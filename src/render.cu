@@ -40,11 +40,11 @@ __global__ void SumData(MeshBlock mb) {
 int main(void) {
     // testing MeshBlock build
 
-    printf("launching kernel...")
+    printf("launching kernel...");
     HelloCUDA<<<1,5>>>(76.5);
     // checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
-    print("finished.")
+    print("finished.");
 
     // const vec3 xl(0, 0, 0);
     // const vec3 xr(1, 1, 1);
