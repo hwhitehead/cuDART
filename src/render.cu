@@ -29,7 +29,7 @@ __global__ void SumData(MeshBlock mb) {
     for (int i = 0; i < mb.Size(); i++) {
         mb.sum += mb.data[i];
     }
-    printf("finished sum.")
+    printf("finished sum.");
 }
 
 int main(void) {
