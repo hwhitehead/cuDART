@@ -56,7 +56,7 @@ int main(void) {
     int blk_in_grid = 16;
 
     SumData<<<1,1>>>(mb);
-    std::cout << "size = " << mb.size << std::endl;
+    std::cout << "size = " << mb.Size() << std::endl;
     std::cout << mb.sum << std::endl;
 
     PrintData<<<1, 1>>>(mb);
