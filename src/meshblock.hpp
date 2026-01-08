@@ -45,6 +45,8 @@ __host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) 
     std::vector<unsigned long> shape = d.shape;
     size_t bytes = npy_data.size() * sizeof(float);
 
+    printf("finished numpy import")
+
     // allocate device memory
     cudaMalloc(&data, bytes);
 
@@ -54,6 +56,7 @@ __host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) 
     // update size definitions
     data_size_ = npy_data.size();
 
+    printf("finished data alloc")
 }
 
 __host__ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
