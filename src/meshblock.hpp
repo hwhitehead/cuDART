@@ -67,3 +67,5 @@ bool MeshBlock::CalcIntercept(Ray r, float &tl, float &tr) {
     tr = tmax;
     return true;
 }
+
+#endif
