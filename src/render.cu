@@ -16,11 +16,11 @@
 #include "tools.hpp"
 
 __global__ void PrintData(MeshBlock mb) {
-    printf("printing data from mb data...\n")
+    printf("printing data from mb data...\n");
     for (int i = 0; i < mb.Size(); i++) {
         printf("%.6f\n", mb.data[i]);
     }
-    printf("finished print.")
+    printf("finished print.");
 }
 
 int main(void) {
