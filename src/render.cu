@@ -41,7 +41,7 @@ int main(void) {
     // testing MeshBlock build
 
     HelloCUDA<<<1,5>>>(76.5);
-    checkCudaErrors(cudaGetLastError());
+    // checkCudaErrors(cudaGetLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     
 
