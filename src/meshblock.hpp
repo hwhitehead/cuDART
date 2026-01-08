@@ -29,18 +29,18 @@ class MeshBlock {
     private:
         std::vector<int> dims_;
         vec3 xl_, xr_, dx_;
-        void InitMeshBlock();
-        
+        void InitMeshBlock();        
 };
 
 MeshBlock::~MeshBlock() {
     cudaFree(data);
 }
 
-void ImportNumpy(const std::string path) {
+void MeshBlock::ImportNumpy(const std::string path) {
     // import numpy 
     npy::npy_data d = npy::read_npy<float>(path);
     std::vector<float> npy_data = d.data;
+    float *p_data = npy_data.data();
     std::vector<unsigned long> shape = d.shape;
     size_t bytes = npy_data.size() * sizeof(float);
 
@@ -48,7 +48,7 @@ void ImportNumpy(const std::string path) {
     cudaMalloc(&data, bytes);
 
     // copy data into device memory
-    cudaMemcpy(data, npy_data, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice);
 
 }
 

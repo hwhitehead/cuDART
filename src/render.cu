@@ -18,7 +18,7 @@ __global__ void PrintData(MeshBlock mb) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i == 0) {
         for (int i = 0; i < mb.Size(); i++) {
-            printf(mb.data[i]);
+            printf("%.6f", mb.data[i]);
         }
     }
 }
@@ -36,7 +36,7 @@ int main(void) {
     std::cout << "xr = " << mb.Edge(true) << std::endl;
 
     // load npy data
-    const std::string npy_path {"simdata/data.npy"}
+    const std::string npy_path {"simdata/data.npy"};
     mb.ImportData(npy_path);
 
     int thr_per_blk = 16;
