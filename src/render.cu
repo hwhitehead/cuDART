@@ -1,5 +1,6 @@
 // standard library imports
 #include <iostream>
+#include <stdio.h>
 #include <math.h>
 #include <fstream>
 #include <vector>
