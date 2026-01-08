@@ -23,6 +23,10 @@ __global__ void PrintData(MeshBlock mb) {
     printf("finished print.");
 }
 
+__global__ void HelloCUDA(float f) {
+    printf("Hello thread %d, f=%f\n", threadIdx.x, f);
+}
+
 __global__ void SumData(MeshBlock mb) {
     printf("starting sum...");
     mb.sum = 0;
@@ -35,34 +39,37 @@ __global__ void SumData(MeshBlock mb) {
 int main(void) {
     // testing MeshBlock build
 
-    const vec3 xl(0, 0, 0);
-    const vec3 xr(1, 1, 1);
-    const std::vector<int> dims{10, 10, 10};
+    HelloCUDA<<<1,5>>>(76.5);
+    cudaDeviceSynchronize();
 
-    MeshBlock mb(xl, xr, dims);
+    // const vec3 xl(0, 0, 0);
+    // const vec3 xr(1, 1, 1);
+    // const std::vector<int> dims{10, 10, 10};
 
-    std::cout << "xl = " << mb.Edge(false) << std::endl;
-    std::cout << "xr = " << mb.Edge(true) << std::endl;
+    // MeshBlock mb(xl, xr, dims);
 
-    // load npy data
-    const std::string npy_path {"simdata/data.npy"};
-    mb.ImportNumpyData(npy_path);
+    // std::cout << "xl = " << mb.Edge(false) << std::endl;
+    // std::cout << "xr = " << mb.Edge(true) << std::endl;
 
-    std::cout << "import finished." << std::endl;
+    // // load npy data
+    // const std::string npy_path {"simdata/data.npy"};
+    // mb.ImportNumpyData(npy_path);
 
-    for (int i = 0; i < mb.Size(); i++) {
-        std::cout << mb.data[i] << std::endl;
-    }
+    // std::cout << "import finished." << std::endl;
 
-    int thr_per_blk = 16;
-    int blk_in_grid = 16;
+    // for (int i = 0; i < mb.Size(); i++) {
+    //     std::cout << mb.data[i] << std::endl;
+    // }
 
-    SumData<<<1,1>>>(mb);
-    checkCudaErrors(cudaDeviceSynchronize());
-    std::cout << "size = " << mb.Size() << std::endl;
-    std::cout << "sum = " << mb.sum << std::endl;
+    // int thr_per_blk = 16;
+    // int blk_in_grid = 16;
 
-    PrintData<<<1, 1>>>(mb);
+    // SumData<<<1,1>>>(mb);
+    // checkCudaErrors(cudaDeviceSynchronize());
+    // std::cout << "size = " << mb.Size() << std::endl;
+    // std::cout << "sum = " << mb.sum << std::endl;
+
+    // PrintData<<<1, 1>>>(mb);
 
     return 0;
 }
