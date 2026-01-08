@@ -2,6 +2,7 @@
 #define MESHBLOCK_HPP_
 
 #include "vec3.hpp"
+#include "ray.hpp"
 
 class MeshBlock {
     public:
@@ -15,7 +16,6 @@ class MeshBlock {
         float PathSum(Ray &r);
         int IntClamp(float f, float l, float r);
         vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
-        void InitMeshBlock();
 
         // public properties
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};

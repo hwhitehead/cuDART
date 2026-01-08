@@ -169,7 +169,7 @@ __host__ __device__ inline vec3 refract(const vec3 &i, vec3 &N, float n) {
     return t;
 }
 
-__host__ __device inline vec3 vec3::rotate_about(const vec3 k, const float theta) {
+__host__ __device__ inline vec3 vec3::rotate_about(const vec3 k, const float theta) {
     // use Rodrigues' rotation formula to rotate v about k by theta
     cos_theta = std::cos(theta);
     sin_theta = std::sin(theta);
