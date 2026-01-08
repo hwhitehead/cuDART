@@ -1,5 +1,4 @@
 # Configured outputs
-Makefile
 src/defs.hpp
 configure.log
 
