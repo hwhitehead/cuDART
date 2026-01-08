@@ -23,6 +23,13 @@ __global__ void PrintData(MeshBlock mb) {
     printf("finished print.");
 }
 
+__global__ void SumData(MeshBlock mb) {
+    mb.sum = 0;
+    for (int i = 0; i < mb.Size(); i++) {
+        mb.sum += mb.data[i];
+    }
+}
+
 int main(void) {
     // testing MeshBlock build
 
@@ -48,7 +55,9 @@ int main(void) {
     int thr_per_blk = 16;
     int blk_in_grid = 16;
 
+    SumData<<<1,1>>>(mb);
 
+    std::cout << mb.sum << std::endl;
 
     PrintData<<<1, 1>>>(mb);
 
