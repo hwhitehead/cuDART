@@ -10,20 +10,22 @@
 
 
 // custom local library imports 
+#include "vec3.hpp"
+#include "ray.hpp"
+#include "meshblock.hpp"
+
 
 int main(void) {
-    // hello world test
-    std::cout << "Hello world." << std::endl;
-    // perform basic test of libnpy functionality
-    const std::string path {"simdata/data.npy"};
-    npy::npy_data d = npy::read_npy<double>(path);
-    std::vector<double> data = d.data;
-    std::vector<unsigned long> shape = d.shape;
-    std::cout << "data shape: ";
-    for (auto i: shape) {
-      std::cout << i << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "finished init test." << std::endl;
+    // testing MeshBlock build
+
+    const vec3 xl(0, 0, 0);
+    const vec3 xr(1, 1, 1);
+    const std::vector<int> dims{10, 10, 10};
+
+    MeshBlock mb(xl, xr, dims);
+
+    std::cout << "xl = " << mb.Edge(false) << std::endl;
+    std::cout << "xr = " << mb.Edge(true) << std::endl;
+
     return 0;
 }

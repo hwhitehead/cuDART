@@ -11,10 +11,10 @@ class Ray {
         __device__ Ray() {}
         __device__ Ray(Ray& r) {origin = r.origin; 
                                 normal = r.normal;, 
-                                inverse_normal = 1.0 / r.normal;
-                                sign = vec3(inverse_normal.x() < 0, 
-                                            inverse_normal.y() < 0,
-                                            inverse_normal.z() < 0);}
+                                inv_normal = 1.0 / r.normal;
+                                sign = vec3(inv_normal.x() < 0, 
+                                            inv_normal.y() < 0,
+                                            inv_normal.z() < 0);}
         __device__ Ray(const vec3& o, const vec3& n) {origin = o; normal = n;}
         
         // methods
@@ -25,7 +25,7 @@ class Ray {
         // internals
         vec3 origin;
         vec3 normal;
-        vec3 inverse_normal;
+        vec3 inv_normal;
         vec3 sign;
 
 }
