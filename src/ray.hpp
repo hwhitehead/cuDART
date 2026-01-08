@@ -9,8 +9,8 @@ class Ray {
     public:
         // ctors
         __device__ Ray() {}
-        __device__ Ray(Ray& r) {origin = r.origin; 
-                                normal = r.normal;, 
+        __device__ Ray(Ray &r) {origin = r.origin; 
+                                normal = r.normal; 
                                 inv_normal = 1.0 / r.normal;
                                 sign = vec3(inv_normal.x() < 0, 
                                             inv_normal.y() < 0,
