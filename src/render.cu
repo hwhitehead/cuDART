@@ -39,8 +39,16 @@ int main(void) {
     const std::string npy_path {"simdata/data.npy"};
     mb.ImportNumpyData(npy_path);
 
+    std::cout << "import finished." << std::endl;
+
+    for (int i = 0; i < mb.Size(); i++) {
+        std::cout << mb.data[i] << std::endl;
+    }
+
     int thr_per_blk = 16;
     int blk_in_grid = 16;
+
+
 
     PrintData<<<1, 1>>>(mb);
 
