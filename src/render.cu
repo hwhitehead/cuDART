@@ -40,7 +40,9 @@ int main(void) {
     // testing MeshBlock build
 
     HelloCUDA<<<1,5>>>(76.5);
-    cudaDeviceSynchronize();
+    checkCudaErrors(cudaGetLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+    
 
     // const vec3 xl(0, 0, 0);
     // const vec3 xr(1, 1, 1);
