@@ -16,16 +16,41 @@ class MeshBlock {
         float PathSum(Ray &r);
         int IntClamp(float f, float l, float r);
         vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
+        void ImportData(const std::string path);
+        int Size() {return dims_[0] * dims_[1] * dims_[2];}
+
+        // dtor
+        ~MeshBlock();
 
         // public properties
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
+        float *data;
 
     private:
         std::vector<int> dims_;
         vec3 xl_, xr_, dx_;
         void InitMeshBlock();
-
+        
 };
+
+MeshBlock::~MeshBlock() {
+    cudaFree(data);
+}
+
+void ImportNumpy(const std::string path) {
+    // import numpy 
+    npy::npy_data d = npy::read_npy<float>(path);
+    std::vector<float> npy_data = d.data;
+    std::vector<unsigned long> shape = d.shape;
+    size_t bytes = npy_data.size() * sizeof(float);
+
+    // allocate device memory
+    cudaMalloc(&data, bytes);
+
+    // copy data into device memory
+    cudaMemcpy(data, npy_data, bytes, cudaMemcpyHostToDevice);
+
+}
 
 int MeshBlock::IntClamp(float f, float l, float r) {
     return std::max(l, std::min(std::floor(f), r));
