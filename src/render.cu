@@ -19,7 +19,11 @@ int main(void) {
     npy::npy_data d = npy::read_npy<double>(path);
     std::vector<double> data = d.data;
     std::vector<unsigned long> shape = d.shape;
-    std::cout << shape << std::endl;
+    std::cout << "data shape: ";
+    for (auto i: shape) {
+      std::cout << i << " ";
+    }
+    std::cout << std::endl;
     std::cout << "finished init test." << std::endl;
     return 0;
 }
