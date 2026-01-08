@@ -9,7 +9,7 @@ EXE_DIR := bin/
 EXECUTABLE := $(EXE_DIR)cudart
 SRC_FILES := $(wildcard src/render.cu)
 OBJ_DIR := obj/
-OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(SRC_FILES:.cc=.o)))
+OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(SRC_FILES:.cu=.o)))
 GCOV_FILES := $(notdir $(addsuffix .gcov,$(SRC_FILES)))
 GCDA_FILES := $(wildcard $(OBJ_DIR)/*.gcda)
 SRC_PREFIX := src/
@@ -45,12 +45,12 @@ $(EXECUTABLE) : $(OBJ_FILES)
 
 # Create objects from source files
 
-$(OBJ_DIR)%.o : %.cc
+$(OBJ_DIR)%.o : %.cu
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
 # Process .gcno and .gcda files from obj/ into .cpp.gcov files (and .hpp.gcov, .h.gcov) in root directory
 # Rerun Gcov on all files if a single .gcda changes. Other options to consider: --preserve-paths -abcu
-./%.cpp.gcov : %.cc $(OBJ_DIR)/%.gcno $(GCDA_FILES)
+./%.cpp.gcov : %.cu $(OBJ_DIR)/%.gcno $(GCDA_FILES)
 	$(GCOV_CMD)  --relative-only --source-prefix=$(SRC_PREFIX) --object-directory=$(OBJ_DIR) $<
 
 # Cleanup
