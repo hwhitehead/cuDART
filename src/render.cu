@@ -13,6 +13,7 @@
 #include "vec3.hpp"
 #include "ray.hpp"
 #include "meshblock.hpp"
+#include "tools.hpp"
 
 __global__ void PrintData(MeshBlock mb) {
     for (int i = 0; i < mb.Size(); i++) {

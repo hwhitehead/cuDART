@@ -1,9 +1,11 @@
 #ifndef MESHBLOCK_HPP_
 #define MESHBLOCK_HPP_
 
+#include <stdexcept>
+
 #include "vec3.hpp"
 #include "ray.hpp"
-#include <stdexcept>
+#include "tools.hpp"
 
 class MeshBlock {
     public:
@@ -47,10 +49,10 @@ __host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) 
     size_t bytes = data_size_ * sizeof(float);
 
     // allocate device memory
-    cudaMalloc(&data, bytes);
+    checkCudaErrors(cudaMallocManaged(&data, bytes));
 
     // copy data into device memory
-    cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice);
+    checkCudaErrors(cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice));
 }
 
 __host__ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
