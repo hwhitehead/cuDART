@@ -77,7 +77,6 @@ __host__ __device__ bool MeshBlock::CalcIntercept(Ray r, float &tl, float &tr) {
         }
 
         if ((tmin > tcmax) or (tcmin > tmax)) {
-            std::cout << "false!" << std::endl;
             return false;
         }
 
