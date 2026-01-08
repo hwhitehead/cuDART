@@ -28,6 +28,7 @@ class MeshBlock {
         // public properties
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
         float *data;
+        float sum;
 
     private:
         int data_size_;
