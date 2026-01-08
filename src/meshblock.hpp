@@ -15,6 +15,7 @@ class MeshBlock {
         float PathSum(Ray &r);
         int IntClamp(float f, float l, float r);
         vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
+        void InitMeshBlock();
 
         // public properties
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
@@ -24,13 +25,13 @@ class MeshBlock {
         vec3 xl_, xr_, dx_;
         void InitMeshBlock();
 
-}
+};
 
 int MeshBlock::IntClamp(float f, float l, float r) {
     return std::max(l, std::min(std::floor(f), r));
 }
 
-void InitMeshBlock() {
+void MeshBlock::InitMeshBlock() {
     dx_ = vec3();
     for (int i = 0; i <= 2; i++) {
         dx_[i] = (xr_[i] - xl_[i]) / dims_[i];

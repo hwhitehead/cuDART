@@ -28,6 +28,6 @@ class Ray {
         vec3 inv_normal;
         vec3 sign;
 
-}
+};
 
 #endif
