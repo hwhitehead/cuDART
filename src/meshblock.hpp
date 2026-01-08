@@ -17,7 +17,7 @@ class MeshBlock {
         __host__ __device__ int IntClamp(float f, float l, float r);
         __host__ __device__ vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
         __host__ __device__ void ImportNumpyData(const std::string path);
-        __host__ __device__ int Size() {return dims_[0] * dims_[1] * dims_[2];}
+        __host__ __device__ int Size() {return data_size_;}
 
         // dtor
         ~MeshBlock();
@@ -27,6 +27,7 @@ class MeshBlock {
         float *data;
 
     private:
+        int data_size_;
         std::vector<int> dims_;
         vec3 xl_, xr_, dx_;
         void InitMeshBlock();        
@@ -36,9 +37,9 @@ MeshBlock::~MeshBlock() {
     cudaFree(data);
 }
 
-__host__ __device__ void MeshBlock::ImportNumpyData(const std::string path) {
+__host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) {
     // import numpy 
-    npy::npy_data d = npy::read_npy<float>(path);
+    npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
     float *p_data = npy_data.data();
     std::vector<unsigned long> shape = d.shape;
@@ -49,6 +50,9 @@ __host__ __device__ void MeshBlock::ImportNumpyData(const std::string path) {
 
     // copy data into device memory
     cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice);
+
+    // update size definitions
+    data_size_ = npy_data.size();
 
 }
 
