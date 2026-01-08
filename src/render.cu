@@ -15,11 +15,8 @@
 #include "meshblock.hpp"
 
 __global__ void PrintData(MeshBlock mb) {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i == 0) {
-        for (int i = 0; i < mb.Size(); i++) {
-            printf("%.6f", mb.data[i]);
-        }
+    for (int i = 0; i < mb.Size(); i++) {
+        printf("%.6f\n", mb.data[i]);
     }
 }
 
@@ -42,7 +39,7 @@ int main(void) {
     int thr_per_blk = 16;
     int blk_in_grid = 16;
 
-    PrintData<<<blk_in_grid, thr_per_blk>>>(mb);
+    PrintData<<<1, 1>>>(mb);
 
     return 0;
 }

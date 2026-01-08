@@ -42,21 +42,15 @@ __host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) 
     // import numpy 
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
+    data_size_ = npy_data.size();
     float *p_data = npy_data.data();
-    size_t bytes = npy_data.size() * sizeof(float);
-
-    printf("finished numpy import");
+    size_t bytes = data_size_ * sizeof(float);
 
     // allocate device memory
     cudaMalloc(&data, bytes);
 
     // copy data into device memory
     cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice);
-
-    // update size definitions
-    data_size_ = npy_data.size();
-
-    printf("finished data alloc");
 }
 
 __host__ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
