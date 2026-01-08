@@ -43,7 +43,6 @@ __host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) 
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
     float *p_data = npy_data.data();
-    std::vector<int> shape = d.shape;
     size_t bytes = npy_data.size() * sizeof(float);
 
     printf("finished numpy import");
