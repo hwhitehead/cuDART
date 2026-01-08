@@ -24,10 +24,12 @@ __global__ void PrintData(MeshBlock mb) {
 }
 
 __global__ void SumData(MeshBlock mb) {
+    printf("starting sum...");
     mb.sum = 0;
     for (int i = 0; i < mb.Size(); i++) {
         mb.sum += mb.data[i];
     }
+    printf("finished sum.")
 }
 
 int main(void) {
