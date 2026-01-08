@@ -37,7 +37,7 @@ int main(void) {
 
     // load npy data
     const std::string npy_path {"simdata/data.npy"};
-    mb.ImportData(npy_path);
+    mb.ImportNumpyData(npy_path);
 
     int thr_per_blk = 16;
     int blk_in_grid = 16;

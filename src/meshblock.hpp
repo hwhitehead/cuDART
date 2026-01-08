@@ -16,7 +16,7 @@ class MeshBlock {
         float PathSum(Ray &r);
         int IntClamp(float f, float l, float r);
         vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
-        void ImportData(const std::string path);
+        void ImportNumpyData(const std::string path);
         int Size() {return dims_[0] * dims_[1] * dims_[2];}
 
         // dtor
@@ -36,7 +36,7 @@ MeshBlock::~MeshBlock() {
     cudaFree(data);
 }
 
-void MeshBlock::ImportNumpy(const std::string path) {
+void MeshBlock::ImportNumpyData(const std::string path) {
     // import numpy 
     npy::npy_data d = npy::read_npy<float>(path);
     std::vector<float> npy_data = d.data;
