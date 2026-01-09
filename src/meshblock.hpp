@@ -31,7 +31,7 @@ class MeshBlock {
 
     private:
         int data_size_;
-        std::vector<int> dims_;
+        // std::vector<int> dims_;
         vec3 xl_, xr_, dx_;
         void InitMeshBlock();        
 };
