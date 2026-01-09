@@ -32,14 +32,14 @@ __global__ void HelloCUDA(float f) {
     printf("Hello thread %d, f=%f\n", threadIdx.x, f);
 }
 
-__global__ void SumData(MeshBlock **mb) {
-    printf("starting sum...\n");
-    (*mb)->sum = 0;
-    for (int i = 0; i < (*mb)->Size(); i++) {
-        (*mb)->sum += (*mb)->data[i];
-    }
-    printf("finished sum.\n");
-}
+// __global__ void SumData(MeshBlock **mb) {
+//     printf("starting sum...\n");
+//     (*mb)->sum = 0;
+//     for (int i = 0; i < (*mb)->Size(); i++) {
+//         (*mb)->sum += (*mb)->data[i];
+//     }
+//     printf("finished sum.\n");
+// }
 
 __global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float **data, const int data_size) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
