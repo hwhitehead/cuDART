@@ -51,7 +51,7 @@ int main(void) {
 
     // initiliase MeshBlock space
     MeshBlock **mb;
-    cudaMalloc(&mb, sizeof(MeshBlock));
+    cudaMalloc(&mb, sizeof(MeshBlock *));
 
     // load npy data
     const std::string npy_path {"simdata/sn_low.npy"};
