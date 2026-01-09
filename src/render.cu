@@ -17,7 +17,7 @@
 
 __global__ void PrintMeshBlockData(MeshBlock **mb) {
     printf("printing data from mb data...\n");
-    for (int i = 0; i < (*mb)->.Size(); i++) {
+    for (int i = 0; i < (*mb)->Size(); i++) {
         printf("%.6f\n", (*mb)->data[i]);
     }
     printf("finished print.");
@@ -75,7 +75,7 @@ int main(void) {
     checkCudaErrors(cudaDeviceSynchronize());
 
     // check MeshBlock data
-    PrintMeshBlockData<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data, data_size);
+    PrintMeshBlockData<<<thr_per_blk,blk_in_grid>>>(mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     // SumData<<<thr_per_blk,blk_in_grid>>>(mb);
