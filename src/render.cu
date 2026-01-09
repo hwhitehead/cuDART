@@ -59,6 +59,7 @@ int main(void) {
     std::vector<float> npy_data = d.data;
     std::vector<unsigned long> npy_shape = d.shape;
     int mb_shape[3] = {(int)npy_shape[0], (int)npy_shape[1], (int)npy_shape[2]};
+    std::cout << mb_shape[0] << " " << mb_shape[1] << " " << mb_shape[2] << std::endl;
     int data_size = npy_data.size();
     float *p_data = npy_data.data();
     size_t bytes = data_size * sizeof(float);
@@ -68,7 +69,6 @@ int main(void) {
     float *data;
     checkCudaErrors(cudaMallocManaged(&data, bytes));
     std::cout << "finished data init on device" << std::endl;
-    std::cout << "data at " << data << std::endl;
 
     // copy data into device memory
     checkCudaErrors(cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice));
