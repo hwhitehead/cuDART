@@ -27,7 +27,7 @@ class MeshBlock {
 
         // public properties
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
-        float *data;
+        float *mb_data;
         float sum;
 
     private:
@@ -50,8 +50,8 @@ __device__ void MeshBlock::PrintData() {
 __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size) {
     xl_ = xl;
     xr_ = xr;
-    printf("passed data as 0x%p", data);
-    data = data;
+    printf("passed data as 0x%p\n", data);
+    mb_data = data;
     data_size_ = data_size;
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {
