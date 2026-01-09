@@ -57,7 +57,7 @@ void MeshBlock::ImportNumpyData(const std::string npy_path) {
 }
 
 __host__ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
-    return std::max(l, std::min(std::floor(f), r));
+    return max(l, min(std::floor(f), r));
 }
 
 __host__ __device__ void MeshBlock::InitMeshBlock() {

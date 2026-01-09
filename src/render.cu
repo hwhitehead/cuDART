@@ -56,6 +56,7 @@ int main(void) {
     int blk_in_grid = 1;
 
     SumData<<<thr_per_blk,blk_in_grid>>>(mb);
+    checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "size = " << mb.Size() << std::endl;
     std::cout << "sum = " << mb.sum << std::endl;
