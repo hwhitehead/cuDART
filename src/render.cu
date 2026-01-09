@@ -16,12 +16,15 @@
 #include "tools.hpp"
 
 __global__ void PrintMeshBlockData(MeshBlock **mb) {
-    printf("printing data from mb data...\n");
-    printf("expect %.6d entries", (*mb)->Size());
-    for (int i = 0; i < (*mb)->Size(); i++) {
-        printf("%.6f\n", (*mb)->data[i]);
-    }
-    printf("finished print.");
+    int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (thr_idx == 0) {
+        printf("printing data from mb data...\n");
+        printf("expect %.6d entries\n", (*mb)->Size());
+        for (int i = 0; i < (*mb)->Size(); i++) {
+            printf("%.6f\n", (*mb)->data[i]);
+        }
+        printf("finished print.");
+    }  
 }
 
 __global__ void HelloCUDA(float f) {
@@ -49,7 +52,7 @@ int main(void) {
 
     // initiliase MeshBlock space
     MeshBlock **mb;
-    cudaMalloc((void **) &mb, sizeof(MeshBlock *));
+    cudaMalloc(&mb, sizeof(MeshBlock *));
 
     // load npy data
     const std::string npy_path {"simdata/data.npy"};
@@ -62,7 +65,7 @@ int main(void) {
 
     // allocate device memory
     float *data;
-    checkCudaErrors(cudaMallocManaged((void **)&data, bytes));
+    checkCudaErrors(cudaMallocManaged(&data, bytes));
     std::cout << "finished data init on device" << std::endl;
 
     // copy data into device memory
