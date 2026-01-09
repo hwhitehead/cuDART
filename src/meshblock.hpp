@@ -20,6 +20,7 @@ class MeshBlock {
         __device__ int IntClamp(float f, float l, float r);
         __device__ vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
         __host__ __device__ int Size() {return data_size_;}
+        __device__ void PrintData();
 
         // dtor
         ~MeshBlock();
@@ -40,7 +41,7 @@ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
 
-__device__ MeshBlock::PrintData() {
+__device__ void MeshBlock::PrintData() {
     for (int i = 0; i < data_size_; i++) {
         printf("%.6f\n", data[i]);
     }
