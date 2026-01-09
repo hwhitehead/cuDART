@@ -20,7 +20,7 @@ __global__ void PrintMeshBlockData(MeshBlock **mb) {
     if (thr_idx == 0) {
         printf("printing data from mb data...\n");
         printf("expect %.6d entries\n", (*mb)->Size());
-        printf("data at 0x%p", data);
+        printf("data at 0x%p", (*mb)->data);
         // for (int i = 0; i < (*mb)->Size(); i++) {
         //     printf("%.6f\n", (*mb)->data[i]);
         // }
