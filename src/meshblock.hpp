@@ -40,6 +40,12 @@ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
 
+__device__ MeshBlock::PrintData() {
+    for (int i = 0; i < data_size_; i++) {
+        printf("%.6f\n", data[i]);
+    }
+}
+
 __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size) {
     xl_ = xl;
     xr_ = xr;
