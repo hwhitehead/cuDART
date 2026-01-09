@@ -57,13 +57,16 @@ int main(void) {
     int data_size = npy_data.size();
     float *p_data = npy_data.data();
     size_t bytes = data_size * sizeof(float);
+    std::cout << "finished load from npy" << std::endl;
 
     // allocate device memory
     float *data;
     checkCudaErrors(cudaMallocManaged((void **)&data, bytes));
+    std::cout << "finished data init on device" << std::endl;
 
     // copy data into device memory
     checkCudaErrors(cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice));
+    std::cout << "finished data copy to device" << std::endl;
 
     // initialsie MeshBlock
     int thr_per_blk = 1;
@@ -73,11 +76,13 @@ int main(void) {
     InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data, data_size);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
+    std::cout << "finished meshblock init on device" << std::endl;
 
     // check MeshBlock data
     PrintMeshBlockData<<<thr_per_blk,blk_in_grid>>>(mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
+    std::cout << "finished." << std::endl;
     // SumData<<<thr_per_blk,blk_in_grid>>>(mb);
     // checkCudaErrors(cudaPeekAtLastError());
     // checkCudaErrors(cudaDeviceSynchronize());
