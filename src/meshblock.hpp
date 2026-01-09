@@ -11,7 +11,7 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(const vec3 xleft, const vec3 xright, float *data);
+        __device__ MeshBlock(const vec3 xleft, const vec3 xright, const vec3 dims, float *data);
 
         // routines
         __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
@@ -29,15 +29,15 @@ class MeshBlock {
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
         float *mb_data;
         float sum;
-        int mb_size, nx, ny, nz;
-        vec3 xl, xr, dx;
+        int mb_size;
+        vec3 xl, xr, dx, mb_dims;
         void InitMeshBlock();        
 };
 
-__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float *data) {
+__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, vec3 dims, float *data) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        *mb = new MeshBlock(xl, xr, data);
+        *mb = new MeshBlock(xl, xr, dims, data);
     }
 }
 
@@ -61,11 +61,12 @@ __device__ void MeshBlock::PrintData() {
     }
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, float *data) {
+__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, vec3 dims, float *data) {
     xl = xleft;
     xr = xright;
     mb_data = data;
-    mb_size = 4;
+    mb_dims = dims;
+    mb_size = mb_dims[0];
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {
     //     dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
