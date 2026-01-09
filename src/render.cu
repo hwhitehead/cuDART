@@ -16,7 +16,7 @@
 #include "meshblock.hpp"
 #include "tools.hpp"
 
-__global__ void PrintData(MeshBlock mb) {
+__global__ void PrintData(MeshBlock &mb) {
     printf("printing data from mb data...\n");
     for (int i = 0; i < mb.Size(); i++) {
         printf("%.6f\n", mb.data[i]);
@@ -28,13 +28,13 @@ __global__ void HelloCUDA(float f) {
     printf("Hello thread %d, f=%f\n", threadIdx.x, f);
 }
 
-__global__ void SumData(MeshBlock mb) {
-    printf("starting sum...");
+__global__ void SumData(MeshBlock &mb) {
+    printf("starting sum...\n");
     mb.sum = 0;
     for (int i = 0; i < mb.Size(); i++) {
         mb.sum += mb.data[i];
     }
-    printf("finished sum.");
+    printf("finished sum.\n");
 }
 
 int main(void) {
@@ -68,6 +68,7 @@ int main(void) {
     std::cout << "sum = " << mb.sum << std::endl;
 
     PrintData<<<1, 1>>>(mb);
+    checkCudaErrors(cudaDeviceSynchronize());
 
     return 0;
 }
