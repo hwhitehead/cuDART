@@ -29,8 +29,7 @@ class MeshBlock {
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
         float *mb_data;
         float sum;
-        int mb_size;
-        int mb_shape[3];
+        int mb_size, nx, ny, nz;
         vec3 xl, xr, dx;
         void InitMeshBlock();        
 };
@@ -62,15 +61,13 @@ __device__ void MeshBlock::PrintData() {
     }
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, int shape[3], float *data) {
+__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, int mb_shape[3], float *data) {
     xl = xleft;
     xr = xright;
-    // for (int i = 0; i <= 2; i++) {
-    //     mb_shape[i] = shape[i];
-    // }
-    mb_shape = {4,1,1};
     mb_data = data;
-    mb_size = mb_shape[0] * mb_shape[1] * mb_shape[2];
+    nx = mb_shape[0], ny = mb_shape[1], nz = mb_shape[2];
+    mb_size = nx * ny * nz;
+
 
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {
