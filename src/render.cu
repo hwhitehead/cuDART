@@ -9,7 +9,6 @@
 // custom external library imports
 #include "npy.hpp"
 
-
 // custom local library imports 
 #include "vec3.hpp"
 #include "ray.hpp"
@@ -28,11 +27,11 @@ __global__ void HelloCUDA(float f) {
     printf("Hello thread %d, f=%f\n", threadIdx.x, f);
 }
 
-__global__ void SumData(MeshBlock &mb) {
+__global__ void SumData(MeshBlock **mb) {
     printf("starting sum...\n");
-    mb.sum = 0;
-    for (int i = 0; i < mb.Size(); i++) {
-        mb.sum += mb.data[i];
+    (*mb)->sum = 0;
+    for (int i = 0; i < (*mb)->Size(); i++) {
+        (*mb)->sum += (*mb)->data[i];
     }
     printf("finished sum.\n");
 }
@@ -52,9 +51,10 @@ int main(void) {
     cudaMalloc((void **) &mb, sizeof(MeshBlock *));
 
     // load npy data
+    const std::string npy_path {"simdata/data.npy"};
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
-    data_size_ = npy_data.size();
+    int data_size_ = npy_data.size();
     float *p_data = npy_data.data();
     size_t bytes = data_size_ * sizeof(float);
 
@@ -70,7 +70,7 @@ int main(void) {
     int blk_in_grid = 1;
     vec3 xl(0.0, 0.0, 0.0);
     vec3 xr(1.0, 1.0, 1.0);
-    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(xl, xr, data);
+    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data, data_size);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
 

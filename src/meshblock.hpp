@@ -40,10 +40,11 @@ __host__ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
 
-__host__ __device__ void MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data) {
+__host__ __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, int data_size) {
     xl_ = xl;
     xr_ = xr;
     data = data;
+    data_size_ = data_size;
     dx_ = vec3();
     for (int i = 0; i <= 2; i++) {
         dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
