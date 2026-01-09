@@ -45,10 +45,10 @@ __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const
     xr_ = xr;
     data = data;
     data_size_ = data_size;
-    dx_ = vec3();
-    for (int i = 0; i <= 2; i++) {
-        dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
-    }
+    // dx_ = vec3();
+    // for (int i = 0; i <= 2; i++) {
+    //     dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
+    // }
 }
 
 __device__ bool MeshBlock::CalcIntercept(Ray r, float &tl, float &tr) {

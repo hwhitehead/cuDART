@@ -23,8 +23,8 @@ class vec3  {
         __host__ __device__ inline float b() const { return e[2]; }
         __host__ __device__ inline const vec3& operator+() const { return *this; }
         __host__ __device__ inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
-        __host__ __device__ float operator[](int i) const { return e[i]; }
-        __host__ __device__ float& operator[](int i) { return e[i]; };
+        __host__ __device__ inline float operator[](int i) const { return e[i]; }
+        __host__ __device__ inline float& operator[](int i) { return e[i]; };
         __host__ __device__ inline float mag() const { return sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]); }
         __host__ __device__ inline float magSqr() const { return e[0]*e[0] + e[1]*e[1] + e[2]*e[2]; }
         // basic arithmetic
