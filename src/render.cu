@@ -20,6 +20,7 @@ __global__ void PrintMeshBlockData(MeshBlock **mb) {
     if (thr_idx == 0) {
         printf("printing data from mb data...\n");
         printf("expect %.6d entries\n", (*mb)->Size());
+        printf("data at 0x%p", data);
         // for (int i = 0; i < (*mb)->Size(); i++) {
         //     printf("%.6f\n", (*mb)->data[i]);
         // }
@@ -68,12 +69,13 @@ int main(void) {
     float *data;
     checkCudaErrors(cudaMallocManaged(&data, bytes));
     std::cout << "finished data init on device" << std::endl;
+    std::cout << "data at " << data << std::endl;
 
     // copy data into device memory
     checkCudaErrors(cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice));
     std::cout << "finished data copy to device" << std::endl;
 
-    for (int i = 0; i < data_size; i++) {
+    for (int i = 0; i < data_size; i++) { // data properly copied here
         std::cout << data[i] << std::endl;
     }
 
@@ -97,6 +99,9 @@ int main(void) {
     // checkCudaErrors(cudaDeviceSynchronize());
     // std::cout << "size = " << (*mb)->Size() << std::endl;
     // std::cout << "sum = " << (*mb)->sum << std::endl;
+
+    cudaFree(mb);
+    cudaFree(data);
 
     return 0;
 }
