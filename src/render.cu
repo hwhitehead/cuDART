@@ -15,43 +15,43 @@
 #include "meshblock.hpp"
 #include "tools.hpp"
 
-__global__ void PrintMeshBlockData(MeshBlock **mb) {
-    int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thr_idx == 0) {
-        printf("printing data from mb data...\n");
-        printf("expect %.6d entries\n", (*mb)->mb_size);
-        printf("data at 0x%p\n", (*mb)->mb_data); // null here!
-        for (int i = 0; i < (*mb)->mb_size; i++) {
-            printf("%.6f\n", (*mb)->mb_data[i]);
-        }
-        //(*mb)->PrintData();
-        printf("finished print.");
-    }  
-}
+// __global__ void PrintMeshBlockData(MeshBlock **mb) {
+//     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
+//     if (thr_idx == 0) {
+//         printf("printing data from mb data...\n");
+//         printf("expect %.6d entries\n", (*mb)->mb_size);
+//         printf("data at 0x%p\n", (*mb)->mb_data); // null here!
+//         for (int i = 0; i < (*mb)->mb_size; i++) {
+//             printf("%.6f\n", (*mb)->mb_data[i]);
+//         }
+//         //(*mb)->PrintData();
+//         printf("finished print.");
+//     }  
+// }
 
-__global__ void HelloCUDA(float f) {
-    printf("Hello thread %d, f=%f\n", threadIdx.x, f);
-}
+// __global__ void HelloCUDA(float f) {
+//     printf("Hello thread %d, f=%f\n", threadIdx.x, f);
+// }
 
-__global__ void render(Camera *pcam, MeshBlock **mb) { // untested
-    int i = threadIdx.x + blockIdx.x * blockDim.x;
-    int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if ((i >= max_x) || (j >= max_y)) return; // ignore oob
-  	int pixel_idx = j * max_x + i;
+// __global__ void render(Camera *pcam, MeshBlock **mb) { // untested
+//     int i = threadIdx.x + blockIdx.x * blockDim.x;
+//     int j = threadIdx.y + blockIdx.y * blockDim.y;
+//     if ((i >= max_x) || (j >= max_y)) return; // ignore oob
+//   	int pixel_idx = j * max_x + i;
 
-    vec3 pixel_origin = pcam->get_pixel_origin(i, j);
-    Ray pixel_ray(pixel_origin, pcam->normal);
+//     vec3 pixel_origin = pcam->get_pixel_origin(i, j);
+//     Ray pixel_ray(pixel_origin, pcam->normal);
      
-    pcam->fb[pixel_idx] = pcam->trace(pixel_ray, mb);
-}
+//     pcam->fb[pixel_idx] = pcam->trace(pixel_ray, mb);
+// }
 
 
 int main(void) {
     // testing MeshBlock build with real dataset
 
     // initiliase MeshBlock space
-    MeshBlock **mb;
-    cudaMalloc(&mb, sizeof(MeshBlock *));
+    MeshBlock *mb;
+    cudaMalloc(&mb, sizeof(MeshBlock));
 
     // load npy data
     const std::string npy_path {"simdata/data.npy"};
@@ -90,6 +90,7 @@ int main(void) {
     PrintMeshBlockProperties<<<thr_per_blk,blk_in_grid>>>(mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
+    std::cout << "finished printing properties." << std::endl;
 
     // check MeshBlock data
     // PrintMeshBlockData<<<thr_per_blk,blk_in_grid>>>(mb);
