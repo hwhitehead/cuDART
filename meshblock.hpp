@@ -1,0 +1,82 @@
+#ifndef MESHBLOCK_HPP_
+#define MESHBLOCK_HPP_
+
+#include <stdexcept>
+
+#include "vec3.hpp"
+#include "ray.hpp"
+#include "tools.hpp"
+
+class MeshBlock {
+    public:
+        // ctors
+        __device__ MeshBlock() {}
+        __device__ MeshBlock(vec3 xl, vec3 xr, float *data);
+
+        // routines
+        __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
+        __device__ void CalcPath(Ray &r, float tl, float tr);
+        __device__ float PathSum(Ray &r);
+        __device__ int IntClamp(float f, float l, float r);
+        __device__ vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
+        __host__ __device__ int Size() {return data_size_;}
+
+        // dtor
+        ~MeshBlock();
+
+        // public properties
+        int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
+        float *data;
+        float sum;
+
+    private:
+        int data_size_;
+        std::vector<int> dims_;
+        vec3 xl_, xr_, dx_;
+        void InitMeshBlock();        
+};
+
+__host__ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
+    return max(l, min(std::floor(f), r));
+}
+
+__host__ __device__ void MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data) {
+    xl_ = xl;
+    xr_ = xr;
+    data = data;
+    dx_ = vec3();
+    for (int i = 0; i <= 2; i++) {
+        dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
+    }
+}
+
+__host__ __device__ bool MeshBlock::CalcIntercept(Ray r, float &tl, float &tr) {
+    tl = 0.0, tr = 0.0;
+    float tcmin, tcmax, tmin, tmax;
+    for (int i = 0; i <= 2; i++) {
+        tcmin = (Edge(r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
+        tcmax = (Edge(1 - r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
+        if (i == 0) {
+            tmin = tcmin;
+            tmax = tcmax;
+            continue;
+        }
+
+        if ((tmin > tcmax) or (tcmin > tmax)) {
+            return false;
+        }
+
+        if (tcmin > tmin) {
+            tmin = tcmin;
+        }
+
+        if (tcmax < tmax) {
+            tmax = tcmax;
+        }
+    }
+    tl = tmin;
+    tr = tmax;
+    return true;
+}
+
+#endif

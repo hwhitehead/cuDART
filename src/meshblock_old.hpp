@@ -7,6 +7,19 @@
 #include "ray.hpp"
 #include "tools.hpp"
 
+class Mesh {
+    // contains a list of all MeshBlocks within the scene and a means to test ray collisions
+
+    public:
+        // ctors
+        __device__ Mesh() {}
+        __device__ Mesh(MeshBlock **l, int nmb) {mb_list = l; num_mb = nmb;}
+
+        // internal values 
+        MeshBlock **mb_list;
+        int num_mb;
+};
+
 class MeshBlock {
     public:
         // ctors
