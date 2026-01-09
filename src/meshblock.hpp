@@ -66,7 +66,7 @@ __device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, vec3 dims, 
     xr = xright;
     mb_data = data;
     mb_dims = dims;
-    mb_size = mb_dims[0];
+    mb_size = mb_dims[0] * mb_dims[1] * mb_dims[2];
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {
     //     dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
