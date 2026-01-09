@@ -15,10 +15,10 @@
 #include "meshblock.hpp"
 #include "tools.hpp"
 
-__global__ void PrintData(MeshBlock &mb) {
+__global__ void PrintMeshBlockData(MeshBlock **mb) {
     printf("printing data from mb data...\n");
-    for (int i = 0; i < mb.Size(); i++) {
-        printf("%.6f\n", mb.data[i]);
+    for (int i = 0; i < (*mb)->.Size(); i++) {
+        printf("%.6f\n", (*mb)->data[i]);
     }
     printf("finished print.");
 }
@@ -36,10 +36,10 @@ __global__ void SumData(MeshBlock **mb) {
     printf("finished sum.\n");
 }
 
-__global__ void InitMeshBlock(MeshBlock **mb, vec3 xl, vec3 xr, float *data) {
+__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float *data, const int data_size) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        *mb = new MeshBlock(xl, xr, data);
+        *mb = new MeshBlock(xl, xr, data, data_size);
     }
 }
 
@@ -56,7 +56,7 @@ int main(void) {
     std::vector<float> npy_data = d.data;
     int data_size = npy_data.size();
     float *p_data = npy_data.data();
-    size_t bytes = data_size_ * sizeof(float);
+    size_t bytes = data_size * sizeof(float);
 
     // allocate device memory
     float *data;
@@ -75,11 +75,14 @@ int main(void) {
     checkCudaErrors(cudaDeviceSynchronize());
 
     // check MeshBlock data
-    SumData<<<thr_per_blk,blk_in_grid>>>(mb);
+    PrintMeshBlockData<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data, data_size);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
-    std::cout << "size = " << mb.Size() << std::endl;
-    std::cout << "sum = " << mb.sum << std::endl;
+    // SumData<<<thr_per_blk,blk_in_grid>>>(mb);
+    // checkCudaErrors(cudaPeekAtLastError());
+    // checkCudaErrors(cudaDeviceSynchronize());
+    // std::cout << "size = " << (*mb)->Size() << std::endl;
+    // std::cout << "sum = " << (*mb)->sum << std::endl;
 
     return 0;
 }
