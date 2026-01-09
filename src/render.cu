@@ -21,10 +21,10 @@ __global__ void PrintMeshBlockData(MeshBlock **mb) {
         printf("printing data from mb data...\n");
         printf("expect %.6d entries\n", (*mb)->Size());
         printf("data at 0x%p\n", (*mb)->mb_data); // null here!
-        // for (int i = 0; i < (*mb)->Size(); i++) {
-        //     printf("%.6f\n", (*mb)->data[i]);
-        // }
-        (*mb)->PrintData();
+        for (int i = 0; i < (*mb)->Size(); i++) {
+            printf("%.6f\n", (*mb)->mb_data[i]);
+        }
+        //(*mb)->PrintData();
         printf("finished print.");
     }  
 }
