@@ -19,9 +19,9 @@ def prep_sn_data(load_str, save_str):
     emm[:hdim, hdim:, :] = quart_emm[::-1, :, :]  # -x, +y quadrant
     emm[:hdim, :hdim, :] = quart_emm[::-1, ::-1, :]  # -x, -y quadrant
 
-    np.save(save_str, emm)
+    np.save(save_str, data)
 
 if __name__ == "__main__":
 
     #gen_npy("../simdata/data.npy")
-    prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn.npy")
+    prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn_low.npy")

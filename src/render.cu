@@ -54,9 +54,10 @@ int main(void) {
     cudaMalloc(&mb, sizeof(MeshBlock));
 
     // load npy data
-    const std::string npy_path {"simdata/interpolated_frame_gamm7_early_287.npy"};
+    const std::string npy_path {"simdata/sn_low.npy"};
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
+    std::cout << "got here" << std::endl;
     std::vector<unsigned long> npy_shape = d.shape;
     int mb_shape[3] = {750,375,375};//    {(int)npy_shape[0], (int)npy_shape[1], (int)npy_shape[2]};
     std::cout << mb_shape[0] << " " << mb_shape[1] << " " << mb_shape[2] << std::endl;
