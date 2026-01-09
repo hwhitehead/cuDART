@@ -72,10 +72,6 @@ int main(void) {
     checkCudaErrors(cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice));
     std::cout << "finished data copy to device" << std::endl;
 
-    for (int i = 0; i < data_size; i++) { // data properly copied here
-        std::cout << data[i] << std::endl;
-    }
-
     // initialise MeshBlock
     int thr_per_blk = 32;
     int blk_in_grid = 64;
