@@ -58,7 +58,7 @@ int main(void) {
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
     std::vector<unsigned long> npy_shape = d.shape;
-    int mb_shape[3] = {(int)npy_shape[0], (int)npy_shape[1], (int)npy_shape[2]};
+    int mb_shape[3] = {750,375,375};//    {(int)npy_shape[0], (int)npy_shape[1], (int)npy_shape[2]};
     std::cout << mb_shape[0] << " " << mb_shape[1] << " " << mb_shape[2] << std::endl;
     int data_size = npy_data.size();
     float *p_data = npy_data.data();
