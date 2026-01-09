@@ -50,7 +50,7 @@ int main(void) {
     // testing MeshBlock build with real dataset
 
     // initiliase MeshBlock space
-    MeshBlock *mb;
+    MeshBlock **mb;
     cudaMalloc(&mb, sizeof(MeshBlock));
 
     // load npy data
@@ -81,7 +81,7 @@ int main(void) {
     int blk_in_grid = 64;
     vec3 xl(0.0, 0.0, 0.0);
     vec3 xr(1.0, 1.0, 1.0);
-    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(&mb, xl, xr, data, data_size);
+    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data, data_size);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "finished meshblock init on device" << std::endl;
