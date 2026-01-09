@@ -80,7 +80,7 @@ int main(void) {
     int blk_in_grid = 64;
     vec3 xl(0.0, 0.0, 0.0);
     vec3 xr(1.0, 1.0, 1.0);
-    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, mb_shape, data);
+    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "finished meshblock init on device" << std::endl;

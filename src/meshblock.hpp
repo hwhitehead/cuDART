@@ -34,10 +34,10 @@ class MeshBlock {
         void InitMeshBlock();        
 };
 
-__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, int mb_shape[3], float *data) {
+__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float *data) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        *mb = new MeshBlock(xl, xr, mb_shape, data);
+        *mb = new MeshBlock(xl, xr, data);
     }
 }
 
@@ -61,14 +61,11 @@ __device__ void MeshBlock::PrintData() {
     }
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, int mb_shape[3], float *data) {
+__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, float *data) {
     xl = xleft;
     xr = xright;
     mb_data = data;
-    nx = mb_shape[0], ny = mb_shape[1], nz = mb_shape[2];
-    mb_size = nx * ny * nz;
-
-
+    mb_size = 4;
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {
     //     dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
