@@ -66,7 +66,7 @@ __device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, int shape[3
     xl = xleft;
     xr = xright;
     for (int i = 0; i <= 2; i++) {
-        mb_shape[0] = shape[0];
+        mb_shape[i] = shape[i];
     }
     mb_data = data;
     mb_size = mb_shape[0] * mb_shape[1] * mb_shape[2];
