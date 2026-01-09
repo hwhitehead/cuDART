@@ -19,9 +19,9 @@ __global__ void PrintMeshBlockData(MeshBlock **mb) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
         printf("printing data from mb data...\n");
-        printf("expect %.6d entries\n", (*mb)->Size());
+        printf("expect %.6d entries\n", (*mb)->mb_size);
         printf("data at 0x%p\n", (*mb)->mb_data); // null here!
-        for (int i = 0; i < (*mb)->Size(); i++) {
+        for (int i = 0; i < (*mb)->mb_size; i++) {
             printf("%.6f\n", (*mb)->mb_data[i]);
         }
         //(*mb)->PrintData();
@@ -32,15 +32,6 @@ __global__ void PrintMeshBlockData(MeshBlock **mb) {
 __global__ void HelloCUDA(float f) {
     printf("Hello thread %d, f=%f\n", threadIdx.x, f);
 }
-
-// __global__ void SumData(MeshBlock **mb) {
-//     printf("starting sum...\n");
-//     (*mb)->sum = 0;
-//     for (int i = 0; i < (*mb)->Size(); i++) {
-//         (*mb)->sum += (*mb)->data[i];
-//     }
-//     printf("finished sum.\n");
-// }
 
 __global__ void render(Camera *pcam, MeshBlock **mb) { // untested
     int i = threadIdx.x + blockIdx.x * blockDim.x;

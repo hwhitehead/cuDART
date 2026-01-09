@@ -11,15 +11,15 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size);
+        __device__ MeshBlock(const vec3 xleft, const vec3 xright, float *data, const int data_size);
 
         // routines
         __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
         __device__ void CalcPath(Ray &r, float tl, float tr);
         __device__ float PathSum(Ray &r);
         __device__ int IntClamp(float f, float l, float r);
-        __device__ vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
-        __host__ __device__ int Size() {return data_size_;}
+        __device__ vec3 Edge(bool sign) {return (sign) ? xr : xl;}
+        __host__ __device__ int Size() {return mb_size;}
         __device__ void PrintData();
 
         // dtor
@@ -29,11 +29,8 @@ class MeshBlock {
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
         float *mb_data;
         float sum;
-
-    private:
-        int data_size_;
-        // std::vector<int> dims_;
-        vec3 xl_, xr_, dx_;
+        int mb_size;
+        vec3 xl, xr, dx;
         void InitMeshBlock();        
 };
 
@@ -48,8 +45,8 @@ __global__ void PrintMeshBlockProperties(MeshBlock **mb) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
         printf("printing data from mb...\n");
-        printf("xl = (%.3f, %.3f, %.3f)", xl_[0], xl_[1], xl_[2]);
-        printf("xr = (%.3f, %.3f, %.3f)", xr_[0], xr_[1], xr_[2]);
+        printf("xl = (%.3f, %.3f, %.3f)", xl[0], xl[1], xl[2]);
+        printf("xr = (%.3f, %.3f, %.3f)", xr[0], xr[1], xr[2]);
         printf("data_size = %.3d", data_size_);
     }  
 }
@@ -59,17 +56,16 @@ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
 }
 
 __device__ void MeshBlock::PrintData() {
-    for (int i = 0; i < data_size_; i++) {
+    for (int i = 0; i < mb_size; i++) {
         printf("%.6f\n", mb_data[i]);
     }
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size) {
-    xl_ = xl;
-    xr_ = xr;
-    printf("passed data as 0x%p\n", data);
-    data = data;
-    data_size_ = data_size;
+__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, float *data, const int data_size) {
+    xl = xleft;
+    xr = xright;
+    mb_data = data;
+    mb_size = data_size;
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {
     //     dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
