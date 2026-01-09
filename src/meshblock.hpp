@@ -47,7 +47,7 @@ __global__ void PrintMeshBlockProperties(MeshBlock *mb) {
         printf("printing data from mb...\n");
         printf("xl = (%.3f, %.3f, %.3f)", mb->xl[0], mb->xl[1], mb->xl[2]);
         printf("xr = (%.3f, %.3f, %.3f)", mb->xr[0], mb->xr[1], mb->xr[2]);
-        printf("data_size = %.3d", mb->data_size);
+        printf("data_size = %.3d", mb->mb_size);
     }  
 }
 
