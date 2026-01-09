@@ -34,10 +34,10 @@ class MeshBlock {
         void InitMeshBlock();        
 };
 
-__global__ void InitMeshBlock(MeshBlock *mb, const vec3 xl, const vec3 xr, float *data, const int data_size) {
+__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float *data, const int data_size) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        mb = new MeshBlock(xl, xr, data, data_size);
+        *mb = new MeshBlock(xl, xr, data, data_size);
     }
 }
 
