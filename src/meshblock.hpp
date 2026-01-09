@@ -43,7 +43,7 @@ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
 
 __device__ void MeshBlock::PrintData() {
     for (int i = 0; i < data_size_; i++) {
-        printf("%.6f\n", data[i]);
+        printf("%.6f\n", mb_data[i]);
     }
 }
 
