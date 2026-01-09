@@ -20,9 +20,10 @@ __global__ void PrintMeshBlockData(MeshBlock **mb) {
     if (thr_idx == 0) {
         printf("printing data from mb data...\n");
         printf("expect %.6d entries\n", (*mb)->Size());
-        for (int i = 0; i < (*mb)->Size(); i++) {
-            printf("%.6f\n", (*mb)->data[i]);
-        }
+        // for (int i = 0; i < (*mb)->Size(); i++) {
+        //     printf("%.6f\n", (*mb)->data[i]);
+        // }
+        (*mb)->PrintData();
         printf("finished print.");
     }  
 }
@@ -73,8 +74,8 @@ int main(void) {
     std::cout << "finished data copy to device" << std::endl;
 
     // initialsie MeshBlock
-    int thr_per_blk = 1;
-    int blk_in_grid = 1;
+    int thr_per_blk = 32;
+    int blk_in_grid = 64;
     vec3 xl(0.0, 0.0, 0.0);
     vec3 xr(1.0, 1.0, 1.0);
     InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data, data_size);
