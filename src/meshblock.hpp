@@ -50,6 +50,7 @@ __device__ void MeshBlock::PrintData() {
 __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size) {
     xl_ = xl;
     xr_ = xr;
+    printf("passed data as 0x%p", data);
     data = data;
     data_size_ = data_size;
     // dx_ = vec3();
