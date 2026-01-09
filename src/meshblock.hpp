@@ -11,7 +11,7 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(const vec3 xleft, const vec3 xright, float *data, const int data_size);
+        __device__ MeshBlock(const vec3 xleft, const vec3 xright, int mb_shape[3], float *data);
 
         // routines
         __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
@@ -30,14 +30,15 @@ class MeshBlock {
         float *mb_data;
         float sum;
         int mb_size;
+        int mb_shape[3];
         vec3 xl, xr, dx;
         void InitMeshBlock();        
 };
 
-__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float *data, const int data_size) {
+__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, int mb_shape[3], float *data) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        *mb = new MeshBlock(xl, xr, data, data_size);
+        *mb = new MeshBlock(xl, xr, mb_shape, data);
     }
 }
 
@@ -47,7 +48,7 @@ __global__ void PrintMeshBlockProperties(MeshBlock **mb) {
         printf("printing data from mb...\n");
         printf("xl = (%.3f, %.3f, %.3f)\n", (*mb)->xl[0], (*mb)->xl[1], (*mb)->xl[2]);
         printf("xr = (%.3f, %.3f, %.3f)\n", (*mb)->xr[0], (*mb)->xr[1], (*mb)->xr[2]);
-        printf("data_size = %d", (*mb)->mb_size);
+        printf("data_size = %d\n", (*mb)->mb_size);
     }  
 }
 
@@ -61,11 +62,15 @@ __device__ void MeshBlock::PrintData() {
     }
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, float *data, const int data_size) {
+__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, int shape[3], float *data) {
     xl = xleft;
     xr = xright;
+    for (int i = 0; i <= 2; i++) {
+        mb_shape[0] = shape[0]
+    }
     mb_data = data;
-    mb_size = data_size;
+    mb_size = mb_shape[0] * mb_shape[1] * mb_shape[2];
+
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {
     //     dx_[i] = (xr_[i] - xl_[i]) / dims_[i];

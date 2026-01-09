@@ -57,6 +57,8 @@ int main(void) {
     const std::string npy_path {"simdata/sn.npy"};
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
+    std::vector<unsigned long> npy_shape = d.shape;
+    int mb_shape[3] = {npy_shape[0], npy_shape[1], npy_shape[2]};
     int data_size = npy_data.size();
     float *p_data = npy_data.data();
     size_t bytes = data_size * sizeof(float);
@@ -77,7 +79,7 @@ int main(void) {
     int blk_in_grid = 64;
     vec3 xl(0.0, 0.0, 0.0);
     vec3 xr(1.0, 1.0, 1.0);
-    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, data, data_size);
+    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, mb_shape, data);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "finished meshblock init on device" << std::endl;
