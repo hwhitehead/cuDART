@@ -45,9 +45,9 @@ __global__ void PrintMeshBlockProperties(MeshBlock **mb) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
         printf("printing data from mb...\n");
-        printf("xl = (%.3f, %.3f, %.3f)", (*mb)->xl[0], (*mb)->xl[1], (*mb)->xl[2]);
-        printf("xr = (%.3f, %.3f, %.3f)", (*mb)->xr[0], (*mb)->xr[1], (*mb)->xr[2]);
-        printf("data_size = %.3d", (*mb)->mb_size);
+        printf("xl = (%.3f, %.3f, %.3f)\n", (*mb)->xl[0], (*mb)->xl[1], (*mb)->xl[2]);
+        printf("xr = (%.3f, %.3f, %.3f)\n", (*mb)->xr[0], (*mb)->xr[1], (*mb)->xr[2]);
+        printf("data_size = %d", (*mb)->mb_size);
     }  
 }
 

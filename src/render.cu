@@ -54,7 +54,7 @@ int main(void) {
     cudaMalloc(&mb, sizeof(MeshBlock));
 
     // load npy data
-    const std::string npy_path {"simdata/data.npy"};
+    const std::string npy_path {"simdata/sn.npy"};
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
     int data_size = npy_data.size();
