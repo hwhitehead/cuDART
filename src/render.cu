@@ -74,7 +74,7 @@ int main(void) {
     std::cout << "finished data copy to device" << std::endl;
 
     for (int i = 0; i < data_size; i++) {
-        std:cout << data[i] << std::endl;
+        std::cout << data[i] << std::endl;
     }
 
     // initialsie MeshBlock

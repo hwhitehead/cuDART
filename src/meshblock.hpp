@@ -11,7 +11,7 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(const vec3 xl, const vec3 xr, float **data, const int data_size);
+        __device__ MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size);
 
         // routines
         __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
@@ -27,7 +27,7 @@ class MeshBlock {
 
         // public properties
         int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
-        float **data;
+        float *data;
         float sum;
 
     private:
@@ -43,11 +43,11 @@ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
 
 __device__ void MeshBlock::PrintData() {
     for (int i = 0; i < data_size_; i++) {
-        printf("%.6f\n", *data[i]);
+        printf("%.6f\n", data[i]);
     }
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float **data, const int data_size) {
+__device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size) {
     xl_ = xl;
     xr_ = xr;
     data = data;
