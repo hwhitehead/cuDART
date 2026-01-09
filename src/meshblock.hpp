@@ -41,7 +41,7 @@ MeshBlock::~MeshBlock() {
     cudaFree(data);
 }
 
-__host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) {
+void MeshBlock::ImportNumpyData(const std::string npy_path) {
     // import numpy 
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
