@@ -17,6 +17,7 @@
 
 __global__ void PrintMeshBlockData(MeshBlock **mb) {
     printf("printing data from mb data...\n");
+    printf("expect %.6f entries", (*mb)->Size());
     for (int i = 0; i < (*mb)->Size(); i++) {
         printf("%.6f\n", (*mb)->data[i]);
     }
