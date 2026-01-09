@@ -19,7 +19,7 @@ def prep_sn_data(load_str, save_str):
     emm[:hdim, hdim:, :] = quart_emm[::-1, :, :]  # -x, +y quadrant
     emm[:hdim, :hdim, :] = quart_emm[::-1, ::-1, :]  # -x, -y quadrant
 
-    np.save(save_str, data)
+    np.save(save_str, emm)
 
 if __name__ == "__main__":
 
