@@ -54,12 +54,12 @@ int main(void) {
     const std::string npy_path {"simdata/data.npy"};
     npy::npy_data d = npy::read_npy<float>(npy_path);
     std::vector<float> npy_data = d.data;
-    int data_size_ = npy_data.size();
+    int data_size = npy_data.size();
     float *p_data = npy_data.data();
     size_t bytes = data_size_ * sizeof(float);
 
     // allocate device memory
-    float **data;
+    float *data;
     checkCudaErrors(cudaMallocManaged((void **)&data, bytes));
 
     // copy data into device memory

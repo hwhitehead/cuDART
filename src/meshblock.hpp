@@ -11,7 +11,7 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(vec3 xl, vec3 xr, float *data);
+        __device__ MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size);
 
         // routines
         __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
@@ -36,11 +36,11 @@ class MeshBlock {
         void InitMeshBlock();        
 };
 
-__host__ __device__ int MeshBlock::IntClamp(float f, float l, float r) {
+__device__ int MeshBlock::IntClamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
 
-__host__ __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, int data_size) {
+__device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size) {
     xl_ = xl;
     xr_ = xr;
     data = data;
@@ -51,7 +51,7 @@ __host__ __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *da
     }
 }
 
-__host__ __device__ bool MeshBlock::CalcIntercept(Ray r, float &tl, float &tr) {
+__device__ bool MeshBlock::CalcIntercept(Ray r, float &tl, float &tr) {
     tl = 0.0, tr = 0.0;
     float tcmin, tcmax, tmin, tmax;
     for (int i = 0; i <= 2; i++) {
