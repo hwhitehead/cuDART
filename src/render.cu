@@ -52,14 +52,10 @@ int main(void) {
 
     std::cout << "import finished." << std::endl;
 
-    for (int i = 0; i < mb.Size(); i++) {
-        std::cout << mb.data[i] << std::endl;
-    }
+    int thr_per_blk = 1;
+    int blk_in_grid = 1;
 
-    int thr_per_blk = 16;
-    int blk_in_grid = 16;
-
-    SumData<<<1,1>>>(mb);
+    SumData<<<thr_per_blk,blk_in_grid>>>(mb);
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "size = " << mb.Size() << std::endl;
     std::cout << "sum = " << mb.sum << std::endl;
