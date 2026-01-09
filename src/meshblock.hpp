@@ -37,6 +37,23 @@ class MeshBlock {
         void InitMeshBlock();        
 };
 
+__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float *data, const int data_size) {
+    int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (thr_idx == 0) {
+        *mb = new MeshBlock(xl, xr, data, data_size);
+    }
+}
+
+__global__ void PrintMeshBlockProperties(MeshBlock **mb) {
+    int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (thr_idx == 0) {
+        printf("printing data from mb...\n");
+        printf("xl = (%.3f, %.3f, %.3f)", xl_[0], xl_[1], xl_[2]);
+        printf("xr = (%.3f, %.3f, %.3f)", xr_[0], xr_[1], xr_[2]);
+        printf("data_size = %.3d", data_size_);
+    }  
+}
+
 __device__ int MeshBlock::IntClamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
@@ -51,7 +68,7 @@ __device__ MeshBlock::MeshBlock(const vec3 xl, const vec3 xr, float *data, const
     xl_ = xl;
     xr_ = xr;
     printf("passed data as 0x%p\n", data);
-    mb_data = data;
+    data = data;
     data_size_ = data_size;
     // dx_ = vec3();
     // for (int i = 0; i <= 2; i++) {

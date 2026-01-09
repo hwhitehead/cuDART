@@ -42,15 +42,21 @@ __global__ void HelloCUDA(float f) {
 //     printf("finished sum.\n");
 // }
 
-__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, float *data, const int data_size) {
-    int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thr_idx == 0) {
-        *mb = new MeshBlock(xl, xr, data, data_size);
-    }
+__global__ void render(Camera *pcam, MeshBlock **mb) { // untested
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= max_x) || (j >= max_y)) return; // ignore oob
+  	int pixel_idx = j * max_x + i;
+
+    vec3 pixel_origin = pcam->get_pixel_origin(i, j);
+    Ray pixel_ray(pixel_origin, pcam->normal);
+     
+    pcam->fb[pixel_idx] = pcam->trace(pixel_ray, mb);
 }
 
+
 int main(void) {
-    // testing MeshBlock build
+    // testing MeshBlock build with real dataset
 
     // initiliase MeshBlock space
     MeshBlock **mb;
@@ -89,11 +95,16 @@ int main(void) {
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "finished meshblock init on device" << std::endl;
 
-    // check MeshBlock data
-    PrintMeshBlockData<<<thr_per_blk,blk_in_grid>>>(mb);
+    // test MeshBlock properties
+    PrintMeshBlockProperties<<<thr_per_blk,blk_in_grid>>>(mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
-    std::cout << "finished." << std::endl;
+
+    // check MeshBlock data
+    // PrintMeshBlockData<<<thr_per_blk,blk_in_grid>>>(mb);
+    // checkCudaErrors(cudaPeekAtLastError());
+    // checkCudaErrors(cudaDeviceSynchronize());
+    // std::cout << "finished." << std::endl;
     // SumData<<<thr_per_blk,blk_in_grid>>>(mb);
     // checkCudaErrors(cudaPeekAtLastError());
     // checkCudaErrors(cudaDeviceSynchronize());

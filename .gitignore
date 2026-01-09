@@ -6,6 +6,10 @@ configure.log
 obj/
 bin/
 
+# large data files
+simdata/sn.npy
+simdata/interpolated_frame_gamm7_early_287.npy
+
 # Compiled object files
 *.slo
 *.lo

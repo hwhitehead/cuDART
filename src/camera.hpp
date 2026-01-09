@@ -36,6 +36,8 @@ class Camera {
         float tilt;
         vec3 vertical, Xhat, Yhat;
         vec3 upper_left;
+
+        float *fb;
 }
 
 __host__ __device__ Camera::init() {
