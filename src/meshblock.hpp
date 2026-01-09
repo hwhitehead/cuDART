@@ -11,7 +11,7 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(const vec3 xl, const vec3 xr, float *data, const int data_size);
+        __device__ MeshBlock(const vec3 xl, const vec3 xr, float **data, const int data_size);
 
         // routines
         __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
