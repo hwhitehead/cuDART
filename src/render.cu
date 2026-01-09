@@ -46,9 +46,6 @@ int main(void) {
 
     MeshBlock mb(xl, xr, dims);
 
-    std::cout << "xl = " << mb.Edge(false) << std::endl;
-    std::cout << "xr = " << mb.Edge(true) << std::endl;
-
     // load npy data
     const std::string npy_path {"simdata/data.npy"};
     mb.ImportNumpyData(npy_path);

@@ -10,8 +10,8 @@
 class MeshBlock {
     public:
         // ctors
-        __host__ __device__ MeshBlock() {}
-        __host__ __device__ MeshBlock(vec3 xl, vec3 xr, std::vector<int> dims) {xl_ = xl; xr_ = xr; dims_ = dims; InitMeshBlock();}
+        MeshBlock() {}
+        MeshBlock(vec3 xl, vec3 xr, std::vector<int> dims) {xl_ = xl; xr_ = xr; dims_ = dims; InitMeshBlock();}
 
         // routines
         __host__ __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
@@ -19,7 +19,7 @@ class MeshBlock {
         __host__ __device__ float PathSum(Ray &r);
         __host__ __device__ int IntClamp(float f, float l, float r);
         __host__ __device__ vec3 Edge(bool sign) {return (sign) ? xr_ : xl_;}
-        __host__ __device__ void ImportNumpyData(const std::string path);
+        void ImportNumpyData(const std::string path);
         __host__ __device__ int Size() {return data_size_;}
 
         // dtor
