@@ -50,7 +50,7 @@ __host__ __device__ void MeshBlock::ImportNumpyData(const std::string npy_path) 
     size_t bytes = data_size_ * sizeof(float);
 
     // allocate device memory
-    checkCudaErrors(cudaMallocManaged(&data, bytes));
+    checkCudaErrors(cudaMalloc(&data, bytes));
 
     // copy data into device memory
     checkCudaErrors(cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice));
