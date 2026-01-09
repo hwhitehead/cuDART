@@ -40,40 +40,34 @@ __global__ void SumData(MeshBlock mb) {
 int main(void) {
     // testing MeshBlock build
 
-    printf("launching kernel...");
-    HelloCUDA<<<1,5>>>(76.5);
-    // checkCudaErrors(cudaGetLastError());
+    const vec3 xl(0, 0, 0);
+    const vec3 xr(1, 1, 1);
+    const std::vector<int> dims{10, 10, 10};
+
+    MeshBlock mb(xl, xr, dims);
+
+    std::cout << "xl = " << mb.Edge(false) << std::endl;
+    std::cout << "xr = " << mb.Edge(true) << std::endl;
+
+    // load npy data
+    const std::string npy_path {"simdata/data.npy"};
+    mb.ImportNumpyData(npy_path);
+
+    std::cout << "import finished." << std::endl;
+
+    for (int i = 0; i < mb.Size(); i++) {
+        std::cout << mb.data[i] << std::endl;
+    }
+
+    int thr_per_blk = 16;
+    int blk_in_grid = 16;
+
+    SumData<<<1,1>>>(mb);
     checkCudaErrors(cudaDeviceSynchronize());
-    printf("finished.");
+    std::cout << "size = " << mb.Size() << std::endl;
+    std::cout << "sum = " << mb.sum << std::endl;
 
-    // const vec3 xl(0, 0, 0);
-    // const vec3 xr(1, 1, 1);
-    // const std::vector<int> dims{10, 10, 10};
-
-    // MeshBlock mb(xl, xr, dims);
-
-    // std::cout << "xl = " << mb.Edge(false) << std::endl;
-    // std::cout << "xr = " << mb.Edge(true) << std::endl;
-
-    // // load npy data
-    // const std::string npy_path {"simdata/data.npy"};
-    // mb.ImportNumpyData(npy_path);
-
-    // std::cout << "import finished." << std::endl;
-
-    // for (int i = 0; i < mb.Size(); i++) {
-    //     std::cout << mb.data[i] << std::endl;
-    // }
-
-    // int thr_per_blk = 16;
-    // int blk_in_grid = 16;
-
-    // SumData<<<1,1>>>(mb);
-    // checkCudaErrors(cudaDeviceSynchronize());
-    // std::cout << "size = " << mb.Size() << std::endl;
-    // std::cout << "sum = " << mb.sum << std::endl;
-
-    // PrintData<<<1, 1>>>(mb);
+    PrintData<<<1, 1>>>(mb);
 
     return 0;
 }
