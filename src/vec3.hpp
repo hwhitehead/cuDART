@@ -25,8 +25,7 @@ class vec3  {
         __host__ __device__ inline vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
         __host__ __device__ inline float operator[](int i) const { return e[i]; }
         __host__ __device__ inline float& operator[](int i) { return e[i]; };
-        __host__ __device__ inline float mag() const { return sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]); }
-        __host__ __device__ inline float magSqr() const { return e[0]*e[0] + e[1]*e[1] + e[2]*e[2]; }
+        __host__ __device__ inline float vector_mag() const { return sqrt(e[0]*e[0] + e[1]*e[1] + e[2]*e[2]); }
         // basic arithmetic
         __host__ __device__ inline vec3& operator+=(const vec3 &v2);
         __host__ __device__ inline vec3& operator-=(const vec3 &v2);
@@ -36,10 +35,8 @@ class vec3  {
         __host__ __device__ inline vec3& operator/=(const float t);
         // vector arithmetic 
         __host__ __device__ inline vec3 vector_norm(vec3 v);
-        //__host__ __device__ inline float dot(const vec3 &v1, const vec3 &v2);
+        __host__ __device__ inline float dot_prod(const vec3 &v1, const vec3 &v2);
         __host__ __device__ inline vec3 cross_prod(const vec3 &v1, const vec3 &v2);
-        //__host__ __device__ inline vec3 reflect(const vec3 &i, const vec3 &n);
-        //__host__ __device__ inline vec3 refract(const vec3 &i, vec3 &N, float n);
         __host__ __device__ inline vec3 rotate_about(const vec3 k, const float theta);
 
         // internal values
@@ -133,7 +130,7 @@ __host__ __device__ inline vec3& vec3::operator/=(const float t) {
 }
 
 __host__ __device__ inline vec3 vector_norm(vec3 v) {
-    return v / v.mag();
+    return v / v.vector_mag();
 }
 
 __host__ __device__ inline float dot_prod(const vec3 &v1, const vec3 &v2) {
