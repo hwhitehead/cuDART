@@ -7,7 +7,7 @@ GCOV_CMD := gcov
 
 EXE_DIR := bin/
 EXECUTABLE := $(EXE_DIR)cudart
-SRC_FILES := $(wildcard src/render.cu)
+SRC_FILES := $(wildcard src/main.cu)
 OBJ_DIR := obj/
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(SRC_FILES:.cu=.o)))
 GCOV_FILES := $(notdir $(addsuffix .gcov,$(SRC_FILES)))
