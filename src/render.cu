@@ -15,37 +15,6 @@
 #include "meshblock.hpp"
 #include "tools.hpp"
 
-// __global__ void PrintMeshBlockData(MeshBlock **mb) {
-//     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (thr_idx == 0) {
-//         printf("printing data from mb data...\n");
-//         printf("expect %.6d entries\n", (*mb)->mb_size);
-//         printf("data at 0x%p\n", (*mb)->mb_data); // null here!
-//         for (int i = 0; i < (*mb)->mb_size; i++) {
-//             printf("%.6f\n", (*mb)->mb_data[i]);
-//         }
-//         //(*mb)->PrintData();
-//         printf("finished print.");
-//     }  
-// }
-
-// __global__ void HelloCUDA(float f) {
-//     printf("Hello thread %d, f=%f\n", threadIdx.x, f);
-// }
-
-// __global__ void render(Camera *pcam, MeshBlock **mb) { // untested
-//     int i = threadIdx.x + blockIdx.x * blockDim.x;
-//     int j = threadIdx.y + blockIdx.y * blockDim.y;
-//     if ((i >= max_x) || (j >= max_y)) return; // ignore oob
-//   	int pixel_idx = j * max_x + i;
-
-//     vec3 pixel_origin = pcam->get_pixel_origin(i, j);
-//     Ray pixel_ray(pixel_origin, pcam->normal);
-     
-//     pcam->fb[pixel_idx] = pcam->trace(pixel_ray, mb);
-// }
-
-
 int main(void) {
     // testing MeshBlock build with real dataset
 
@@ -78,13 +47,13 @@ int main(void) {
     int blk_in_grid = 64;
     vec3 xl(0.0, 0.0, 0.0);
     vec3 xr(1.0, 1.0, 1.0);
-    InitMeshBlock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, dims, data);
+    init_meshblock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, dims, data);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "finished meshblock init on device" << std::endl;
 
     // test MeshBlock properties
-    PrintMeshBlockProperties<<<thr_per_blk,blk_in_grid>>>(mb);
+    print_meshblock_properties<<<thr_per_blk,blk_in_grid>>>(mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     std::cout << "finished printing properties." << std::endl;

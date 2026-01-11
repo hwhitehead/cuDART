@@ -14,14 +14,11 @@ class MeshBlock {
         __device__ MeshBlock(const vec3 xleft, const vec3 xright, const vec3 dims, float *data);
 
         // routines
-        __device__ bool CalcIntercept(Ray r, float &tl, float &tr);
-        __device__ void CalcPath(Ray &r, float tl, float tr);
-        __device__ float PathSum(Ray &r);
-        __device__ int IntClamp(float f, float l, float r);
-        __device__ vec3 Edge(bool sign) {return (sign) ? xr : xl;}
-        __host__ __device__ int Size() {return mb_size;}
-        __device__ void PrintData();
-        __device__ float CalcTrace(Ray &r);
+        __device__ bool calc_mb_intercept(Ray r, float &tl, float &tr);
+        __device__ int int_clamp(float f, float l, float r);
+        __device__ vec3 get_edge(bool sign) {return (sign) ? xr : xl;}
+        __device__ void print_data();
+        __device__ float calc_trace(Ray &r);
 
         // dtor
         ~MeshBlock();
@@ -31,14 +28,13 @@ class MeshBlock {
         float *mb_data;
         float sum;
         int mb_size;
-        vec3 xl, xr, dx, mb_dims;
-        void InitMeshBlock();        
+        vec3 xl, xr, dx, mb_dims;    
 };
 
-__device__ float MeshBlock::CalcTrace(Ray &r) {
+__device__ float MeshBlock::calc_trace(Ray &r) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;
-    bool hit = CalcIntercept(r, tl, tr)
+    bool hit = calc_mb_intercept(r, tl, tr)
     if (hit) { // valid intercept found
         // prep arrays for orientation
         int cell[3] = {0, 0, 0}; // convert to vec3? typesafe?
@@ -51,7 +47,7 @@ __device__ float MeshBlock::CalcTrace(Ray &r) {
         // orientate trace
         for (int i = 0; i <= 2; i++) {
             float ray_mb_orgin = mb_entrace[i] - xl[i];
-            cell[i] = IntClamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1); // awkward typing, tempalte vec3?
+            cell[i] = int_clamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1); // awkward typing, tempalte vec3?
             if (r.sign[i]) { 
                 step_dir[i] = -1; // traverse backwards
                 exit_cond[i] = -1; // stop walk when leading edge reached
@@ -62,8 +58,8 @@ __device__ float MeshBlock::CalcTrace(Ray &r) {
                 exit_cond[i] = mb_dims[i]; // stop walk when tailing edge reached
                 dt[i] = dx[i] * r.inv_normal[i];
                 next_t_cross[i] = tl + ((cell[i]+1) * dx[i] - ray_mb_orgin) * r.inv_normal[i];
-            }
-        }
+            } // end if
+        } // end for
 
         // perform traversal
         float t_current = tl;
@@ -88,21 +84,19 @@ __device__ float MeshBlock::CalcTrace(Ray &r) {
 
             // check for termination (necessary?)
             if (cell[axis] == exit_cond[axis]) break;
-        }
-        
-    }
+        } // end while     
+    } // end if
     return trace;
 }
 
-
-__global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, vec3 dims, float *data) {
+__global__ void init_meshblock(MeshBlock **mb, const vec3 xl, const vec3 xr, vec3 dims, float *data) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
         *mb = new MeshBlock(xl, xr, dims, data);
     }
 }
 
-__global__ void PrintMeshBlockProperties(MeshBlock **mb) {
+__global__ void print_meshblock_properties(MeshBlock **mb) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
         printf("printing data from mb...\n");
@@ -112,11 +106,11 @@ __global__ void PrintMeshBlockProperties(MeshBlock **mb) {
     }  
 }
 
-__device__ int MeshBlock::IntClamp(float f, float l, float r) {
+__device__ int MeshBlock::int_clamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
 
-__device__ void MeshBlock::PrintData() {
+__device__ void MeshBlock::print_data() {
     for (int i = 0; i < mb_size; i++) {
         printf("%.6f\n", mb_data[i]);
     }
@@ -128,18 +122,15 @@ __device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, vec3 dims, 
     mb_data = data;
     mb_dims = dims;
     mb_size = mb_dims[0] * mb_dims[1] * mb_dims[2];
-    // dx_ = vec3();
-    // for (int i = 0; i <= 2; i++) {
-    //     dx_[i] = (xr_[i] - xl_[i]) / dims_[i];
-    // }
+    dx = (xr - xl) / mb_dims;
 }
 
-__device__ bool MeshBlock::CalcIntercept(Ray r, float &tl, float &tr) {
+__device__ bool MeshBlock::calc_mb_intercept(Ray r, float &tl, float &tr) {
     tl = 0.0, tr = 0.0;
     float tcmin, tcmax, tmin, tmax;
     for (int i = 0; i <= 2; i++) {
-        tcmin = (Edge(r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
-        tcmax = (Edge(1 - r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
+        tcmin = (get_edge(r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
+        tcmax = (get_edge(1 - r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
         if (i == 0) {
             tmin = tcmin;
             tmax = tcmax;

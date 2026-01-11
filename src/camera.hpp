@@ -40,6 +40,21 @@ class Camera {
         float *fb;
 }
 
+__global__ void Camera::render_img(float *img, Camera cam, MeshBlock **mb) { // untested
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= max_x) || (j >= max_y)) return; // ignore oob
+  	int pixel_idx = j * max_x + i;
+
+    // initialise ray
+    vec3 pixel_origin = cam.get_pixel_origin(i, j);
+    Ray pixel_ray(pixel_origin, pcam->normal);
+    
+    // calculate pixel value from MeshBlock data
+    img[pixel_idx] = (*mb)->calc_trace(pixel_ray);
+}
+
 __host__ __device__ Camera::init() {
     // define axis unit vectors
     vec3 Xvec = cross(vertical, normal);
@@ -53,7 +68,7 @@ __host__ __device__ Camera::init() {
     upper_left = origin - 0.5 * Xhat * length_X + 0.5 * Yhat * length_Y; 
 }
 
-__host__ __device__ get_pixel_origin(const int i, const int j) const {
+__host__ __device__ vec3 Camera::get_pixel_origin(const int i, const int j) const {
     vec3 dY = -(i / num_pixels_Y) * length_Y;
     vec3 dX = (j / num_pixels_X) * length_X;
     return upper_left + dX * Xhat + dY * Yhat;
