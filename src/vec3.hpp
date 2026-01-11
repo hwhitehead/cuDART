@@ -35,9 +35,9 @@ class vec3  {
         __host__ __device__ inline vec3& operator*=(const float t);
         __host__ __device__ inline vec3& operator/=(const float t);
         // vector arithmetic 
-        __host__ __device__ inline vec3 norm(vec3 v);
+        __host__ __device__ inline vec3 vector_norm(vec3 v);
         //__host__ __device__ inline float dot(const vec3 &v1, const vec3 &v2);
-        //__host__ __device__ inline vec3 cross(const vec3 &v1, const vec3 &v2);
+        __host__ __device__ inline vec3 cross_prod(const vec3 &v1, const vec3 &v2);
         //__host__ __device__ inline vec3 reflect(const vec3 &i, const vec3 &n);
         //__host__ __device__ inline vec3 refract(const vec3 &i, vec3 &N, float n);
         __host__ __device__ inline vec3 rotate_about(const vec3 k, const float theta);
@@ -132,48 +132,25 @@ __host__ __device__ inline vec3& vec3::operator/=(const float t) {
     return *this;
 }
 
-__host__ __device__ inline vec3 norm(vec3 v) {
+__host__ __device__ inline vec3 vector_norm(vec3 v) {
     return v / v.mag();
 }
 
-__host__ __device__ inline float dot(const vec3 &v1, const vec3 &v2) {
+__host__ __device__ inline float dot_prod(const vec3 &v1, const vec3 &v2) {
     return v1.e[0] *v2.e[0] + v1.e[1] *v2.e[1]  + v1.e[2] *v2.e[2];
 }
 
-__host__ __device__ inline vec3 cross(const vec3 &v1, const vec3 &v2) {
+__host__ __device__ inline vec3 cross_prod(const vec3 &v1, const vec3 &v2) {
     return vec3( (v1.e[1]*v2.e[2] - v1.e[2]*v2.e[1]),
                 (-(v1.e[0]*v2.e[2] - v1.e[2]*v2.e[0])),
                 (v1.e[0]*v2.e[1] - v1.e[1]*v2.e[0]));
-}
-// TODO: cleanup old funcs
-__host__ __device__ inline vec3 reflect(const vec3 &i, const vec3 &n) {
-    float perp = 2.0f * dot(i,n);
-    return norm(i - 2 * perp * n);
-}
-
-__host__ __device__ inline vec3 refract(const vec3 &i, vec3 &N, float n) {
-    if (n == 1) {
-        return i; 
-    }
-    float c1 = dot(i,N);
-    float eta;
-    if (c1 < 0) { // entering object
-        c1 = -c1;
-        eta = 1 / n;
-    } else { // exiting object
-        N = -N;
-        eta = n;
-    }
-    float c2 = std::sqrt(1 - eta * eta * (1 - c1 * c1));
-    vec3 t = eta * i + (eta*c1 - c2) * N;
-    return t;
 }
 
 __host__ __device__ inline vec3 vec3::rotate_about(const vec3 k, const float theta) {
     // use Rodrigues' rotation formula to rotate v about k by theta
     float cos_theta = std::cos(theta);
     float sin_theta = std::sin(theta);
-    return *this * cos_theta + cross(k,*this) * sin_theta + k * dot(k,*this) * (1-cos_theta);
+    return *this * cos_theta + cross_prod(k,*this) * sin_theta + k * dot(k,*this) * (1-cos_theta);
 }
 
 #endif
