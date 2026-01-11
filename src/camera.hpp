@@ -7,7 +7,7 @@
 class Camera {
     public:
         // ctors
-        __host__ Camera()  {R_pos = 1.0;
+        __host__ __device__ Camera()  {R_pos = 1.0;
                             theta_pos = M_PI / 2.0;
                             phi_pos = 0.0;
                             length_X = 1.0;
@@ -17,11 +17,11 @@ class Camera {
                             bias = vec3(0,0,1);
                             tilt = 0.0;
                             update_camera();}
-        __host__ void update_camera();
+        __host__ __device__ void update_camera();
 
         // routines
         __global__ void render_img(float *img, MeshBlock **mb) const; 
-        __device__ const calc_pixel_origin(int i, int j) const;                           
+        __host__ __device__ vec3 calc_pixel_origin(int i, int j) const;                           
 
         // internals
         float R_pos, theta_pos, phi_pos;
@@ -33,7 +33,7 @@ class Camera {
         vec3 upper_left;
 }
 
-__host__ Camera::update_camera() {
+__host__ __device__ Camera::update_camera() {
     // calculate position
     origin = R_pos * vec3(sin(theta_pos) * cos(phi_pos),
                             sin(theta_pos) * sin(phi_pos),
@@ -54,18 +54,18 @@ __global__ void Camera::render_img(float *img, MeshBlock **mb) const {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if ((i >= max_x) || (j >= max_y)) return; // ignore oob
-  	int pixel_idx = j * max_x + i;
+    if ((i >= num_pixels_x) || (j >= num_pixels_y)) return; // ignore oob
+  	int pixel_index = j * max_x + i;
 
     // initialise ray
     vec3 pixel_origin = calc_pixel_origin(i, j);
     Ray pixel_ray(pixel_origin, pcam->normal);
     
     // calculate pixel value from MeshBlock data
-    img[pixel_idx] = (*mb)->calc_trace(pixel_ray);
+    img[pixel_index] = (*mb)->calc_trace(pixel_ray);
 }
 
-__device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {
+__host__ __device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {
     vec3 dY = -(i / num_pixels_Y) * length_Y;
     vec3 dX = (j / num_pixels_X) * length_X;
     return upper_left + dX * Xhat + dY * Yhat;

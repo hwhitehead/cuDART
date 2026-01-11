@@ -16,13 +16,19 @@
 #include "tools.hpp"
 
 int main(int argc, char *argv[]) {
+    
     // parse user input
     std::string cudart_version = "version 0.1 - January 2026";
+    
     // filenames
     char *input_filename = nullptr, *save_filename = nullptr;
+    
     // default camera settings
-    int num_pixels_x = 100, num_pixels_y = 100; 
+    int num_pixels_X = 100, num_pixels_Y = 100; 
     float R_pos = 1.0, theta_pos = 0.5 * M_PI, phi_pos = 0.0;
+    float length_X = 1.0, length_Y = 1.0, tilt = 0.0;
+    ve3 bias(0.0, 0.0, 1.0);
+
     // flags
     bool verbose = false;
 
@@ -68,14 +74,19 @@ int main(int argc, char *argv[]) {
                 << "No input file or output file specified." << std::endl;
     }
 
-    // initialise camera settings as specified by user
+    if (verbose) std::cout << "Starting cuDART...\n";
 
+    // initialise camera settings as specified by user
+    Camera cam;
+    // decide on format for user input 
+    cam.update_camera();
+    if (verbose) std::cout << "Initialised camera.\n";
 
     // initialise image space
     const size_t img_size = cam.num_pixels * sizeof(float);
     float *img;
     checkCudaErrors(cudaMallocManaged((void **)&img, img_size));
-    if (verbose) std::cout << "initialised image space.\n";
+    if (verbose) std::cout << "Initialised image space.\n";
 
     // load npy data as specified by user
     const std::string npy_path {"simdata/sn_low.npy"};
@@ -86,33 +97,35 @@ int main(int argc, char *argv[]) {
     int data_size = npy_data.size();
     float *p_data = npy_data.data();
     size_t bytes = data_size * sizeof(float);
-    if (verbose) std::cout << "finished load from npy input.\n";
+    if (verbose) std::cout << "Finished load from npy input.\n";
 
     // allocate device memory
     float *data;
     checkCudaErrors(cudaMallocManaged(&data, bytes));
-    if (verbose) std::cout << "finished data alloc on device.\n";
+    if (verbose) std::cout << "Finished data alloc on device.\n";
     
     // copy data into device memory
     checkCudaErrors(cudaMemcpy(data, p_data, bytes, cudaMemcpyHostToDevice));
-    if (verbose) std::cout << "finished data copy to device.\n";
+    if (verbose) std::cout << "Finished data copy to device.\n";
 
     // initialise MeshBlock
-    int thr_per_blk = 32;
-    int blk_in_grid = 64;
-    vec3 xl(0.0, 0.0, 0.0);
+    vec3 xl(0.0, 0.0, 0.0); // TODO: add shape-sentive domain definition
     vec3 xr(1.0, 1.0, 1.0);
     MeshBlock **mb;
     checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *)));
-    init_meshblock<<<thr_per_blk,blk_in_grid>>>(mb, xl, xr, dims, data); // run on single?
+    init_meshblock<<<1,1>>>(mb, xl, xr, dims, data);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
-    if (verbose) std::cout << "finished meshblock init on device.\n";
+    if (verbose) std::cout << "Finished MeshBlock init on device.\n";
     
     // call render
-    if (verbose) std::cout << "starting render...\n";
-    cam.render_img(fb, mb)
-    if (verbose) std::cout << "finished render.\n";
+    int thr_per_blk = 32;
+    int blk_in_grid = 64;
+    if (verbose) std::cout << "Starting render...\n";
+    cam.render_img<<<thr_per_blk,blk_in_grid>>>(fb, mb); // how to run this as kernel?
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+    if (verbose) std::cout << "Finished render.\n";
 
     // perform cleanup
     checkCudaErrors(cudaFree(img));
