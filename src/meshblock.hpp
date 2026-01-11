@@ -21,6 +21,7 @@ class MeshBlock {
         __device__ vec3 Edge(bool sign) {return (sign) ? xr : xl;}
         __host__ __device__ int Size() {return mb_size;}
         __device__ void PrintData();
+        __device__ float CalcTrace(Ray &r);
 
         // dtor
         ~MeshBlock();
@@ -33,6 +34,66 @@ class MeshBlock {
         vec3 xl, xr, dx, mb_dims;
         void InitMeshBlock();        
 };
+
+__device__ float MeshBlock::CalcTrace(Ray &r) {
+    // calculate the weighted path of a given ray through the MeshBlock
+    float tl, tr, trace = 0;
+    bool hit = CalcIntercept(r, tl, tr)
+    if (hit) { // valid intercept found
+        // prep arrays for orientation
+        int cell[3] = {0, 0, 0}; // convert to vec3? typesafe?
+        float dt[3] = {0.0, 0.0, 0.0};
+        float next_t_cross[3] = {0.0, 0.0, 0.0};
+        int exit_cond[3] = {0, 0, 0};
+        int step_dir[3] = {0, 0, 0};
+        vec3 mb_entrace = r.march(tl);
+        
+        // orientate trace
+        for (int i = 0; i <= 2; i++) {
+            float ray_mb_orgin = mb_entrace[i] - xl[i];
+            cell[i] = IntClamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1); // awkward typing, tempalte vec3?
+            if (r.sign[i]) { 
+                step_dir[i] = -1; // traverse backwards
+                exit_cond[i] = -1; // stop walk when leading edge reached
+                dt[i] = - dx[i] * r.inv_normal[i];
+                next_t_cross[i] = tl + (cell[i] * dx[i] - ray_mb_orgin) * r.inv_normal[i];
+            } else {
+                step_dir[i] = 1; // traverse forwards
+                exit_cond[i] = mb_dims[i]; // stop walk when tailing edge reached
+                dt[i] = dx[i] * r.inv_normal[i];
+                next_t_cross[i] = tl + ((cell[i]+1) * dx[i] - ray_mb_orgin) * r.inv_normal[i];
+            }
+        }
+
+        // perform traversal
+        float t_current = tl;
+        while (t_current < tr) { // terminate on mb exit
+            // identify next step direction
+            int k = (((next_t_cross[0] < next_t_cross[1]) << 2) +
+                    ((next_t_cross[0] < next_t_cross[2]) << 1) +
+                    ((next_t_cross[1] < next_t_cross[2])));
+            int axis = axes_bitmap[k];
+
+            // determine dwell
+            float dwell = next_t_cross[axis] - t_current;
+
+            // add local cell to trace
+            int cell_index = 0; // todo: add unpack for c-order indexing
+            trace += dwell * mb_data[cell_index];
+
+            // update position of ray head
+            t_current = next_t_cross[axis]; // += dwell
+            cell[axis] += step_dir[axis];
+            next_t_cross[axis] += dt[axis];
+
+            // check for termination (necessary?)
+            if (cell[axis] == exit_cond[axis]) break;
+        }
+        
+    }
+    return trace;
+}
+
 
 __global__ void InitMeshBlock(MeshBlock **mb, const vec3 xl, const vec3 xr, vec3 dims, float *data) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
