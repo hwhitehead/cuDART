@@ -98,7 +98,9 @@ int main(int argc, char *argv[]) {
     //const std::string npy_path {"simdata/sn_low.npy"}; // old
     clock_t npy_read_start = clock();
     const std::string input_str(input_char);
-    std::cout << "loading " << input_str << std::endl;
+    if (verbose) {
+        std::cout << "Reading data from " << input_str << "...\n";
+    }
     npy::npy_data d = npy::read_npy<float>(input_str);
     std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-trasnfer
     std::vector<unsigned long> npy_shape = d.shape;
@@ -111,22 +113,22 @@ int main(int argc, char *argv[]) {
         printf("Loaded npy data to host in %.6fs\n",npy_read_dur);
     }
 
-    // // allocate device memory
-    // float *d_data = nullptr;
-    // clock_t d_data_alloc_start = clock();
-    // checkCudaErrors(cudaMalloc(&d_data, bytes_in_data));
-    // if (verbose) {
-    //     float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-    //     printf("Allocated memory for data on device in %.6fs\n",d_data_alloc_dur);
-    // }
+    // allocate device memory
+    float *d_data = nullptr;
+    clock_t d_data_alloc_start = clock();
+    checkCudaErrors(cudaMalloc(&d_data, bytes_in_data));
+    if (verbose) {
+        float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
+        printf("Allocated memory for data on device in %.6fs\n",d_data_alloc_dur);
+    }
     
-    // // copy data into device memory
-    // clock_t data_copy_start = clock();
-    // checkCudaErrors(cudaMemcpy(d_data, data, bytes_in_data, cudaMemcpyHostToDevice));
-    // if (verbose) {
-    //     float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-    //     printf("Copied data to device in %.6fs\n",data_copy_dur);
-    // }
+    // copy data into device memory
+    clock_t data_copy_start = clock();
+    checkCudaErrors(cudaMemcpy(d_data, data, bytes_in_data, cudaMemcpyHostToDevice));
+    if (verbose) {
+        float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
+        printf("Copied data to device in %.6fs\n",data_copy_dur);
+    }
 
     // // initialise MeshBlock
     // vec3 xl(0.0, 0.0, 0.0); // TODO: add shape-sentive domain definition
