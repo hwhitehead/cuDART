@@ -21,19 +21,13 @@ int main(int argc, char *argv[]) {
     // start general timer
     clock_t main_start = clock();
 
-    // parse user input
+    // define space for user settings
     std::string cudart_version = "version 0.1 - January 2026";
-    
-    // filenames
     char *input_char = nullptr, *save_char = nullptr;
-    
-    // default camera settings
     int num_pixels_X = 100, num_pixels_Y = 100; 
     float R_pos = 1.0, theta_pos = 0.5 * M_PI, phi_pos = 0.0;
     float length_X = 1.0, length_Y = 1.0, tilt = 0.0;
     ve3 bias(0.0, 0.0, 1.0);
-
-    // flags
     bool verbose = false;
 
     for (int i = 1; i < argc; i++) {
