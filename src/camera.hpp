@@ -12,8 +12,8 @@ class Camera {
                             phi_pos = 0.0 + 0.0000001;
                             length_X = 1.0;
                             length_Y = 1.0;
-                            num_pixels_X = 100;
-                            num_pixels_Y = 100;
+                            num_pixels_X = 10;
+                            num_pixels_Y = 10;
                             num_pixels = num_pixels_X * num_pixels_Y;
                             bias = vec3(0,0,1);
                             tilt = 0.0;
