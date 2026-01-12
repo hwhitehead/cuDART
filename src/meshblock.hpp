@@ -41,11 +41,11 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
         float next_t_cross[3] = {0.0, 0.0, 0.0};
         int exit_cond[3] = {0, 0, 0};
         int step_dir[3] = {0, 0, 0};
-        vec3 mb_entrace = r.march(tl);
+        vec3 mb_entrance = r.march(tl);
         
         // orientate trace
         for (int i = 0; i <= 2; i++) {
-            float ray_mb_orgin = mb_entrace[i] - xl[i];
+            float ray_mb_orgin = mb_entrance[i] - xl[i];
             cell[i] = int_clamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1); // awkward typing, template vec3?
             if (r.sign[i]) { 
                 step_dir[i] = -1; // traverse backwards
@@ -61,10 +61,12 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
         } // end for
 
         printf("entering MeshBlock at cell (i,j,k) = (%d,%d,%d)\n",cell[0],cell[1],cell[2]);
+        printf("inverse_normal = (%.3f,%.3f,%.3f)\n", r.inv_normal[0], r.inv_normal[1], r.inv_normal[2]);
+        printf("next_t_cross = [%.3f,%.3f,%.3f]\n", next_t_cross[0], next_t_cross[1], next_t_cross[2]);
+
 
         // perform traversal
         float t_current = tl;
-        printf("(tl,tr) = (%.3f,%.3f)\n", tl, tr);
         while (t_current < tr) { // terminate on mb exit
             // identify next step direction
             int k = (((next_t_cross[0] < next_t_cross[1]) << 2) +
@@ -73,7 +75,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
             int axis = axes_bitmap[k];
 
             // determine dwell
-            float dwell = next_t_cross[axis] - t_current;
+            float dwell = next_t_cross[axis] - t_current; // INVALID
 
             // add local cell to trace
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
