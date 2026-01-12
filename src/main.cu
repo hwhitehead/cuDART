@@ -193,11 +193,11 @@ int main(int argc, char *argv[]) {
 
     // save data
     clock_t npy_write_start = clock();
-    // const std::string save_str(save_char);
-    // npy::npy_data_ptr<float> npy_img;
-    // npy_img.data_ptr = img;
-    // npy_img.shape = {camera.num_pixels_Y, camera.num_pixels_X};
-    // npy::write_npy(save_str, npy_img);
+    const std::string save_str(save_char);
+    npy::npy_data_ptr<float> npy_img;
+    npy_img.data_ptr = img;
+    npy_img.shape = {camera.num_pixels_Y, camera.num_pixels_X};
+    npy::write_npy(save_str, npy_img);
     if (verbose) {
         float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
         printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
