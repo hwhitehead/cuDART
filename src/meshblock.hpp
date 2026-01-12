@@ -60,6 +60,8 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
             } // end if
         } // end for
 
+        printf("entering MeshBlock at cell (i,j,k) = (%d,%d,%d)\n",cell[0],cell[1],cell[2]);
+
         // perform traversal
         float t_current = tl;
         while (t_current < tr) { // terminate on mb exit
