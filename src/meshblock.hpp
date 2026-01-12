@@ -8,6 +8,8 @@
 #include "tools.hpp"
 
 class MeshBlock {
+    // a MeshBlock provides a wrapper for data that allows for tracing by rays
+    // MesHBlocks are purely device objects, including a pointer to traceable data device-allocated externally 
     public:
         // ctors
         __device__ MeshBlock() {}
@@ -20,11 +22,8 @@ class MeshBlock {
         __device__ void print_data();
         __device__ float calc_trace(Ray &r);
 
-        // dtor
-        ~MeshBlock();
-
         // public properties
-        int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
+        const int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
         float *mb_data;
         float sum;
         int mb_size;

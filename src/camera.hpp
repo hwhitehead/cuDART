@@ -7,33 +7,34 @@
 class Camera {
     public:
         // ctors
-        __host__ __device__ Camera()  {R_pos = 1.0;
+        __host__ Camera()  {R_pos = 1.0;
                             theta_pos = M_PI / 2.0;
                             phi_pos = 0.0;
                             length_X = 1.0;
                             length_Y = 1.0;
                             num_pixels_X = 100;
                             num_pixels_Y = 100;
+                            num_pixels = num_pixels_X * num_pixels_Y;
                             bias = vec3(0,0,1);
                             tilt = 0.0;
                             update_camera();}
-        __host__ __device__ void update_camera();
+        __host__ void update_camera();
 
         // routines
         __global__ void render_img(float *img, MeshBlock **mb) const; 
-        __host__ __device__ vec3 calc_pixel_origin(int i, int j) const;                           
+        __device__ vec3 calc_pixel_origin(int i, int j) const;                           
 
         // internals
         float R_pos, theta_pos, phi_pos;
         vec3 origin, normal;
-        int num_pixels_X, num_pixels_Y;
+        int num_pixels_X, num_pixels_Y, num_pixels;
         float length_X, length_Y;
         float tilt;
         vec3 bias, unit_X, unit_Y;
         vec3 upper_left;
 }
 
-__host__ __device__ Camera::update_camera() {
+__host__ Camera::update_camera() {
     // calculate position
     origin = R_pos * vec3(sin(theta_pos) * cos(phi_pos),
                             sin(theta_pos) * sin(phi_pos),
@@ -48,13 +49,14 @@ __host__ __device__ Camera::update_camera() {
 
     // define screen size
     upper_left = origin - 0.5 * length_X * unit_X + 0.5 * length_Y * unit_Y;
+    num_pixels = num_pixels_X * num_pixels_Y;
 }
 
 __global__ void Camera::render_img(float *img, MeshBlock **mb) const {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if ((i >= num_pixels_x) || (j >= num_pixels_y)) return; // ignore oob
+    if ((i >= num_pixels_x) || (j >= num_pixels_y)) return; // skip oob
   	int pixel_index = j * max_x + i;
 
     // initialise ray
@@ -65,7 +67,7 @@ __global__ void Camera::render_img(float *img, MeshBlock **mb) const {
     img[pixel_index] = (*mb)->calc_trace(pixel_ray);
 }
 
-__host__ __device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {
+__device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {
     vec3 dY = -(i / num_pixels_Y) * length_Y;
     vec3 dX = (j / num_pixels_X) * length_X;
     return upper_left + dX * Xhat + dY * Yhat;
