@@ -108,8 +108,13 @@ int main(int argc, char *argv[]) {
     std::vector<unsigned long> npy_shape = d.shape;
     vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
     int data_size = npy_data.size();
-    float *data = npy_data.data();
+    float *unpinned_data = npy_data.data();
     size_t bytes_in_data = data_size * sizeof(float);
+
+    float *data;
+    checkCudaErrors(cudaMallocHost(&data, bytes_in_data));
+    memcpy(&data, &unpinned_data, bytes_in_data);
+
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("read/malloc data        (npy->host)         %.6fs\n",npy_read_dur);
@@ -211,8 +216,9 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaFree(d_img));
     checkCudaErrors(cudaFree(mb));
     checkCudaErrors(cudaFree(d_data));
+    checkCudaErrors(cudaFree(data));
     free(img);
-    free(data);
+    free(unpinned_data);
     cudaDeviceReset();
     if (verbose) {
         float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;

@@ -53,9 +53,9 @@ def gen_npy(save_str):
 
 def gen_simple_data(npy_str, png_str):
 
-    x_fc = np.linspace(-0.5, 0.5, 100)
-    y_fc = np.linspace(-0.5, 0.5, 100)
-    z_fc = np.linspace(-0.5, 0.5, 100)
+    x_fc = np.linspace(-0.5, 0.5, 10)
+    y_fc = np.linspace(-0.5, 0.5, 10)
+    z_fc = np.linspace(-0.5, 0.5, 10)
 
     x_cc = x_fc[0:-1]
     y_cc = y_fc[0:-1]
@@ -114,6 +114,6 @@ if __name__ == "__main__":
 
     #gen_npy("../simdata/data.npy")
     #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn_low.npy")
-    #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
+    gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
     #show_npy("../simdata/simple.npy", "../outputs/simple_data.png")
-    show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
+    #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
