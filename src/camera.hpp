@@ -63,8 +63,8 @@ __host__ void Camera::update_camera() {
 }
 
 __device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {
-    float dY = -(i / num_pixels_Y) * length_Y;
-    float dX = (j / num_pixels_X) * length_X;
+    float dY = -((float)i / num_pixels_Y) * length_Y;
+    float dX = ((float)j / num_pixels_X) * length_X;
     return upper_left + dX * unit_X + dY * unit_Y;
 }
 
