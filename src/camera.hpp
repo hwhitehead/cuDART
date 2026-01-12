@@ -19,6 +19,7 @@ class Camera {
                             tilt = 0.0;
                             update_camera();}
         __host__ void update_camera();
+        __host__ void print_camera();
 
         // routines
         __device__ vec3 calc_pixel_origin(int i, int j) const;                           
