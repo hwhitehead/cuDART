@@ -94,17 +94,14 @@ int main(int argc, char *argv[]) {
 
     if (verbose) {
         std::cout << "Starting cuDART (verbose)...\n";
-        std::cout << "----------------------------------------------\n";
-        std::cout << "|     Activity                    | Duration |\n";
-        std::cout << "----------------------------------------------\n";
+        std::cout << "----------------------------------------------------------------\n";
+        std::cout << "|                  Activity                  |    Duration    |\n";
+        std::cout << "---------------------------------------------------------------\n";
     }
     // load npy data as specified by user
     //const std::string npy_path {"simdata/sn_low.npy"}; // old
     clock_t npy_read_start = clock();
     const std::string input_str(input_char);
-    if (verbose) {
-        std::cout << "Reading data from " << input_str << "...\n";
-    }
     npy::npy_data d = npy::read_npy<float>(input_str);
     std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-trasnfer
     std::vector<unsigned long> npy_shape = d.shape;
@@ -114,7 +111,7 @@ int main(int argc, char *argv[]) {
     size_t bytes_in_data = data_size * sizeof(float);
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("Loaded npy data to host in %.6fs\n",npy_read_dur);
+        printf("read/malloc data (npy->host)                        %.6fs\n",npy_read_dur);
     }
 
     // allocate device memory
@@ -123,7 +120,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc(&d_data, bytes_in_data));
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-        printf("Allocated memory for data on device in %.6fs\n",d_data_alloc_dur); // align these prints?
+        printf("malloc data (device)                                %.6fs\n",d_data_alloc_dur); // align these prints?
     }
     
     // copy data into device memory
@@ -131,7 +128,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMemcpy(d_data, data, bytes_in_data, cudaMemcpyHostToDevice));
     if (verbose) {
         float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-        printf("Copied data to device in %.6fs\n",data_copy_dur);
+        printf("memcpy data (host->device)                          %.6fs\n",data_copy_dur);
     }
 
     // initialise MeshBlock
@@ -145,14 +142,14 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaDeviceSynchronize());
     if (verbose) {
         float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("Allocated memory for MeshBlock on device in %.6fs\n",mb_alloc_dur);
+        printf("malloc/init MeshBlock (device)                      %.6fs\n",mb_alloc_dur);
     }
 
     // initialise camera settings as specified by user
     Camera camera;
     // decide on format for user input 
     camera.update_camera();
-    if (verbose) std::cout << "Positioned camera.\n";
+    //if (verbose) std::cout << "Positioned camera.\n";
 
     // initialise image space on device
     clock_t d_img_alloc_start = clock();
@@ -161,11 +158,11 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
     if (verbose) {
         float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
-        printf("Allocated space for (%d,%d) image on device in %.6fs\n",camera.num_pixels_X, camera.num_pixels_Y, d_img_alloc_dur);
+        printf("malloc image (device)                               %.6fs\n",d_img_alloc_dur);
     }
 
-    // // call render
-    // clock_t render_start = clock();
+    // call render
+    clock_t render_start = clock();
     // const dim3 threads_per_block(32,32); // must not exceed 1024 (max thread per block)
     // const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
     //                             std::ceil(camera.num_pixels_Y/32));
@@ -173,59 +170,60 @@ int main(int argc, char *argv[]) {
     // render_img<<<blocks_per_grid,threads_per_block>>>(camerea, d_img, mb); // how to run this as kernel?
     // checkCudaErrors(cudaPeekAtLastError());
     // checkCudaErrors(cudaDeviceSynchronize());
-    // if (verbose) {
-    //     float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-    //     printf("Render kernel completed in %.6fs\n",render_dur);
-    // }
+    if (verbose) {
+        float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
+        printf("render kernel                                       %.6fs\n",render_dur);
+    }
 
-    // // allocate image space on host
-    // clock_t img_alloc_start = clock();
-    // float *img = (float*) malloc(bytes_in_img);
-    // if (verbose) {
-    //     float img_alloc_dur = (float)(clock() - img_alloc_start)/CLOCKS_PER_SEC;
-    //     printf("Allocated space for image on host in %.6fs\n",img_alloc_dur);
-    // }
+    // allocate image space on host
+    clock_t img_alloc_start = clock();
+    float *img = (float*) malloc(bytes_in_img);
+    if (verbose) {
+        float img_alloc_dur = (float)(clock() - img_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc image (host)                                 %.6fs\n",img_alloc_dur);
+    }
 
-    // // copy image data to host
-    // clock_t img_copy_start = clock();
-    // checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
-    // if (verbose) {
-    //     float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-    //     printf("Copied image to host in %.6fs\n",img_copy_dur);
-    // }
+    // copy image data to host
+    clock_t img_copy_start = clock();
+    checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
+    if (verbose) {
+        float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
+        printf("memcpy image (device->host)                         %.6fs\n",img_copy_dur);
+    }
 
-    // // save data
-    // clock_t npy_write_start = clock();
+    // save data
+    clock_t npy_write_start = clock();
     // const std::string save_str(save_char);
     // npy::npy_data_ptr<float> npy_img;
     // npy_img.data_ptr = img;
     // npy_img.shape = {camera.num_pixels_Y, camera.num_pixels_X};
     // npy::write_npy(save_str, npy_img);
-    // if (verbose) {
-    //     float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-    //     printf("Saved image data to npy in %.6fs\n",npy_write_dur);
-    // }
+    if (verbose) {
+        float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
+        printf("write data (host->npy)                              %.6fs\n",npy_write_dur);
+    }
 
-    // // perform cleanup of device/host data
-    // clock_t free_start = clock();
-    // free_meshblock<<<1,1>>>(mb);
-    // checkCudaErrors(cudaPeekAtLastError());
-    // checkCudaErrors(cudaDeviceSynchronize());
-    // checkCudaErrors(cudaFree(img));
-    // checkCudaErrors(cudaFree(mb));
-    // checkCudaErrors(cudaFree(data));
-    // free(img);
-    // free(data);
-    // if (verbose) {
-    //     float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
-    //     printf("Completed memory cleanup in %.6fs\n",clean_dur);
-    // }
+    // perform cleanup of device/host data
+    clock_t free_start = clock();
+    free_meshblock<<<1,1>>>(mb);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+    checkCudaErrors(cudaFree(img));
+    checkCudaErrors(cudaFree(mb));
+    checkCudaErrors(cudaFree(data));
+    free(img);
+    free(data);
+    if (verbose) {
+        float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
+        printf("free all                                            %.6fs\n",clean_dur);
+    }
 
-    // // terminate
-    // if (verbose) {
-    //     float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
-    //     printf("cuDART terminating after %.6fs\n",main_dur);
-    // }
+    // terminate
+    if (verbose) {
+        float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
+        printf("total runtime                                       %.6fs\n",main_dur);
+        printf("cuDART terminated.\n");
+    }
 
     return 0;
 }
