@@ -29,7 +29,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     Ray pixel_ray(pixel_origin, camera.normal);
     
     // calculate pixel value from MeshBlock data
-    printf("scanning pixels (%d,%d)\n", i, j);
+    printf("scanning pixel (%d,%d)\n", i, j);
     img[pixel_index] = (*mb)->calc_trace(pixel_ray);
 }
 
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
 
     // call render
     clock_t render_start = clock();
-    const dim3 threads_per_block(32,32); // must not exceed 1024 (max thread per block)
+    const dim3 threads_per_block(8,8); // must not exceed 1024 (max thread per block)
     const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
                                 std::ceil(camera.num_pixels_Y/32));
     render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
