@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
     const std::string save_str(save_char);
     npy::npy_data_ptr<float> npy_img;
     npy_img.data_ptr = img;
-    npy_img.shape = {camera.num_pixels_Y, camera.num_pixels_X};
+    npy_img.shape = {(unsigned long)camera.num_pixels_Y, (unsigned long)camera.num_pixels_X};
     npy::write_npy(save_str, npy_img);
     if (verbose) {
         float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
