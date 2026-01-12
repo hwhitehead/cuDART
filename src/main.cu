@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
 
     // perform cleanup of device/host data
     clock_t free_start = clock();
-    init_meshblock<<<1,1>>>(mb);
+    free_meshblock<<<1,1>>>(mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     checkCudaErrors(cudaFree(img));
