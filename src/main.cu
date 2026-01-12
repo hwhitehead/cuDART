@@ -48,13 +48,13 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; i++) {
         // check if argv[i] is a 2 character string of form "-X"
-        if (*argv[i] == "-" && *(argv[i]+1) != "\0" && *(argv[i]+2) == "\0") {
+        if (*argv[i] == '-' && *(argv[i]+1) != '\0' && *(argv[i]+2) == '\0') {
             // check command line arguments
             char opt_letter = *(argv[i]+1);
             switch (opt_letter) { // parse options without arguments
-                case "h":
-                case "v":
-                case "t":
+                case 'h':
+                case 'v':
+                case 't':
                     break;
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == "-")) { 
@@ -63,15 +63,15 @@ int main(int argc, char *argv[]) {
                     }
             } // end cases
             switch (*(argv[i]+1)) { //
-                case "i":
-                    input_filename = argv[++i];
+                case 'i':
+                    input_char = argv[++i];
                     break;
-                case "s":
-                    save_filename = argv[++i];
+                case 's':
+                    save_char = argv[++i];
                     break;
-                case "v":
+                case 'v':
                     verbose = true;
-                case "h":
+                case 'h':
                 default:
                     std::cout << "cuDART " << cudart_version << std::endl;
                     std::cout << "Usage: " << argv[0] << " [options]\n";
@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
         } // end 2 char check
     }
 
-    if (input_filename == nullptr && save_filename == nullptr) {
+    if (input_char == nullptr && save_char == nullptr) {
         std::cout << "### FATAL ERROR in main" << std::endl;
-                << "No input file or output file specified." << std::endl;
+        std::cout << "No input file or output file specified." << std::endl;
     }
 
     if (verbose) std::cout << "Starting cuDART...\n";
