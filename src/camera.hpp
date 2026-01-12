@@ -31,7 +31,7 @@ class Camera {
         float tilt;
         vec3 bias, unit_X, unit_Y;
         vec3 upper_left;
-}
+};
 
 __host__ void Camera::update_camera() {
     // calculate position
@@ -43,8 +43,8 @@ __host__ void Camera::update_camera() {
     unit_X = vector_norm(cross_prod(bias, origin));
     unit_Y = vector_norm(cross_prod(origin, unit_X));
     normal = -vector_norm(origin);
-    unit_X = rotate_about(unit_X, normal, tilt);
-    unit_Y = rotate_about(unit_Y, normal, tilt);
+    unit_X = unit_X.rotate_about(normal, tilt);
+    unit_Y = unit_X.rotate_about(normal, tilt);
 
     // define screen size
     upper_left = origin - 0.5 * length_X * unit_X + 0.5 * length_Y * unit_Y;

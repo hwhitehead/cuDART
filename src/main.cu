@@ -21,8 +21,8 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if ((i >= camera.num_pixels_x) || (j >= camera.num_pixels_y)) return; // skip oob
-  	int pixel_index = j * num_pixels_x + i;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = j * camera.num_pixels_X + i;
 
     // initialise ray
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);

@@ -143,7 +143,7 @@ __host__ __device__ inline vec3 cross_prod(const vec3 &v1, const vec3 &v2) {
                 (v1.e[0]*v2.e[1] - v1.e[1]*v2.e[0]));
 }
 
-__host__ __device__ inline vec3 rotate_about(const vec3 k, const float theta) {
+__host__ __device__ inline vec3 vec3::rotate_about(const vec3 k, const float theta) {
     // use Rodrigues' rotation formula to rotate v about k by theta
     float cos_theta = std::cos(theta);
     float sin_theta = std::sin(theta);
