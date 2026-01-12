@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
                 case 't':
                     break;
                 default:
-                    if ((i+1 >= argc) || (*argv[i+1] == "-")) { 
+                    if ((i+1 >= argc) || (*argv[i+1] == '-')) { 
                         std::cout << "### FATAL ERROR in main" << std::endl
                                 << "-" << opt_letter << "must be follower by a valid argument\n";
                     }
