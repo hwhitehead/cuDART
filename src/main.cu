@@ -94,9 +94,9 @@ int main(int argc, char *argv[]) {
 
     if (verbose) {
         std::cout << "Starting cuDART (verbose)...\n";
-        std::cout << "------------------------------------------------------\n";
-        std::cout << "|      Activity      |   Location   |    Duration    |\n";
-        std::cout << "------------------------------------------------------\n";
+        std::cout << "----------------------------------------------------------\n";
+        std::cout << "|      Activity        |    Location    |    Duration    |\n";
+        std::cout << "----------------------------------------------------------\n";
     }
     // load npy data as specified by user
     //const std::string npy_path {"simdata/sn_low.npy"}; // old
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     size_t bytes_in_data = data_size * sizeof(float);
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("read/malloc data (npy->host)                %.6fs\n",npy_read_dur);
+        printf("read/malloc data        (npy->host)         %.6fs\n",npy_read_dur);
     }
 
     // allocate device memory
