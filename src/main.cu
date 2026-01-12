@@ -92,8 +92,12 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (verbose) std::cout << "Starting cuDART (verbose)...\n";
-
+    if (verbose) {
+        std::cout << "Starting cuDART (verbose)...\n";
+        std::cout << "----------------------------------------------\n";
+        std::cout << "|     Activity                    | Duration |\n";
+        std::cout << "----------------------------------------------\n";
+    }
     // load npy data as specified by user
     //const std::string npy_path {"simdata/sn_low.npy"}; // old
     clock_t npy_read_start = clock();
@@ -119,7 +123,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc(&d_data, bytes_in_data));
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-        printf("Allocated memory for data on device in %.6fs\n",d_data_alloc_dur);
+        printf("Allocated memory for data on device in %.6fs\n",d_data_alloc_dur); // align these prints?
     }
     
     // copy data into device memory
@@ -144,21 +148,21 @@ int main(int argc, char *argv[]) {
         printf("Allocated memory for MeshBlock on device in %.6fs\n",mb_alloc_dur);
     }
 
-    // // initialise camera settings as specified by user
-    // Camera camera;
-    // // decide on format for user input 
-    // camera.update_camera();
-    // if (verbose) std::cout << "Positioned camera.\n";
+    // initialise camera settings as specified by user
+    Camera camera;
+    // decide on format for user input 
+    camera.update_camera();
+    if (verbose) std::cout << "Positioned camera.\n";
 
-    // // initialise image space on device
-    // clock_t d_img_alloc_start = clock();
-    // const size_t bytes_in_img = camera.num_pixels * sizeof(float);
-    // float *d_img = nullptr;
-    // checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
-    // if (verbose) {
-    //     float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
-    //     printf("Allocated space for (%d,%d) image on device in %.6fs\n",camera.num_pixels_X, camera.num_pixels_Y, d_img_alloc_dur);
-    // }
+    // initialise image space on device
+    clock_t d_img_alloc_start = clock();
+    const size_t bytes_in_img = camera.num_pixels * sizeof(float);
+    float *d_img = nullptr;
+    checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
+    if (verbose) {
+        float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
+        printf("Allocated space for (%d,%d) image on device in %.6fs\n",camera.num_pixels_X, camera.num_pixels_Y, d_img_alloc_dur);
+    }
 
     // // call render
     // clock_t render_start = clock();
