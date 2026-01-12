@@ -64,6 +64,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
 
         // perform traversal
         float t_current = tl;
+        printf("(tl,tr) = (%.3f,%.3f)\n", tl, tr);
         while (t_current < tr) { // terminate on mb exit
             // identify next step direction
             int k = (((next_t_cross[0] < next_t_cross[1]) << 2) +
@@ -77,7 +78,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
             // add local cell to trace
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
                             + cell[1] * (int)mb_dims[2] + cell[2];
-            printf("dwell, local = (%.3f,%.3f)\n");
+            printf("dwell, local = (%.3f,%.3f)\n", dwell, mb_data[cell_index]);
             trace += dwell * mb_data[cell_index];
 
             // update position of ray head
