@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     //const std::string npy_path {"simdata/sn_low.npy"}; // old
     clock_t npy_read_start = clock();
     const std::string input_str(input_char);
-    npy::npy_data d = npy::read_npy<float>(npy_path);
+    npy::npy_data d = npy::read_npy<float>(input_str);
     std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-trasnfer
     std::vector<unsigned long> npy_shape = d.shape;
     vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
