@@ -7,9 +7,9 @@
 class Camera {
     public:
         // ctors
-        __host__ Camera()  {R_pos = 1.0;
-                            theta_pos = M_PI / 2.0;
-                            phi_pos = 0.0;
+        __host__ Camera()  {R_pos = 2.0;
+                            theta_pos = M_PI / 2.0 + 0.00001;
+                            phi_pos = 0.0 + 0.0000001;
                             length_X = 1.0;
                             length_Y = 1.0;
                             num_pixels_X = 100;

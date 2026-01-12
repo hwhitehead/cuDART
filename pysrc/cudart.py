@@ -51,11 +51,33 @@ def gen_npy(save_str):
 
     np.save(save_str, data)
 
+def gen_simple_data(npy_str, png_str):
+
+    x_fc = np.linspace(-0.5, 0.5, 100)
+    y_fc = np.linspace(-0.5, 0.5, 100)
+    z_fc = np.linspace(-0.5, 0.5, 100)
+
+    x_cc = x_fc[0:-1]
+    y_cc = y_fc[0:-1]
+    z_cc = z_fc[0:-1]
+    xx, yy, zz = np.meshgrid(x_cc, y_cc, z_cc, indexing="ij")
+    data = yy * zz
+    np.save(npy_str, data)
+
+    set_plot_defaults()
+    fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
+    ax = fig.add_subplot()
+
+    yy, zz = np.meshgrid(y_fc, z_fc)
+    ax.pcolormesh(yy, zz, data[0,:,:])
+
+    plt.subplots_adjust(hspace=0, wspace=0)
+    fig.savefig(png_str, dpi=300, bbox_inches="tight")
+    plt.close("all")
+
 def show_npy(load_str, save_str):
 
     data = np.load(load_str)
-    print(np.max(data))
-    print(np.min(data))
 
     set_plot_defaults()
     fig = plt.figure(figsize=(10.0/3, 10.0/3))
@@ -85,4 +107,6 @@ if __name__ == "__main__":
 
     #gen_npy("../simdata/data.npy")
     #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn_low.npy")
-    show_npy("../outputs/img.npy", "../outputs/img.png")
+    gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
+    #show_npy("../simdata/simple.npy", "../outputs/simple_data.png")
+    #show_npy("../outputs/img.npy", "../outputs/img.png")
