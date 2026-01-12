@@ -148,7 +148,6 @@ int main(int argc, char *argv[]) {
 
     // initialise camera settings as specified by user
     Camera camera;
-    camera.print_camera();
     camera.update_camera();
     //if (verbose) std::cout << "Positioned camera.\n";
 
@@ -164,9 +163,10 @@ int main(int argc, char *argv[]) {
 
     // call render
     clock_t render_start = clock();
-    const dim3 threads_per_block(32,32); // must not exceed 1024 (max thread per block)
-    const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
-                                std::ceil(camera.num_pixels_Y/32));
+    int tx = 8, ty = 8; // must not exceed 1024 (max thread per block)
+    const dim3 threads_per_block(tx,ty); 
+    const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/tx), 
+                                std::ceil(camera.num_pixels_Y/ty));
     render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
