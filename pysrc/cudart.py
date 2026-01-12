@@ -79,9 +79,9 @@ def show_npy(load_str, save_str):
 
     data = np.load(load_str)
 
-    x_fc = np.linspace(-0.5, 0.5, 100)
-    y_fc = np.linspace(-0.5, 0.5, 100)
-    z_fc = np.linspace(-0.5, 0.5, 100)
+    x_fc = np.linspace(-0.5, 0.5, 10)
+    y_fc = np.linspace(-0.5, 0.5, 10)
+    z_fc = np.linspace(-0.5, 0.5, 10)
     yy, zz = np.meshgrid(y_fc, z_fc)
 
     set_plot_defaults()
