@@ -30,9 +30,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     
     // calculate pixel value from MeshBlock data
     
-    //img[pixel_index] = (*mb)->calc_trace(pixel_ray);
-    float pixel_value = (*mb)->calc_trace(pixel_ray);
-    printf("scanned pixel (%d,%d) with origin at (%.3f,%.3f,%.3f), returning value %.3f\n", i, j, pixel_origin[0], pixel_origin[1], pixel_origin[2], pixel_value);
+    img[pixel_index] = (*mb)->calc_trace(pixel_ray);
 }
 
 int main(int argc, char *argv[]) {

@@ -78,6 +78,8 @@ def gen_simple_data(npy_str, png_str):
 def show_npy(load_str, save_str):
 
     data = np.load(load_str)
+    print(np.max(data))
+    print(np.min(data))
 
     x_fc = np.linspace(-0.5, 0.5, 10)
     y_fc = np.linspace(-0.5, 0.5, 10)
