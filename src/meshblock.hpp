@@ -35,6 +35,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
     float tl, tr, trace = 0;
     bool hit = calc_mb_intercept(r, tl, tr);
     if (hit) { // valid intercept found
+        print("hit block, (tl,tr) = (%.3f,%.3f)\n", tl, tr);
         // prep arrays for orientation
         int cell[3] = {0, 0, 0}; // convert to vec3? typesafe?
         float dt[3] = {0.0, 0.0, 0.0};
