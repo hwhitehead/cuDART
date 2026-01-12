@@ -40,9 +40,9 @@ __host__ void Camera::update_camera() {
                             cos(theta_pos));
     
     // calculate orientation
-    unit_X = vector_norm(cross_prod(bias, origin));
-    unit_Y = vector_norm(cross_prod(origin, unit_X));
-    normal = -vector_norm(origin);
+    unit_X = (bias.cross_prod(origin)).vector_norm();
+    unit_Y = (origin.cross_prod(unit_X)).vector_norm();
+    normal = -origin.vector_norm();
     unit_X = unit_X.rotate_about(normal, tilt);
     unit_Y = unit_X.rotate_about(normal, tilt);
 
