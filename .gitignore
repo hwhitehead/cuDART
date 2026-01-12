@@ -5,6 +5,7 @@ configure.log
 # Object and binary directories
 obj/
 bin/
+outputs/
 
 # large data files
 simdata/sn.npy
