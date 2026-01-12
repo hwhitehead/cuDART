@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaDeviceSynchronize());
     checkCudaErrors(cudaFree(d_img));
     checkCudaErrors(cudaFree(mb));
-    checkCudaErrors(cudaFree(data));
+    checkCudaErrors(cudaFree(d_data));
     free(img);
     free(data);
     if (verbose) {
