@@ -34,10 +34,10 @@ class vec3  {
         __host__ __device__ inline vec3& operator*=(const float t);
         __host__ __device__ inline vec3& operator/=(const float t);
         // vector arithmetic 
-        __host__ __device__ inline vec3 vector_norm(vec3 v);
+        __host__ __device__ inline vec3 vector_norm();
         __host__ __device__ inline float dot_prod(const vec3 &v2);
         __host__ __device__ inline vec3 cross_prod(const vec3 &v2);
-        __host__ __device__ inline vec3 rotate_about(const float theta);
+        __host__ __device__ inline vec3 rotate_about(const vec3 k, const float theta);
 
         // internal values
         float e[3];
@@ -129,8 +129,8 @@ __host__ __device__ inline vec3& vec3::operator/=(const float t) {
     return *this;
 }
 
-__host__ __device__ inline vec3 vec3::vector_norm(vec3 v) {
-    return *this / (*this)->vector_mag();
+__host__ __device__ inline vec3 vec3::vector_norm() {
+    return *this / (*this).vector_mag();
 }
 
 __host__ __device__ inline float vec3::dot_prod(const vec3 &v2) {
