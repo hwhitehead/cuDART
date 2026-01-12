@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'v':
                     verbose = true;
+                    break;
                 case 'h':
                 default:
                     std::cout << "cuDART " << cudart_version << std::endl;
@@ -91,7 +92,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (verbose) std::cout << "Starting cuDART...\n";
+    if (verbose) std::cout << "Starting cuDART (verbose)...\n";
 
     // load npy data as specified by user
     //const std::string npy_path {"simdata/sn_low.npy"}; // old
