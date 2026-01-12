@@ -77,7 +77,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
             // add local cell to trace
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
                             + cell[1] * (int)mb_dims[2] + cell[2];
-            printf("hit cell (i,j,k = (%d,%d,%d)\n",cell[0],cell[1],cell[2]);
+            printf("dwell, local = (%.3f,%.3f)\n");
             trace += dwell * mb_data[cell_index];
 
             // update position of ray head
