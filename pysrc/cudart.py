@@ -54,6 +54,8 @@ def gen_npy(save_str):
 def show_npy(load_str, save_str):
 
     data = np.load(load_str)
+    print(np.max(data))
+    print(np.min(data))
 
     set_plot_defaults()
     fig = plt.figure(figsize=(10.0/3, 10.0/3))
@@ -83,4 +85,4 @@ if __name__ == "__main__":
 
     #gen_npy("../simdata/data.npy")
     #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn_low.npy")
-    show_npy("outputs/img.npy", "outputs/img.png")
+    show_npy("../outputs/img.npy", "../outputs/img.png")

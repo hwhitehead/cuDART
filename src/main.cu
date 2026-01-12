@@ -132,8 +132,8 @@ int main(int argc, char *argv[]) {
     }
 
     // initialise MeshBlock
-    vec3 xl(0.0, 0.0, 0.0); // TODO: add shape-sentive domain definition
-    vec3 xr(1.0, 1.0, 1.0);
+    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sentive domain definition
+    vec3 xr(0.5, 0.5, 0.5);
     MeshBlock **mb = nullptr;
     clock_t mb_alloc_start = clock();
     checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
@@ -166,8 +166,7 @@ int main(int argc, char *argv[]) {
     const dim3 threads_per_block(32,32); // must not exceed 1024 (max thread per block)
     const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
                                 std::ceil(camera.num_pixels_Y/32));
-    if (verbose) std::cout << "Starting render...\n";
-    render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb); // how to run this as kernel?
+    render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     if (verbose) {

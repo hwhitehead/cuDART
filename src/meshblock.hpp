@@ -73,7 +73,8 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
             float dwell = next_t_cross[axis] - t_current;
 
             // add local cell to trace
-            int cell_index = 0; // todo: add unpack for c-order indexing
+            int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
+                            + cell[1] * (int)mb_dims[2] + cell[2];
             trace += dwell * mb_data[cell_index];
 
             // update position of ray head
