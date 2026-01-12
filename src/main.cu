@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
     free(data);
     if (verbose) {
         float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
-        printf("free all                                            %.6fs\n",clean_dur);
+        printf("free all                                            %.6fs\n",free_dur);
     }
 
     // terminate
