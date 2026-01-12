@@ -187,11 +187,19 @@ int main(int argc, char *argv[]) {
     }
 
     // perform cleanup of device/host data
+    clock_t free_start = clock();
+    init_meshblock<<<1,1>>>(mb);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
     checkCudaErrors(cudaFree(img));
     checkCudaErrors(cudaFree(mb));
     checkCudaErrors(cudaFree(data));
     free(img);
     free(data);
+    if (verbose) {
+        float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
+        printf("Completed memory cleanup in %.6fs\n",clean_dur);
+    }
 
     // terminate
     if (verbose) {

@@ -95,6 +95,13 @@ __global__ void init_meshblock(MeshBlock **mb, const vec3 xl, const vec3 xr, vec
     }
 }
 
+__global__ void free_meshblock(MeshBlock **mb) {
+    int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (thr_idx == 0) {
+        delete *mb;
+    }
+}
+
 __global__ void print_meshblock_properties(MeshBlock **mb) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
