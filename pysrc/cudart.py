@@ -112,8 +112,5 @@ def prep_sn_data(load_str, save_str):
 
 if __name__ == "__main__":
 
-    #gen_npy("../simdata/data.npy")
-    #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn_low.npy")
-    gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
-    #show_npy("../simdata/simple.npy", "../outputs/simple_data.png")
-    #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
+    #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
+    show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
