@@ -29,6 +29,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     Ray pixel_ray(pixel_origin, camera.normal);
     
     // calculate pixel value from MeshBlock data
+    printf("scanning pixels (%d,%d)\n", i, j);
     img[pixel_index] = (*mb)->calc_trace(pixel_ray);
 }
 
