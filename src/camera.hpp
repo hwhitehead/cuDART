@@ -55,7 +55,7 @@ __host__ void Camera::update_camera() {
     unit_Y = (origin.cross_prod(unit_X)).vector_norm();
     normal = -origin.vector_norm();
     unit_X = unit_X.rotate_about(normal, tilt);
-    unit_Y = unit_X.rotate_about(normal, tilt);
+    unit_Y = unit_Y.rotate_about(normal, tilt);
 
     // define screen size
     upper_left = origin - 0.5 * length_X * unit_X + 0.5 * length_Y * unit_Y;
