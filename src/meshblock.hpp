@@ -33,7 +33,7 @@ class MeshBlock {
 __device__ float MeshBlock::calc_trace(Ray &r) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;
-    bool hit = calc_mb_intercept(r, tl, tr)
+    bool hit = calc_mb_intercept(r, tl, tr);
     if (hit) { // valid intercept found
         // prep arrays for orientation
         int cell[3] = {0, 0, 0}; // convert to vec3? typesafe?

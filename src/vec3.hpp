@@ -147,7 +147,7 @@ __host__ __device__ inline vec3 vec3::rotate_about(const vec3 k, const float the
     // use Rodrigues' rotation formula to rotate v about k by theta
     float cos_theta = std::cos(theta);
     float sin_theta = std::sin(theta);
-    return *this * cos_theta + cross_prod(k,*this) * sin_theta + k * dot(k,*this) * (1-cos_theta);
+    return *this * cos_theta + cross_prod(k,*this) * sin_theta + k * dot_prod(k,*this) * (1-cos_theta);
 }
 
 #endif
