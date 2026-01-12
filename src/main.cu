@@ -163,13 +163,13 @@ int main(int argc, char *argv[]) {
 
     // call render
     clock_t render_start = clock();
-    // const dim3 threads_per_block(32,32); // must not exceed 1024 (max thread per block)
-    // const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
-    //                             std::ceil(camera.num_pixels_Y/32));
-    // if (verbose) std::cout << "Starting render...\n";
-    // render_img<<<blocks_per_grid,threads_per_block>>>(camerea, d_img, mb); // how to run this as kernel?
-    // checkCudaErrors(cudaPeekAtLastError());
-    // checkCudaErrors(cudaDeviceSynchronize());
+    const dim3 threads_per_block(32,32); // must not exceed 1024 (max thread per block)
+    const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
+                                std::ceil(camera.num_pixels_Y/32));
+    if (verbose) std::cout << "Starting render...\n";
+    render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb); // how to run this as kernel?
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
     if (verbose) {
         float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
         printf("render kernel           (device)            %.6fs\n",render_dur);
@@ -213,17 +213,17 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaFree(d_data));
     free(img);
     free(data);
+    cudaDeviceReset();
     if (verbose) {
         float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
-        printf("free all            (device/host)           %.6fs\n",free_dur);
+        printf("free all                (device/host)       %.6fs\n",free_dur);
     }
 
     // terminate
     if (verbose) {
         float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
-        std::cout << "------------------------------------------------------\n";
         printf("total runtime                               %.6fs\n",main_dur);
-        std::cout << "------------------------------------------------------\n";
+        std::cout << "----------------------------------------------------------\n";
         printf("cuDART terminated.\n");
     }
 
