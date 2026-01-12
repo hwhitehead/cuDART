@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 
     // initialise camera settings as specified by user
     Camera camera;
-    // decide on format for user input 
+    camera.print_camera();
     camera.update_camera();
     //if (verbose) std::cout << "Positioned camera.\n";
 

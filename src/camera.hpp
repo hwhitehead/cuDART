@@ -33,6 +33,14 @@ class Camera {
         vec3 upper_left;
 };
 
+__host__ void Camera::print_camera() {
+    std::cout << "Image size = (" << num_pixels_X << "," << num_pixels_Y << ")\n";
+    std::cout << num_pixels << " pixels total\n";
+    std::cout << "origin =" << origin << std::endl;
+    std::cout << "normal = " << normal << std::endl;
+    std::cout << "upper left = " << upper_left << std::endl;
+}
+
 __host__ void Camera::update_camera() {
     // calculate position
     origin = R_pos * vec3(sin(theta_pos) * cos(phi_pos),
