@@ -35,7 +35,6 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
     float tl, tr, trace = 0;
     bool hit = calc_mb_intercept(r, tl, tr);
     if (hit) { // valid intercept found
-        printf("hit block, (tl,tr) = (%.3f,%.3f)\n", tl, tr);
         // prep arrays for orientation
         int cell[3] = {0, 0, 0}; // convert to vec3? typesafe?
         float dt[3] = {0.0, 0.0, 0.0};
@@ -76,6 +75,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
             // add local cell to trace
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
                             + cell[1] * (int)mb_dims[2] + cell[2];
+            printf("hit cell (i,j,k = (%d,%d,%d)\n",cell[0],cell[1],cell[2]);
             trace += dwell * mb_data[cell_index];
 
             // update position of ray head
