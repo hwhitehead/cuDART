@@ -35,9 +35,9 @@ class vec3  {
         __host__ __device__ inline vec3& operator/=(const float t);
         // vector arithmetic 
         __host__ __device__ inline vec3 vector_norm();
-        __host__ __device__ inline float dot_prod(const vec3 &v2);
-        __host__ __device__ inline vec3 cross_prod(const vec3 &v2);
-        __host__ __device__ inline vec3 rotate_about(const vec3 k, const float theta);
+        __host__ __device__ inline float dot_prod(vec3 &v2);
+        __host__ __device__ inline vec3 cross_prod(vec3 &v2);
+        __host__ __device__ inline vec3 rotate_about(vec3 &k, const float theta);
 
         // internal values
         float e[3];
@@ -133,17 +133,17 @@ __host__ __device__ inline vec3 vec3::vector_norm() {
     return *this / (*this).vector_mag();
 }
 
-__host__ __device__ inline float vec3::dot_prod(const vec3 &v2) {
+__host__ __device__ inline float vec3::dot_prod(vec3 &v2) {
     return e[0] *v2.e[0] + e[1] * v2.e[1]  + e[2] *v2.e[2];
 }
 
-__host__ __device__ inline vec3 vec3::cross_prod(const vec3 &v2) {
+__host__ __device__ inline vec3 vec3::cross_prod(vec3 &v2) {
     return vec3( (e[1] * v2.e[2] - e[2] * v2.e[1]),
                 (-(e[0] * v2.e[2] - e[2] * v2.e[0])),
                 (e[0] * v2.e[1] - e[1] * v2.e[0]));
 }
 
-__host__ __device__ inline vec3 vec3::rotate_about(const vec3 k, const float theta) {
+__host__ __device__ inline vec3 vec3::rotate_about(vec3 &k, const float theta) {
     // use Rodrigues' rotation formula to rotate v about k by theta
     float cos_theta = std::cos(theta);
     float sin_theta = std::sin(theta);
