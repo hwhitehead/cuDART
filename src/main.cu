@@ -130,19 +130,19 @@ int main(int argc, char *argv[]) {
         printf("Copied data to device in %.6fs\n",data_copy_dur);
     }
 
-    // // initialise MeshBlock
-    // vec3 xl(0.0, 0.0, 0.0); // TODO: add shape-sentive domain definition
-    // vec3 xr(1.0, 1.0, 1.0);
-    // MeshBlock **mb = nullptr;
-    // clock_t mb_alloc_start = clock();
-    // checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
-    // init_meshblock<<<1,1>>>(mb, xl, xr, mb_dims, d_data);
-    // checkCudaErrors(cudaPeekAtLastError());
-    // checkCudaErrors(cudaDeviceSynchronize());
-    // if (verbose) {
-    //     float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-    //     printf("Allocated space for MeshBlock on device in %.6fs\n",mb_alloc_dur);
-    // }
+    // initialise MeshBlock
+    vec3 xl(0.0, 0.0, 0.0); // TODO: add shape-sentive domain definition
+    vec3 xr(1.0, 1.0, 1.0);
+    MeshBlock **mb = nullptr;
+    clock_t mb_alloc_start = clock();
+    checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
+    init_meshblock<<<1,1>>>(mb, xl, xr, mb_dims, d_data);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+    if (verbose) {
+        float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
+        printf("Allocated memory for MeshBlock on device in %.6fs\n",mb_alloc_dur);
+    }
 
     // // initialise camera settings as specified by user
     // Camera camera;
