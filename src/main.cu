@@ -17,6 +17,21 @@
 #include "tools.hpp"
 #include "camera.hpp"
 
+__global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_x) || (j >= camera.num_pixels_y)) return; // skip oob
+  	int pixel_index = j * num_pixels_x + i;
+
+    // initialise ray
+    vec3 pixel_origin = camera.calc_pixel_origin(i, j);
+    Ray pixel_ray(pixel_origin, camera.normal);
+    
+    // calculate pixel value from MeshBlock data
+    img[pixel_index] = (*mb)->calc_trace(pixel_ray);
+}
+
 int main(int argc, char *argv[]) {
     
     // start general timer
@@ -28,7 +43,7 @@ int main(int argc, char *argv[]) {
     int num_pixels_X = 100, num_pixels_Y = 100; 
     float R_pos = 1.0, theta_pos = 0.5 * M_PI, phi_pos = 0.0;
     float length_X = 1.0, length_Y = 1.0, tilt = 0.0;
-    ve3 bias(0.0, 0.0, 1.0);
+    vec3 bias(0.0, 0.0, 1.0);
     bool verbose = false;
 
     for (int i = 1; i < argc; i++) {
@@ -150,7 +165,7 @@ int main(int argc, char *argv[]) {
     // const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
     //                             std::ceil(camera.num_pixels_Y/32));
     // if (verbose) std::cout << "Starting render...\n";
-    // camera.render_img<<<blocks_per_grid,threads_per_block>>>(d_img, mb); // how to run this as kernel?
+    // render_img<<<blocks_per_grid,threads_per_block>>>(camerea, d_img, mb); // how to run this as kernel?
     // checkCudaErrors(cudaPeekAtLastError());
     // checkCudaErrors(cudaDeviceSynchronize());
     // if (verbose) {
