@@ -79,7 +79,8 @@ int main(int argc, char *argv[]) {
                     std::cout << " -i <file>    specify input file [.npy]\n";
                     std::cout << " -s <file>    specify render save file [.ppm]\n";
                     std::cout << " -v           verbosity flag\n";
-                    std::cout << " -h           this help message\n";   
+                    std::cout << " -h           this help message\n"; 
+                    return 0; 
             } // end cases
         } // end 2 char check
     }
@@ -87,30 +88,26 @@ int main(int argc, char *argv[]) {
     if (input_char == nullptr && save_char == nullptr) {
         std::cout << "### FATAL ERROR in main" << std::endl;
         std::cout << "No input file or output file specified." << std::endl;
+        return 0;
     }
 
     if (verbose) std::cout << "Starting cuDART...\n";
 
-    std::string save_str(save_char);
-    std::string input_str(input_char);
-    std::cout << "input_str = " << input_str << std::endl;
-    std::cout << "save_str = " << save_str << std::endl;
-
-    // // load npy data as specified by user
-    // //const std::string npy_path {"simdata/sn_low.npy"}; // old
-    // clock_t npy_read_start = clock();
-    // const std::string input_str(input_char);
-    // npy::npy_data d = npy::read_npy<float>(npy_path);
-    // std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-trasnfer
-    // std::vector<unsigned long> npy_shape = d.shape;
-    // vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
-    // int data_size = npy_data.size();
-    // float *data = npy_data.data();
-    // size_t bytes_in_data = data_size * sizeof(float);
-    // if (verbose) {
-    //     float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-    //     printf("Loaded npy data to host in %.6fs\n",npy_read_dur);
-    // }
+    // load npy data as specified by user
+    //const std::string npy_path {"simdata/sn_low.npy"}; // old
+    clock_t npy_read_start = clock();
+    const std::string input_str(input_char);
+    npy::npy_data d = npy::read_npy<float>(npy_path);
+    std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-trasnfer
+    std::vector<unsigned long> npy_shape = d.shape;
+    vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
+    int data_size = npy_data.size();
+    float *data = npy_data.data();
+    size_t bytes_in_data = data_size * sizeof(float);
+    if (verbose) {
+        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+        printf("Loaded npy data to host in %.6fs\n",npy_read_dur);
+    }
 
     // // allocate device memory
     // float *d_data = nullptr;
