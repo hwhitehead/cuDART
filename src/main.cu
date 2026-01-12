@@ -164,9 +164,9 @@ int main(int argc, char *argv[]) {
 
     // call render
     clock_t render_start = clock();
-    const dim3 threads_per_block(8,8); // must not exceed 1024 (max thread per block)
-    const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/8), 
-                                std::ceil(camera.num_pixels_Y/8));
+    const dim3 threads_per_block(32,32); // must not exceed 1024 (max thread per block)
+    const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/32), 
+                                std::ceil(camera.num_pixels_Y/32));
     render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
