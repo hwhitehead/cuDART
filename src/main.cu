@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
     // define space for user settings
     std::string cudart_version = "version 0.2 - January 2026";
-    char *input_char = nullptr, *save_char = nullptr, char *camera_char = nullptr;
+    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr;
     bool verbose = false;
 
     for (int i = 1; i < argc; i++) {
