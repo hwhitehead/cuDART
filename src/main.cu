@@ -53,7 +53,9 @@ int main(int argc, char *argv[]) {
             char opt_letter = *(argv[i]+1);
             switch (opt_letter) { // parse options without arguments
                 case 'h':
-                case 'v': // fails at end of line?
+                    break;
+                case 'v':
+                    break;
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) { 
                         std::cout << "### FATAL ERROR in main ###" << std::endl

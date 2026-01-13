@@ -7,8 +7,8 @@ obj/
 bin/
 
 # large data files
+inputs/
 outputs/
-simdata/
 
 # Compiled object files
 *.slo
