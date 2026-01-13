@@ -95,9 +95,17 @@ int main(int argc, char *argv[]) {
     } else { // determine number of camera locations
         std::string camera_str(camera_char);
         std::ifstream camera_file(camera_str);
-        camera_file.unsetf(std::ios_base::skipws);
-        int line_count = std::count(std::istream_iterator<char>(camera_file),
-                                        std::istream_iterator<char>(),'\n');
+        int line_count = 0;
+        if (camera.file.is_open()) {
+            std::string line;
+            
+
+            while (std::getline(camera_file, line)) {
+                line_count++;
+            }
+
+            camera_file.close();
+        }
         std::cout << "lines in file = " << line_count << std::endl;
     }
 
