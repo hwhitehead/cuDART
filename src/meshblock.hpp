@@ -46,7 +46,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
         // orientate trace
         for (int i = 0; i <= 2; i++) {
             float ray_mb_orgin = mb_entrance[i] - xl[i];
-            cell[i] = int_clamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1); // awkward typing, template vec3?
+            cell[i] = int_clamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1);
             if (r.sign[i]) { 
                 step_dir[i] = -1; // traverse backwards
                 exit_cond[i] = -1; // stop walk when leading edge reached

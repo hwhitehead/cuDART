@@ -25,14 +25,11 @@ class Camera {
         __device__ vec3 calc_pixel_origin(int i, int j) const;                           
 
         // internals
-        float R_pos, theta_pos, phi_pos;
+        float R_pos, theta_pos, phi_pos, tilt;
         vec3 origin, normal;
         int num_pixels_X, num_pixels_Y, num_pixels;
         float length_X, length_Y;
-        float tilt;
-        vec3 bias, unit_X, unit_Y;
-        vec3 upper_left;
-        vec3 lower_left;
+        vec3 bias, unit_X, unit_Y, lower_left;
 };
 
 __host__ void Camera::print_camera() {
@@ -42,7 +39,7 @@ __host__ void Camera::print_camera() {
     std::cout << "normal = " << normal << std::endl;
     std::cout << "unit_X = " << unit_X << std::endl;
     std::cout << "unit_Y = " << unit_Y << std::endl;
-    std::cout << "upper left = " << upper_left << std::endl;
+    std::cout << "lower left = " << lower_left << std::endl;
 }
 
 __host__ void Camera::update_camera() {
@@ -55,7 +52,9 @@ __host__ void Camera::update_camera() {
     unit_X = (bias.cross_prod(origin)).vector_norm();
     unit_Y = (origin.cross_prod(unit_X)).vector_norm();
     normal = -origin.vector_norm();
+    std::cout << "unit_X = " << unit_X << std::endl;
     unit_X = unit_X.rotate_about(normal, tilt);
+    std::cout << "unit_X = " << unit_X << std::endl;
     unit_Y = unit_Y.rotate_about(normal, tilt);
 
     // define screen size
@@ -65,9 +64,6 @@ __host__ void Camera::update_camera() {
 }
 
 __device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {
-    // float dY = -((float)i / num_pixels_Y) * length_Y;
-    // float dX = ((float)j / num_pixels_X) * length_X;
-    // return upper_left + dX * unit_X + dY * unit_Y;
     float dY = (((float)j + 0.5) / num_pixels_Y) * length_Y;
     float dX = (((float)i + 0.5) / num_pixels_X) * length_X;
     return lower_left + dX * unit_X + dY * unit_Y;
