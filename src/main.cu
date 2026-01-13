@@ -237,7 +237,8 @@ int main(int argc, char *argv[]) {
                                 std::ceil((float)camera.num_pixels_Y / ty));
     
     // iterate over cameras
-    for (auto const [index, camera] : std::views::enumerate(cameras)) {
+    int img_count = 0;
+    for (auto &camera : cameras) {
         
         // call render
         render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
@@ -269,6 +270,7 @@ int main(int argc, char *argv[]) {
             printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
         }
         // TODO timings
+        img_count++;
     }
 
     // perform cleanup of device/host data
