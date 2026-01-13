@@ -29,9 +29,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     Ray pixel_ray(pixel_origin, camera.normal);
     
     // calculate pixel value from MeshBlock data
-    float pixel_value = (*mb)->calc_trace(pixel_ray);
-    printf("tracing ray at (%.3f,%.3f,%.3f) with index (%d,%d), value = %.3f\n",pixel_origin[0],pixel_origin[1],pixel_origin[2],i,j,pixel_value);
-    img[pixel_index] = pixel_value;
+    img[pixel_index] = (*mb)->calc_trace(pixel_ray);
 }
 
 int main(int argc, char *argv[]) {
@@ -149,9 +147,7 @@ int main(int argc, char *argv[]) {
 
     // initialise camera settings as specified by user
     Camera camera;
-    camera.print_camera();
     camera.update_camera();
-    //if (verbose) std::cout << "Positioned camera.\n";
 
     // initialise image space on device
     clock_t d_img_alloc_start = clock();
