@@ -29,7 +29,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     Ray pixel_ray(pixel_origin, camera.normal);
     
     // calculate pixel value from MeshBlock data
-    
+    printf("tracing ray at (%.3f,%.3f,%.3f) with index (%d,%d)\n",pixel_origin[0],pixel_origin[1],pixel_origin[2],i,j);
     img[pixel_index] = (*mb)->calc_trace(pixel_ray);
 }
 
@@ -41,10 +41,10 @@ int main(int argc, char *argv[]) {
     // define space for user settings
     std::string cudart_version = "version 0.1 - January 2026";
     char *input_char = nullptr, *save_char = nullptr;
-    int num_pixels_X = 100, num_pixels_Y = 100; 
-    float R_pos = 1.0, theta_pos = 0.5 * M_PI, phi_pos = 0.0;
-    float length_X = 1.0, length_Y = 1.0, tilt = 0.0;
-    vec3 bias(0.0, 0.0, 1.0);
+    // int num_pixels_X = 100, num_pixels_Y = 100; 
+    // float R_pos = 1.0, theta_pos = 0.5 * M_PI, phi_pos = 0.0;
+    // float length_X = 1.0, length_Y = 1.0, tilt = 0.0;
+    // vec3 bias(0.0, 0.0, 1.0);
     bool verbose = false;
 
     for (int i = 1; i < argc; i++) {
