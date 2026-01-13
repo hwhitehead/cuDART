@@ -238,6 +238,7 @@ int main(int argc, char *argv[]) {
     
     // iterate over cameras
     int img_count = 0;
+    int num_zeros = 3;
     for (auto &camera : cameras) {
         
         // call render
@@ -260,7 +261,9 @@ int main(int argc, char *argv[]) {
         // save data
         clock_t npy_write_start = clock();
         const std::string save_str(save_char);
-        save_str << img_count << ".png";
+        std::string num_str = std::to_string(img_count);
+        auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
+        save_str = save_str +  padded_num_str + ".png";
         npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
         npy_img.shape = {(unsigned long)camera.num_pixels_X, (unsigned long)camera.num_pixels_Y};
