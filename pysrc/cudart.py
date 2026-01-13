@@ -55,28 +55,27 @@ def gen_simple_data(npy_str, png_str):
 
     mb_dims = np.array([9,9,9])
 
-    x_fc = np.linspace(-0.5, 0.5, mb_dims[0]+2)
-    y_fc = np.linspace(-0.5, 0.5,  mb_dims[1]+2)
-    z_fc = np.linspace(-0.5, 0.5,  mb_dims[2]+2)
+    x_fc = np.linspace(-0.5, 0.5, mb_dims[0]+1)
+    y_fc = np.linspace(-0.5, 0.5,  mb_dims[1]+1)
+    z_fc = np.linspace(-0.5, 0.5,  mb_dims[2]+1)
 
-    x_cc = x_fc[1:-1]
-    print(x_cc)
-    y_cc = y_fc[1:-1]
-    z_cc = z_fc[1:-1]
+    x_cc = 0.5 * (x_fc[1:] + x_fc[:-1])
+    y_cc = 0.5 * (y_fc[1:] + y_fc[:-1])
+    z_cc = 0.5 * (z_fc[1:] + z_fc[:-1])
     xx, yy, zz = np.meshgrid(x_cc, y_cc, z_cc, indexing="ij")
     data = (yy * zz).astype(np.float32)
     np.save(npy_str, data)
 
-    # set_plot_defaults()
-    # fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
-    # ax = fig.add_subplot()
-    #
-    # yy, zz = np.meshgrid(y_fc, z_fc)
-    # ax.pcolormesh(yy, zz, data[0,:,:])
-    #
-    # plt.subplots_adjust(hspace=0, wspace=0)
-    # fig.savefig(png_str, dpi=300, bbox_inches="tight")
-    # plt.close("all")
+    set_plot_defaults()
+    fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
+    ax = fig.add_subplot()
+
+    yy, zz = np.meshgrid(y_fc, z_fc,indexing="ij")
+    ax.pcolormesh(yy, zz, data[0,:,:])
+
+    plt.subplots_adjust(hspace=0, wspace=0)
+    fig.savefig(png_str, dpi=300, bbox_inches="tight")
+    plt.close("all")
 
 def show_npy(load_str, save_str):
 
@@ -86,15 +85,15 @@ def show_npy(load_str, save_str):
     print(np.min(data))
 
     mb_dims = np.array([9, 9, 9])
-    x_fc = np.linspace(-0.5, 0.5, mb_dims[0] + 2)
-    y_fc = np.linspace(-0.5, 0.5, mb_dims[1] + 2)
-    z_fc = np.linspace(-0.5, 0.5, mb_dims[2] + 2)
+    x_fc = np.linspace(-0.5, 0.5, mb_dims[0] + 1)
+    y_fc = np.linspace(-0.5, 0.5, mb_dims[1] + 1)
+    z_fc = np.linspace(-0.5, 0.5, mb_dims[2] + 1)
     yy, zz = np.meshgrid(y_fc, z_fc, indexing="ij")
 
     set_plot_defaults()
     fig = plt.figure(figsize=(10.0/3, 10.0/3))
     ax = fig.add_subplot()
-    ax.pcolormesh(yy, zz, data)
+    ax.pcolormesh(yy, zz, data, shading="flat")
 
     plt.subplots_adjust(hspace=0, wspace=0)
     fig.savefig(save_str, dpi=300, bbox_inches="tight")
@@ -117,5 +116,5 @@ def prep_sn_data(load_str, save_str):
 
 if __name__ == "__main__":
 
-    #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
-    show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
+    gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
+    #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
