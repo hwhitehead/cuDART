@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
         // save data
         clock_t npy_write_start = clock();
         const std::string save_str(save_char);
-        save_str << index << ".png";
+        save_str << img_count << ".png";
         npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
         npy_img.shape = {(unsigned long)camera.num_pixels_X, (unsigned long)camera.num_pixels_Y};
