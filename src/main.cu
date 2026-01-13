@@ -215,17 +215,7 @@ int main(int argc, char *argv[]) {
         printf("malloc image            (device)            %.6fs\n",d_img_alloc_dur);
     }
 
-    // initialise camera settings as specified by user
-    
-    // camera.num_pixels_X = 2048;
-    // camera.num_pixels_Y = 2048;
-    // camera.theta_pos = (75.0 / 180) * M_PI;
-    // camera.phi_pos = (180.0 / 180) * M_PI;
-    // camera.tilt = (-38.0 / 180) * M_PI;
-    // camera.update_camera();
-
-    // define render shape
-    
+    // define render shape    
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
@@ -238,7 +228,7 @@ int main(int argc, char *argv[]) {
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
-
+        std::cout << "phi_pos = " << camera.phi_pos << std::endl;
         // call render
         clock_t render_start = clock();
         render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);

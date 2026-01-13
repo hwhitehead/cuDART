@@ -159,4 +159,8 @@ if __name__ == "__main__":
     # plot_sn_data("../outputs/sn_imgs000.npy", "../outputs/sn_imgs000.png")
     # plot_sn_data("../outputs/sn_imgs001.npy", "../outputs/sn_imgs001.png")
     # plot_sn_data("../outputs/sn_imgs002.npy", "../outputs/sn_imgs002.png")
-    build_camera_file("../inputs/camera.txt")
+    for n in range(0,100):
+        load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
+        save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
+        plot_sn_data(load_str, save_str)
+    #build_camera_file("../inputs/camera.txt")
