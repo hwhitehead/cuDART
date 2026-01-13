@@ -102,7 +102,6 @@ int main(int argc, char *argv[]) {
         // camera.theta_pos = (75.0 / 180) * M_PI;
         // camera.phi_pos = (180.0 / 180) * M_PI;
         // camera.tilt = (-38.0 / 180) * M_PI;
-    camera.update_camera();
     } else { // determine number of camera locations
         std::string camera_str(camera_char);
         std::ifstream camera_file(camera_str);
@@ -178,6 +177,9 @@ int main(int argc, char *argv[]) {
         printf("malloc/init MeshBlock   (device)            %.6fs\n",mb_alloc_dur);
     }
 
+    Camera camera = cameras[0];
+    const size_t bytes_in_img = camera.num_pixels * sizeof(float);
+
     // allocate image space on host
     clock_t img_alloc_start = clock();
     float *img = (float*) malloc(bytes_in_img);
@@ -188,7 +190,6 @@ int main(int argc, char *argv[]) {
 
     // initialise image space on device
     clock_t d_img_alloc_start = clock();
-    const size_t bytes_in_img = camera.num_pixels * sizeof(float);
     float *d_img = nullptr;
     checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
     if (verbose) {
@@ -197,7 +198,7 @@ int main(int argc, char *argv[]) {
     }
 
     // initialise camera settings as specified by user
-    Camera camera = cameras[0];
+    
     // camera.num_pixels_X = 2048;
     // camera.num_pixels_Y = 2048;
     // camera.theta_pos = (75.0 / 180) * M_PI;
