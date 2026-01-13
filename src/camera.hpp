@@ -42,6 +42,12 @@ __host__ void Camera::print_camera() {
     std::cout << "lower left = " << lower_left << std::endl;
 }
 
+__host__ Camera read_camera_data(std::string input) {
+    Camera camera();
+    std::ifstream fin(input);
+    
+}
+
 __host__ void Camera::update_camera() {
     // calculate position
     origin = R_pos * vec3(sin(theta_pos) * cos(phi_pos),
@@ -52,9 +58,7 @@ __host__ void Camera::update_camera() {
     unit_X = (bias.cross_prod(origin)).vector_norm();
     unit_Y = (origin.cross_prod(unit_X)).vector_norm();
     normal = -origin.vector_norm();
-    std::cout << "unit_X = " << unit_X << std::endl;
     unit_X = unit_X.rotate_about(normal, tilt);
-    std::cout << "unit_X = " << unit_X << std::endl;
     unit_Y = unit_Y.rotate_about(normal, tilt);
 
     // define screen size

@@ -39,11 +39,7 @@ int main(int argc, char *argv[]) {
 
     // define space for user settings
     std::string cudart_version = "version 0.2 - January 2026";
-    char *input_char = nullptr, *save_char = nullptr;
-    // int num_pixels_X = 100, num_pixels_Y = 100; 
-    // float R_pos = 1.0, theta_pos = 0.5 * M_PI, phi_pos = 0.0;
-    // float length_X = 1.0, length_Y = 1.0, tilt = 0.0;
-    // vec3 bias(0.0, 0.0, 1.0);
+    char *input_char = nullptr, *save_char = nullptr, char *camera_char;
     bool verbose = false;
 
     for (int i = 1; i < argc; i++) {
@@ -54,8 +50,6 @@ int main(int argc, char *argv[]) {
             switch (opt_letter) { // parse options without arguments
                 case 'h':
                 case 'v':
-                case 't':
-                    break;
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) { 
                         std::cout << "### FATAL ERROR in main" << std::endl
@@ -72,6 +66,9 @@ int main(int argc, char *argv[]) {
                 case 'v':
                     verbose = true;
                     break;
+                case "c":
+                    camera_char = argv[++i];
+                    break;
                 case 'h':
                 default:
                     std::cout << "cuDART " << cudart_version << std::endl;
@@ -79,6 +76,7 @@ int main(int argc, char *argv[]) {
                     std::cout << "Options:\n";
                     std::cout << " -i <file>    specify input file [.npy]\n";
                     std::cout << " -s <file>    specify render save file [.ppm]\n";
+                    std::cout << " -c <file>    specify camera data file [.txt]\n";
                     std::cout << " -v           verbosity flag\n";
                     std::cout << " -h           this help message\n"; 
                     return 0; 
@@ -87,9 +85,20 @@ int main(int argc, char *argv[]) {
     }
 
     if (input_char == nullptr && save_char == nullptr) {
-        std::cout << "### FATAL ERROR in main" << std::endl;
-        std::cout << "No input file or output file specified." << std::endl;
+        std::cout << "### FATAL ERROR in main\n";
+        std::cout << "No input file or output file specified.\n";
         return 0;
+    }
+
+    if (camera_char == nullptr && verbose) {
+        std::cout << "No user specified camera input, falling back to default.\n";
+    } else { // determine number of camera locations
+        std::string camera_str(camera_char);
+        std::ifstream camera_file(camera_str);
+        camera_file.unsetf(std::ios_base::skipws);
+        int line_count = std::count(std::istream_iterator<char>(camera_file),
+                                        std::istream_iterator<char>(),'\n');
+        std::cout << "lines in file = " << 
     }
 
     if (verbose) {
