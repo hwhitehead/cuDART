@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
         std::string camera_str(camera_char);
         std::ifstream camera_file(camera_str);
         int line_count = 0;
-        if (camera.file.is_open()) {
+        if (camera_file.is_open()) {
             std::string line;
             
 
