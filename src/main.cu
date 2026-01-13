@@ -260,7 +260,7 @@ int main(int argc, char *argv[]) {
         std::string save_str(save_char);
         std::string num_str = std::to_string(img_count);
         auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
-        save_str = save_str +  padded_num_str + ".npy";
+        save_str = save_str + padded_num_str + ".npy";
         npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
         npy_img.shape = {(unsigned long)camera.num_pixels_X, (unsigned long)camera.num_pixels_Y};
@@ -269,10 +269,9 @@ int main(int argc, char *argv[]) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
             printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
             float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
-            printf("img %d total          (host/device)            %.6fs\n",img_count+1,render_dur);
+            printf("img total               (host/device)       %.6fs\n",this_img_dur);
             if (verbose) std::cout << "----------------------------------------------------------\n";
         }
-
         img_count++;
     }
 
