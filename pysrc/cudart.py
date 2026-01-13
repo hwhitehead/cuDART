@@ -113,8 +113,28 @@ def prep_sn_data(load_str, save_str):
     emm[:hdim, :hdim, :] = quart_emm[::-1, ::-1, :]  # -x, -y quadrant
     np.save(save_str, emm.astype(np.float32))
 
+def plot_sn_data(load_str, save_str):
+
+    img = np.load(load_str)
+    img_shape = np.shape(img)
+    X = np.linspace(0,1,img_shape[0]+1)
+    Y = np.linspace(0,1,img_shape[0]+1)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+
+    cmap = "Greys"
+
+    set_plot_defaults()
+    fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
+    ax = fig.add_subplot()
+    ax.pcolormesh(XX, YY, np.log10(img), vmin = -13, vmax=-10, cmap=cmap, shading="flat")
+
+    plt.subplots_adjust(hspace=0, wspace=0)
+    fig.savefig(save_str, dpi=300, bbox_inches="tight")
+    plt.close("all")
+
 if __name__ == "__main__":
 
     #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
-    prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn.npy")
+    #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn.npy")
+    plot_sn_data("../outputs/sn_img.npy", "../outputs/sn_img.png")
