@@ -134,7 +134,7 @@ __host__ __device__ inline vec3 vec3::vector_norm() {
 }
 
 __host__ __device__ inline float vec3::dot_prod(vec3 &v2) {
-    return e[0] *v2.e[0] + e[1] * v2.e[1]  + e[2] *v2.e[2];
+    return e[0] * v2.e[0] + e[1] * v2.e[1]  + e[2] * v2.e[2];
 }
 
 __host__ __device__ inline vec3 vec3::cross_prod(vec3 &v2) {
@@ -147,7 +147,7 @@ __host__ __device__ inline vec3 vec3::rotate_about(vec3 &k, const float theta) {
     // use Rodrigues' rotation formula to rotate v about k by theta
     float cos_theta = std::cos(theta);
     float sin_theta = std::sin(theta);
-    return *this * cos_theta + k.cross_prod(*this) * sin_theta + k * k.dot_prod(*this) * (1 - cos_theta);
+    return (*this) * cos_theta + k.cross_prod(*this) * sin_theta + k * k.dot_prod(*this) * (1 - cos_theta);
 }
 
 #endif
