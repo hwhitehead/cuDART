@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
     // define space for user settings
     std::string cudart_version = "version 0.2 - January 2026";
-    char *input_char = nullptr, *save_char = nullptr, char *camera_char;
+    char *input_char = nullptr, *save_char = nullptr, char *camera_char = nullptr;
     bool verbose = false;
 
     for (int i = 1; i < argc; i++) {
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
                 case 'v':
                     verbose = true;
                     break;
-                case "c":
+                case 'c':
                     camera_char = argv[++i];
                     break;
                 case 'h':
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
         camera_file.unsetf(std::ios_base::skipws);
         int line_count = std::count(std::istream_iterator<char>(camera_file),
                                         std::istream_iterator<char>(),'\n');
-        std::cout << "lines in file = " << 
+        std::cout << "lines in file = " << line_count << std::endl;
     }
 
     if (verbose) {

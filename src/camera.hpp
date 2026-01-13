@@ -42,12 +42,6 @@ __host__ void Camera::print_camera() {
     std::cout << "lower left = " << lower_left << std::endl;
 }
 
-__host__ Camera read_camera_data(std::string input) {
-    Camera camera();
-    std::ifstream fin(input);
-    
-}
-
 __host__ void Camera::update_camera() {
     // calculate position
     origin = R_pos * vec3(sin(theta_pos) * cos(phi_pos),
