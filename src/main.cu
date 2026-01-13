@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil(camera.num_pixels_X/tx), 
                                 std::ceil(camera.num_pixels_Y/ty));
-    std::cout << "blocks_per_grid = (" << blocks_per_grid[0] << "," << blocks_per_grid << ")\n";
+    std::cout << "blocks_per_grid = (" << std::ceil(camera.num_pixels_X/tx) << "," << std::ceil(camera.num_pixels_Y/ty) << ")\n";
     render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
