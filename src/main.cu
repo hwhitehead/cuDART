@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
     // camera.update_camera();
 
     // define render shape
-    clock_t render_start = clock();
+    
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
@@ -232,9 +232,13 @@ int main(int argc, char *argv[]) {
     // iterate over cameras
     int img_count = 0;
     size_t num_zeros = 3;
+    if (verbose) std::cout << "----------------------------------------------------------\n";
     for (auto &camera : cameras) {
         
+        clock_t this_img_start = clock();
+
         // call render
+        clock_t render_start = clock();
         render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
@@ -264,8 +268,11 @@ int main(int argc, char *argv[]) {
         if (verbose) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
             printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
+            float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
+            printf("img %d total          (host/device)            %.6fs\n",img_count+1,render_dur);
+            if (verbose) std::cout << "----------------------------------------------------------\n";
         }
-        // TODO timings
+
         img_count++;
     }
 
