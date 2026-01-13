@@ -90,23 +90,39 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    int num_images = 1;
+    bool default_camera = true;
+    std::vector<Camera> cameras = {};
     if (camera_char == nullptr && verbose) {
         std::cout << "No user specified camera input, falling back to default.\n";
+        Camera default_camera;
+        cameras.push_back(default_camera);
+        // camera.num_pixels_X = 2048;
+        // camera.num_pixels_Y = 2048;
+        // camera.theta_pos = (75.0 / 180) * M_PI;
+        // camera.phi_pos = (180.0 / 180) * M_PI;
+        // camera.tilt = (-38.0 / 180) * M_PI;
+    camera.update_camera();
     } else { // determine number of camera locations
         std::string camera_str(camera_char);
         std::ifstream camera_file(camera_str);
         int line_count = 0;
         if (camera_file.is_open()) {
             std::string line;
-            
-
             while (std::getline(camera_file, line)) {
                 line_count++;
             }
-
             camera_file.close();
+            default_camera = false;
+            num_images = line_count;
+            // TEMP add default camera
+            Camera default_camera;
+            cameras.push_back(default_camera);
+        } else {
+            std::cout << "### FATAL ERROR in main\n";
+            std::cout << "Unable to open camera file at " << camera_str << std::endl;
+            return 0;
         }
-        std::cout << "lines in file = " << line_count << std::endl;
     }
 
     if (verbose) {
@@ -162,14 +178,13 @@ int main(int argc, char *argv[]) {
         printf("malloc/init MeshBlock   (device)            %.6fs\n",mb_alloc_dur);
     }
 
-    // initialise camera settings as specified by user
-    Camera camera;
-    camera.num_pixels_X = 2048;
-    camera.num_pixels_Y = 2048;
-    camera.theta_pos = (75.0 / 180) * M_PI;
-    camera.phi_pos = (180.0 / 180) * M_PI;
-    camera.tilt = (-38.0 / 180) * M_PI;
-    camera.update_camera();
+    // allocate image space on host
+    clock_t img_alloc_start = clock();
+    float *img = (float*) malloc(bytes_in_img);
+    if (verbose) {
+        float img_alloc_dur = (float)(clock() - img_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc image            (host)              %.6fs\n",img_alloc_dur);
+    }
 
     // initialise image space on device
     clock_t d_img_alloc_start = clock();
@@ -181,12 +196,23 @@ int main(int argc, char *argv[]) {
         printf("malloc image            (device)            %.6fs\n",d_img_alloc_dur);
     }
 
-    // call render
+    // initialise camera settings as specified by user
+    Camera camera = cameras[0];
+    // camera.num_pixels_X = 2048;
+    // camera.num_pixels_Y = 2048;
+    // camera.theta_pos = (75.0 / 180) * M_PI;
+    // camera.phi_pos = (180.0 / 180) * M_PI;
+    // camera.tilt = (-38.0 / 180) * M_PI;
+    // camera.update_camera();
+
+    // define render shape
     clock_t render_start = clock();
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
                                 std::ceil((float)camera.num_pixels_Y / ty));
+    
+    // call render
     render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
@@ -195,13 +221,7 @@ int main(int argc, char *argv[]) {
         printf("render kernel           (device)            %.6fs\n",render_dur);
     }
 
-    // allocate image space on host
-    clock_t img_alloc_start = clock();
-    float *img = (float*) malloc(bytes_in_img);
-    if (verbose) {
-        float img_alloc_dur = (float)(clock() - img_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc image            (host)              %.6fs\n",img_alloc_dur);
-    }
+    
 
     // copy image data to host
     clock_t img_copy_start = clock();
