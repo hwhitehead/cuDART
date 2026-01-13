@@ -34,12 +34,6 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
 
 int main(int argc, char *argv[]) {
 
-    vec3 X(1.0,0.0,0.0);
-    vec3 Z(0.0,0.0,1.0);
-    vec3 Y = X.rotate_about(Z, 0.5 * M_PI);
-    std::cout << Y << std::endl;
-    return 0;
-
     // start general timer
     clock_t main_start = clock();
 
@@ -157,7 +151,7 @@ int main(int argc, char *argv[]) {
     camera.num_pixels_Y = 512;
     camera.theta_pos = (75.0 / 180) * M_PI;
     camera.phi_pos = (180.0 / 180) * M_PI;
-    camera.tilt = (-38 / 180) * M_PI;
+    camera.tilt = (-38.0 / 180) * M_PI;
     camera.update_camera();
 
     // initialise image space on device
