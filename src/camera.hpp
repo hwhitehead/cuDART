@@ -58,7 +58,6 @@ __host__ void Camera::update_camera() {
     unit_Y = unit_Y.rotate_about(normal, tilt);
 
     // define screen size
-    upper_left = origin - 0.5 * length_X * unit_X + 0.5 * length_Y * unit_Y;
     lower_left = origin - 0.5 * length_X * unit_X - 0.5 * length_Y * unit_Y;
     num_pixels = num_pixels_X * num_pixels_Y;
 }
