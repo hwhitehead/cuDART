@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
                         this_camera.tilt = d;
                         this_camera.length_X = e;
                         this_camera.length_Y = f;
+                        this_camera.update_camera();
                         cameras.push_back(this_camera);
                     }
                 }
