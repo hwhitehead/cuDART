@@ -134,7 +134,7 @@ __host__ __device__ inline vec3 vec3::vector_norm() {
 }
 
 __host__ __device__ inline float vec3::dot_prod(vec3 &v2) {
-    return e[0] * v2.e[0] + e[1] * v2.e[1]  + e[2] * v2.e[2];
+    return e[0] * v2.e[0] + e[1] * v2.e[1] + e[2] * v2.e[2];
 }
 
 __host__ __device__ inline vec3 vec3::cross_prod(vec3 &v2) {

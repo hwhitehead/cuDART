@@ -33,7 +33,13 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
 }
 
 int main(int argc, char *argv[]) {
-    
+
+    vec3 X(1.0,0.0,0.0);
+    vec3 Z(0.0,0.0,1.0);
+    vec3 Y = X.rotate_about(Z, 0.5 * M_PI);
+    std::cout << Y << std::endl;
+    return 0;
+
     // start general timer
     clock_t main_start = clock();
 
