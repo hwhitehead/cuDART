@@ -89,7 +89,7 @@ def show_npy(load_str, save_str):
     x_fc = np.linspace(-0.5, 0.5, mb_dims[0] + 2)
     y_fc = np.linspace(-0.5, 0.5, mb_dims[1] + 2)
     z_fc = np.linspace(-0.5, 0.5, mb_dims[2] + 2)
-    yy, zz = np.meshgrid(y_fc, z_fc)
+    yy, zz = np.meshgrid(y_fc, z_fc, indexing="ij")
 
     set_plot_defaults()
     fig = plt.figure(figsize=(10.0/3, 10.0/3))

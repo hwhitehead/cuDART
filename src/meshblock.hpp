@@ -43,15 +43,15 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
         int step_dir[3] = {0, 0, 0};
         vec3 mb_entrance = r.march(tl);
 
-        if (mb_entrance[1] > 0 && mb_entrance[2] > 0) {
-            return 1.0;
-        } else if (mb_entrance[1] <= 0 && mb_entrance[2] > 0) {
-            return 2.0 / 3;
-        } else if (mb_entrance[1] <= 0 && mb_entrance[2] <= 0) {
-            return -2.0 / 3;
-        } else {
-            return -1.0;
-        }
+        // if (mb_entrance[1] > 0 && mb_entrance[2] > 0) { // behaves properly
+        //     return 1.0;
+        // } else if (mb_entrance[1] <= 0 && mb_entrance[2] > 0) {
+        //     return 2.0 / 3;
+        // } else if (mb_entrance[1] <= 0 && mb_entrance[2] <= 0) {
+        //     return -2.0 / 3;
+        // } else {
+        //     return -1.0;
+        // }
 
         // orientate trace
         for (int i = 0; i <= 2; i++) {

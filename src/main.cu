@@ -22,7 +22,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
-  	int pixel_index = i * camera.num_pixels_Y + j;
+  	int pixel_index = i * camera.num_pixels_Y + j; // well behaved
 
     // initialise ray
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);
@@ -169,7 +169,6 @@ int main(int argc, char *argv[]) {
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
                                 std::ceil((float)camera.num_pixels_Y / ty));
-    std::cout << "blocks_per_grid = (" << std::ceil(camera.num_pixels_X/tx) << "," << std::ceil(camera.num_pixels_Y/ty) << ")\n";
     render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
