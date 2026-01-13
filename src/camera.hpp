@@ -35,7 +35,7 @@ class Camera {
 __host__ void Camera::print_camera() {
     std::cout << "Image size = (" << num_pixels_X << "," << num_pixels_Y << ")\n";
     std::cout << num_pixels << " pixels total\n";
-    std::cout << "origin =" << origin << std::endl;
+    std::cout << "origin = " << origin << std::endl;
     std::cout << "normal = " << normal << std::endl;
     std::cout << "unit_X = " << unit_X << std::endl;
     std::cout << "unit_Y = " << unit_Y << std::endl;

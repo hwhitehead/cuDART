@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
             char opt_letter = *(argv[i]+1);
             switch (opt_letter) { // parse options without arguments
                 case 'h':
-                case 'v':
+                case 'v': // fails at end of line?
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) { 
                         std::cout << "### FATAL ERROR in main ###" << std::endl
@@ -97,11 +97,6 @@ int main(int argc, char *argv[]) {
         std::cout << "No user specified camera input, falling back to default.\n";
         Camera default_camera;
         cameras.push_back(default_camera);
-        // camera.num_pixels_X = 2048;
-        // camera.num_pixels_Y = 2048;
-        // camera.theta_pos = (75.0 / 180) * M_PI;
-        // camera.phi_pos = (180.0 / 180) * M_PI;
-        // camera.tilt = (-38.0 / 180) * M_PI;
     } else { // determine number of camera locations
         std::string camera_str(camera_char);
         std::ifstream camera_file(camera_str);
@@ -149,12 +144,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    for (Camera camera : cameras) {
-        camera.print_camera();
-    }
-
-    return 0;
-
     if (verbose) {
         std::cout << "Starting cuDART (verbose)...\n";
         std::cout << "----------------------------------------------------------\n";
@@ -162,11 +151,10 @@ int main(int argc, char *argv[]) {
         std::cout << "----------------------------------------------------------\n";
     }
     // load npy data as specified by user
-    //const std::string npy_path {"simdata/sn_low.npy"}; // old
     clock_t npy_read_start = clock();
     const std::string input_str(input_char);
     npy::npy_data d = npy::read_npy<float>(input_str);
-    std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-trasnfer
+    std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-transfer (seems unhelpful)
     std::vector<unsigned long> npy_shape = d.shape;
     vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
     int data_size = npy_data.size();
@@ -183,7 +171,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc(&d_data, bytes_in_data));
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data             (device)            %.6fs\n",d_data_alloc_dur); // align these prints?
+        printf("malloc data             (device)            %.6fs\n",d_data_alloc_dur);
     }
     
     // copy data into device memory
@@ -244,35 +232,39 @@ int main(int argc, char *argv[]) {
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
                                 std::ceil((float)camera.num_pixels_Y / ty));
     
-    // call render
-    render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
-    if (verbose) {
-        float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-        printf("render kernel           (device)            %.6fs\n",render_dur);
-    }
+    // iterate over cameras
+    for (auto const [index, camera] : std::views::enumerate(cameras)) {
+        
+        // call render
+        render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+        if (verbose) {
+            float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
+            printf("render kernel           (device)            %.6fs\n",render_dur);
+        }
 
-    
+        // copy image data to host
+        clock_t img_copy_start = clock();
+        checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
+        if (verbose) {
+            float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
+            printf("memcpy image            (device->host)      %.6fs\n",img_copy_dur);
+        }
 
-    // copy image data to host
-    clock_t img_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
-    if (verbose) {
-        float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-        printf("memcpy image            (device->host)      %.6fs\n",img_copy_dur);
-    }
-
-    // save data
-    clock_t npy_write_start = clock();
-    const std::string save_str(save_char);
-    npy::npy_data_ptr<float> npy_img;
-    npy_img.data_ptr = img;
-    npy_img.shape = {(unsigned long)camera.num_pixels_X, (unsigned long)camera.num_pixels_Y};
-    npy::write_npy(save_str, npy_img);
-    if (verbose) {
-        float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-        printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
+        // save data
+        clock_t npy_write_start = clock();
+        const std::string save_str(save_char);
+        save_str << index << ".png"
+        npy::npy_data_ptr<float> npy_img;
+        npy_img.data_ptr = img;
+        npy_img.shape = {(unsigned long)camera.num_pixels_X, (unsigned long)camera.num_pixels_Y};
+        npy::write_npy(save_str, npy_img);
+        if (verbose) {
+            float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
+            printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
+        }
+        // TODO timings
     }
 
     // perform cleanup of device/host data
