@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
                 case 'v':
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) { 
-                        std::cout << "### FATAL ERROR in main" << std::endl
+                        std::cout << "### FATAL ERROR in main ###" << std::endl
                                 << "-" << opt_letter << "must be follower by a valid argument\n";
                     }
             } // end cases
@@ -105,10 +105,33 @@ int main(int argc, char *argv[]) {
     } else { // determine number of camera locations
         std::string camera_str(camera_char);
         std::ifstream camera_file(camera_str);
-        int line_count = 0;
+        int line_count = 0, num_pixels_X, num_pixels_Y;
         if (camera_file.is_open()) {
             std::string line;
+            float a, b, c, d, e, f;
             while (std::getline(camera_file, line)) {
+                if (!(iss >> a >> b >> c >> d >> e >> f)) {
+                    std::cout << "### FATAL ERROR in main ###\n";
+                    std::cout << "Unable to parse line " << line_count << "of camera file at " << camera_str << std::endl;
+                    return 0;
+                } else {
+                    // read line by line
+                    if (line_count == 0) { // read static header
+                        num_pixels_X = a;
+                        num_pixels_Y = b;
+                    } else { // read dynamic camera data
+                        Camera this_camera();
+                        this_camera.num_pixels_X = num_pixels_X;
+                        this_camera.num_pixels_Y = num_pixels_Y;
+                        this_camera.R_pos = a;
+                        this_camera.theta_pos = b;
+                        this_camera.phi_pos = c;
+                        this_camera.tilt = d;
+                        this_camera.length_X = e;
+                        this_camera.length_Y = f;
+                        cameras.push_back(this_camera);
+                    }
+                }
                 line_count++;
             }
             camera_file.close();
@@ -118,11 +141,17 @@ int main(int argc, char *argv[]) {
             Camera default_camera;
             cameras.push_back(default_camera);
         } else {
-            std::cout << "### FATAL ERROR in main\n";
+            std::cout << "### FATAL ERROR in main ###\n";
             std::cout << "Unable to open camera file at " << camera_str << std::endl;
             return 0;
         }
     }
+
+    for (Camera camera : cameras) {
+        camera.print_camera();
+    }
+
+    return 0;
 
     if (verbose) {
         std::cout << "Starting cuDART (verbose)...\n";
