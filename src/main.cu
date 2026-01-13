@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     clock_t main_start = clock();
 
     // define space for user settings
-    std::string cudart_version = "version 0.1 - January 2026";
+    std::string cudart_version = "version 0.2 - January 2026";
     char *input_char = nullptr, *save_char = nullptr;
     // int num_pixels_X = 100, num_pixels_Y = 100; 
     // float R_pos = 1.0, theta_pos = 0.5 * M_PI, phi_pos = 0.0;
