@@ -8,6 +8,7 @@
 #include <time.h>
 #include <ranges>
 #include <vector>
+#include <map>
 
 // custom external library imports
 #include "npy.hpp"
