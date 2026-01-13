@@ -134,11 +134,6 @@ int main(int argc, char *argv[]) {
                 line_count++;
             }
             camera_file.close();
-            default_camera = false;
-            num_images = line_count;
-            // TEMP add default camera
-            Camera default_camera;
-            cameras.push_back(default_camera);
         } else {
             std::cout << "### FATAL ERROR in main ###\n";
             std::cout << "Unable to open camera file at " << camera_str << std::endl;
