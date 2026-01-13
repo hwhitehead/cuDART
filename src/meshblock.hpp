@@ -43,7 +43,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
         int step_dir[3] = {0, 0, 0};
         vec3 mb_entrance = r.march(tl);
         
-        if (mb_entrace[1] > 0) {
+        if (mb_entrance[1] > 0) {
             return 1.0 / mb_dims[1];
         } else{
             return -1.0 / mb_dims[1];;
