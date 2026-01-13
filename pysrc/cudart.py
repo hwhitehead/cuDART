@@ -54,8 +54,8 @@ def gen_npy(save_str):
 def gen_simple_data(npy_str, png_str):
 
     x_fc = np.linspace(-0.5, 0.5, 10)
-    y_fc = np.linspace(-0.5, 0.5, 10)
-    z_fc = np.linspace(-0.5, 0.5, 10)
+    y_fc = np.linspace(-0.5, 0.5, 20)
+    z_fc = np.linspace(-0.5, 0.5, 30)
 
     x_cc = x_fc[0:-1]
     y_cc = y_fc[0:-1]
@@ -64,16 +64,16 @@ def gen_simple_data(npy_str, png_str):
     data = (yy * zz).astype(np.float32)
     np.save(npy_str, data)
 
-    set_plot_defaults()
-    fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
-    ax = fig.add_subplot()
-
-    yy, zz = np.meshgrid(y_fc, z_fc)
-    ax.pcolormesh(yy, zz, data[0,:,:])
-
-    plt.subplots_adjust(hspace=0, wspace=0)
-    fig.savefig(png_str, dpi=300, bbox_inches="tight")
-    plt.close("all")
+    # set_plot_defaults()
+    # fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
+    # ax = fig.add_subplot()
+    #
+    # yy, zz = np.meshgrid(y_fc, z_fc)
+    # ax.pcolormesh(yy, zz, data[0,:,:])
+    #
+    # plt.subplots_adjust(hspace=0, wspace=0)
+    # fig.savefig(png_str, dpi=300, bbox_inches="tight")
+    # plt.close("all")
 
 def show_npy(load_str, save_str):
 
@@ -112,5 +112,5 @@ def prep_sn_data(load_str, save_str):
 
 if __name__ == "__main__":
 
-    #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
-    show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
+    gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
+    #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")

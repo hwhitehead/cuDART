@@ -107,6 +107,7 @@ int main(int argc, char *argv[]) {
     std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-trasnfer
     std::vector<unsigned long> npy_shape = d.shape;
     vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
+    std::cout << "mb_size = " << mb_dims << std::endl;
     int data_size = npy_data.size();
     float *data = npy_data.data();
     size_t bytes_in_data = data_size * sizeof(float);
