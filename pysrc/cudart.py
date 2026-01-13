@@ -138,17 +138,17 @@ def build_camera_file(save_str):
     num_pixels_X = 512
     num_pixels_Y = 512
     R_pos = 2.0
-    theta_pos = (75 / 180) * np.pi
+    phi_pos = 0.0
     tilt = (-38 / 180) * np.pi
     length_X = 1.0
     length_Y = 1.0
 
     num_snapshots = 100
-    phi_array = np.linspace(0,2 * np.pi, num_snapshots)
+    theta_array = np.linspace(0,np.pi, num_snapshots)
 
     with open(save_str, "w") as f:
         f.write("{0} {1} 0.0 0.0 0.0 0.0\n".format(num_pixels_X, num_pixels_Y)) # header
-        for phi_pos in phi_array:
+        for theta_pos in theta_array:
             f.write("{0} {1} {2} {3} {4} {5}\n".format(R_pos, theta_pos, phi_pos, tilt, length_X, length_Y))
 
 if __name__ == "__main__":
@@ -156,11 +156,8 @@ if __name__ == "__main__":
     #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
     #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn.npy")
-    # plot_sn_data("../outputs/sn_imgs000.npy", "../outputs/sn_imgs000.png")
-    # plot_sn_data("../outputs/sn_imgs001.npy", "../outputs/sn_imgs001.png")
-    # plot_sn_data("../outputs/sn_imgs002.npy", "../outputs/sn_imgs002.png")
     for n in range(0,100):
         load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
         save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
         plot_sn_data(load_str, save_str)
-    #build_camera_file("../inputs/camera.txt")
+    # build_camera_file("../inputs/camera.txt")

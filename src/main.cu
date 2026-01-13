@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
-        std::cout << "phi_pos = " << camera.phi_pos << std::endl;
+        
         // call render
         clock_t render_start = clock();
         render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
