@@ -137,4 +137,5 @@ if __name__ == "__main__":
     #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
     #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn.npy")
-    plot_sn_data("../outputs/sn_img.npy", "../outputs/sn_img.png")
+    plot_sn_data("../outputs/sn_imgs000.npy", "../outputs/sn_imgs000.png")
+    plot_sn_data("../outputs/sn_imgs001.npy", "../outputs/sn_imgs001.png")
