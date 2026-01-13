@@ -94,8 +94,6 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    int num_images = 1;
-    bool default_camera = true;
     std::vector<Camera> cameras = {};
     if (camera_char == nullptr && verbose) {
         std::cout << "No user specified camera input, falling back to default.\n";
@@ -263,7 +261,7 @@ int main(int argc, char *argv[]) {
         std::string save_str(save_char);
         std::string num_str = std::to_string(img_count);
         auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
-        save_str = save_str +  padded_num_str + ".png";
+        save_str = save_str +  padded_num_str + ".npy";
         npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
         npy_img.shape = {(unsigned long)camera.num_pixels_X, (unsigned long)camera.num_pixels_Y};
