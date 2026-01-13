@@ -110,6 +110,7 @@ int main(int argc, char *argv[]) {
             std::string line;
             float a, b, c, d, e, f;
             while (std::getline(camera_file, line)) {
+                std::istreamstream iss(line);
                 if (!(iss >> a >> b >> c >> d >> e >> f)) {
                     std::cout << "### FATAL ERROR in main ###\n";
                     std::cout << "Unable to parse line " << line_count << "of camera file at " << camera_str << std::endl;
@@ -120,7 +121,7 @@ int main(int argc, char *argv[]) {
                         num_pixels_X = a;
                         num_pixels_Y = b;
                     } else { // read dynamic camera data
-                        Camera this_camera();
+                        Camera this_camera;
                         this_camera.num_pixels_X = num_pixels_X;
                         this_camera.num_pixels_Y = num_pixels_Y;
                         this_camera.R_pos = a;
