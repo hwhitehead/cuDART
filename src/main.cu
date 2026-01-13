@@ -7,9 +7,9 @@
 #include <string>
 #include <time.h>
 #include <initializer_list>
-// #include <ranges>
-// #include <vector>
-// #include <map>
+#include <ranges>
+#include <vector>
+#include <map>
 
 // custom external library imports
 #include "npy.hpp"
