@@ -53,13 +53,16 @@ def gen_npy(save_str):
 
 def gen_simple_data(npy_str, png_str):
 
-    x_fc = np.linspace(-0.5, 0.5, 10)
-    y_fc = np.linspace(-0.5, 0.5, 20)
-    z_fc = np.linspace(-0.5, 0.5, 30)
+    mb_dims = np.array([9,9,9])
 
-    x_cc = x_fc[0:-1]
-    y_cc = y_fc[0:-1]
-    z_cc = z_fc[0:-1]
+    x_fc = np.linspace(-0.5, 0.5, mb_dims[0]+2)
+    y_fc = np.linspace(-0.5, 0.5,  mb_dims[1]+2)
+    z_fc = np.linspace(-0.5, 0.5,  mb_dims[2]+2)
+
+    x_cc = x_fc[1:-1]
+    print(x_cc)
+    y_cc = y_fc[1:-1]
+    z_cc = z_fc[1:-1]
     xx, yy, zz = np.meshgrid(x_cc, y_cc, z_cc, indexing="ij")
     data = (yy * zz).astype(np.float32)
     np.save(npy_str, data)
@@ -78,12 +81,14 @@ def gen_simple_data(npy_str, png_str):
 def show_npy(load_str, save_str):
 
     data = np.load(load_str)
+    print(data)
     print(np.max(data))
     print(np.min(data))
 
-    x_fc = np.linspace(-0.5, 0.5, 10)
-    y_fc = np.linspace(-0.5, 0.5, 10)
-    z_fc = np.linspace(-0.5, 0.5, 10)
+    mb_dims = np.array([9, 9, 9])
+    x_fc = np.linspace(-0.5, 0.5, mb_dims[0] + 2)
+    y_fc = np.linspace(-0.5, 0.5, mb_dims[1] + 2)
+    z_fc = np.linspace(-0.5, 0.5, mb_dims[2] + 2)
     yy, zz = np.meshgrid(y_fc, z_fc)
 
     set_plot_defaults()
