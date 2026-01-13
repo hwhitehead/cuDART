@@ -32,6 +32,7 @@ class Camera {
         float tilt;
         vec3 bias, unit_X, unit_Y;
         vec3 upper_left;
+        vec3 lower_left;
 };
 
 __host__ void Camera::print_camera() {
@@ -59,13 +60,17 @@ __host__ void Camera::update_camera() {
 
     // define screen size
     upper_left = origin - 0.5 * length_X * unit_X + 0.5 * length_Y * unit_Y;
+    lower_left = origin - 0.5 * length_X * unit_X - 0.5 * length_Y * unit_Y;
     num_pixels = num_pixels_X * num_pixels_Y;
 }
 
 __device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {
-    float dY = -((float)i / num_pixels_Y) * length_Y;
-    float dX = ((float)j / num_pixels_X) * length_X;
-    return upper_left + dX * unit_X + dY * unit_Y;
+    // float dY = -((float)i / num_pixels_Y) * length_Y;
+    // float dX = ((float)j / num_pixels_X) * length_X;
+    // return upper_left + dX * unit_X + dY * unit_Y;
+    float dY = ((float)j / num_pixels_Y) * length_Y;
+    float dX = ((float)i / num_pixels_X) * length_X;
+    return lower_left + dX * unit_X + dY * unit_Y;
 }
 
 #endif
