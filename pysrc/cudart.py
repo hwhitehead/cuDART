@@ -153,9 +153,8 @@ def build_camera_file(save_str):
 
 if __name__ == "__main__":
 
-    #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
-    #prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn.npy")
+    #prep_sn_data("../inputs/interpolated_frame_B2_416.npy", "../inputs/sn_alt.npy")
     for n in range(0,100):
         load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
         save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
