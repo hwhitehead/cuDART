@@ -111,10 +111,10 @@ def prep_sn_data(load_str, save_str):
     emm[hdim:, :hdim, :] = quart_emm[:, ::-1, :]  # +x, -y quadrant
     emm[:hdim, hdim:, :] = quart_emm[::-1, :, :]  # -x, +y quadrant
     emm[:hdim, :hdim, :] = quart_emm[::-1, ::-1, :]  # -x, -y quadrant
-
-    np.save(save_str, data)
+    np.save(save_str, emm.astype(np.float32))
 
 if __name__ == "__main__":
 
     #gen_simple_data("../simdata/simple.npy", "../outputs/simple_data.png")
-    show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
+    #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
+    prep_sn_data("../simdata/interpolated_frame_gamm7_early_287.npy", "../simdata/sn.npy")

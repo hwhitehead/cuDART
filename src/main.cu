@@ -147,6 +147,11 @@ int main(int argc, char *argv[]) {
 
     // initialise camera settings as specified by user
     Camera camera;
+    camera.num_pixels_X = 100;
+    camera.num_pixels_Y = 100;
+    camera.theta_pos = (75.0 / 180) * M_PI;
+    camera.phi_pos = (180.0 / 180) * M_PI;
+    camera.tilt = (-38 / 180) * M_PI;
     camera.update_camera();
 
     // initialise image space on device
