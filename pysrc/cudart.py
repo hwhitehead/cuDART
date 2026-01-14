@@ -98,8 +98,8 @@ class Scene:
         fig = plt.figure(figsize=(10.0/3,10.0/3))
         ax = fig.add_subplot()
         plt.subplots_adjust(hspace=0, wspace=0)
-        X = np.linspace(0,1,num_pixels_X+1)
-        Y = np.linspace(0,1,num_pixels_Y+1)
+        X = np.linspace(0,1,self.num_pixels_X+1)
+        Y = np.linspace(0,1,self.num_pixels_Y+1)
         XX, YY = np.meshgrid(X, Y, indexing="ij")
 
         num_images = len(self.cameras)
