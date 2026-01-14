@@ -34,7 +34,8 @@ class Scene:
         # parse load/save strings        
         if not load_str.endswith(".npy"): # enforce suffix
             load_str += ".npy"
-        self.save_str = load_str.rsplit(".",1)[0] # remove any suffix
+        self.load_str = load_str
+        self.save_str = save_str.rsplit(".",1)[0] # remove any suffix
 
         if cameras is None:
             self.cameras = [Camera()]
