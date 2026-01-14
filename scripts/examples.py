@@ -33,7 +33,7 @@ def demo_scene_gen(num_img = 100, verbose=True, remove_data=True):
 
     # render and save images
     scene.render(verbose=verbose)
-    scene.plot(png_save_lot, verbose=verbose, remove_data=True)
+    scene.plot(png_save_str, verbose=verbose, remove_data=True)
 
 if __name__ == "__main__":
 
