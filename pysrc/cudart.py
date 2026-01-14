@@ -69,7 +69,7 @@ class Scene:
 
         # call executable
         path_to_executable = os.path.join(host_dir, "bin/cudart")
-        command = [path_to_executable, "-i", self.load_str, "-s", save_str]
+        command = [path_to_executable, "-i", self.load_str, "-s", self.save_str]
         if profile: 
             command = ["nvprof"] + command
         if verbose:
