@@ -84,6 +84,9 @@ class Scene:
             if (verbose):
                 print("unable to located executable, forcing remake.")
             self.make()
+        elif force_make:
+            if verbose:
+                print("forcing remake of executable")
 
         # call executable        
         command = [path_to_executable, "-i", self.load_str, "-s", self.save_str,"-c",self.temp_camera_file]
@@ -102,7 +105,7 @@ class Scene:
                 if verbose:
                     print("removed temporary camera file")
 
-    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_data=False):
+    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_data=False, verbose=False):
         
         save_location = save_location.removesuffix(".png") # strip as needed
 
