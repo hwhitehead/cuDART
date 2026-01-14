@@ -165,9 +165,9 @@ def build_cudart(main_dir):
 
 if __name__ == "__main__":
 
-    c1 = Camera()
-    c2 = Camera()
-    c3 = Camera()
+    c1 = Camera(theta=0.00001)
+    c2 = Camera(theta=0.4)
+    c3 = Camera(theta=1.2)
     cameras = [c1,c2,c3]
     load_str = os.path.join(host_dir, "inputs/sn.npy")
     save_str = os.path.join(host_dir, "outputs/auto/sn")

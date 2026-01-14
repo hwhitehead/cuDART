@@ -46,9 +46,9 @@ class Scene:
         self.camera_file_name = camera_file_name
 
         if self.camera_file_name is None:
-            self.temp_file_name = "camera_file.txt"
+            self.temp_camera_file = "temp_camera_file.txt"
         else:
-            self.temp_file_name = self.camera_file_name
+            self.temp_camera_file = self.camera_file_name
 
         # check camera dimensions
         for camera in self.cameras:
@@ -57,19 +57,21 @@ class Scene:
 
     def build_camera_file(self):
 
-        with open(self.temp_file_name, "w") as f:
+        with open(self.temp_camera_file, "w") as f:
             f.write("{0} {1} 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y)) # header
             for camera in self.cameras:
                 f.write("{0} {1} {2} {3} {4} {5}\n".format(*camera.unpack()))
 
-    def render(self, profile=False, verbose=False):
+    def render(self, profile=False, verbose=False, force_make=False):
 
         # prepare camera space
         self.build_camera_file()
 
+        # check executable exists, or build
+
         # call executable
         path_to_executable = os.path.join(host_dir, "bin/cudart")
-        command = [path_to_executable, "-i", self.load_str, "-s", self.save_str]
+        command = [path_to_executable, "-i", self.load_str, "-s", self.save_str,"-c",self.temp_camera_file]
         if profile: 
             command = ["nvprof"] + command
         if verbose:
