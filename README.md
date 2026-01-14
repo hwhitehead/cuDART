@@ -2,7 +2,16 @@
 This repository contains a lightweight set of tools for raytracing Cartesian meshes, designed for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. The principle acceleration structure for this method is the Digitial Differential Analyzer (DDA) which allows for iterative low-cost propagation of rays through regular meshes. Previously implemented in Python [here](https://github.com/hwhitehead/DART), this repository utilises the CUDA toolkit to perform ray propagation and summation exceptionally quickly. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
 
 ## Overview
-In its base form, `cuDART` can be run from the command line, targeting a `.npy` file containing simulation data and specifying a further `.npy` file for the output image. The user has complete control over the camera position, specified in a seperate `.txt` file 
+The canon of `cuDART` execution is as follows:
+- The user defines camera position(s) in a `.txt` file, assisted by a Python frontend
+- The user calls the `bin/cudart` executable, specifying input (`-i`) and output (`-s`) `.npy` files and tageting the camera `.txt` file (`-c`)
+- `cuDART` executes:
+    * Data is loaded from the input `.npy` file to the host, and copied to the device
+    * Data is allocated on the device to store the image data
+    * Containers for the data (`MeshBlock`) and camera (`Camera`) are initiliased
+    * The `render` kernel is called, calculating pixel values synchronously on the device
+    * The image buffer is copied to the host, and saved to the output `.npy` file
+- The user converts the output `.npy` file to an image using Python.
 
 ## Requirements
 
