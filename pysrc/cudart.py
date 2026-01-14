@@ -87,7 +87,6 @@ class Scene:
             command = ["nvprof"] + command
         if verbose:
             command = command + ["-v"]
-        print(command)
         subprocess.run(command)
 
     def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10):
