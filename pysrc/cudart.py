@@ -116,6 +116,7 @@ class Scene:
         X = np.linspace(0,1,self.num_pixels_X+1)
         Y = np.linspace(0,1,self.num_pixels_Y+1)
         XX, YY = np.meshgrid(X, Y, indexing="ij")
+        ax.axis("off")
 
         num_images = len(self.cameras)
         for i in range(num_images):

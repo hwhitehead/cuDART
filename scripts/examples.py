@@ -168,7 +168,7 @@ if __name__ == "__main__":
     save_loc = os.path.join(host_dir, "outputs/auto/sn")
     scene = Scene(load_str, save_str,cameras)
     scene.render(verbose=True)
-    scene.plot(save_loc, verbose=True)
+    scene.plot(save_loc, verbose=True, remove_data=True)
 
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
     #prep_sn_data("../inputs/interpolated_frame_B2_416.npy", "../inputs/sn_alt.npy")
