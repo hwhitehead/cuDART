@@ -169,8 +169,9 @@ if __name__ == "__main__":
     c2 = Camera()
     c3 = Camera()
     cameras = [c1,c2,c3]
-    scene = Scene("../inputs/sn.npy", "../outputs/auto/sn",cameras)
-
+    load_str = os.path.join(host_dir, "inputs/sn.npy")
+    save_str = os.path.join(host_dir, "outputs/auto/sn")
+    scene = Scene(load_str, save_str,cameras)
     scene.render()
 
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
