@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import subprocess, os
 
 def set_plot_defaults(use_tex = True):
     """
@@ -151,6 +152,12 @@ def build_camera_file(save_str):
         for theta_pos in theta_array:
             f.write("{0} {1} {2} {3} {4} {5}\n".format(R_pos, theta_pos, phi_pos, tilt, length_X, length_Y))
 
+def build_cudart(main_dir):
+
+    os.chdir(main_dir)
+    result = subprocess.run(["make","clean"],check=True)
+    print(result.stdout)
+
 if __name__ == "__main__":
 
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
@@ -159,4 +166,5 @@ if __name__ == "__main__":
     #     load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
     #     save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
     #     plot_sn_data(load_str, save_str)
-    build_camera_file("../inputs/camera_uhr.txt")
+    # build_camera_file("../inputs/camera_uhr.txt")
+    build_cudart("/mnt/users/hww27/cuDART")
