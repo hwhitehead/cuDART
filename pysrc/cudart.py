@@ -75,11 +75,14 @@ class Scene:
 
         # prepare camera space
         self.build_camera_file()
+        if (verbose):
+            print("generated camera file.")
 
         # check executable exists, or build
         path_to_executable = os.path.join(host_dir, "bin/cudart")
         if not os.path.isfile(path_to_executable):
-            print("unable to located executable, forcing remake.")
+            if (verbose):
+                print("unable to located executable, forcing remake.")
             self.make()
 
         # call executable        
@@ -88,9 +91,18 @@ class Scene:
             command = ["nvprof"] + command
         if verbose:
             command = command + ["-v"]
+        print("calling render executable")
         subprocess.run(command)
+        print("executable finished.")
 
-    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10):
+        # destroy temp camera file if called
+        if not self.temp_camera_file == self.camera_file_name:
+            if os.path.exists(self.temp_camera_file):
+                os.remove(self.temp_camera_file)
+                if verbose:
+                    print("removed temporary camera file")
+
+    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_data=False):
         
         save_location = save_location.removesuffix(".png") # strip as needed
 
@@ -104,13 +116,23 @@ class Scene:
 
         num_images = len(self.cameras)
         for i in range(num_images):
+
             load_str = self.save_str + str(i).zfill(str_zfill) + ".npy"
             save_str = save_location + str(i).zfill(str_zfill) + ".png"
+
+            img = np.load(load_str)
 
             pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
             for handle in pc: 
                 handle.remove()
+            if (verbose):
+                print("saved png at " + save_str)
+
+            if (remove_data):
+                os.remove(load_str)
+                if (verbose):
+                    print("removed data file at " + load_str)
 
         plt.close("all")
 
