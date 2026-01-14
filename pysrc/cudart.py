@@ -135,8 +135,8 @@ def plot_sn_data(load_str, save_str):
 def build_camera_file(save_str):
 
     # statis
-    num_pixels_X = 512
-    num_pixels_Y = 512
+    num_pixels_X = 2048
+    num_pixels_Y = 2048
     R_pos = 2.0
     phi_pos = 0.0
     tilt = (-38 / 180) * np.pi
@@ -155,8 +155,8 @@ if __name__ == "__main__":
 
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
     #prep_sn_data("../inputs/interpolated_frame_B2_416.npy", "../inputs/sn_alt.npy")
-    for n in range(0,100):
-        load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
-        save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
-        plot_sn_data(load_str, save_str)
-    # build_camera_file("../inputs/camera.txt")
+    # for n in range(0,100):
+    #     load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
+    #     save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
+    #     plot_sn_data(load_str, save_str)
+    build_camera_file("../inputs/camera_uhr.txt")
