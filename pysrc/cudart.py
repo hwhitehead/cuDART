@@ -124,8 +124,7 @@ class Scene:
 
             pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
-            for handle in pc: 
-                handle.remove()
+            pc.remove()
             if (verbose):
                 print("saved png at " + save_str)
 
