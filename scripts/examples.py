@@ -165,7 +165,7 @@ if __name__ == "__main__":
     cameras = [c1,c2,c3]
     load_str = os.path.join(host_dir, "inputs/sn.npy")
     save_str = os.path.join(host_dir, "outputs/auto/sn")
-    save_loc = os.path.join(host_dir "outputs/auto/sn")
+    save_loc = os.path.join(host_dir, "outputs/auto/sn")
     scene = Scene(load_str, save_str,cameras)
     scene.render()
     scene.plot()
