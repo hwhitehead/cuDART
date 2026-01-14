@@ -73,5 +73,6 @@ class Scene:
         if profile: 
             command = ["nvprof"] + command
         if verbose:
-            command = command + "-v"
+            command = command + ["-v"]
+        print(command)
         subprocess.run(command)
