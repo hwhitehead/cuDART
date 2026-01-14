@@ -7,7 +7,7 @@ GCOV_CMD := gcov
 
 EXE_DIR := bin/
 EXECUTABLE := $(EXE_DIR)cudart
-GENCODE_FLAGS := -gencode arch=compute_75,code=sm_75
+GENCODE_FLAGS := -gencode arch=compute_75,code=sm_75 -Xptxas -O3 -use_fast_math -Xcompiler -O3
 SRC_FILES := $(wildcard src/main.cu)
 OBJ_DIR := obj/
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(SRC_FILES:.cu=.o)))
