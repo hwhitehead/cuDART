@@ -157,12 +157,6 @@ def build_camera_file(save_str):
         for theta_pos in theta_array:
             f.write("{0} {1} {2} {3} {4} {5}\n".format(R_pos, theta_pos, phi_pos, tilt, length_X, length_Y))
 
-def build_cudart(main_dir):
-
-    os.chdir(main_dir)
-    result = subprocess.run(["make","clean"],check=True)
-    
-
 if __name__ == "__main__":
 
     c1 = Camera(theta=0.00001)
@@ -171,14 +165,16 @@ if __name__ == "__main__":
     cameras = [c1,c2,c3]
     load_str = os.path.join(host_dir, "inputs/sn.npy")
     save_str = os.path.join(host_dir, "outputs/auto/sn")
+    save_loc = os.path.join(host_dir "outputs/auto/sn")
     scene = Scene(load_str, save_str,cameras)
     scene.render()
+    scene.plot()
 
     #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
     #prep_sn_data("../inputs/interpolated_frame_B2_416.npy", "../inputs/sn_alt.npy")
-    # for n in range(0,100):
-    #     load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
-    #     save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
+    # for n in range(0,3):
+    #     load_str = "../outputs/auto/sn" + str(n).zfill(3) + ".npy"
+    #     save_str = "../outputs/auto/sn" + str(n).zfill(3) + ".png"
     #     plot_sn_data(load_str, save_str)
     # build_camera_file("../inputs/camera_uhr.txt")
     # build_cudart("/mnt/users/hww27/cuDART")

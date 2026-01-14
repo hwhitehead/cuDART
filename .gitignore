@@ -5,6 +5,7 @@ configure.log
 # Object and binary directories
 obj/
 bin/
+pysrc/__pycache__/
 
 # large data files
 inputs/

@@ -2,6 +2,7 @@ import numpy as np
 import os, sys, subprocess
 
 host_dir = "/mnt/users/hww27/cuDART"
+str_zfill = 3
 
 class Camera:
     """
@@ -51,8 +52,10 @@ class Scene:
             self.temp_camera_file = self.camera_file_name
 
         # check camera dimensions
+        self.num_pixels_X = cameras[0].num_pixels_X
+        self.num_pixels_Y = cameras[0].num_pixels_Y
         for camera in self.cameras:
-            if camera.num_pixels_X != self.cameras[0].num_pixels_X or camera.num_pixels_Y != self.cameras[0].num_pixels_Y:
+            if camera.num_pixels_X != self.num_pixels_X or camera.num_pixels_Y != self.num_pixels_Y:
                 raise Exception("all Camera objects must have coherant image dimensions.")
 
     def build_camera_file(self):
@@ -62,15 +65,23 @@ class Scene:
             for camera in self.cameras:
                 f.write("{0} {1} {2} {3} {4} {5}\n".format(*camera.unpack()))
 
-    def render(self, profile=False, verbose=False, force_make=False):
+    def make(self):
+
+        subprocess.run(["make","clean"])
+        subprocess.run(["make"])
+
+    def render(self, profile=False, verbose=False, force_make=False, plot=False):
 
         # prepare camera space
         self.build_camera_file()
 
         # check executable exists, or build
-
-        # call executable
         path_to_executable = os.path.join(host_dir, "bin/cudart")
+        if not os.path.isfile(path_to_executable):
+            print("unable to located executable, forcing remake.")
+            self.make()
+
+        # call executable        
         command = [path_to_executable, "-i", self.load_str, "-s", self.save_str,"-c",self.temp_camera_file]
         if profile: 
             command = ["nvprof"] + command
@@ -78,3 +89,30 @@ class Scene:
             command = command + ["-v"]
         print(command)
         subprocess.run(command)
+
+    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10):
+        
+        save_location = save_location.removesuffix(".png") # strip as needed
+
+        # define persistent figure
+        fig = plt.figure(figsize=(10.0/3,10.0/3))
+        ax = fig.add_subplot()
+        plt.subplots_adjust(hspace=0, wspace=0)
+        X = np.linspace(0,1,num_pixels_X+1)
+        Y = np.linspace(0,1,num_pixels_Y+1)
+        XX, YY = np.meshgrid(X, Y, indexing="ij")
+
+        num_images = len(self.cameras)
+        for i in range(num_images):
+            load_str = self.save_str + str(i).zfill(str_zfill) + ".npy"
+            save_str = save_location + str(i).zfill(str_zfill) + ".png"
+
+            pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
+            fig.savefig(save_str, dpi=300, bbox_inches="tight")
+            for handle in pc: 
+                handle.remove()
+
+        plt.close("all")
+
+
+
