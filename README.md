@@ -1,4 +1,4 @@
-# cuDART: CUDA + DDA Accelerated Ray Tracing
+# cuDART: CUDA + DDA Accelerated Ray Tracing (v0.4)
 This repository contains a lightweight set of tools for raytracing Cartesian meshes, designed for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. The principle acceleration structure for this method is the Digitial Differential Analyzer (DDA) which allows for iterative low-cost propagation of rays through regular meshes. Previously implemented in Python [here](https://github.com/hwhitehead/DART), this repository utilises the CUDA toolkit to perform ray propagation and summation exceptionally quickly. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
 
 ## Usage
@@ -22,7 +22,7 @@ The `bin/cudart` executable accepts the following flags:
 - `-s` specifies the raw img `.npy` save location (appended numerically for multiple traces)
 - `-v` flags for verbose execution (prints progress to stdout)
 
-Upon execution.
+Upon execution:
 1. Data is loaded from the input `.npy` file to the host, and copied to the device
 2. Data is allocated on the device to store the image data
 3. Containers for the data (`MeshBlock`) and cameras (`Camera`) are initiliased
