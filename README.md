@@ -19,14 +19,16 @@ Exemplar usage of the Python frontend is included as [example.py](https://github
 The `bin/cudart` executable accepts the following flags:
 - `-i` specifies the input `.npy` file to trace
 - `-c` specifies the input `.txt` file specifying the camera(s)
-- `-s` specifies a save location (appended numerically for multiple traces)
-- `-v` flags for verbose execution (progress print to stdout)
+- `-s` specifies the raw img `.npy` save location (appended numerically for multiple traces)
+- `-v` flags for verbose execution (prints progress to stdout)
+
 Upon execution.
-- Data is loaded from the input `.npy` file to the host, and copied to the device
-- Data is allocated on the device to store the image data
-- Containers for the data (`MeshBlock`) and camera (`Camera`) are initiliased
-- The `render` kernel is called, calculating pixel values synchronously on the device
-- The image buffer is copied to the host, and saved to the output `.npy` file
+1. Data is loaded from the input `.npy` file to the host, and copied to the device
+2. Data is allocated on the device to store the image data
+3. Containers for the data (`MeshBlock`) and cameras (`Camera`) are initiliased
+4. The `render` kernel is called, calculating values for each pixel using the device
+5. The image buffer is copied to the host, and saved to the output `.npy` file
+6. Steps 4 and 5 are repeated for all cameras specified in the `.txt` file
 
 ## Requirements
 
