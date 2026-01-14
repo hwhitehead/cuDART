@@ -7,6 +7,7 @@ GCOV_CMD := gcov
 
 EXE_DIR := bin/
 EXECUTABLE := $(EXE_DIR)cudart
+GENCODE_FLAGS := -gencode arch=compute_75,code=cm_75
 SRC_FILES := $(wildcard src/main.cu)
 OBJ_DIR := obj/
 OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(SRC_FILES:.cu=.o)))
@@ -41,12 +42,12 @@ $(OBJ_DIR):
 # Link objects into executable
 
 $(EXECUTABLE) : $(OBJ_FILES)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $(OBJ_FILES) $(LDFLAGS) $(LDLIBS)
+	$(CXX) $(CPPFLAGS) $(GENCODE_FLAGS) $(CXXFLAGS) -o $@ $(OBJ_FILES) $(LDFLAGS) $(LDLIBS)
 
 # Create objects from source files
 
 $(OBJ_DIR)%.o : %.cu
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CPPFLAGS) $(GENCODE_FLAGS) $(CXXFLAGS) -c $< -o $@
 
 # Process .gcno and .gcda files from obj/ into .cpp.gcov files (and .hpp.gcov, .h.gcov) in root directory
 # Rerun Gcov on all files if a single .gcda changes. Other options to consider: --preserve-paths -abcu
