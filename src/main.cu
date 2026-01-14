@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
     }
 
     // initialise MeshBlock
-    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sentive domain definition
+    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sentive domain definition <-----
     vec3 xr(0.5, 0.5, 0.5);
     MeshBlock **mb = nullptr;
     clock_t mb_alloc_start = clock();

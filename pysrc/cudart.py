@@ -1,170 +1,75 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import subprocess, os
 
-def set_plot_defaults(use_tex = True):
+host_dir = "/mnt/users/hww27/cuDART"
+
+class Camera:
     """
-    assign default plot settings before figure creation
+    this class is a basic struct to contain camera properties
     """
-    ## FIGURE
 
-    # test for tex environment
-    if use_tex:
-        plt.rcParams["text.usetex"] = "True"
-        plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
+    def __init__(self, R=2.0, theta=0.500001 * np.pi, phi=0.0001, 
+                    num_pixels_X=512, num_pixels_Y=512, length_X=1.0, length_Y=1.0,
+                    bias = np.array([0.0,0.0,1.0]), tilt=0.0):
+        # copy data
+        self.R = R
+        self.theta = theta
+        self.phi = phi
+        self.num_pixels_X = num_pixels_X
+        self.num_pixels_Y = num_pixels_Y
+        self.length_X = length_X
+        self.length_Y = length_Y
+        self.bias = bias
+        self.tilt = tilt
 
-        # FONT
-        plt.rcParams['font.serif']=['cm']
-        plt.rcParams['font.family']='serif'
-        plt.rcParams['font.serif']=['cm']
-    else:
-        plt.rcParams["text.usetex"] = "False"
+    def unpack(self):
+        return self.R, self.theta, self.phi, self.tilt, self.length_X, self.length_Y # TODO: implement BIAS
 
-    plt.rcParams['font.size']=8 # defval 18
-    plt.rcParams['xtick.labelsize']=8
-    plt.rcParams['ytick.labelsize']=8
-    plt.rcParams['legend.fontsize']=8
-    plt.rcParams['axes.titlesize']=8
-    plt.rcParams['axes.labelsize']=8
-    plt.rcParams['axes.linewidth']=1.5
-    plt.rcParams["lines.linewidth"] = 2.2
-    ## TICKS
-    plt.rcParams['xtick.top']='False'
-    plt.rcParams['xtick.bottom']='True'
-    plt.rcParams['xtick.minor.visible']='True'
-    plt.rcParams['xtick.direction']='out'
-    plt.rcParams['ytick.left']='True'
-    plt.rcParams['ytick.right']='True'
-    plt.rcParams['ytick.minor.visible']='True'
-    plt.rcParams['ytick.direction']='out'
-    plt.rcParams['xtick.major.width']=1.5
-    plt.rcParams['xtick.minor.width']=1
-    plt.rcParams['xtick.major.size']=3
-    plt.rcParams['xtick.minor.size']=9/4
-    plt.rcParams['ytick.major.width']=1.5
-    plt.rcParams['ytick.minor.width']=1
-    plt.rcParams['ytick.major.size']=3
-    plt.rcParams['ytick.minor.size']=9/4
+class Scene:
+    """ 
+    this class provides a simple way for the user to call cuDART and process the results
+    """
+    def __init__(self, load_str, save_str, cameras=None, camera_file_name=None): 
 
-def gen_npy(save_str):
+        # parse load/save strings        
+        if not load_str.endswith(".npy"): # enforce suffix
+            load_str += ".npy"
+        self.save_str = load_str.rsplit(".",1)[0] # remove any suffix
 
-    data = np.array([3.0,4.0,5.0,6.0], dtype=np.float32)
+        if cameras is None:
+            self.cameras = [Camera()]
+        elif isinstance(cameras, list) or isinstance(cameras, np.ndarray):
+            self.cameras = cameras
+        else:
+            self.cameras = [cameras]
+        self.camera_file_name = camera_file_name
 
-    np.save(save_str, data)
+        if self.camera_file_name is None:
+            self.temp_file_name = "camera_file.txt"
+        else:
+            self.temp_file_name = self.camera_file_name
 
-def gen_simple_data(npy_str, png_str):
+        # check camera dimensions
+        for camera in self.cameras:
+            if camera.num_pixels_X != self.cameras[0].num_pixels_X or camera.num_pixels_Y != self.cameras[0].num_pixels_Y:
+                raise Exception("all Camera objects must have coherant image dimensions.")
 
-    mb_dims = np.array([9,9,9])
+    def build_camera_file(self):
 
-    x_fc = np.linspace(-0.5, 0.5, mb_dims[0]+1)
-    y_fc = np.linspace(-0.5, 0.5,  mb_dims[1]+1)
-    z_fc = np.linspace(-0.5, 0.5,  mb_dims[2]+1)
+        with open(self.temp_file_name, "w") as f:
+            f.write("{0} {1} 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y)) # header
+            for camera in self.cameras:
+                f.write("{0} {1} {2} {3} {4} {5}\n".format(*camera.unpack()))
 
-    x_cc = 0.5 * (x_fc[1:] + x_fc[:-1])
-    y_cc = 0.5 * (y_fc[1:] + y_fc[:-1])
-    z_cc = 0.5 * (z_fc[1:] + z_fc[:-1])
-    xx, yy, zz = np.meshgrid(x_cc, y_cc, z_cc, indexing="ij")
-    data = (yy * zz).astype(np.float32)
-    np.save(npy_str, data)
+    def render(self, profile=False, verbose=False):
 
-    set_plot_defaults()
-    fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
-    ax = fig.add_subplot()
+        # prepare camera space
+        self.build_camera_file()
 
-    yy, zz = np.meshgrid(y_fc, z_fc,indexing="ij")
-    ax.pcolormesh(yy, zz, data[0,:,:])
-
-    plt.subplots_adjust(hspace=0, wspace=0)
-    fig.savefig(png_str, dpi=300, bbox_inches="tight")
-    plt.close("all")
-
-def show_npy(load_str, save_str):
-
-    data = np.load(load_str)
-    print(data)
-    print(np.max(data))
-    print(np.min(data))
-
-    mb_dims = np.array([9, 9, 9])
-    x_fc = np.linspace(-0.5, 0.5, mb_dims[0] + 1)
-    y_fc = np.linspace(-0.5, 0.5, mb_dims[1] + 1)
-    z_fc = np.linspace(-0.5, 0.5, mb_dims[2] + 1)
-    yy, zz = np.meshgrid(y_fc, z_fc, indexing="ij")
-
-    set_plot_defaults()
-    fig = plt.figure(figsize=(10.0/3, 10.0/3))
-    ax = fig.add_subplot()
-    ax.pcolormesh(yy, zz, data, shading="flat")
-
-    plt.subplots_adjust(hspace=0, wspace=0)
-    fig.savefig(save_str, dpi=300, bbox_inches="tight")
-    plt.close("all")
-
-def prep_sn_data(load_str, save_str):
-
-    data = np.load(load_str).astype(dtype=np.float32)
-    quart_emm = np.einsum("kji->ijk", data)
-    quart_dims = np.shape(quart_emm)
-    hdim = quart_dims[0]
-    # populate FULL array (x4 size)
-    emm = np.zeros(shape=(2 * quart_dims[0], 2 * quart_dims[1], quart_dims[2]))
-    emm[hdim:, hdim:, :] = quart_emm  # +x, +y quadrant
-    emm[hdim:, :hdim, :] = quart_emm[:, ::-1, :]  # +x, -y quadrant
-    emm[:hdim, hdim:, :] = quart_emm[::-1, :, :]  # -x, +y quadrant
-    emm[:hdim, :hdim, :] = quart_emm[::-1, ::-1, :]  # -x, -y quadrant
-    np.save(save_str, emm.astype(np.float32))
-
-def plot_sn_data(load_str, save_str):
-
-    img = np.load(load_str)
-    img_shape = np.shape(img)
-    X = np.linspace(0,1,img_shape[0]+1)
-    Y = np.linspace(0,1,img_shape[0]+1)
-    XX, YY = np.meshgrid(X, Y, indexing="ij")
-
-    cmap = "Greys"
-
-    set_plot_defaults()
-    fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
-    ax = fig.add_subplot()
-    ax.pcolormesh(XX, YY, np.log10(img), vmin = -13, vmax=-10, cmap=cmap, shading="flat")
-
-    plt.subplots_adjust(hspace=0, wspace=0)
-    fig.savefig(save_str, dpi=300, bbox_inches="tight")
-    plt.close("all")
-
-def build_camera_file(save_str):
-
-    # statis
-    num_pixels_X = 2048
-    num_pixels_Y = 2048
-    R_pos = 2.0
-    phi_pos = 0.0
-    tilt = (-38 / 180) * np.pi
-    length_X = 1.0
-    length_Y = 1.0
-
-    num_snapshots = 100
-    theta_array = np.linspace(0,np.pi, num_snapshots)
-
-    with open(save_str, "w") as f:
-        f.write("{0} {1} 0.0 0.0 0.0 0.0\n".format(num_pixels_X, num_pixels_Y)) # header
-        for theta_pos in theta_array:
-            f.write("{0} {1} {2} {3} {4} {5}\n".format(R_pos, theta_pos, phi_pos, tilt, length_X, length_Y))
-
-def build_cudart(main_dir):
-
-    os.chdir(main_dir)
-    result = subprocess.run(["make","clean"],check=True)
-    print(result.stdout)
-
-if __name__ == "__main__":
-
-    #show_npy("../outputs/simple_img.npy", "../outputs/simple_img.png")
-    #prep_sn_data("../inputs/interpolated_frame_B2_416.npy", "../inputs/sn_alt.npy")
-    # for n in range(0,100):
-    #     load_str = "../outputs/npy/sn_imgs" + str(n).zfill(3) + ".npy"
-    #     save_str = "../outputs/png/sn_imgs" + str(n).zfill(3) + ".png"
-    #     plot_sn_data(load_str, save_str)
-    # build_camera_file("../inputs/camera_uhr.txt")
-    build_cudart("/mnt/users/hww27/cuDART")
+        # call executable
+        path_to_executable = os.path.join(host_dir, "bin/cudart")
+        command = [path_to_executable, "-i", self.load_str, "-s", save_str]
+        if profile: 
+            command = ["nvprof"] + command
+        if verbose:
+            command = command + "-v"
+        subprocess.run(command)
