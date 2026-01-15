@@ -1,5 +1,7 @@
 Profiling tests from v0.2 (0791f9d) 14/01/26
 
+All profiling perfomed with a GeForce RTX 2060 Ti, driver version: 590.44.01, CUDA version: 13.1 without persistence daemon.
+
 Single 512x512 trace of a 750x750x750 domain
 
 ==2251401== Profiling result:

@@ -24,7 +24,7 @@ class Camera:
         self.bias = bias
         self.tilt = tilt
 
-    def unpack(self):
+    def unpack(self): # TODO: accept bias in cmd line
         return self.R, self.theta, self.phi, self.tilt, self.length_X, self.length_Y # TODO: implement BIAS
 
 class Scene:
