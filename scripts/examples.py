@@ -19,6 +19,8 @@ def demo_scene_gen(num_img = 200, verbose=True, remove_data=True):
     template_camera.num_pixels_X = 2048
     template_camera.num_pixels_Y = 2048
     template_camera.tilt = (-38.0/180) * np.pi
+    template_camera.length_X = 0.66
+    template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
     theta_ar = np.linspace(0,np.pi,num_img)
