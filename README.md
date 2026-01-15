@@ -4,10 +4,10 @@
   <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/rotate.gif alt=animated/>
 </p>
 <p align="center"">
-  <em> Animation of a supernova-jet simulation snapshot, featuring 200 viewpoints each yielding a 2048^2 (4M) pixel image. Total runtime 50s, during which over 800M rays were cast through a 750^3 (400M) cell domain.</em>
+  <em> Animation of a supernova-jet simulation snapshot, featuring 200 viewpoints each yielding a 2048^2 image. Each frame generated in ~150ms, during which 4 million rays were cast through a simulation domain hosting over 400 million (750^3) cells.</em>
 </p>
 
-This repository contains a lightweight set of tools for raytracing Cartesian meshes, designed for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. The principle acceleration structure for this method is the Digitial Differential Analyzer (DDA) which allows for iterative low-cost propagation of rays through regular meshes. Previously implemented in Python [here](https://github.com/hwhitehead/DART), this repository utilises the CUDA toolkit to perform ray propagation and summation exceptionally quickly. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
+This repository contains a lightweight set of tools for raytracing regular orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
 
 ## Usage
 
@@ -38,19 +38,26 @@ Upon execution:
 5. The image buffer is copied to the host, and saved to the output `.npy` file
 6. Steps 4 and 5 are repeated for all cameras specified in the `.txt` file
 
-## Requirements
+## Technical Notes
+
+### Requirements
 
 To run `cuDART`, the following is required:
 - A CUDA-capable GPU
 - The `nvcc` CUDA compiler
 - Python (optional frontend, requires basic libraries such as `numpy` and `matplotlib`)
 
-## Performance
+### Performance
 `cuDART` is bottlenecked primarily by I/O; the actual tracing of meshes and image writes are performed exceptionally quickly. The main overhead occurs at executable intialisation, due to the cost of launching a GPU context and reading the `.npy` file into host memory. CUDA-type operations are MUCH faster, for a 1.7GB file copying the data into device memory takes ~300ms and generating a 4MP image from this data takes only 70ms (see profiling [here](https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.txt)). As such, peak efficiency with `cuDART` is achieved when many images are taken using the same data set e.g. many lines-of-sight. Comparing a 100 image render to a single image, `cuDART` transitions from 16% of the runtime dedicated to the render kernel to 95%.  
 
-## Portability
+### Portability
 
 By default, the [Makefile](https://github.com/hwhitehead/cuDART/blob/main/Makefile) uses the `-gencode` flag to avoid JIT machine-specification code compilation, targeting Turing architecture appropriate for the 2060 Ti machines used to develop this code. The users should tailor (or remove) these flags as appropriate for their runtime environment; see [here](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#gpu-compilation) for the full NVIDIA GPU/Virtual Architecture feature lists.
 
-## Inherited Libraries
+### Inherited Libraries
 To support interaction with commonly used simualtion file types, this repository uses the [libnpy](https://github.com/llohse/libnpy) library to support the import .npy files. In addition to this direct import, much of the code structure has been informed by pre-existing publically available codebases. Most notably, as with the original Pythonic DART repository, the underlying ray marching algorithm was written with help of [this](https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-acceleration-structure/grid.html) excellent guide on acceleration structures in C. [This](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/) developer blog on raytracing in CUDA helped introduce me to memory management and CUDA Makefiles, though the primary Makefile structure is actually inherited from the [Athena++](https://github.com/PrincetonUniversity/athena) repository. 
+
+### Development
+
+While `cuDART` is functional and tested in its current form, development on this code is ongoing. Future plans include supporting additional file types and increased camera flexibility. The latest code version is v0.4, v1.0 will be delayed until this repository is made public. 
+

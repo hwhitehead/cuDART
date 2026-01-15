@@ -107,6 +107,8 @@ class Scene:
 
     def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_data=False, verbose=False):
         
+        # TODO: add labelling options, axes?
+
         save_location = save_location.removesuffix(".png") # strip as needed
 
         # define persistent figure
