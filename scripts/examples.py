@@ -7,10 +7,10 @@ import subprocess, os, sys, copy
 sys.path.append("..")
 from pysrc import *
 
-def demo_scene_gen(num_img = 100, verbose=True, remove_data=True):
+def demo_scene_gen(num_img = 200, verbose=True, remove_data=True):
 
     # define targets
-    npy_load_str = os.path.join(host_dir, "inputs/sn.npy")
+    npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
     npy_save_str = os.path.join(host_dir, "outputs/auto/sn")
     png_save_str = os.path.join(host_dir, "outputs/auto/sn")
 
