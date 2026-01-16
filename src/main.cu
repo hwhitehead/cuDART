@@ -266,17 +266,14 @@ int main(int argc, char *argv[]) {
     if (verbose) {
         std::cout << "----------------------------------------------------------\n";
         if (num_divisions == 1) {
-            std::cout << "Data fits within available VRAM, launching single partition.\n";
+            std::cout << "Data fits within available VRAM, launching one partition.\n";
         } else {
             std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions.\n";
         }
-        std::cout << "----------------------------------------------------------\n";
         if (verbose) std::cout << "==========================================================\n";
     }
     for (auto &camera : cameras) {
         
-        
-
         clock_t this_img_start = clock();
 
         // iterate over partitions
