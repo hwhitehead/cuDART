@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
         float f_avail = free_f / 1e9;
         float f_req = bytes_in_data / 1e9;
         if (not (mem_char == nullptr)) {
-            float f_limit = static_cast<float>std::atof(mem_char) * 1e9;
+            float f_limit = static_cast<float>(std::atof(mem_char) * 1e9);
             printf("VRAM:  Avail = %.3fGB, Limit = %.3fGB, Required = %.3fGB\n",f_avail,f_limit,f_req);
         } else {
             printf("VRAM:  Avail = %.3fGB, Limit = None, Required = %.3fGB\n",f_avail,f_req);
