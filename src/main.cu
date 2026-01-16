@@ -300,6 +300,7 @@ int main(int argc, char *argv[]) {
             clock_t data_copy_start = clock();
             float* data_addr = data + il * sizeof(float);
             checkCudaErrors(cudaMemcpy(d_data, data_addr, bytes_on_device, cudaMemcpyHostToDevice));
+            checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
                 printf("memcpy data             (host->device)      %.6fs\n",data_copy_dur);
