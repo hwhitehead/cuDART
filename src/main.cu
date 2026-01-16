@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
     // define space for user settings
     std::string cudart_version = "version 0.4 - January 2026";
-    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr;
+    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     bool verbose = false;
 
     for (int i = 1; i < argc; i++) {
@@ -69,6 +69,9 @@ int main(int argc, char *argv[]) {
                 case 's':
                     save_char = argv[++i];
                     break;
+                case 'm':
+                    mem_char = argv[++i];
+                    break;
                 case 'v':
                     verbose = true;
                     break;
@@ -83,6 +86,7 @@ int main(int argc, char *argv[]) {
                     std::cout << " -i <file>    specify input file [.npy]\n";
                     std::cout << " -s <file>    specify render save file [.ppm]\n";
                     std::cout << " -c <file>    specify camera data file [.txt]\n";
+                    std::cout << " -m <value>   max VRAM in GB\n";
                     std::cout << " -v           verbosity flag\n";
                     std::cout << " -h           this help message\n"; 
                     return 0; 
@@ -172,6 +176,8 @@ int main(int argc, char *argv[]) {
         std::cout << "data mem requirements: " << bytes_in_data << std::endl;
         float mem_ratio = static_cast<float>(free_t) / static_cast<float>(bytes_in_data);
         std::cout << "memory ratio: " << mem_ratio << std::endl; 
+        float max_mem = std::atof(mem_char);
+        std::cout << "memory limit: " << max_mem << std::endl;
     }
 
     // allocate device memory
