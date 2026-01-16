@@ -268,9 +268,9 @@ int main(int argc, char *argv[]) {
         float f_req = bytes_in_data / 1e9;
         if (not (mem_char == nullptr)) {
             float f_limit = static_cast<float>(std::atof(mem_char));
-            printf("VRAM:  Avail = %.3fGB, Limit = %.3fGB, Req. = %.3fGB\n",f_avail,f_limit,f_req);
+            printf("VRAM: Avail = %.2fGB, Limit = %.2fGB, Required = %.2fGB\n",f_avail,f_limit,f_req);
         } else {
-            printf("VRAM:  Avail = %.3fGB, Limit = None, Required = %.3fGB\n",f_avail,f_req);
+            printf("VRAM: Avail = %.2fGB, Limit = None, Required = %.2fGB\n",f_avail,f_req);
         }
         
         if (num_divisions == 1) {
@@ -298,8 +298,8 @@ int main(int argc, char *argv[]) {
 
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
-            size_t mem_shift = il * sizeof(float);
-            checkCudaErrors(cudaMemcpy(d_data, data + mem_shift, bytes_on_device, cudaMemcpyHostToDevice));
+            float* data_addr = data + il * sizeof(float);
+            checkCudaErrors(cudaMemcpy(d_data, data_addr, bytes_on_device, cudaMemcpyHostToDevice));
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
                 printf("memcpy data             (host->device)      %.6fs\n",data_copy_dur);
