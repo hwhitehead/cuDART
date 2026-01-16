@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
     float free_f = static_cast<float>(free_t);
     float avail_mem = free_f;
     if (not (mem_char == nullptr)) {
-        avail_mem = std::min(std::atof(mem_char) * 1e9, avial_mem); // convert GB to B
+        avail_mem = std::min(std::atof(mem_char) * 1e9, avail_mem); // convert GB to B
     }
 
     // define data memory on device
