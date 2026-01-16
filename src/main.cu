@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
             int il = n * floats_on_device;
             int ir = il + floats_on_device;
             std::cout << "(il,ir) = (" << il << "," << ir << ")\n";
-            size_t sublen_in_bytes = (il - ir) * sizeof(float);
+            size_t sublen_in_bytes = (ir - il) * sizeof(float);
             std::cout << "sublen_in_bytes = " << sublen_in_bytes << std::endl;
 
             // copy subsection of data into device memory
