@@ -51,7 +51,7 @@ __global__ void render_partitioned_img(Camera camera, float *img, MeshBlock **mb
     img[pixel_index] += (*mb)->calc_partitioned_trace(pixel_ray, il, ir);
 }
 
-__global__ void wipe_img(float *img) {
+__global__ void wipe_img(Camera camera, float *img) {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -212,20 +212,6 @@ int main(int argc, char *argv[]) {
         printf("malloc image            (device)            %.6fs\n",d_img_alloc_dur);
     }
 
-    // initialise MeshBlock on device
-    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
-    vec3 xr(0.5, 0.5, 0.5);
-    MeshBlock **mb = nullptr;
-    clock_t mb_alloc_start = clock();
-    checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
-    init_meshblock<<<1,1>>>(mb, xl, xr, mb_dims, d_data);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
-    if (verbose) {
-        float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init MeshBlock   (device)            %.6fs\n",mb_alloc_dur);
-    }
-
     // check dimensions of GPU/user VRAM maximum
     size_t free_t, total_t;
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
@@ -250,6 +236,20 @@ int main(int argc, char *argv[]) {
         printf("malloc data             (device)            %.6fs\n",d_data_alloc_dur);
     }
 
+    // initialise MeshBlock on device
+    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
+    vec3 xr(0.5, 0.5, 0.5);
+    MeshBlock **mb = nullptr;
+    clock_t mb_alloc_start = clock();
+    checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
+    init_meshblock<<<1,1>>>(mb, xl, xr, mb_dims, d_data);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+    if (verbose) {
+        float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc/init MeshBlock   (device)            %.6fs\n",mb_alloc_dur);
+    }
+
     // define render shape    
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
         for (int n = 0; n < num_divisions; n++) {
             if (verbose) std::cout << "==========================================================\n";
             // wipe image
-            wipe_img<<<blocks_per_grid,threads_per_block>>>(d_img);
+            wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
             checkCudaErrors(cudaPeekAtLastError());
             checkCudaErrors(cudaDeviceSynchronize());
 
