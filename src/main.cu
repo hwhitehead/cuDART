@@ -173,9 +173,9 @@ int main(int argc, char *argv[]) {
 
     if (verbose) {
         std::cout << "Starting cuDART (verbose)...\n";
-        std::cout << "----------------------------------------------------------\n";
+        std::cout << "==========================================================\n";
         std::cout << "|      Activity        |    Location    |    Duration    |\n";
-        std::cout << "----------------------------------------------------------\n";
+        std::cout << "==========================================================\n";
     }
     // load npy data as specified by user
     clock_t npy_read_start = clock();
@@ -215,9 +215,12 @@ int main(int argc, char *argv[]) {
     // check dimensions of GPU/user VRAM maximum
     size_t free_t, total_t;
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
+    std::cout << "finished mem calc" << std::endl;
     float free_f = static_cast<float>(free_t);
-    float user_max_mem = std::atof(mem_char) * 1e9; // convert GB to B
-    float avail_mem = std::min(free_f, user_max_mem);
+    float avil_mem = free_f;
+    if (not mem_char == nullptr) {
+        avail_mem = std::min(std::atof(mem_char) * 1e9); // convert GB to B
+    }
 
     // define data memory on device
     int num_divisions = 1;
@@ -229,9 +232,13 @@ int main(int argc, char *argv[]) {
         bytes_on_device = bytes_in_data / num_divisions;
     } 
 
-    std::cout << "b_in_data = " << bytes_in_data << std::endl;
-    std::cout << "b_on_d = " << bytes_on_device << std::endl;
-    std::cout << "num_divisions = " << num_divisions << std::endl;
+    if (verbose) {
+        if (num_divisions == 1) {
+            std::cout << "Data fits within available VRAM, launching single partition.\n";
+        } else {
+            std::cout << "Data exceeds available VRAM, launching " << num_division << " partitions.\n";
+        }
+    }
 
     clock_t d_data_alloc_start = clock();
     checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
@@ -264,14 +271,13 @@ int main(int argc, char *argv[]) {
     // iterate over cameras
     int img_count = 0;
     size_t num_zeros = 3;
-    if (verbose) std::cout << "----------------------------------------------------------\n";
+    if (verbose) std::cout << "==========================================================\n";
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
 
         // iterate over partitions
         for (int n = 0; n < num_divisions; n++) {
-            if (verbose) std::cout << "==========================================================\n";
             // wipe image
             wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
             checkCudaErrors(cudaPeekAtLastError());
@@ -297,8 +303,9 @@ int main(int argc, char *argv[]) {
                 float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
                 printf("render kernel           (device)            %.6fs\n",render_dur);
             }
-            if (verbose) std::cout << "==========================================================\n";
+            if (verbose && n != num_divisions - 1) std::cout << "----------------------------------------------------------\n";
         }
+        if (verbose) std::cout << "==========================================================\n";
 
         // copy image data to host
         clock_t img_copy_start = clock();
