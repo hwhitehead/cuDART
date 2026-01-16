@@ -288,6 +288,8 @@ int main(int argc, char *argv[]) {
         
         clock_t this_img_start = clock();
 
+        // TODO: escape single partition run from loop to bypass wipe overhead
+
         // iterate over partitions
         for (int n = 0; n < num_divisions; n++) {
             // wipe image
@@ -304,7 +306,7 @@ int main(int argc, char *argv[]) {
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
             float* data_addr = data + il * sizeof(float);
-            checkCudaErrors(cudaMemcpy(d_data, data_addr, bytes_on_device, cudaMemcpyHostToDevice)); // FAIL here when partitioned
+            checkCudaErrors(cudaMemcpy(d_data, data_addr, 0.5 * bytes_on_device, cudaMemcpyHostToDevice)); // FAIL here when partitioned
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
