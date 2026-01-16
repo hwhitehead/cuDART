@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
     if (verbose) {
         float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc image            (device)            %.6fs\n",d_img_alloc_dur);
+        printf("malloc img              (device)            %.6fs\n",d_img_alloc_dur);
     }
 
     // check dimensions of GPU/user VRAM maximum
@@ -271,9 +271,12 @@ int main(int argc, char *argv[]) {
             std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions.\n";
         }
         std::cout << "----------------------------------------------------------\n";
+        if (verbose) std::cout << "==========================================================\n";
     }
     for (auto &camera : cameras) {
         
+        
+
         clock_t this_img_start = clock();
 
         // iterate over partitions
@@ -303,7 +306,7 @@ int main(int argc, char *argv[]) {
                 float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
                 printf("render kernel           (device)            %.6fs\n",render_dur);
             }
-            if (verbose && n != num_divisions - 1) std::cout << "..........................................................\n";
+            if (verbose) std::cout << "..........................................................\n";
         }
 
         // copy image data to host
