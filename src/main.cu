@@ -217,9 +217,9 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
     std::cout << "finished mem calc" << std::endl;
     float free_f = static_cast<float>(free_t);
-    float avil_mem = free_f;
-    if (not mem_char == nullptr) {
-        avail_mem = std::min(std::atof(mem_char) * 1e9); // convert GB to B
+    float avail_mem = free_f;
+    if (not (mem_char == nullptr)) {
+        avail_mem = std::min(std::atof(mem_char) * 1e9, avial_mem); // convert GB to B
     }
 
     // define data memory on device
@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
         if (num_divisions == 1) {
             std::cout << "Data fits within available VRAM, launching single partition.\n";
         } else {
-            std::cout << "Data exceeds available VRAM, launching " << num_division << " partitions.\n";
+            std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions.\n";
         }
     }
 
