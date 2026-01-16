@@ -298,11 +298,13 @@ int main(int argc, char *argv[]) {
             int il = n * floats_on_device;
             int ir = il + floats_on_device;
             std::cout << "(il,ir) = (" << il << "," << ir << ")\n";
+            size_t sublen_in_bytes = (il - ir) * sizeof(float);
+            std::cout << "sublen_in_bytes = " << sublen_in_bytes << std::endl;
 
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
             float* data_addr = data + il * sizeof(float);
-            checkCudaErrors(cudaMemcpy(d_data, data_addr, bytes_on_device, cudaMemcpyHostToDevice));
+            checkCudaErrors(cudaMemcpy(d_data, data_addr, bytes_on_device, cudaMemcpyHostToDevice)); // FAIL here when partitioned
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
