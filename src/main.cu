@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     size_t free_t, total_t;
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
     if (verbose) {
-        std::cout << "free mem: " << free_t << " total mem: " << total_mem << std::endl;
+        std::cout << "free mem: " << free_t << " total mem: " << total_t << std::endl;
     }
 
     // allocate device memory
