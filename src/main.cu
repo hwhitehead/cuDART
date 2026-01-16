@@ -192,6 +192,7 @@ int main(int argc, char *argv[]) {
         printf("read/malloc data        (npy->host)         %.6fs\n",npy_read_dur);
     }
 
+    // load image dimensions from the first camera
     Camera camera = cameras[0];
     const size_t bytes_in_img = camera.num_pixels * sizeof(float);
 
@@ -281,6 +282,8 @@ int main(int argc, char *argv[]) {
         if (verbose) std::cout << "==========================================================\n";
     }
     std::cout << "data size = " << data_size << std::endl;
+    std::cout << "bytes_on_device = " << bytes_on_device << std::endl;
+    std::cout << "floats_on_device = " << floats_on_device << std::endl;
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
