@@ -267,8 +267,8 @@ int main(int argc, char *argv[]) {
         float f_avail = free_f / 1e9;
         float f_req = bytes_in_data / 1e9;
         if (not (mem_char == nullptr)) {
-            float f_limit = static_cast<float>(std::atof(mem_char) * 1e9);
-            printf("VRAM:  Avail = %.3fGB, Limit = %.3fGB, Required = %.3fGB\n",f_avail,f_limit,f_req);
+            float f_limit = static_cast<float>(std::atof(mem_char));
+            printf("VRAM:  Avail = %.3fGB, Limit = %.3fGB, Req. = %.3fGB\n",f_avail,f_limit,f_req);
         } else {
             printf("VRAM:  Avail = %.3fGB, Limit = None, Required = %.3fGB\n",f_avail,f_req);
         }
@@ -293,6 +293,7 @@ int main(int argc, char *argv[]) {
 
             int il = n * floats_on_device;
             int ir = il + floats_on_device;
+            std::cout << "(il,ir) = (" << il << "," << ir << ")\n";
 
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
