@@ -39,6 +39,15 @@ Upon execution:
 6. Steps 4 and 5 are repeated for all cameras specified in the `.txt` file
 7. The program frees all associated memory registers (device and host) and terminates 
 
+## Performance
+`cuDART` is bottlenecked primarily by I/O; the actual tracing of meshes and image writes are performed exceptionally quickly. The main overhead occurs at executable intialisation, due to the cost of launching a GPU context and reading the `.npy` file into host memory, usually taking O(1)s. CUDA-type operations are MUCH faster, copying the data into device memory and generating an image from this data takes only O(100)ms. For sensible image dimsions, the data transfer to device is more expensive than the trace operation itself (see profiling [here](https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.txt)). As such, peak efficiency with `cuDART` is achieved when many images are taken using the same data set e.g. many lines-of-sight. Comparing a 100 image render to a single image, `cuDART` transitions from 16% of the runtime attributed to the render kernel up to 95%. 
+
+### Comparison to DART
+
+Performance comparisons can be made with a pervious implementation of the DDA algorithm, the single-core Pythonic `DART` (hosted privately [here](https://github.com/hwhitehead/DART)). Extrpolating scaling tests performed on `DART`, tracing a $2048^2$$ image from a $750^3$ image would take O(100)s. The same trace in `cuDART` takes O(100)ms, a factor 1000 speedup. This marks an extreme case, as the high image resolution supersamples the domain resolution. `DART` itself uses `numba`, a Python JIT compiler to accelerate its own calculations, without this module the code is 100 times slower. As such `cuDART` boasts a $10^3$ efficiency boost over JIT-compiled `DART`, and a $10^5$ boost over the raw Python.
+
+`DART` features routines not present in the current `cuDART` implementation, such as the ability to "bake" rays and reuse them on different domains with identical dimensions. This allowed for a 30-60% saving in render cost for repeated imaging of different domains. Such features are not present in `cuDART` primarily because baking significantly increases the memory overhead which is more problematic for GPU codes. Additional costs associated with the absence of this feature are rapidly amortized by the efficiency of the render algorithm.
+
 ## Technical Notes
 
 ### Requirements
@@ -48,12 +57,10 @@ To run `cuDART`, the following is required:
 - The `nvcc` CUDA compiler
 - Python (optional frontend, requires basic libraries such as `numpy` and `matplotlib`)
 
-### Performance
-`cuDART` is bottlenecked primarily by I/O; the actual tracing of meshes and image writes are performed exceptionally quickly. The main overhead occurs at executable intialisation, due to the cost of launching a GPU context and reading the `.npy` file into host memory, usually taking O(1)s. CUDA-type operations are MUCH faster, copying the data into device memory and generating an image from this data takes only O(100)ms. For sensible image dimsions, the data transfer to device is more expensive than the trace operation itself (see profiling [here](https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.txt)). As such, peak efficiency with `cuDART` is achieved when many images are taken using the same data set e.g. many lines-of-sight. Comparing a 100 image render to a single image, `cuDART` transitions from 16% of the runtime attributed to the render kernel up to 95%. 
 
 ### Portability
 
-By default, the [Makefile](https://github.com/hwhitehead/cuDART/blob/main/Makefile) uses the `-gencode` flag to avoid just-in-time ([JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation)) machine-specification code compilation, targeting Turing architecture appropriate for the GeForce RTX 2060 Ti machines used during development of this code. The users should tailor (or remove) these flags as appropriate for their runtime environment: see [here](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#gpu-compilation) for the full NVIDIA GPU/Virtual Architecture feature lists.
+By default, the [Makefile](https://github.com/hwhitehead/cuDART/blob/main/Makefile) uses the `-gencode` flag to avoid just-in-time ([JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation)) machine-specification code compilation, targeting Turing architecture appropriate for the GeForce RTX 2080 Ti machines used during development of this code. The users should tailor (or remove) these flags as appropriate for their runtime environment: see [here](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#gpu-compilation) for the full NVIDIA GPU/Virtual Architecture feature lists.
 
 ### Inherited Libraries
 To support interaction with commonly used simulation file types, this repository uses the [libnpy](https://github.com/llohse/libnpy) library to support the import of `.npy` files. In addition to the verbatim use of this libary, much of the code structure has been informed by pre-existing publically available codebases. Most notably, as with the original Pythonic [DART](https://github.com/hwhitehead/DART) repository, the underlying DDA algorithm was written with help of [this](https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-acceleration-structure/grid.html) excellent guide on acceleration structures in C. [This](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/) developer blog on raytracing in CUDA helped introduce me to memory management and CUDA Makefiles, though the primary Makefile structure is actually inherited from the [Athena++](https://github.com/PrincetonUniversity/athena) repository. 
