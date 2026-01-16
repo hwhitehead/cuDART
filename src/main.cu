@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
         printf("malloc image            (host)              %.6fs\n",img_alloc_dur);
     }
 
-    // initialise image space on device
+    // initialise image space on device TODO: identify insane overhead?? O(5)s
     clock_t d_img_alloc_start = clock();
     float *d_img = nullptr;
     checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
@@ -299,6 +299,8 @@ int main(int argc, char *argv[]) {
 
             int il = n * floats_on_device;
             int ir = il + floats_on_device;
+            if (ir > data_size) ir = data_size; // prevent overrun
+            size_t bytes_in_sub = (ir - il) * sizeof(float);
             std::cout << "(il,ir) = (" << il << "," << ir << ")\n";
             size_t sublen_in_bytes = (ir - il) * sizeof(float);
             std::cout << "sublen_in_bytes = " << sublen_in_bytes << std::endl;
@@ -306,7 +308,7 @@ int main(int argc, char *argv[]) {
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
             float* data_addr = data + il * sizeof(float);
-            checkCudaErrors(cudaMemcpy(d_data, data_addr, 0.5 * bytes_on_device, cudaMemcpyHostToDevice)); // FAIL here when partitioned
+            checkCudaErrors(cudaMemcpy(d_data, data_addr, bytes_in_sub, cudaMemcpyHostToDevice)); // FAIL here when partitioned
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
