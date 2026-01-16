@@ -229,6 +229,10 @@ int main(int argc, char *argv[]) {
         bytes_on_device = bytes_in_data / num_divisions;
     } 
 
+    std::cout << "b_in_data = " << bytes_in_data << std::endl;
+    std::cout << "b_on_d = " << bytes_on_device << std::endl;
+    std::cout << "num_divisions = " << num_divisions << std::endl;
+
     clock_t d_data_alloc_start = clock();
     checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
     if (verbose) {
