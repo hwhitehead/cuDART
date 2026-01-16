@@ -70,7 +70,7 @@ __device__ float MeshBlock::calc_trace(Ray &r) {
             int axis = axes_bitmap[k];
 
             // determine dwell
-            float dwell = next_t_cross[axis] - t_current; // INVALID
+            float dwell = next_t_cross[axis] - t_current; 
 
             // add local cell to trace
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]

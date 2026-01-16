@@ -21,7 +21,9 @@
 #include "tools.hpp"
 #include "camera.hpp"
 
-__global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
+// THIS CODE IS WIP AND NOT ACTIVE IN MAIN
+
+__global__ void render_img(Camera camera, float *img, Mesh **mesh) {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -33,7 +35,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     Ray pixel_ray(pixel_origin, camera.normal);
     
     // calculate pixel value from MeshBlock data
-    img[pixel_index] = (*mb)->calc_trace(pixel_ray);
+    img[pixel_index] = (*mesh)->calc_trace(pixel_ray);
 }
 
 int main(int argc, char *argv[]) {
@@ -96,6 +98,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    // read in camera data from .txt file
     std::vector<Camera> cameras = {};
     if (camera_char == nullptr && verbose) {
         std::cout << "No user specified camera input, falling back to default.\n";
@@ -164,14 +167,20 @@ int main(int argc, char *argv[]) {
         printf("read/malloc data        (npy->host)         %.6fs\n",npy_read_dur);
     }
 
-    // check dimensions of GPU
-    size_t free_t, total_t;
-    checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
-    if (verbose) {
-        std::cout << "free mem: " << free_t << " total mem: " << total_mem << std::endl;
+    // allocate device memory
+    int num_meshblocks = 1;
+    // allocate space on device for array of pointers (to data arrays)
+    float **data_list;
+    cudaMalloc((void **)&data_list, num_meshblocks * sizeof(float *));
+    // generate array of meshblock labels
+    MeshBlockLabel mb_labels[num_meshblocks];
+    for (int n = 0; n < num_meshblocks; n++) {
+        mb_labels[n].xl = vec3(-0.5, -0.5, -0.5);
+        mb_labels[n].xr = vec3(0.5, 0.5, 0.5);
+        mb_labels[n].dims = mb_dims;
     }
 
-    // allocate device memory
+
     float *d_data = nullptr;
     clock_t d_data_alloc_start = clock();
     checkCudaErrors(cudaMalloc(&d_data, bytes_in_data));
