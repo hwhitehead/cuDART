@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
         }
         if (verbose) std::cout << "==========================================================\n";
     }
-    std::cout << "data size = " << mb_size << std::endl;
+    std::cout << "data size = " << data_size << std::endl;
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
 
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
-            size_t mem_shift = il * sizeof(float)
+            size_t mem_shift = il * sizeof(float);
             checkCudaErrors(cudaMemcpy(d_data, data + mem_shift, bytes_on_device, cudaMemcpyHostToDevice));
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
