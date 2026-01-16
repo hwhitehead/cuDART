@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     if (verbose) {
         std::cout << "free mem: " << free_t << " total mem: " << total_t << std::endl;
         std::cout << "data mem requirements: " << bytes_in_data << std::endl;
-        float mem_ratio = static_cast<float>free_t / bytes_in_data;
+        float mem_ratio = static_cast<float>(free_t) / static_cast<float>(bytes_in_data);
         std::cout << "memory ratio: " << mem_ratio << std::endl; 
     }
 
