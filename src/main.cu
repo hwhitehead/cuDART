@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
             float* data_addr = data + il * sizeof(float);
-            checkCudaErrors(cudaMemcpy(d_data, data_addr, bytes_in_sub, cudaMemcpyHostToDevice)); // FAIL here when partitioned
+            checkCudaErrors(cudaMemcpy(d_data, &data[il], bytes_in_sub, cudaMemcpyHostToDevice)); // FAIL here when partitioned
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
