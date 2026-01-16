@@ -26,7 +26,7 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
-  	int pixel_index = i * camera.num_pixels_Y + j; // well behaved
+  	int pixel_index = i * camera.num_pixels_Y + j; 
 
     // initialise ray
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);
@@ -34,6 +34,30 @@ __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     
     // calculate pixel value from MeshBlock data
     img[pixel_index] = (*mb)->calc_trace(pixel_ray);
+}
+
+__global__ void render_partitioned_img(Camera camera, float *img, MeshBlock **mb, int il, int ir) {
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+
+    // initialise ray
+    vec3 pixel_origin = camera.calc_pixel_origin(i, j);
+    Ray pixel_ray(pixel_origin, camera.normal);
+    
+    // calculate pixel value from MeshBlock data
+    img[pixel_index] += (*mb)->calc_partitioned_trace(pixel_ray, il, ir);
+}
+
+__global__ void wipe_img(float *img) {
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+    img[pixel_index] = 0; // reset image
 }
 
 int main(int argc, char *argv[]) {
@@ -168,49 +192,6 @@ int main(int argc, char *argv[]) {
         printf("read/malloc data        (npy->host)         %.6fs\n",npy_read_dur);
     }
 
-    // check dimensions of GPU
-    size_t free_t, total_t;
-    checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
-    if (verbose) {
-        std::cout << "free mem: " << free_t << " total mem: " << total_t << std::endl;
-        std::cout << "data mem requirements: " << bytes_in_data << std::endl;
-        float mem_ratio = static_cast<float>(free_t) / static_cast<float>(bytes_in_data);
-        std::cout << "memory ratio: " << mem_ratio << std::endl; 
-        float max_mem = std::atof(mem_char);
-        std::cout << "memory limit: " << max_mem << std::endl;
-    }
-
-    // allocate device memory
-    float *d_data = nullptr;
-    clock_t d_data_alloc_start = clock();
-    checkCudaErrors(cudaMalloc(&d_data, bytes_in_data));
-    if (verbose) {
-        float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data             (device)            %.6fs\n",d_data_alloc_dur);
-    }
-    
-    // copy data into device memory
-    clock_t data_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(d_data, data, bytes_in_data, cudaMemcpyHostToDevice));
-    if (verbose) {
-        float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-        printf("memcpy data             (host->device)      %.6fs\n",data_copy_dur);
-    }
-
-    // initialise MeshBlock
-    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sentive domain definition <-----
-    vec3 xr(0.5, 0.5, 0.5);
-    MeshBlock **mb = nullptr;
-    clock_t mb_alloc_start = clock();
-    checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
-    init_meshblock<<<1,1>>>(mb, xl, xr, mb_dims, d_data);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
-    if (verbose) {
-        float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init MeshBlock   (device)            %.6fs\n",mb_alloc_dur);
-    }
-
     Camera camera = cameras[0];
     const size_t bytes_in_img = camera.num_pixels * sizeof(float);
 
@@ -231,12 +212,51 @@ int main(int argc, char *argv[]) {
         printf("malloc image            (device)            %.6fs\n",d_img_alloc_dur);
     }
 
+    // initialise MeshBlock on device
+    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
+    vec3 xr(0.5, 0.5, 0.5);
+    MeshBlock **mb = nullptr;
+    clock_t mb_alloc_start = clock();
+    checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
+    init_meshblock<<<1,1>>>(mb, xl, xr, mb_dims, d_data);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+    if (verbose) {
+        float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc/init MeshBlock   (device)            %.6fs\n",mb_alloc_dur);
+    }
+
+    // check dimensions of GPU/user VRAM maximum
+    size_t free_t, total_t;
+    checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
+    float free_f = static_cast<float>(free_t);
+    float user_max_mem = std::atof(mem_char) * 1e9; // convert GB to B
+    float avail_mem = std::min(free_f, user_max_mem);
+
+    // define data memory on device
+    int num_divisions = 1;
+    float *d_data = nullptr;
+    size_t bytes_on_device = bytes_in_data;
+    if (bytes_in_data > avail_mem) { // data must be partioned to fit device
+        float mem_ratio = bytes_in_data / avail_mem;
+        num_divisions = std::ceil(mem_ratio);
+        bytes_on_device = bytes_in_data / num_divisions;
+    } 
+
+    clock_t d_data_alloc_start = clock();
+    checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
+    if (verbose) {
+        float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc data             (device)            %.6fs\n",d_data_alloc_dur);
+    }
+
     // define render shape    
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
                                 std::ceil((float)camera.num_pixels_Y / ty));
-    
+    int floats_on_device = bytes_on_device / sizeof(float);
+
     // iterate over cameras
     int img_count = 0;
     size_t num_zeros = 3;
@@ -245,14 +265,35 @@ int main(int argc, char *argv[]) {
         
         clock_t this_img_start = clock();
 
-        // call render
-        clock_t render_start = clock();
-        render_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb);
-        checkCudaErrors(cudaPeekAtLastError());
-        checkCudaErrors(cudaDeviceSynchronize());
-        if (verbose) {
-            float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-            printf("render kernel           (device)            %.6fs\n",render_dur);
+        // iterate over partitions
+        for (int n = 0; n < num_divisions; n++) {
+            if (verbose) std::cout << "==========================================================\n";
+            // wipe image
+            wipe_img<<<blocks_per_grid,threads_per_block>>>(d_img);
+            checkCudaErrors(cudaPeekAtLastError());
+            checkCudaErrors(cudaDeviceSynchronize());
+
+            int il = n * floats_on_device;
+            int ir = il + floats_on_device;
+
+            // copy subsection of data into device memory
+            clock_t data_copy_start = clock();
+            checkCudaErrors(cudaMemcpy(d_data, data + n * floats_on_device, bytes_on_device, cudaMemcpyHostToDevice));
+            if (verbose) {
+                float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
+                printf("memcpy data             (host->device)      %.6fs\n",data_copy_dur);
+            }
+
+            // call render
+            clock_t render_start = clock();
+            render_partitioned_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb, il, ir);
+            checkCudaErrors(cudaPeekAtLastError());
+            checkCudaErrors(cudaDeviceSynchronize());
+            if (verbose) {
+                float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
+                printf("render kernel           (device)            %.6fs\n",render_dur);
+            }
+            if (verbose) std::cout << "==========================================================\n";
         }
 
         // copy image data to host
