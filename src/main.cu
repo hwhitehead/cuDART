@@ -169,6 +169,9 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
     if (verbose) {
         std::cout << "free mem: " << free_t << " total mem: " << total_t << std::endl;
+        std::cout << "data mem requirements: " << bytes_in_data << std::endl;
+        float mem_ratio = std::static_cast<float>free_t / bytes_in_data;
+        std::cout << "memory ratio: " << mem_ratio << std::endl; 
     }
 
     // allocate device memory
