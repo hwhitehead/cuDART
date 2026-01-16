@@ -215,7 +215,6 @@ int main(int argc, char *argv[]) {
     // check dimensions of GPU/user VRAM maximum
     size_t free_t, total_t;
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
-    std::cout << "finished mem calc" << std::endl;
     float free_f = static_cast<float>(free_t);
     float avail_mem = free_f;
     if (not (mem_char == nullptr)) {
@@ -231,14 +230,6 @@ int main(int argc, char *argv[]) {
         num_divisions = std::ceil(mem_ratio);
         bytes_on_device = bytes_in_data / num_divisions;
     } 
-
-    if (verbose) {
-        if (num_divisions == 1) {
-            std::cout << "Data fits within available VRAM, launching single partition.\n";
-        } else {
-            std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions.\n";
-        }
-    }
 
     clock_t d_data_alloc_start = clock();
     checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
@@ -271,7 +262,16 @@ int main(int argc, char *argv[]) {
     // iterate over cameras
     int img_count = 0;
     size_t num_zeros = 3;
-    if (verbose) std::cout << "==========================================================\n";
+    if (verbose) 
+    if (verbose) {
+        std::cout << "----------------------------------------------------------\n";
+        if (num_divisions == 1) {
+            std::cout << "Data fits within available VRAM, launching single partition.\n";
+        } else {
+            std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions.\n";
+        }
+        std::cout << "----------------------------------------------------------\n";
+    }
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
@@ -303,9 +303,8 @@ int main(int argc, char *argv[]) {
                 float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
                 printf("render kernel           (device)            %.6fs\n",render_dur);
             }
-            if (verbose && n != num_divisions - 1) std::cout << "----------------------------------------------------------\n";
+            if (verbose && n != num_divisions - 1) std::cout << "..........................................................\n";
         }
-        if (verbose) std::cout << "==========================================================\n";
 
         // copy image data to host
         clock_t img_copy_start = clock();
@@ -330,7 +329,7 @@ int main(int argc, char *argv[]) {
             printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
             float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
             printf("img total               (host/device)       %.6fs\n",this_img_dur);
-            if (verbose) std::cout << "----------------------------------------------------------\n";
+            if (verbose) std::cout << "==========================================================\n";
         }
         img_count++;
     }
@@ -355,7 +354,7 @@ int main(int argc, char *argv[]) {
     if (verbose) {
         float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
         printf("total runtime                               %.6fs\n",main_dur);
-        std::cout << "----------------------------------------------------------\n";
+        std::cout << "==========================================================\n";
         printf("cuDART terminated.\n");
     }
 
