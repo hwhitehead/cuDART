@@ -290,14 +290,7 @@ int main(int argc, char *argv[]) {
         clock_t this_img_start = clock();
 
         // iterate over partitions
-        for (int n = 0; n < num_divisions; n++) {
-            // wipe previous image
-            if (n > 0) {
-                wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
-                checkCudaErrors(cudaPeekAtLastError());
-                checkCudaErrors(cudaDeviceSynchronize());
-            }
-            
+        for (int n = 0; n < num_divisions; n++) {            
             int il = n * floats_on_device;
             int ir = il + floats_on_device;
             if (ir > data_size) ir = data_size; // prevent overrun
@@ -353,6 +346,11 @@ int main(int argc, char *argv[]) {
             printf("img total               (host/device)       %.6fs\n",this_img_dur);
             if (verbose) std::cout << "==========================================================\n";
         }
+
+        // prepare for next image
+        wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
         img_count++;
     }
 
