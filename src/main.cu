@@ -285,7 +285,7 @@ int main(int argc, char *argv[]) {
 
     // initialise meshblock list
     MeshBlock **mb_list;
-    checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *));
+    checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
 
     // initialise mesh
     Mesh **mesh;
