@@ -20,7 +20,7 @@
 #include "meshblock.hpp"
 #include "tools.hpp"
 #include "camera.hpp"
-#include "dev_array.hpp"
+#include "mesh.hpp"
 
 __global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
     // idenitfy relevant pixel for this thread
@@ -59,6 +59,21 @@ __global__ void wipe_img(Camera camera, float *img) {
     if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
   	int pixel_index = i * camera.num_pixels_Y + j; 
     img[pixel_index] = 0; // reset image
+}
+
+__global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh) {
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+
+    // initialise ray
+    vec3 pixel_origin = camera.calc_pixel_origin(i, j);
+    Ray pixel_ray(pixel_origin, camera.normal);
+    
+    // calculate pixel value from MeshBlock data
+    img[pixel_index] += (*mesh)->calc_partitioned_trace(pixel_ray);
 }
 
 int main(int argc, char *argv[]) {
@@ -252,26 +267,47 @@ int main(int argc, char *argv[]) {
         std::cout << "-------------------------------------------------------------\n";
     }
 
-    // alloc space for data on device
+
+    // initialise series of pointers for data
     clock_t d_data_alloc_start = clock();
-    checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
+    int num_meshblocks = 1;
+    float **data_list = new float*[num_meshblocks];
+
+    // populate data list with allocated data locations
+    for (int n = 0; n < num_meshblocks; n++) {
+        checkCudaErrors(cudaMalloc(&data_list[n], bytes_on_device));
+    }
+
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
     }
 
-    // initialise MeshBlock on device
-    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
-    vec3 xr(0.5, 0.5, 0.5);
-    MeshBlock **mb = nullptr;
-    clock_t mb_alloc_start = clock();
-    checkCudaErrors(cudaMalloc(&mb, sizeof(MeshBlock *))); // locator of MeshBlock memory position
-    init_meshblock<<<1,1>>>(mb, xl, xr, mb_dims, d_data);
+    // initialise meshblock list
+    MeshBlock **mb_list;
+    checkCudaErrors((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *));
+
+    // initialise mesh
+    Mesh **mesh;
+    checkCudaErrors((void **)&mesh, sizeof(Mesh * )); 
+    init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
+
+    // temporary statics
+    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
+    vec3 xr(0.5, 0.5, 0.5);
+
+    // initialise meshblocks within mesh
+    for (int n = 0; n < nun_meshblocks; n++) {
+        add_meshblock<<<1,1>>>(mesh, data_list, n, xl, xr, dims);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+    }
+
     if (verbose) {
         float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init MeshBlock     (device)            %.6fs\n",mb_alloc_dur);
+        printf("malloc/init Mesh          (device)            %.6fs\n",mb_alloc_dur);
     }
 
     // define render shape    
@@ -306,7 +342,7 @@ int main(int argc, char *argv[]) {
 
             // call render
             clock_t render_start = clock();
-            render_partitioned_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb, il, ir);
+            render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb); // TODO: add partition support?
             checkCudaErrors(cudaPeekAtLastError());
             checkCudaErrors(cudaDeviceSynchronize());
             if (verbose) {
@@ -351,14 +387,14 @@ int main(int argc, char *argv[]) {
 
     // perform cleanup of device/host data
     clock_t free_start = clock();
-    free_meshblock<<<1,1>>>(mb);
+    free_mesh<<<1,1>>>(mesh);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     checkCudaErrors(cudaFree(d_img));
-    checkCudaErrors(cudaFree(mb));
+    checkCudaErrors(cudaFree(mesh));
     checkCudaErrors(cudaFree(d_data));
     free(img);
-    free(data);
+    delete data_list;
     cudaDeviceReset();
     if (verbose) {
         float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;

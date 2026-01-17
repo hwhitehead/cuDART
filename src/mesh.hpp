@@ -15,16 +15,26 @@ class Mesh {
         // routines
         __device__ float calc_trace(Ray &r);
 
+
         // members
         MeshBlock **mb_list;
         int num_meshblocks;
 }
 
-__global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) {
+__global__ void add_meshblock(Mesh **mesh, float **data_list, int meshblock_index, const vec3 xl, const vec3 xr, vec3 dims) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i == 0 && j == 0) {
-        *(mb_list) = new MeshBlock();
+        (*mesh)->mb_list[n] = new MeshBlock(xl, xr, dims, data);
+    }
+    return;
+}
+
+__global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) { // allow mb to added here?
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if (i == 0 && j == 0) {
+        *mesh = new Mesh(mb_list, num_meshblocks);
     }
     return;
 }
@@ -32,8 +42,8 @@ __global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) 
 __global__ void free_mesh(Mesh **mesh, float **data_list) {
     // free mesh and linked meshblocks from memory
     for (int n = 0; n < (*mesh)->num_meshblocks; n++) {
-        delete data_list[n];
-        delete *((*mesh)->mb_list[n]); // check this
+        free(data_list[n]);
+        delete *((*mesh)->mb_list[n]); // check this usage
     }
     delete *mesh;
 }
@@ -46,6 +56,7 @@ __device__ float Mesh::calc_trace(const Ray &r) {
         float local_trace = mb_list[i]->calc_trace(r);
         total_trace += local_trace;
     }
+    return total_trace;
 }
 
 #endif
