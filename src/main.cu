@@ -22,36 +22,6 @@
 #include "camera.hpp"
 #include "mesh.hpp"
 
-__global__ void render_img(Camera camera, float *img, MeshBlock **mb) {
-    // idenitfy relevant pixel for this thread
-    int i = threadIdx.x + blockIdx.x * blockDim.x;
-    int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
-  	int pixel_index = i * camera.num_pixels_Y + j; 
-
-    // initialise ray
-    vec3 pixel_origin = camera.calc_pixel_origin(i, j);
-    Ray pixel_ray(pixel_origin, camera.normal);
-    
-    // calculate pixel value from MeshBlock data
-    img[pixel_index] = (*mb)->calc_trace(pixel_ray);
-}
-
-__global__ void render_partitioned_img(Camera camera, float *img, MeshBlock **mb, int il, int ir) {
-    // idenitfy relevant pixel for this thread
-    int i = threadIdx.x + blockIdx.x * blockDim.x;
-    int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
-  	int pixel_index = i * camera.num_pixels_Y + j; 
-
-    // initialise ray
-    vec3 pixel_origin = camera.calc_pixel_origin(i, j);
-    Ray pixel_ray(pixel_origin, camera.normal);
-    
-    // calculate pixel value from MeshBlock data
-    img[pixel_index] += (*mb)->calc_partitioned_trace(pixel_ray, il, ir);
-}
-
 __global__ void wipe_img(Camera camera, float *img) {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -295,7 +265,7 @@ int main(int argc, char *argv[]) {
     vec3 xr(0.5, 0.5, 0.5);
     for (int n = 0; n < num_meshblocks; n++) {
         int mb_start = 0; // TODO adapt
-        init_meshblock<<<1,1,>>>(mb_list, xl, xr, mb_dims, mb_start);
+        init_meshblock<<<1,1>>>(mb_list, xl, xr, mb_dims, mb_start);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
     }
@@ -377,14 +347,14 @@ int main(int argc, char *argv[]) {
 
     // perform cleanup of device/host data
     clock_t free_start = clock();
-    free_mesh<<<1,1>>>(mesh, data_list);
+    free_mesh<<<1,1>>>(mesh, num_meshblocks);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     checkCudaErrors(cudaFree(d_img));
     checkCudaErrors(cudaFree(mesh));
     checkCudaErrors(cudaFree(d_data));
+    free(data);
     free(img);
-    delete data_list;
     cudaDeviceReset();
     if (verbose) {
         float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;

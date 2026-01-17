@@ -76,7 +76,7 @@ __device__ float MeshBlock::calc_trace(const Ray &r) {
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
                             + cell[1] * (int)mb_dims[2] + cell[2];
             int data_index = mem_start + cell_index;
-            trace += dwell * mb_data[cell_index];
+            trace += dwell * all_data[cell_index];
 
             // update position of ray head
             t_current = next_t_cross[axis]; // += dwell
@@ -90,18 +90,10 @@ __device__ float MeshBlock::calc_trace(const Ray &r) {
     return trace;
 }
 
-__global__ void init_meshblock(MeshBlock **mb, const vec3 xl, const vec3 xr, vec3 dims, float *data, int mem_start) {
-    int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (thr_idx == 0) {
-        *mb = new MeshBlock(xl, xr, dims, data, mem_start);
-    }
-    return;
-}
-
 __global__ void init_meshblock(MeshBlock **mb_list, int mb_index, const vec3 xl, const vec3 xr, vec3 dims, float *data, int mem_start) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        *mb = new MeshBlock(xl, xr, dims, data, mem_start);
+        *mb_list[mb_index] = new MeshBlock(xl, xr, dims, data, mem_start);
     }
     return;
 }

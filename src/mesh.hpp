@@ -30,12 +30,12 @@ __global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) 
     return;
 }
 
-__global__ void free_mesh(Mesh **mesh, float **data_list) {
+__global__ void free_mesh(Mesh **mesh, int num_meshblocks) {
     // free mesh and linked meshblocks from memory
-    for (int n = 0; n < (*mesh)->num_meshblocks; n++) {
-        free(data_list[n]);
-        delete (*mesh)->mb_list[n]; // check this usage
+    for (int n = 0; n < num_meshblocks; n++) {
+        delete (*mesh)->mb_list[n];
     }
+    
     delete *mesh;
 }
 
