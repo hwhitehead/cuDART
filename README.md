@@ -71,5 +71,5 @@ To support interaction with commonly used simulation file types, this repository
 
 ### Development
 
-While `cuDART` is functional and tested in its current form, development on this code is ongoing. Future plans include supporting additional file types and increased camera flexibility. The latest code version is v0.4, v1.0 will be delayed until this repository is made public. 
+While `cuDART` is functional and tested in its current form, development on this code is ongoing. Future plans include supporting additional file types and increased camera flexibility. The latest code version is v0.5, v1.0 will be delayed until this repository is made public. 
 
