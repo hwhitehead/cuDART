@@ -247,7 +247,7 @@ int main(int argc, char *argv[]) {
 
     // copy data into device
     clock_t data_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(d_data, &data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+    checkCudaErrors(cudaMemcpy(d_data, data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
     checkCudaErrors(cudaPeekAtLastError());
     if (verbose) {
         float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
