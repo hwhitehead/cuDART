@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
 
     // initialise mesh
     Mesh **mesh;
-    checkCudaErrors((void **)&mesh, sizeof(Mesh * )); 
+    checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
     init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
