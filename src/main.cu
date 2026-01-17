@@ -267,56 +267,49 @@ int main(int argc, char *argv[]) {
         std::cout << "-------------------------------------------------------------\n";
     }
 
-
-    // initialise series of pointers for data
+    // alloc space for data on device (TODO: partitioning?)
     clock_t d_data_alloc_start = clock();
-    int num_meshblocks = 1;
-    float **data_list = new float*[num_meshblocks];
-
-    // populate data list with allocated data locations
-    for (int n = 0; n < num_meshblocks; n++) {
-        checkCudaErrors(cudaMalloc(&data_list[n], bytes_on_device));
-        // copy subsection of data into device memory
-        clock_t data_copy_start = clock();
-        checkCudaErrors(cudaMemcpy(d_data, &data[il], bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
-        checkCudaErrors(cudaPeekAtLastError());
-        if (verbose) {
-            float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-            printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
-        }
-    }
-
+    checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
     }
 
-    // initialise meshblock list
+    // copy data into device
+    clock_t data_copy_start = clock();
+    checkCudaErrors(cudaMemcpy(d_data, &data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+    checkCudaErrors(cudaPeekAtLastError());
+    if (verbose) {
+        float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
+        printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
+    }
+
+    // initialise meshblock list on device
     clock_t mb_alloc_start = clock();
+    int num_meshblocks = 1;
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
-
+    
+    // initialise meshblocks
+    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
+    vec3 xr(0.5, 0.5, 0.5);
+    for (int n = 0; n < num_meshblocks; n++) {
+        int mb_start = 0; // TODO adapt
+        init_meshblock<<<1,1,>>>(mb_list, xl, xr, mb_dims, mb_start);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+    }
+    
     // initialise mesh
     Mesh **mesh;
     checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
     init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
-
-    // temporary statics
-    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
-    vec3 xr(0.5, 0.5, 0.5);
-
-    // initialise meshblocks within mesh
-    for (int n = 0; n < num_meshblocks; n++) {
-        add_meshblock<<<1,1>>>(mesh, data_list, n, xl, xr, mb_dims);
-        checkCudaErrors(cudaPeekAtLastError());
-        checkCudaErrors(cudaDeviceSynchronize());
-    }
-
+    
     if (verbose) {
         float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init Mesh          (device)            %.6fs\n",mb_alloc_dur);
+        printf("malloc/init MeshBlock     (device)            %.6fs\n",mb_alloc_dur);
     }
 
     // define render shape    

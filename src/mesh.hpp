@@ -6,7 +6,7 @@
 // THIS CODE IS WIP AND NOT ACTIVE IN MAIN
 
 class Mesh {
-    // data contained to support heterogenous domain resolutions
+    // data container to support heterogenous domain resolutions
     public:
         // ctors
         __device__ Mesh() {}
@@ -20,15 +20,6 @@ class Mesh {
         MeshBlock **mb_list;
         int num_meshblocks;
 };
-
-__global__ void add_meshblock(Mesh **mesh, float **data_list, int mb_index, const vec3 xl, const vec3 xr, vec3 dims) {
-    int i = threadIdx.x + blockIdx.x * blockDim.x;
-    int j = threadIdx.y + blockIdx.y * blockDim.y;
-    if (i == 0 && j == 0) {
-        (*mesh)->mb_list[mb_index] = new MeshBlock(xl, xr, dims, data_list[mb_index]);
-    }
-    return;
-}
 
 __global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) { // allow mb to added here?
     int i = threadIdx.x + blockIdx.x * blockDim.x;
