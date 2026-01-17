@@ -7,7 +7,7 @@ import subprocess, os, sys, copy
 sys.path.append("..")
 from pysrc import *
 
-def demo_scene_gen(num_img = 1, verbose=True, remove_data=True):
+def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
     # define targets
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
@@ -23,7 +23,8 @@ def demo_scene_gen(num_img = 1, verbose=True, remove_data=True):
     template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
-    theta_ar = np.linspace(0,np.pi,num_img)
+    ep = 1e-4 # avoid purely aligned casts
+    theta_ar = np.linspace(ep,np.pi - ep,num_img)
     cameras = []
     for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
