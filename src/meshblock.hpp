@@ -16,7 +16,7 @@ class MeshBlock {
         __device__ MeshBlock(const vec3 xleft, const vec3 xright, const vec3 dims, float *data);
 
         // routines
-        __device__ bool calc_mb_intercept(Ray r, float &tl, float &tr);
+        __device__ bool calc_mb_intercept(const Ray &r, float &tl, float &tr);
         __device__ int int_clamp(float f, float l, float r);
         __device__ vec3 get_edge(bool sign) {return (sign) ? xr : xl;}
         __device__ void print_data();
@@ -196,7 +196,7 @@ __device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, vec3 dims, 
     dx = (xr - xl) / mb_dims;
 }
 
-__device__ bool MeshBlock::calc_mb_intercept(Ray r, float &tl, float &tr) {
+__device__ bool MeshBlock::calc_mb_intercept(const Ray &r, float &tl, float &tr) {
     tl = 0.0, tr = 0.0;
     float tcmin, tcmax, tmin, tmax;
     for (int i = 0; i <= 2; i++) {
