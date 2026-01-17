@@ -17,7 +17,7 @@ class DevArray {
         size_t get_size() const;
         const float* data() const;
         void set_data(const float* src, size_t size);
-        void pull_data(const float *target, size_t size);
+        void pull_data(float *target, size_t size);
 
     private:
         void allocate(size_t size);
@@ -51,7 +51,7 @@ void DevArray::set_data(const float* src, size_t size) {
     return;
 }
 
-void DevArray::pull_data(const float *target, size_t size) {
+void DevArray::pull_data(float *target, size_t size) {
     size_t len = std::min(size, get_size());
     cudaError_t result = cudaMemcpy(target, start_, len * sizeof(float), cudaMemcpyDeviceToHost);
     if (result != cudaSuccess) {
