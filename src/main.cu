@@ -223,6 +223,16 @@ int main(int argc, char *argv[]) {
         avail_mem = std::min(static_cast<float>(std::atof(mem_char) * 1e9), avail_mem); // convert GB to B
     }
 
+    // determine partitioning 
+    int num_divisions = 1;
+    float *d_data = nullptr;
+    size_t bytes_on_device = bytes_in_data;
+    if (bytes_in_data > avail_mem) { // data must be partioned to fit device
+        float mem_ratio = bytes_in_data / avail_mem;
+        num_divisions = std::ceil(mem_ratio);
+        bytes_on_device = bytes_in_data / num_divisions;
+    } 
+
     if (verbose) {
         std::cout << "----------------------------------------------------------\n";
         float f_avail = free_f / 1e9;
@@ -242,16 +252,7 @@ int main(int argc, char *argv[]) {
         std::cout << "----------------------------------------------------------\n";
     }
 
-    // define data memory on device
-    int num_divisions = 1;
-    float *d_data = nullptr;
-    size_t bytes_on_device = bytes_in_data;
-    if (bytes_in_data > avail_mem) { // data must be partioned to fit device
-        float mem_ratio = bytes_in_data / avail_mem;
-        num_divisions = std::ceil(mem_ratio);
-        bytes_on_device = bytes_in_data / num_divisions;
-    } 
-
+    // alloc space for data on device
     clock_t d_data_alloc_start = clock();
     checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
     if (verbose) {
@@ -296,7 +297,7 @@ int main(int argc, char *argv[]) {
 
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
-            checkCudaErrors(cudaMemcpy(d_data, &data[il], bytes_in_sub, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+            checkCudaErrors(cudaMemcpy(d_data, &data[il], bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
