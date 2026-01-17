@@ -289,15 +289,15 @@ int main(int argc, char *argv[]) {
         
         clock_t this_img_start = clock();
 
-        // TODO: escape single partition run from loop to bypass wipe overhead
-
         // iterate over partitions
         for (int n = 0; n < num_divisions; n++) {
-            // wipe image
-            wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
-            checkCudaErrors(cudaPeekAtLastError());
-            checkCudaErrors(cudaDeviceSynchronize());
-
+            // wipe previous image
+            if (n > 0) {
+                wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
+                checkCudaErrors(cudaPeekAtLastError());
+                checkCudaErrors(cudaDeviceSynchronize());
+            }
+            
             int il = n * floats_on_device;
             int ir = il + floats_on_device;
             if (ir > data_size) ir = data_size; // prevent overrun
