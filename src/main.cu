@@ -276,6 +276,14 @@ int main(int argc, char *argv[]) {
     // populate data list with allocated data locations
     for (int n = 0; n < num_meshblocks; n++) {
         checkCudaErrors(cudaMalloc(&data_list[n], bytes_on_device));
+        // copy subsection of data into device memory
+        clock_t data_copy_start = clock();
+        checkCudaErrors(cudaMemcpy(d_data, &data[il], bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+        checkCudaErrors(cudaPeekAtLastError());
+        if (verbose) {
+            float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
+            printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
+        }
     }
 
     if (verbose) {
@@ -328,18 +336,6 @@ int main(int argc, char *argv[]) {
 
         // iterate over partitions
         for (int n = 0; n < num_divisions; n++) {            
-            // find partition edges
-            int il = n * floats_on_device;
-            int ir = il + floats_on_device;
-
-            // copy subsection of data into device memory
-            clock_t data_copy_start = clock();
-            checkCudaErrors(cudaMemcpy(d_data, &data[il], bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
-            checkCudaErrors(cudaPeekAtLastError());
-            if (verbose) {
-                float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-                printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
-            }
 
             // call render
             clock_t render_start = clock();
