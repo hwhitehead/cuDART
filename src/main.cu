@@ -223,6 +223,25 @@ int main(int argc, char *argv[]) {
         avail_mem = std::min(static_cast<float>(std::atof(mem_char) * 1e9), avail_mem); // convert GB to B
     }
 
+    if (verbose) {
+        std::cout << "----------------------------------------------------------\n";
+        float f_avail = free_f / 1e9;
+        float f_req = bytes_in_data / 1e9;
+        if (not (mem_char == nullptr)) {
+            float f_limit = static_cast<float>(std::atof(mem_char));
+            printf("VRAM: Avail = %.2fGB, Limit = %.2fGB, Required = %.2fGB\n",f_avail,f_limit,f_req);
+        } else {
+            printf("VRAM: Avail = %.2fGB, Limit = None, Required = %.2fGB\n",f_avail,f_req);
+        }
+        
+        if (num_divisions == 1) {
+            std::cout << "Data fits within available VRAM, launching one partition per image\n";
+        } else {
+            std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions per image\n";
+        }
+        std::cout << "----------------------------------------------------------\n";
+    }
+
     // define data memory on device
     int num_divisions = 1;
     float *d_data = nullptr;
@@ -264,44 +283,19 @@ int main(int argc, char *argv[]) {
     // iterate over cameras
     int img_count = 0;
     size_t num_zeros = 3;
-    if (verbose) {
-        std::cout << "----------------------------------------------------------\n";
-        float f_avail = free_f / 1e9;
-        float f_req = bytes_in_data / 1e9;
-        if (not (mem_char == nullptr)) {
-            float f_limit = static_cast<float>(std::atof(mem_char));
-            printf("VRAM: Avail = %.2fGB, Limit = %.2fGB, Required = %.2fGB\n",f_avail,f_limit,f_req);
-        } else {
-            printf("VRAM: Avail = %.2fGB, Limit = None, Required = %.2fGB\n",f_avail,f_req);
-        }
-        
-        if (num_divisions == 1) {
-            std::cout << "Data fits within available VRAM, launching one partition.\n";
-        } else {
-            std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions.\n";
-        }
-        if (verbose) std::cout << "==========================================================\n";
-    }
-    std::cout << "data size = " << data_size << std::endl;
-    std::cout << "bytes_on_device = " << bytes_on_device << std::endl;
-    std::cout << "floats_on_device = " << floats_on_device << std::endl;
+    if (verbose) std::cout << "==========================================================\n";
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
 
         // iterate over partitions
         for (int n = 0; n < num_divisions; n++) {            
+            // find partition edges
             int il = n * floats_on_device;
             int ir = il + floats_on_device;
-            if (ir > data_size) ir = data_size; // prevent overrun
-            size_t bytes_in_sub = (ir - il) * sizeof(float);
-            std::cout << "(il,ir) = (" << il << "," << ir << ")\n";
-            size_t sublen_in_bytes = (ir - il) * sizeof(float);
-            std::cout << "sublen_in_bytes = " << sublen_in_bytes << std::endl;
 
             // copy subsection of data into device memory
             clock_t data_copy_start = clock();
-            float* data_addr = data + il * sizeof(float);
             checkCudaErrors(cudaMemcpy(d_data, &data[il], bytes_in_sub, cudaMemcpyHostToDevice)); // no fail, but missing domain?
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
