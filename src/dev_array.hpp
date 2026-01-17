@@ -42,7 +42,7 @@ const float* DevArray::data() const {
     return start_;
 }
 
-void DevArray::et_data(const float* src, size_t size) {
+void DevArray::set_data(const float* src, size_t size) {
     size_t len = std::min(size, get_size());
     cudaError_t result = cudaMemcpy(start_, src, len * sizeof(float), cudaMemcpyHostToDevice);
     if (result != cudaSuccess) {
@@ -51,7 +51,7 @@ void DevArray::et_data(const float* src, size_t size) {
     return;
 }
 
-void DevArray::pull_data(float *target, size_t size) {
+void DevArray::pull_data(const float *target, size_t size) {
     size_t len = std::min(size, get_size());
     cudaError_t result = cudaMemcpy(target, start_, len * sizeof(float), cudaMemcpyDeviceToHost);
     if (result != cudaSuccess) {
@@ -75,7 +75,7 @@ void DevArray::allocate(size_t size) {
 void DevArray::free() {
     if (start_ != 0) {
         cudaFree(start_);
-        start_ = end_ = 0
+        start_ = end_ = 0;
     }
 }
 

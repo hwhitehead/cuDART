@@ -65,12 +65,12 @@ int main(int argc, char *argv[]) {
 
     // testing dev_array functionality
     std::vector<float> h_A = {2,3,5,6};
-    size_t size = A.size();
+    size_t size = h_A.size();
     DevArray d_A(size);
-    d_A.set(&h_A[0],size);
+    d_A.set_data(&h_A[0],size);
 
     std::vector<float> h_B(4);
-    d_A.get(&h_B[0],size);
+    d_A.pull_data(&h_B[0],size);
     printf("h_B = (%f,%f,%f,%f)\n",h_B[0],h_B[1],h_B[2],h_B[3]);
 
     return 0;
