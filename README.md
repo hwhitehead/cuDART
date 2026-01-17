@@ -25,9 +25,10 @@ Exemplar usage of the Python frontend is included as [example.py](https://github
 
 ### Backend
 The `bin/cudart` executable accepts the following flags:
-- `-i` specifies the input `.npy` file to trace
-- `-c` specifies the input `.txt` file specifying the camera(s) (dimension, position and orientation)
-- `-s` specifies the raw img `.npy` save location (appended numerically for multiple traces)
+- `-i <file>`   specifies the input `.npy` file to trace
+- `-c <file>`   specifies the input `.txt` file specifying the camera(s) (dimension, position and orientation)
+- `-s <file>`   specifies the raw img `.npy` save location (appended numerically for multiple traces)
+- `-m <value>`  species the maximum allowed VRAM usage (see "Partitioning" below)
 - `-v` flags for verbose execution (prints progress to stdout)
 
 Upon execution:
@@ -57,10 +58,13 @@ To run `cuDART`, the following is required:
 - The `nvcc` CUDA compiler
 - Python (optional frontend, requires basic libraries such as `numpy` and `matplotlib`)
 
-
 ### Portability
 
 By default, the [Makefile](https://github.com/hwhitehead/cuDART/blob/main/Makefile) uses the `-gencode` flag to avoid just-in-time ([JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation)) machine-specification code compilation, targeting Turing architecture appropriate for the GeForce RTX 2080 Ti machines used during development of this code. The users should tailor (or remove) these flags as appropriate for their runtime environment: see [here](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#gpu-compilation) for the full NVIDIA GPU/Virtual Architecture feature lists.
+
+### Partitioning
+
+For sensible data-to-image resolution ratios, the vast majority of VRAM required by `cuDART` will be occupied by data to be traced. As the render kernel requires access to all of this data `cuDART` may become VRAM limited. `cuDART` will automatically partition the input data into equal length subsections of contiguous memory if the data size exceeds either the available VARM on the device, or a user specified ceiling (using `-m` at runtime). The render kernel is then called on each of these subsections in turn, transfering the next section to the device each tine. The increase in runtime scales roughly linearly with the number of partitions required.
 
 ### Inherited Libraries
 To support interaction with commonly used simulation file types, this repository uses the [libnpy](https://github.com/llohse/libnpy) library to support the import of `.npy` files. In addition to the verbatim use of this libary, much of the code structure has been informed by pre-existing publically available codebases. Most notably, as with the original Pythonic [DART](https://github.com/hwhitehead/DART) repository, the underlying DDA algorithm was written with help of [this](https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-acceleration-structure/grid.html) excellent guide on acceleration structures in C. [This](https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/) developer blog on raytracing in CUDA helped introduce me to memory management and CUDA Makefiles, though the primary Makefile structure is actually inherited from the [Athena++](https://github.com/PrincetonUniversity/athena) repository. 

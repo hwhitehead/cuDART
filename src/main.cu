@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
     if (verbose) {
         std::cout << "Starting cuDART (verbose)...\n";
         std::cout << "=============================================================\n";
-        std::cout << "|      Activity        |    Location    |    Duration       |\n";
+        std::cout << "|      Activity        |    Location    |      Duration     |\n";
         std::cout << "=============================================================\n";
     }
     // load npy data as specified by user
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
     size_t bytes_in_data = data_size * sizeof(float);
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("read/malloc data        (npy->host)         %.6fs\n",npy_read_dur);
+        printf("read/malloc data        (npy->host)             %.6fs\n",npy_read_dur);
     }
 
     // load image dimensions from the first camera
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]) {
     float *img = (float*) malloc(bytes_in_img);
     if (verbose) {
         float img_alloc_dur = (float)(clock() - img_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc image            (host)              %.6fs\n",img_alloc_dur);
+        printf("malloc image            (host)                  %.6fs\n",img_alloc_dur);
     }
 
     // initialise image space on device TODO: identify insane overhead?? O(5)s
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
     if (verbose) {
         float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc image            (device)            %.6fs\n",d_img_alloc_dur);
+        printf("malloc image            (device)                %.6fs\n",d_img_alloc_dur);
     }
 
     // check dimensions of GPU/user VRAM maximum
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data             (device)            %.6fs\n",d_data_alloc_dur);
+        printf("malloc data             (device)                %.6fs\n",d_data_alloc_dur);
     }
 
     // initialise MeshBlock on device
@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaDeviceSynchronize());
     if (verbose) {
         float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init MeshBlock   (device)            %.6fs\n",mb_alloc_dur);
+        printf("malloc/init MeshBlock   (device)                %.6fs\n",mb_alloc_dur);
     }
 
     // define render shape    
@@ -301,7 +301,7 @@ int main(int argc, char *argv[]) {
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-                printf("memcpy data             (host->device)      %.6fs\n",data_copy_dur);
+                printf("memcpy data             (host->device)              %.6fs\n",data_copy_dur);
             }
 
             // call render
@@ -311,7 +311,7 @@ int main(int argc, char *argv[]) {
             checkCudaErrors(cudaDeviceSynchronize());
             if (verbose) {
                 float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-                printf("render kernel           (device)            %.6fs\n",render_dur);
+                printf("render kernel           (device)                %.6fs\n",render_dur);
             }
             if (verbose) std::cout << ".............................................................\n";
         }
@@ -321,7 +321,7 @@ int main(int argc, char *argv[]) {
         checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
         if (verbose) {
             float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-            printf("memcpy image            (device->host)      %.6fs\n",img_copy_dur);
+            printf("memcpy image            (device->host)          %.6fs\n",img_copy_dur);
         }
 
         // save data
@@ -336,9 +336,9 @@ int main(int argc, char *argv[]) {
         npy::write_npy(save_str, npy_img);
         if (verbose) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-            printf("write data              (host->npy)         %.6fs\n",npy_write_dur);
+            printf("write data              (host->npy)             %.6fs\n",npy_write_dur);
             float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
-            printf("img total               (host/device)       %.6fs\n",this_img_dur);
+            printf("img total               (host/device)           %.6fs\n",this_img_dur);
             if (verbose) std::cout << "=============================================================\n";
         }
 
@@ -362,13 +362,13 @@ int main(int argc, char *argv[]) {
     cudaDeviceReset();
     if (verbose) {
         float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
-        printf("free all                (device/host)       %.6fs\n",free_dur);
+        printf("free all                (device/host)           %.6fs\n",free_dur);
     }
 
     // terminate
     if (verbose) {
         float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
-        printf("total runtime                               %.6fs\n",main_dur);
+        printf("total runtime                                   %.6fs\n",main_dur);
         std::cout << "=============================================================\n";
         printf("cuDART terminated.\n");
     }
