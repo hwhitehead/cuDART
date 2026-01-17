@@ -73,7 +73,7 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh) {
     Ray pixel_ray(pixel_origin, camera.normal);
     
     // calculate pixel value from MeshBlock data
-    img[pixel_index] += (*mesh)->calc_partitioned_trace(pixel_ray);
+    img[pixel_index] += (*mesh)->calc_trace(pixel_ray);
 }
 
 int main(int argc, char *argv[]) {
@@ -284,6 +284,7 @@ int main(int argc, char *argv[]) {
     }
 
     // initialise meshblock list
+    clock_t mb_alloc_start = clock();
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
 
@@ -299,7 +300,7 @@ int main(int argc, char *argv[]) {
     vec3 xr(0.5, 0.5, 0.5);
 
     // initialise meshblocks within mesh
-    for (int n = 0; n < nun_meshblocks; n++) {
+    for (int n = 0; n < num_meshblocks; n++) {
         add_meshblock<<<1,1>>>(mesh, data_list, n, xl, xr, dims);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
@@ -342,7 +343,7 @@ int main(int argc, char *argv[]) {
 
             // call render
             clock_t render_start = clock();
-            render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mb); // TODO: add partition support?
+            render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh); // TODO: add partition support?
             checkCudaErrors(cudaPeekAtLastError());
             checkCudaErrors(cudaDeviceSynchronize());
             if (verbose) {
@@ -387,7 +388,7 @@ int main(int argc, char *argv[]) {
 
     // perform cleanup of device/host data
     clock_t free_start = clock();
-    free_mesh<<<1,1>>>(mesh);
+    free_mesh<<<1,1>>>(mesh, data_list);
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
     checkCudaErrors(cudaFree(d_img));
