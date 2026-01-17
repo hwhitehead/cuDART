@@ -20,7 +20,7 @@ class MeshBlock {
         __device__ int int_clamp(float f, float l, float r);
         __device__ vec3 get_edge(bool sign) {return (sign) ? xr : xl;}
         __device__ void print_data();
-        __device__ float calc_trace(Ray &r);
+        __device__ float calc_trace(const Ray &r);
         __device__ float calc_partitioned_trace(Ray &r, int il, int ir);
 
         // public properties
@@ -31,7 +31,7 @@ class MeshBlock {
         vec3 xl, xr, dx, mb_dims;
 };
 
-__device__ float MeshBlock::calc_trace(Ray &r) {
+__device__ float MeshBlock::calc_trace(const Ray &r) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;
     bool hit = calc_mb_intercept(r, tl, tr);

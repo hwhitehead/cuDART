@@ -301,7 +301,7 @@ int main(int argc, char *argv[]) {
 
     // initialise meshblocks within mesh
     for (int n = 0; n < num_meshblocks; n++) {
-        add_meshblock<<<1,1>>>(mesh, data_list, n, xl, xr, dims);
+        add_meshblock<<<1,1>>>(mesh, data_list, n, xl, xr, mb_dims);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
     }
