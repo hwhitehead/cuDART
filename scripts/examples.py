@@ -24,7 +24,7 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
     # build camera array, inherit from template
     ep = 1e-4 # avoid purely aligned casts
-    theta_ar = np.linspace(ep,np.pi - ep,num_img)
+    theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
     cameras = []
     for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
@@ -35,7 +35,7 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
     scene = Scene(npy_load_str, npy_save_str, cameras)
 
     # render and save images
-    scene.render(verbose=verbose, max_mem=1)
+    scene.render(verbose=verbose, max_mem=0.2)
     scene.plot(png_save_str, verbose=verbose, remove_data=True)
 
 if __name__ == "__main__":
