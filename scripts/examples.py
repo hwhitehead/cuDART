@@ -7,7 +7,7 @@ import subprocess, os, sys, copy
 sys.path.append("..")
 from pysrc import *
 
-def demo_scene_gen(num_img = 10, verbose=True, remove_data=True):
+def demo_scene_gen(num_img = 1, verbose=True, remove_data=True):
 
     # define targets
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
@@ -34,7 +34,7 @@ def demo_scene_gen(num_img = 10, verbose=True, remove_data=True):
     scene = Scene(npy_load_str, npy_save_str, cameras)
 
     # render and save images
-    scene.render(verbose=verbose, max_mem=4)
+    scene.render(verbose=verbose, max_mem=1)
     scene.plot(png_save_str, verbose=verbose, remove_data=True)
 
 if __name__ == "__main__":
