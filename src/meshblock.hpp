@@ -13,7 +13,7 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(const vec3 xleft, const vec3 xright, const vec3 dims, float *all_data);
+        __device__ MeshBlock(const vec3 xleft, const vec3 xright, const vec3 dims, float *all_data, int mem_start);
 
         // routines
         __device__ bool calc_mb_intercept(const Ray &r, float &tl, float &tr);
@@ -93,7 +93,7 @@ __device__ float MeshBlock::calc_trace(const Ray &r) {
 __global__ void init_meshblock(MeshBlock **mb_list, int mb_index, const vec3 xl, const vec3 xr, vec3 dims, float *data, int mem_start) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        *mb_list[mb_index] = new MeshBlock(xl, xr, dims, data, mem_start);
+        mb_list[mb_index] = new MeshBlock(xl, xr, dims, data, mem_start);
     }
     return;
 }
@@ -119,10 +119,11 @@ __device__ int MeshBlock::int_clamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, vec3 dims, float *data) {
+__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, vec3 dims, float *data, int m_start) {
     xl = xleft;
     xr = xright;
     all_data = data;
+    mem_start = m_start;
     mb_dims = dims;
     mb_size = mb_dims[0] * mb_dims[1] * mb_dims[2];
     dx = (xr - xl) / mb_dims;

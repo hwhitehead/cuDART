@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
     vec3 xr(0.5, 0.5, 0.5);
     for (int n = 0; n < num_meshblocks; n++) {
         int mb_start = 0; // TODO adapt
-        init_meshblock<<<1,1>>>(mb_list, xl, xr, mb_dims, mb_start);
+        init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, mb_start);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
     }
