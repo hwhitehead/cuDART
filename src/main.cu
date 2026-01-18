@@ -272,7 +272,7 @@ int main(int argc, char *argv[]) {
         std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
         std::cout << "reading npy file at " << npy_str << std::endl;
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
-        std::vector<float> npy_vector = npy_data.data;
+        std::vector<float> npy_vector = npy_data.data; // ERR: populated with zeros?
         for (int i = 0; i < 1000; i++) {
             std::cout << "d[i] = " << npy_vector[i] << std::endl;
         }

@@ -74,4 +74,8 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 if __name__ == "__main__":
 
     # build_mesh()
-    render_from_mesh()
+    #render_from_mesh()
+
+    npy_str = os.path.join(host_dir,"inputs/mesh_demo/meshblock000.npg")
+    data = np.load(npy_str)
+    print(np.max(data))
