@@ -20,7 +20,7 @@ def build_mesh():
     mesh.add_meshblock(mb_data, xl, xr)
     mesh.write_header()
 
-def render_from_mesh():
+def render_from_mesh(verbose=True, remove_data=True):
 
     data_dir = os.path.join(host_dir, "outputs/mesh_demo")
     npy_save_str = os.path.join(data_dir, "raw")
@@ -38,7 +38,7 @@ def render_from_mesh():
     scene = Scene(data_dir, npy_save_str, cameras)
 
     scene.render(verbose=verbose)
-    scene.plot(png_save_str, verbose=verbose, remove_data=True)
+    scene.plot(png_save_str, verbose=verbose, remove_data=remove_data)
 
 def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
