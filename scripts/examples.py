@@ -17,7 +17,10 @@ def build_mesh():
     mb_data = np.load(npy_load_str)
     xl = np.array([-0.5,-0.5,-0.5])
     xr = np.array([0.5,0.5,0.5])
+    xl_zooom = np.array([-0.25,-0.25,-0.25])
+    xr_zoom = np.array([0.25,0.25,0.25])
     mesh.add_meshblock(mb_data, xl, xr)
+    mesh.add_meshblock(mb_data, xl_zoom, zr_zoom)
     mesh.write_header()
 
 def render_from_mesh(verbose=True, remove_data=True):
@@ -73,5 +76,5 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
 if __name__ == "__main__":
 
-    # build_mesh()
+    build_mesh()
     render_from_mesh()
