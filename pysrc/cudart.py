@@ -133,6 +133,7 @@ class Scene:
             save_str = save_location + str(i).zfill(str_zfill) + ".png"
 
             img = np.load(load_str)
+            print("img max in py = {0}".format(np.max(img)))
 
             pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
