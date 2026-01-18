@@ -35,7 +35,7 @@ def demo_scene_gen(num_img = 1, verbose=True, remove_data=True):
     scene = Scene(npy_load_str, npy_save_str, cameras)
 
     # render and save images
-    scene.render(verbose=verbose, max_mem=1)
+    scene.render(verbose=verbose)
     scene.plot(png_save_str, verbose=verbose, remove_data=True)
 
 if __name__ == "__main__":
