@@ -272,11 +272,13 @@ int main(int argc, char *argv[]) {
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
         std::vector<float> npy_vector = npy_data.data; // populated
         std::vector<unsigned long> npy_shape = npy_data.shape;
-        size_t bytes_in_npy = npy_vector.size() * sizeof(float);
-        // add check against header here?
+        int floats_in_npy  = npy_vector.size();
+        size_t bytes_in_npy = floats_in_npy * sizeof(float);
+        // add check against header here? could delay till after mb_list init
         
-        // copy data into host memory buffer. TODO readd offset
-        std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy); // COPIED PROPERLY
+        // copy data into host memory buffer
+        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_npy); // COPIED PROPERLY
+        mem_offset += floats_in_npy;
     }
 
     if (verbose) {
@@ -285,7 +287,7 @@ int main(int argc, char *argv[]) {
     }
 
     // copy data from host into device
-    int il = 0; 
+    int il = 0; // assume no partitioning needed
     clock_t data_copy_start = clock();
     checkCudaErrors(cudaMemcpy(d_data, h_all_data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
     checkCudaErrors(cudaPeekAtLastError());
