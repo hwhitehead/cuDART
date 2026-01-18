@@ -256,20 +256,36 @@ int main(int argc, char *argv[]) {
 
     // initialise meshblock list on device
     clock_t mb_alloc_start = clock();
-    int num_meshblocks = 1;
+    int num_meshblocks = 2;
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
     
     // initialise meshblocks
-    vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
-    vec3 xr(0.5, 0.5, 0.5);
-    for (int n = 0; n < num_meshblocks; n++) {
-        int mb_start = 0; // TODO adapt
-        init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mb_start);
-        checkCudaErrors(cudaPeekAtLastError());
-        checkCudaErrors(cudaDeviceSynchronize());
-    }
+    // vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
+    // vec3 xr(0.5, 0.5, 0.5);
+    // for (int n = 0; n < num_meshblocks; n++) {
+    //     int mb_start = 0; // TODO adapt
+    //     init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mb_start);
+    //     checkCudaErrors(cudaPeekAtLastError());
+    //     checkCudaErrors(cudaDeviceSynchronize());
+    // }
     
+    // spoof meshblock init for multi testing
+    vec3 xl0(-0.5,-0.5,-0.5);
+    vec3 xr0(-0.5,-0.5,-0.5);
+    int mb_start = 0;
+    init_meshblock<<<1,1>>>(mb_list, 0, xl0, xr0, mb_dims, d_data, mb_start);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+
+    vec3 xl1(-0.25,-0.25,-0.25);
+    vec3 xr1(-0.25,-0.25,-0.25);
+    init_meshblock<<<1,1>>>(mb_list, 1, xl1, xr1, mb_dims, d_data, mb_start);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+
+
+
     // initialise mesh
     Mesh **mesh;
     checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
