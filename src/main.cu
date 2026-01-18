@@ -273,6 +273,9 @@ int main(int argc, char *argv[]) {
         std::cout << "reading npy file at " << npy_str << std::endl;
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
         std::vector<float> npy_vector = npy_data.data;
+        for (int i = 0; i < 1000; i++) {
+            std::cout << "d[i] = " << npy_vector[i] << std::endl;
+        }
         std::vector<unsigned long> npy_shape = npy_data.shape;
         size_t bytes_in_npy = npy_vector.size() * sizeof(float);
         // add check against header here?
