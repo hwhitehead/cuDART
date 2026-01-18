@@ -132,6 +132,13 @@ __device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, const vec3 
     mb_dims = dims;
     mb_size = (int)mb_dims[0] * (int)mb_dims[1] * (int)mb_dims[2];
     dx = (xr - xl) / mb_dims;
+
+    for (int i = 0; i < mb_size; i++) {
+        float value = all_data[i];
+        if (value > 0) {
+            printf("non zero value loaded data\n");
+        }
+    }
 }
 
 __device__ bool MeshBlock::calc_mb_intercept(const Ray &r, float &tl, float &tr) {

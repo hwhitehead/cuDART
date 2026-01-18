@@ -281,9 +281,6 @@ int main(int argc, char *argv[]) {
         std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy); // COPIED PROPERLY
     }
 
-    float h_all_data_max = *std::max_element(h_all_data, h_all_data + total_float_count);
-    std::cout << "h_all_data_max = " << h_all_data_max << std::endl;
-
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("read/malloc data          (npy->host)         %.6fs\n",npy_read_dur);
