@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
         // add check against header here?
         
         // copy data into host memory buffer. TODO readd offset
-        std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy); 
+        std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy); // COPIED PROPERLY
     }
 
     float h_all_data_max = *std::max_element(h_all_data, h_all_data + total_float_count);
@@ -292,7 +292,7 @@ int main(int argc, char *argv[]) {
     // copy data from host into device
     int il = 0; 
     clock_t data_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(d_data, &h_all_data[il], bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+    checkCudaErrors(cudaMemcpy(d_data, h_all_data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
     checkCudaErrors(cudaPeekAtLastError());
     if (verbose) {
         float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
