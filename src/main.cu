@@ -206,10 +206,8 @@ int main(int argc, char *argv[]) {
                 err_msg << "Unable to parse line " << line_count << " of header file at " << header_str << std::endl;
                 CUDART_ERROR(err_msg);
             } else {
-                std::cout << "(nx,ny,nz) = (" << nx << "," << ny << "," << nz << ")\n";
                 MeshBlockInfo mb_info;
                 mb_info.mb_size = mb_size;
-                std::cout << mb_size << std::endl;
                 mb_info.xl = vec3(xl,yl,zl);
                 mb_info.xr = vec3(xr,yr,zr);
                 mb_info.mb_dims = vec3(nx,ny,nz);
@@ -244,8 +242,6 @@ int main(int argc, char *argv[]) {
     } else {
         bytes_on_device = bytes_in_data; // allocate entire dataset
     }
-
-    std::cout << "clustering = " << run_clustering << std::endl;
 
     // allocate space on device
     clock_t d_data_alloc_start = clock();
