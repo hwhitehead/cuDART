@@ -160,13 +160,13 @@ class Mesh:
         # TODO: add check against VRAM to ensure no meshblock exceeds limit
 
         mb_data = mb_data.astype(np.float32)
-        npy_str = os.path.join(self.data_dir, "data" + str(num_mb).zfill(3) + ".npy")
+        npy_str = os.path.join(self.data_dir, "data" + str(self.num_mb).zfill(self.nzfill) + ".npy")
         np.save(npy_str, mb_data)
         mb_shape = np.shape(mb_data)
         mb_size = np.size(mb_data)
         mb_header = [mb_size,*mb_shape,*xl,*xr]
         self.mb_headers.append(mb_header)
-        num_mb += 1
+        self.num_mb += 1
 
     def write_header(self):
 
