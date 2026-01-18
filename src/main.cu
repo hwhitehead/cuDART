@@ -209,6 +209,7 @@ int main(int argc, char *argv[]) {
                 std::cout << "(nx,ny,nz) = (" << nx << "," << ny << "," << nz << ")\n";
                 MeshBlockInfo mb_info;
                 mb_info.mb_size = mb_size;
+                std::cout << mb_size << std::endl;
                 mb_info.xl = vec3(xl,yl,zl);
                 mb_info.xr = vec3(xr,yr,zr);
                 mb_info.mb_dims = vec3(nx,ny,nz);
@@ -309,7 +310,6 @@ int main(int argc, char *argv[]) {
         vec3 xl = all_mb_info[n].xl;
         vec3 xr = all_mb_info[n].xr;
         vec3 mb_dims = all_mb_info[n].mb_dims;
-        std::cout << "mb_dims = " << mb_dims << std::endl;
         init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mb_start);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
