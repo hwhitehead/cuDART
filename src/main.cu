@@ -272,20 +272,17 @@ int main(int argc, char *argv[]) {
         std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
         std::cout << "reading npy file at " << npy_str << std::endl;
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
-        std::vector<float> npy_vector = npy_data.data; // ERR: populated with zeros?
-        float vec_max = *std::max_element(npy_vector.begin(), npy_vector.end());
-        std::cout << "vec_max = " << vec_max << std::endl;
+        std::vector<float> npy_vector = npy_data.data; // populated
         std::vector<unsigned long> npy_shape = npy_data.shape;
         size_t bytes_in_npy = npy_vector.size() * sizeof(float);
         // add check against header here?
         
         // copy data into host memory buffer. TODO readd offset
-        std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy);
+        std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy); 
     }
 
-    for (int i = 0; i < 1000; i++) {
-        std::cout << "i = " << h_all_data[i] << std::endl;
-    }
+    float h_all_data_max = *std::max_element(h_all_data, h_all_data + total_float_count);
+    std::cout << "h_all_data_max = " << h_all_data_max << std::endl;
 
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
