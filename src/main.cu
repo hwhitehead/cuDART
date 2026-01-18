@@ -277,9 +277,14 @@ int main(int argc, char *argv[]) {
         size_t bytes_in_npy = npy_vector.size() * sizeof(float);
         // add check against header here?
         
-        // copy data into host memory buffer
-        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_npy);
+        // copy data into host memory buffer. TODO readd offset
+        std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy);
     }
+
+    for (i = 0; i < 100; i++) {
+        std::cout << "i = " << h_all_data[i] << std::endl;
+    }
+
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("read/malloc data          (npy->host)         %.6fs\n",npy_read_dur);
