@@ -73,5 +73,5 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
 if __name__ == "__main__":
 
-    #build_mesh()
+    build_mesh()
     render_from_mesh()
