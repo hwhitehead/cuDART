@@ -17,7 +17,7 @@ def build_mesh():
     mb_data = np.load(npy_load_str)
     xl = np.array([-0.5,-0.5,-0.5])
     xr = np.array([0.5,0.5,0.5])
-    xl_zooom = np.array([-0.25,-0.25,-0.25])
+    xl_zoom = np.array([-0.25,-0.25,-0.25])
     xr_zoom = np.array([0.25,0.25,0.25])
     mesh.add_meshblock(mb_data, xl, xr)
     mesh.add_meshblock(mb_data, xl_zoom, zr_zoom)
