@@ -35,8 +35,6 @@ class Scene:
     def __init__(self, load_str, save_str, cameras=None, camera_file_name=None): 
 
         # parse load/save strings        
-        if not load_str.endswith(".npy"): # enforce suffix
-            load_str += ".npy"
         self.load_str = load_str
         self.save_str = save_str.removesuffix(".png")
 
