@@ -118,7 +118,7 @@ class Scene:
         save_location = save_location.removesuffix(".png") # strip as needed
 
         # check savespace exists
-        save_dir = os.path.dirname(self.save_location)
+        save_dir = os.path.dirname(save_location)
         if not os.path.isdir(save_dir):
             os.mkdir(save_dir)
 
