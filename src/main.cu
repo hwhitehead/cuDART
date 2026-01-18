@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
         std::memcpy(h_all_data, npy_vector.data(), bytes_in_npy);
     }
 
-    for (i = 0; i < 100; i++) {
+    for (int i = 0; i < 1000; i++) {
         std::cout << "i = " << h_all_data[i] << std::endl;
     }
 
