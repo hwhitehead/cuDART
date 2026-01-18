@@ -210,6 +210,7 @@ int main(int argc, char *argv[]) {
                 mb_info.mb_size = mb_size;
                 mb_info.xl = vec3(xl,yl,zl);
                 mb_info.xr = vec3(xr,yr,zr);
+                mb_info.mb_dims = vec3(nx,ny,nz);
                 all_mb_info.push_back(mb_info);
                 total_float_count += mb_size;
             }
