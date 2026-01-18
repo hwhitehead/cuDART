@@ -11,8 +11,8 @@ def demo_scene_gen(num_img = 1, verbose=True, remove_data=True):
 
     # define targets
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
-    npy_save_str = os.path.join(host_dir, "outputs/part/sn")
-    png_save_str = os.path.join(host_dir, "outputs/part/sn")
+    npy_save_str = os.path.join(host_dir, "outputs/mesh/sn")
+    png_save_str = os.path.join(host_dir, "outputs/mesh/sn")
 
     # build template camera
     template_camera = Camera()
