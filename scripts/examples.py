@@ -7,6 +7,39 @@ import subprocess, os, sys, copy
 sys.path.append("..")
 from pysrc import *
 
+def build_mesh():
+
+    npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
+
+    data_dir = os.path.join(host_dir, "outputs/mesh")
+
+    mesh = Mesh(data_dir)
+    mb_data = np.load(npy_load_str)
+    xl = np.array([-0.5,-0.5,-0.5])
+    xr = np.array([0.5,0.5,0.5])
+    mesh.add_meshblock(mb_data, xl, xr)
+    mesh.write_header()
+
+def render_from_mesh():
+
+    data_dir = os.path.join(host_dir, "outputs/mesh")
+    npy_save_str = os.path.join(data_dir, "raw")
+    png_save_str = os.path.join(data_dir, "img")
+
+    # build camera
+    camera = Camera()
+    camera.num_pixels_X = 2048
+    camera.num_pixels_Y = 2048
+    camera.tilt = (-38.0/180) * np.pi
+    camera.length_X = 0.66
+    camera.length_Y = 0.66
+    cameras = [camera]
+
+    scene = Scene(data_dir, npy_save_str, cameras)
+
+    scene.render(verbose=verbose)
+    scene.plot(png_save_str, verbose=verbose, remove_data=True)
+
 def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
     # define targets
@@ -40,4 +73,5 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
 if __name__ == "__main__":
 
-    demo_scene_gen()
+    build_mesh()
+    

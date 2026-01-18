@@ -50,6 +50,7 @@ int main(int argc, char *argv[]) {
 
     // start general timer
     clock_t main_start = clock();
+    size_t num_zeros = 3;
 
     // define space for user settings
     std::string cudart_version = "version 0.5 - January 2026";
@@ -163,20 +164,6 @@ int main(int argc, char *argv[]) {
         std::cout << "|      Activity        |    Location    |      Duration     |\n";
         std::cout << "=============================================================\n";
     }
-    // load npy data as specified by user
-    clock_t npy_read_start = clock();
-    const std::string input_str(input_char);
-    npy::npy_data d = npy::read_npy<float>(input_str);
-    std::vector<float> npy_data = d.data; // TODO: check speedup with cudaMallocHost pre-transfer (seems unhelpful)
-    std::vector<unsigned long> npy_shape = d.shape;
-    vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
-    int data_size = npy_data.size();
-    float *data = npy_data.data();
-    size_t bytes_in_data = data_size * sizeof(float);
-    if (verbose) {
-        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("read/malloc data          (npy->host)         %.6fs\n",npy_read_dur);
-    }
 
     // load image dimensions from the first camera
     Camera camera = cameras[0];
@@ -199,55 +186,106 @@ int main(int argc, char *argv[]) {
         printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur);
     }
 
+    // read memory info from header
+    std::string data_dir(input_char);
+    std::string header_str = data_dir + "/header.txt";
+    std::ifstream header_file(header_str);
+    std::vector<MeshBlockInfo> all_mb_info = {};
+    int total_float_count = 0;
+    if (header_file.is_open()) {
+        std::string line;
+        int line_count = 0;
+        int mb_size, nx, ny, nz;
+        float xl, yl, zl, xr, yr, zr;
+        while (std::getline(header_file, line)) {
+            std::istringstream iss(line);
+            if (!(iss >> mb_size >> nx >> ny >> nz >> xl >> yl >> zl >> xr >> yr >> zr)) {
+                std::stringstream err_msg;
+                err_msg << "### FATAL ERROR in main###\n";
+                err_msg << "Unable to parse line " << line_count << " of header file at " << header_str << std::endl;
+                CUDART_ERROR(err_msg);
+            } else {
+                MeshBlockInfo mb_info;
+                mb_info.mb_size = mb_size;
+                mb_info.xl = vec_xl;
+                mb_info.xr = vec_xr;
+                all_mb_info.push_back(mb_info);
+                total_float_count += mb_size;
+            }
+            line_count++;
+        }
+    }
+
+    // determine total memory requirements
+    size_t bytes_in_data = sizeof(float) * total_float_count;
+
     // check dimensions of GPU/user VRAM maximum
     size_t free_t, total_t;
+    float tolerance = 0.9; // undercut avail by this tolerance
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
-    float free_f = static_cast<float>(free_t);
+    float free_f = static_cast<float>(free_t) * tolerance;
     float avail_mem = free_f;
+    float f_limit;
     if (not (mem_char == nullptr)) {
-        avail_mem = std::min(static_cast<float>(std::atof(mem_char) * 1e9), avail_mem); // convert GB to B
+        f_limit = static_cast<float>(std::atof(mem_char)) * 1e9;
+        avail_mem = std::min(f_limit, avail_mem); // convert GB to B
+    }
+    size_t bytes_avail = static_cast<size_t> avail_mem; // check typing here
+            
+    // define clustering 
+    bool run_clustering = (bytes_avail < bytes_in_data);
+    size_t bytes_on_device;
+    if (run_clustering) {
+        bytes_on_device = bytes_avail; // allocate available data
+    } else {
+        bytes_on_device = bytes_in_data; // allocate entire dataset
     }
 
-    // determine partitioning 
-    int num_divisions = 1;
-    float *d_data = nullptr;
-    size_t bytes_on_device = bytes_in_data;
-    if (bytes_in_data > avail_mem) { // data must be partioned to fit device
-        float mem_ratio = bytes_in_data / avail_mem;
-        num_divisions = std::ceil(mem_ratio);
-        bytes_on_device = bytes_in_data / num_divisions;
-    } 
-
-    if (verbose) {
-        std::cout << "-------------------------------------------------------------\n";
-        float f_avail = free_f / 1e9;
-        float f_req = bytes_in_data / 1e9;
-        if (not (mem_char == nullptr)) {
-            float f_limit = static_cast<float>(std::atof(mem_char));
-            printf("VRAM: Avail = %.2fGB, Limit = %.2fGB, Required = %.2fGB\n",f_avail,f_limit,f_req);
-        } else {
-            printf("VRAM: Avail = %.2fGB, Limit = None, Required = %.2fGB\n",f_avail,f_req);
-        }
-        
-        if (num_divisions == 1) {
-            std::cout << "Data fits within available VRAM, launching one partition per image\n";
-        } else {
-            std::cout << "Data exceeds available VRAM, launching " << num_divisions << " partitions per image\n";
-        }
-        std::cout << "-------------------------------------------------------------\n";
-    }
-
-    // alloc space for data on device (TODO: partitioning?)
+    // allocate space on device
     clock_t d_data_alloc_start = clock();
+    float *d_data = nullptr;
     checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
     }
 
-    // copy data into device
+    if (run_clustering) {
+        std::stringstream err_msg;
+        err_msg << "clustering currently unsupported\n";
+        CUDART_ERROR(err_msg);
+    }
+
+    // assert no clustering for current build
+
+    // load ALL npy data into host memory
+    clock_t npy_read_start = clock();
+    int num_meshblocks = all_mb_info.size();
+    float *h_all_data = (float*) malloc(bytes_in_data);
+    int mem_offset = 0;
+    for (int n = 0; n < num_meshblocks; n++) {
+        // load npy data into host
+        std::string num_str = std::to_string(n);
+        auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
+        std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
+        std::npy_data npy_data = npy::read_npy<float>(npy_str);
+        std::vector<float> npy_vector = npy_data.data;
+        std::vector<unsigned long> npy_shape = npy_data.shape;
+        size_t bytes_in_npy = npy_vector.size() * sizeof(float);
+        // add check against header here?
+        
+        // copy data into host memory buffer
+        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_npy);
+    }
+    if (verbose) {
+        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+        printf("read/malloc data          (npy->host)         %.6fs\n",npy_read_dur);
+    }
+
+    // copy data from host into device
+    int il = 0; 
     clock_t data_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(d_data, data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+    checkCudaErrors(cudaMemcpy(d_data, &h_all_data[il], bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
     checkCudaErrors(cudaPeekAtLastError());
     if (verbose) {
         float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
@@ -261,28 +299,16 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
     
     // initialise meshblocks
-    // vec3 xl(-0.5, -0.5, -0.5); // TODO: add shape-sensitive domain definition <-----
-    // vec3 xr(0.5, 0.5, 0.5);
-    // for (int n = 0; n < num_meshblocks; n++) {
-    //     int mb_start = 0; // TODO adapt
-    //     init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mb_start);
-    //     checkCudaErrors(cudaPeekAtLastError());
-    //     checkCudaErrors(cudaDeviceSynchronize());
-    // }
-    
-    // spoof meshblock init for multi testing
-    vec3 xl0(-0.5,-0.5,-0.5);
-    vec3 xr0(0.5,0.5,0.5);
     int mb_start = 0;
-    init_meshblock<<<1,1>>>(mb_list, 0, xl0, xr0, mb_dims, d_data, mb_start);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
-
-    vec3 xl1(-0.25,-0.25,-0.25);
-    vec3 xr1(0.25,0.25,0.25);
-    init_meshblock<<<1,1>>>(mb_list, 1, xl1, xr1, mb_dims, d_data, mb_start);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
+    for (int n = 0; n < num_meshblocks; n++) {
+        vec3 xl = all_mb_info[n].xl;
+        vec3 xr = all_mb_info[n].xr;
+        vec mb_dims = all_mb_info[n].mb_dims;
+        init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mb_start);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+        mb_start += all_mb_size[n].mb_size;
+    }
 
     // initialise mesh
     Mesh **mesh;
@@ -305,26 +331,23 @@ int main(int argc, char *argv[]) {
 
     // iterate over cameras
     int img_count = 0;
-    size_t num_zeros = 3;
     if (verbose) std::cout << "=============================================================\n";
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
+        
+        // add loop here to add new meshblocks
 
-        // iterate over partitions
-        for (int n = 0; n < num_divisions; n++) {            
-
-            // call render
-            clock_t render_start = clock();
-            render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh); // TODO: add partition support?
-            checkCudaErrors(cudaPeekAtLastError());
-            checkCudaErrors(cudaDeviceSynchronize());
-            if (verbose) {
-                float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-                printf("render kernel             (device)            %.6fs\n",render_dur);
-            }
-            if (verbose) std::cout << ".............................................................\n";
+        // call render
+        clock_t render_start = clock();
+        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh); // TODO: add partition support?
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+        if (verbose) {
+            float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
+            printf("render kernel             (device)            %.6fs\n",render_dur);
         }
+        if (verbose) std::cout << ".............................................................\n";
 
         // copy image data to host
         clock_t img_copy_start = clock();

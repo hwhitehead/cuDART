@@ -7,6 +7,11 @@
 #include "ray.hpp"
 #include "tools.hpp"
 
+struct MeshBlockInfo {
+    int mb_size;
+    vec3 mb_dims, xl, xr;
+};
+
 class MeshBlock {
     // a MeshBlock provides a wrapper for data that allows for tracing by rays
     // MesHBlocks are purely device objects, including a pointer to traceable data device-allocated externally 

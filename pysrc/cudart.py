@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os, sys, subprocess
+import glob
 
 host_dir = "/mnt/users/hww27/cuDART"
 str_zfill = 3
@@ -142,6 +143,37 @@ class Scene:
                     print("removed data file at " + load_str)
 
         plt.close("all")
+
+class Mesh:
+
+    def __init__(self, data_dir, nzfill=3):
+
+        self.data_dir = data_dir
+        if not os.path.isdir(self.data_dir):
+            os.mkdir(self.data_dir)
+        self.num_mb = 0
+        self.mb_headers = []
+        self.nzfill = nzfill
+    
+    def add_meshblock(self, mb_data, xl, xr):
+
+        # TODO: add check against VRAM to ensure no meshblock exceeds limit
+
+        mb_data = mb_data.astype(np.float32)
+        npy_str = os.path.join(data_dir, "data" + str(num_mb).zfill(3) + ".npy")
+        np.save(npy_str, mb_data)
+        mb_shape = np.shape(mb_data)
+        mb_size = np.size(mb_data)
+        mb_header = [mb_size,*mb_shape,*xl,*xr]
+        self.mb_headers.append(mb_header)
+        num_mb += 1
+
+    def write_header(self):
+
+        header_str = os.path.join(self.data_dir, "header.txt")
+        with open(header_str, "w") as f:
+            for mb_header in self.mb_headers:
+                f.write("{0}".format(mb_header))
 
 
 
