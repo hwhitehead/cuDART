@@ -190,6 +190,7 @@ int main(int argc, char *argv[]) {
     std::string data_dir(input_char);
     std::string header_str = data_dir + "/header.txt";
     std::ifstream header_file(header_str);
+    std::cout << header_str << std::endl;
     std::vector<MeshBlockInfo> all_mb_info = {};
     int total_float_count = 0;
     if (header_file.is_open()) {
