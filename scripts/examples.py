@@ -20,7 +20,7 @@ def build_mesh():
     xl_zoom = np.array([-0.25,-0.25,-0.25])
     xr_zoom = np.array([0.25,0.25,0.25])
     mesh.add_meshblock(mb_data, xl, xr)
-    mesh.add_meshblock(mb_data, xl_zoom, zr_zoom)
+    mesh.add_meshblock(mb_data, xl_zoom, xr_zoom)
     mesh.write_header()
 
 def render_from_mesh(verbose=True, remove_data=True):
