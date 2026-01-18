@@ -360,6 +360,8 @@ int main(int argc, char *argv[]) {
             printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
         }
 
+        float max_img_value = std::max_element(img, img + camera.num_pixels);
+
         // save data
         clock_t npy_write_start = clock();
         std::string save_str(save_char);
