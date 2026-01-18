@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
         std::string num_str = std::to_string(n);
         auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
         std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
-        std::npy_data npy_data = npy::read_npy<float>(npy_str);
+        npy::npy_data npy_data = npy::read_npy<float>(npy_str);
         std::vector<float> npy_vector = npy_data.data;
         std::vector<unsigned long> npy_shape = npy_data.shape;
         size_t bytes_in_npy = npy_vector.size() * sizeof(float);
