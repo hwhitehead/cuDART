@@ -207,8 +207,8 @@ int main(int argc, char *argv[]) {
             } else {
                 MeshBlockInfo mb_info;
                 mb_info.mb_size = mb_size;
-                mb_info.xl = vec_xl;
-                mb_info.xr = vec_xr;
+                mb_info.xl = vec3(xl,yl,zl);
+                mb_info.xr = vec3(xr,yr,zr);
                 all_mb_info.push_back(mb_info);
                 total_float_count += mb_size;
             }
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
         f_limit = static_cast<float>(std::atof(mem_char)) * 1e9;
         avail_mem = std::min(f_limit, avail_mem); // convert GB to B
     }
-    size_t bytes_avail = static_cast<size_t> avail_mem; // check typing here
+    size_t bytes_avail = static_cast<size_t>(avail_mem); // check typing here
             
     // define clustering 
     bool run_clustering = (bytes_avail < bytes_in_data);
@@ -294,7 +294,6 @@ int main(int argc, char *argv[]) {
 
     // initialise meshblock list on device
     clock_t mb_alloc_start = clock();
-    int num_meshblocks = 2;
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
     
@@ -303,11 +302,11 @@ int main(int argc, char *argv[]) {
     for (int n = 0; n < num_meshblocks; n++) {
         vec3 xl = all_mb_info[n].xl;
         vec3 xr = all_mb_info[n].xr;
-        vec mb_dims = all_mb_info[n].mb_dims;
+        vec3 mb_dims = all_mb_info[n].mb_dims;
         init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mb_start);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
-        mb_start += all_mb_size[n].mb_size;
+        mb_start += all_mb_info[n].mb_size;
     }
 
     // initialise mesh
@@ -390,7 +389,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaFree(d_img));
     checkCudaErrors(cudaFree(mesh));
     checkCudaErrors(cudaFree(d_data));
-    free(data);
+    free(h_all_data);
     free(img);
     cudaDeviceReset();
     if (verbose) {
