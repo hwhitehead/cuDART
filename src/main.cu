@@ -242,6 +242,8 @@ int main(int argc, char *argv[]) {
         bytes_on_device = bytes_in_data; // allocate entire dataset
     }
 
+    std::cout << "clustering = " << run_clustering << std::endl;
+
     // allocate space on device
     clock_t d_data_alloc_start = clock();
     float *d_data = nullptr;

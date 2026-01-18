@@ -44,6 +44,7 @@ __device__ float Mesh::calc_trace(const Ray &r) {
 
     float total_trace = 0;
     for (int n = 0; n < num_meshblocks; n++) {
+        printf("mb size = %d", mb_list[n]->mb_size);
         float local_trace = mb_list[n]->calc_trace(r);
         total_trace += local_trace;
     }
