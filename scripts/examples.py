@@ -11,7 +11,7 @@ def build_mesh():
 
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
 
-    data_dir = os.path.join(host_dir, "outputs/mesh")
+    data_dir = os.path.join(host_dir, "inputs/mesh_demo")
 
     mesh = Mesh(data_dir)
     mb_data = np.load(npy_load_str)
@@ -22,7 +22,7 @@ def build_mesh():
 
 def render_from_mesh():
 
-    data_dir = os.path.join(host_dir, "outputs/mesh")
+    data_dir = os.path.join(host_dir, "outputs/mesh_demo")
     npy_save_str = os.path.join(data_dir, "raw")
     png_save_str = os.path.join(data_dir, "img")
 
@@ -74,4 +74,3 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 if __name__ == "__main__":
 
     build_mesh()
-    

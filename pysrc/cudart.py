@@ -79,6 +79,11 @@ class Scene:
         if (verbose):
             print("generated camera file.")
 
+        # check savespace exists
+        save_dir = os.path.dirname(self.save_str)
+        if not os.path.isdir(save_dir):
+            os.mkdir(save_dir)
+
         # check executable exists, or build
         path_to_executable = os.path.join(host_dir, "bin/cudart")
         if not os.path.isfile(path_to_executable):
@@ -173,7 +178,7 @@ class Mesh:
         header_str = os.path.join(self.data_dir, "header.txt")
         with open(header_str, "w") as f:
             for mb_header in self.mb_headers:
-                f.write("{0}".format(mb_header))
+                f.write("{0}".format(*mb_header))
 
 
 
