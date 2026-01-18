@@ -23,8 +23,8 @@ def build_mesh():
 def render_from_mesh(verbose=True, remove_data=True):
 
     data_dir = os.path.join(host_dir, "inputs/mesh_demo")
-    npy_save_str = os.path.join(data_dir, "raw")
-    png_save_str = os.path.join(data_dir, "img")
+    npy_save_str = os.path.join(host_dir, "inputs/mesh_demo")
+    png_save_str = os.path.join(data_dir, "outputs/mesh_demo/img")
 
     # build camera
     camera = Camera()

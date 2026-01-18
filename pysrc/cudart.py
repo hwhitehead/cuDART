@@ -114,8 +114,13 @@ class Scene:
     def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_data=False, verbose=False):
         
         # TODO: add labelling options, axes?
-
+        
         save_location = save_location.removesuffix(".png") # strip as needed
+
+        # check savespace exists
+        save_dir = os.path.dirname(self.save_str)
+        if not os.path.isdir(save_dir):
+            os.mkdir(save_dir)
 
         # define persistent figure
         fig = plt.figure(figsize=(10.0/3,10.0/3))

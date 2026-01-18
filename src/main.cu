@@ -190,7 +190,6 @@ int main(int argc, char *argv[]) {
     std::string data_dir(input_char);
     std::string header_str = data_dir + "/header.txt";
     std::ifstream header_file(header_str);
-    std::cout << header_str << std::endl;
     std::vector<MeshBlockInfo> all_mb_info = {};
     int total_float_count = 0;
     if (header_file.is_open()) {
@@ -270,7 +269,6 @@ int main(int argc, char *argv[]) {
         std::string num_str = std::to_string(n);
         auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
         std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
-        std::cout << "reading npy file at " << npy_str << std::endl;
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
         std::vector<float> npy_vector = npy_data.data; // populated
         std::vector<unsigned long> npy_shape = npy_data.shape;
