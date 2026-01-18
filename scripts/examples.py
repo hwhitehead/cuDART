@@ -22,7 +22,7 @@ def build_mesh():
 
 def render_from_mesh(verbose=True, remove_data=True):
 
-    data_dir = os.path.join(host_dir, "outputs/mesh_demo")
+    data_dir = os.path.join(host_dir, "inputs/mesh_demo")
     npy_save_str = os.path.join(data_dir, "raw")
     png_save_str = os.path.join(data_dir, "img")
 
@@ -73,5 +73,5 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
 if __name__ == "__main__":
 
-    build_mesh()
+    #build_mesh()
     render_from_mesh()
