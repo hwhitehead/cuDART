@@ -206,6 +206,7 @@ int main(int argc, char *argv[]) {
                 err_msg << "Unable to parse line " << line_count << " of header file at " << header_str << std::endl;
                 CUDART_ERROR(err_msg);
             } else {
+                std::cout << "(nx,ny,nz) = (" << nx << "," << ny << "," << nz << ")\n";
                 MeshBlockInfo mb_info;
                 mb_info.mb_size = mb_size;
                 mb_info.xl = vec3(xl,yl,zl);
