@@ -361,6 +361,7 @@ int main(int argc, char *argv[]) {
         }
 
         float max_img_value = *std::max_element(img, img + camera.num_pixels);
+        std::cout << "max_img_value = " << max_img_value << std::endl;
 
         // save data
         clock_t npy_write_start = clock();
