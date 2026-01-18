@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
 
     // initialise meshblock list on device
     clock_t mb_alloc_start = clock();
-    int num_meshblocks = 2;
+    int num_meshblocks = 1;
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
     
@@ -278,11 +278,11 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaPeekAtLastError());
     checkCudaErrors(cudaDeviceSynchronize());
 
-    vec3 xl1(-0.25,-0.25,-0.25);
-    vec3 xr1(-0.25,-0.25,-0.25);
-    init_meshblock<<<1,1>>>(mb_list, 1, xl1, xr1, mb_dims, d_data, mb_start);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
+    // vec3 xl1(-0.25,-0.25,-0.25);
+    // vec3 xr1(-0.25,-0.25,-0.25);
+    // init_meshblock<<<1,1>>>(mb_list, 1, xl1, xr1, mb_dims, d_data, mb_start);
+    // checkCudaErrors(cudaPeekAtLastError());
+    // checkCudaErrors(cudaDeviceSynchronize());
 
 
 
