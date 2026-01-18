@@ -238,6 +238,9 @@ int main(int argc, char *argv[]) {
     size_t bytes_on_device;
     if (run_clustering) {
         bytes_on_device = bytes_avail; // allocate available data
+        std::stringstream err_msg;
+        err_msg << "Total meshblock memory exceeds VRAM, partitioning currently unsupported in mesh mode\n";
+        CUDART_ERROR(err_msg);
     } else {
         bytes_on_device = bytes_in_data; // allocate entire dataset
     }
@@ -251,15 +254,7 @@ int main(int argc, char *argv[]) {
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
     }
 
-    if (run_clustering) {
-        std::stringstream err_msg;
-        err_msg << "clustering currently unsupported\n";
-        CUDART_ERROR(err_msg);
-    }
-
-    // assert no clustering for current build
-
-    // load ALL npy data into host memory
+    // load ALL npy data into host memory (no partition support)
     clock_t npy_read_start = clock();
     int num_meshblocks = all_mb_info.size();
     float *h_all_data = (float*) malloc(bytes_in_data);
@@ -277,7 +272,7 @@ int main(int argc, char *argv[]) {
         // add check against header here? could delay till after mb_list init
         
         // copy data into host memory buffer
-        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_npy); // COPIED PROPERLY
+        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_npy);
         mem_offset += floats_in_npy;
     }
 
@@ -287,7 +282,6 @@ int main(int argc, char *argv[]) {
     }
 
     // copy data from host into device
-    int il = 0; // assume no partitioning needed
     clock_t data_copy_start = clock();
     checkCudaErrors(cudaMemcpy(d_data, h_all_data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
     checkCudaErrors(cudaPeekAtLastError());
