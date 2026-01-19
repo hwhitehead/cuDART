@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
 
     // determine VRAM limitations
     float vram_limit_f = 1e12;
-    if (mem_char == nullptr) {
+    if (mem_char != nullptr) {
         vram_limit_f = static_cast<float>(std::atof(mem_char)) * 1e9;
     }
     size_t free_t, total_t;
