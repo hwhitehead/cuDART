@@ -335,7 +335,6 @@ int main(int argc, char *argv[]) {
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
                                 std::ceil((float)camera.num_pixels_Y / ty));
-    int floats_on_device = d_bytes / sizeof(float);
 
     // iterate over cameras
     int img_count = 0;
