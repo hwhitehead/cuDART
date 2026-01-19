@@ -268,7 +268,7 @@ int main(int argc, char *argv[]) {
     clock_t npy_read_start = clock();
     int num_meshblocks = all_mb_info.size();
     size_t h_bytes = npy_bytes; // load ALL data
-    float *h_all_data = (float*) malloc();
+    float *h_all_data = (float*) malloc(h_bytes);
     int mem_offset = 0;
     for (int n = 0; n < num_meshblocks; n++) {
         // load npy data into host
