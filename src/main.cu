@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
     std::string header_str = data_dir + "/header.txt";
     std::ifstream header_file(header_str);
     std::vector<MeshBlockInfo> all_mb_info = {};
-    int total_float_count = 0;
+    int npy_floats = 0;
     if (header_file.is_open()) {
         std::string line;
         int line_count = 0;
@@ -221,11 +221,12 @@ int main(int argc, char *argv[]) {
                 mb_info.xr = vec3(xr,yr,zr);
                 mb_info.mb_dims = vec3(nx,ny,nz);
                 all_mb_info.push_back(mb_info);
-                total_float_count += mb_size;
+                npy_floats += mb_size;
             }
             line_count++;
         }
     }
+    size_t npy_bytes = npy_floats * sizeof(float);
     if (verbose) { 
         float header_init_dur = (float)(clock() - header_init_start)/CLOCKS_PER_SEC;
         printf("parsed header             (device)            %.6fs\n",header_init_dur);
@@ -244,14 +245,14 @@ int main(int argc, char *argv[]) {
     size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
             
     // handle memory request excess
-    bool run_clustering = (d_bytes_avail < bytes_in_data);
+    bool run_clustering = (d_bytes_avail < npy_bytes);
     size_t d_bytes;
     if (run_clustering) {
         std::stringstream err_msg;
         err_msg << "Total meshblock memory exceeds VRAM, partitioning currently unsupported in mesh mode\n";
         CUDART_ERROR(err_msg);
     } else {
-        d_bytes = bytes_in_data; // allocate entire dataset
+        d_bytes = npy_bytes; // allocate entire dataset
     }
 
     // allocate space on device
@@ -263,10 +264,11 @@ int main(int argc, char *argv[]) {
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
     }
 
-    // load ALL npy data into host memory (no partition support)
+    // load npy data into host memory 
     clock_t npy_read_start = clock();
     int num_meshblocks = all_mb_info.size();
-    float *h_all_data = (float*) malloc(bytes_in_data);
+    size_t h_bytes = npy_bytes; // load ALL data
+    float *h_all_data = (float*) malloc();
     int mem_offset = 0;
     for (int n = 0; n < num_meshblocks; n++) {
         // load npy data into host
