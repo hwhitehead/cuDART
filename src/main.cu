@@ -49,6 +49,7 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh) {
 int main(int argc, char *argv[]) {
 
     // start general timer
+    std::cout << "Starting cuDART (verbose)...\n";
     clock_t main_start = clock();
     size_t num_zeros = 3;
 
@@ -57,6 +58,7 @@ int main(int argc, char *argv[]) {
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     bool verbose = false;
 
+    // process command line arguments
     for (int i = 1; i < argc; i++) {
         // check if argv[i] is a 2 character string of form "-X"
         if (*argv[i] == '-' && *(argv[i]+1) != '\0' && *(argv[i]+2) == '\0') {
@@ -68,9 +70,11 @@ int main(int argc, char *argv[]) {
                 case 'v':
                     break;
                 default:
-                    if ((i+1 >= argc) || (*argv[i+1] == '-')) { 
-                        std::cout << "### FATAL ERROR in main ###" << std::endl
-                                << "-" << opt_letter << "must be follower by a valid argument\n";
+                    if ((i+1 >= argc) || (*argv[i+1] == '-')) {
+                        std::stringstream err_msg;
+                        err_msg << "### FATAL ERROR in main ###\n";
+                        err_msg << "-" << opt_letter << "must be follower by a valid argument\n";
+                        CUDART_ERROR(err_msg);
                     }
             } // end cases
             switch (*(argv[i]+1)) { //
@@ -105,15 +109,20 @@ int main(int argc, char *argv[]) {
         } // end 2 char check
     }
 
-    if (input_char == nullptr && save_char == nullptr) {
-        std::cout << "### FATAL ERROR in main\n";
-        std::cout << "No input file or output file specified.\n";
-        return 0;
+    // handle fatal errors in input
+    if (input_char == nullptr || save_char == nullptr) {
+        std::stringstream err_msg;
+        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "No input file or output file specified.\n";
+        CUDART_ERROR(err_msg);
     }
 
+    // load camera data and store in vector
     std::vector<Camera> cameras = {};
     if (camera_char == nullptr && verbose) {
-        std::cout << "No user specified camera input, falling back to default.\n";
+        if (verbose) {
+            std::cout << "No user specified camera input, falling back to default.\n";
+        }
         Camera default_camera;
         cameras.push_back(default_camera);
     } else { // determine number of camera locations
@@ -158,8 +167,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // print timing header
     if (verbose) {
-        std::cout << "Starting cuDART (verbose)...\n";
         std::cout << "=============================================================\n";
         std::cout << "|      Activity        |    Location    |      Duration     |\n";
         std::cout << "=============================================================\n";
@@ -187,6 +196,7 @@ int main(int argc, char *argv[]) {
     }
 
     // read memory info from header
+    clock_t header_init_start = clock();
     std::string data_dir(input_char);
     std::string header_str = data_dir + "/header.txt";
     std::ifstream header_file(header_str);
@@ -216,39 +226,38 @@ int main(int argc, char *argv[]) {
             line_count++;
         }
     }
-
-    // determine total memory requirements
-    size_t bytes_in_data = sizeof(float) * total_float_count;
-
-    // check dimensions of GPU/user VRAM maximum
-    size_t free_t, total_t;
-    float tolerance = 0.9; // undercut avail by this tolerance
-    checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
-    float free_f = static_cast<float>(free_t) * tolerance;
-    float avail_mem = free_f;
-    float f_limit;
-    if (not (mem_char == nullptr)) {
-        f_limit = static_cast<float>(std::atof(mem_char)) * 1e9;
-        avail_mem = std::min(f_limit, avail_mem); // convert GB to B
+    if (verbose) { 
+        float header_init_dur = (float)(clock() - header_init_start)/CLOCKS_PER_SEC;
+        printf("parsed header             (device)            %.6fs\n",header_init_dur);
     }
-    size_t bytes_avail = static_cast<size_t>(avail_mem); // check typing here
+
+    // determine VRAM limitations
+    float vram_limit_f = 1e12;
+    if (mem_char == nullptr) {
+        vram_limit_f = static_cast<float>(std::atof(mem_char)) * 1e9;
+    }
+    size_t free_t, total_t;
+    float vram_tolerance = 0.9; // undercut free by this tolerance
+    checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
+    float vram_free_f = static_cast<float>(free_t) * vram_tolerance;
+    float vram_avail_f = std::min(vram_free_f, vram_limit_f);
+    size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
             
-    // define clustering 
-    bool run_clustering = (bytes_avail < bytes_in_data);
-    size_t bytes_on_device;
+    // handle memory request excess
+    bool run_clustering = (d_bytes_avail < bytes_in_data);
+    size_t d_bytes;
     if (run_clustering) {
-        bytes_on_device = bytes_avail; // allocate available data
         std::stringstream err_msg;
         err_msg << "Total meshblock memory exceeds VRAM, partitioning currently unsupported in mesh mode\n";
         CUDART_ERROR(err_msg);
     } else {
-        bytes_on_device = bytes_in_data; // allocate entire dataset
+        d_bytes = bytes_in_data; // allocate entire dataset
     }
 
     // allocate space on device
     clock_t d_data_alloc_start = clock();
     float *d_data = nullptr;
-    checkCudaErrors(cudaMalloc(&d_data, bytes_on_device));
+    checkCudaErrors(cudaMalloc(&d_data, d_bytes));
     if (verbose) {
         float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
@@ -283,7 +292,7 @@ int main(int argc, char *argv[]) {
 
     // copy data from host into device
     clock_t data_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(d_data, h_all_data, bytes_on_device, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+    checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); // no fail, but missing domain?
     checkCudaErrors(cudaPeekAtLastError());
     if (verbose) {
         float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
@@ -324,7 +333,7 @@ int main(int argc, char *argv[]) {
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
                                 std::ceil((float)camera.num_pixels_Y / ty));
-    int floats_on_device = bytes_on_device / sizeof(float);
+    int floats_on_device = d_bytes / sizeof(float);
 
     // iterate over cameras
     int img_count = 0;
