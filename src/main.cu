@@ -317,7 +317,6 @@ int main(int argc, char *argv[]) {
         clock_t npy_read_start = clock();
         num_meshblocks = all_mb_info.size();
         int mem_offset = 0;
-        clock_t
         for (int n = 0; n < num_meshblocks; n++) {
             std::string num_str = std::to_string(n);
             auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
@@ -352,7 +351,7 @@ int main(int argc, char *argv[]) {
     size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
             
     // handle memory request excess
-    bool d_mem_excess = (d_bytes_avail < npy_bytes);
+    bool d_mem_excess = (d_bytes_avail < h_bytes);
     size_t d_bytes;
     if (d_mem_excess) {
         std::stringstream err_msg;
