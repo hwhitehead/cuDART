@@ -10,6 +10,7 @@
 #include <ranges>
 #include <vector>
 #include <map>
+#include <filesystem>
 
 // custom external library imports
 #include "npy.hpp"
@@ -117,6 +118,22 @@ int main(int argc, char *argv[]) {
         CUDART_ERROR(err_msg);
     }
 
+    // determine run mode type (heterogenous or homogenous)
+    bool homogenous = true;
+    const std::string input_str(input_char);
+    const std::filesystem::path input_path(input_char);
+    if (std::filesystem::is_directory(input_path)) {
+        homogenous = false;
+    } else {
+        std::string npy_suffix = ".npy";
+        if (input_path.extension() != npy_suffix) {
+            std::stringstream err_msg;
+            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "Input path must be .npy file (homogenous mode) or directory (heterogenous mode)\n";
+            CUDART_ERROR(err_msg);
+        }
+    }
+
     // load camera data and store in vector
     std::vector<Camera> cameras = {};
     if (camera_char == nullptr && verbose) {
@@ -186,7 +203,7 @@ int main(int argc, char *argv[]) {
         printf("malloc image              (host)              %.6fs\n",img_alloc_dur);
     }
 
-    // initialise image space on device TODO: identify insane overhead?? O(5)s
+    // initialise image space on device 
     clock_t d_img_alloc_start = clock();
     float *d_img = nullptr;
     checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
@@ -195,41 +212,102 @@ int main(int argc, char *argv[]) {
         printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur);
     }
 
-    // read memory info from header
-    clock_t header_init_start = clock();
-    std::string data_dir(input_char);
-    std::string header_str = data_dir + "/header.txt";
-    std::ifstream header_file(header_str);
+    // import npy data to host
     std::vector<MeshBlockInfo> all_mb_info = {};
-    int npy_floats = 0;
-    if (header_file.is_open()) {
-        std::string line;
-        int line_count = 0;
-        int mb_size, nx, ny, nz;
-        float xl, yl, zl, xr, yr, zr;
-        while (std::getline(header_file, line)) {
-            std::istringstream iss(line);
-            if (!(iss >> mb_size >> nx >> ny >> nz >> xl >> yl >> zl >> xr >> yr >> zr)) {
-                std::stringstream err_msg;
-                err_msg << "### FATAL ERROR in main###\n";
-                err_msg << "Unable to parse line " << line_count << " of header file at " << header_str << std::endl;
-                CUDART_ERROR(err_msg);
-            } else {
-                MeshBlockInfo mb_info;
-                mb_info.mb_size = mb_size;
-                mb_info.xl = vec3(xl,yl,zl);
-                mb_info.xr = vec3(xr,yr,zr);
-                mb_info.mb_dims = vec3(nx,ny,nz);
-                all_mb_info.push_back(mb_info);
-                npy_floats += mb_size;
+    size_t npy_bytes;
+    int num_meshblocks = 1;
+    float *h_all_data = nullptr;
+    clock_t npy_read_start;
+    if (homogenous) {
+        // data in unlabelled
+        npy_read_start = clock();
+        npy::npy_data npy_data = npy::read_npy<float>(input_str);
+        std::vector<float> npy_vector = npy_data.data; // TODO: check speedup with cudaMallocHost pre-transfer (seems unhelpful)
+        std::vector<unsigned long> npy_shape = npy_data.shape;
+        vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
+        int mb_size = npy_vector.size();
+        
+        // auto-generate MeshBlock, assume equal spacing in x, y, z and centering at origin
+        float longest_side = (float)std::max_element(npy_shape.begin(), npy_shape.end());
+        vec3 mb_extent = mb_dims / longest_side;
+        vec3 xl = -0.5 * mb_extent;
+        vec3 xr = 0.5 * mb_extent;
+        mb_info.mb_size = mb_size;
+        mb_info.xl = xl;
+        mb_info.xr = xr;
+        mb_info.mb_dims = mb_dims;
+        all_mb_info.push_back(mb_info);
+
+        // load mb data into host memory
+        size_t bytes_in_mb = mb_size * sizeof(float);
+        std::memcpy(h_all_data, npy_vector.data(), bytes_in_mb);
+    } else {
+        // data is labelled and heterogenous
+
+        // read header data
+        clock_t header_init_start = clock();
+        std::string header_str = input_str + "/header.txt";
+        std::ifstream header_file(header_str);
+        std::vector<MeshBlockInfo> all_mb_info = {};
+        int npy_floats = 0;
+        if (header_file.is_open()) {
+            std::string line;
+            int line_count = 0;
+            int mb_size, nx, ny, nz;
+            float xl, yl, zl, xr, yr, zr;
+            while (std::getline(header_file, line)) {
+                std::istringstream iss(line);
+                if (!(iss >> mb_size >> nx >> ny >> nz >> xl >> yl >> zl >> xr >> yr >> zr)) {
+                    std::stringstream err_msg;
+                    err_msg << "### FATAL ERROR in main ###\n";
+                    err_msg << "Unable to parse line " << line_count << " of header file at " << header_str << std::endl;
+                    CUDART_ERROR(err_msg);
+                } else {
+                    MeshBlockInfo mb_info;
+                    mb_info.mb_size = mb_size;
+                    mb_info.xl = vec3(xl,yl,zl);
+                    mb_info.xr = vec3(xr,yr,zr);
+                    mb_info.mb_dims = vec3(nx,ny,nz);
+                    all_mb_info.push_back(mb_info);
+                    npy_floats += mb_size;
+                }
+                line_count++;
             }
-            line_count++;
+            npy_bytes = npy_floats * sizeof(float);
+        } else {
+            std::stringstream err_msg;
+            err_msg << "### FATAL ERROR in main ####\n";
+            err_msg << "Unable to open header file at " << header_str << std::endl;
+            CUDART_ERROR(err_msg);
+        } // end header read
+
+        if (verbose) { 
+            float header_init_dur = (float)(clock() - header_init_start)/CLOCKS_PER_SEC;
+            printf("parsed header             (device)            %.6fs\n",header_init_dur);
         }
-    }
-    size_t npy_bytes = npy_floats * sizeof(float);
-    if (verbose) { 
-        float header_init_dur = (float)(clock() - header_init_start)/CLOCKS_PER_SEC;
-        printf("parsed header             (device)            %.6fs\n",header_init_dur);
+
+        // load mb data into host memory
+        npy_read_start = clock();
+        num_meshblocks = all_mb_info.size();
+        for (int n = 0; n < num_meshblocks; n++) {
+            std::string num_str = std::to_string(n);
+            auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
+            std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
+            npy::npy_data npy_data = npy::read_npy<float>(npy_str);
+            std::vector<float> npy_vector = npy_data.data; // populated
+            std::vector<unsigned long> npy_shape = npy_data.shape;
+            int floats_in_mb  = npy_vector.size();
+            size_t bytes_in_mb = floats_in_mb * sizeof(float);
+            
+            // copy data into host memory buffer
+            std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_mb);
+            mem_offset += floats_in_mb;
+        } // end mb loop
+    } // end import to host
+
+    if (verbose) {
+        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+        printf("read/malloc data          (npy->host)         %.6fs\n",npy_read_dur);
     }
 
     // determine VRAM limitations
@@ -245,14 +323,13 @@ int main(int argc, char *argv[]) {
     size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
             
     // handle memory request excess
-    bool run_clustering = (d_bytes_avail < npy_bytes);
-    size_t d_bytes;
+    bool excess_mem = (d_bytes_avail < npy_bytes);
     if (run_clustering) {
         std::stringstream err_msg;
-        err_msg << "Total meshblock memory exceeds VRAM, partitioning currently unsupported in mesh mode\n";
+        err_msg << "Total input memory exceeds VRAM, partitioning currently unsupported\n";
         CUDART_ERROR(err_msg);
     } else {
-        d_bytes = npy_bytes; // allocate entire dataset
+        d_bytes = npy_bytes; // allocate entire dataset to device
     }
 
     // allocate space on device
@@ -264,34 +341,6 @@ int main(int argc, char *argv[]) {
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
     }
 
-    // load npy data into host memory 
-    clock_t npy_read_start = clock();
-    int num_meshblocks = all_mb_info.size();
-    size_t h_bytes = npy_bytes; // load ALL data
-    float *h_all_data = (float*) malloc(h_bytes);
-    int mem_offset = 0;
-    for (int n = 0; n < num_meshblocks; n++) {
-        // load npy data into host
-        std::string num_str = std::to_string(n);
-        auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
-        std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
-        npy::npy_data npy_data = npy::read_npy<float>(npy_str);
-        std::vector<float> npy_vector = npy_data.data; // populated
-        std::vector<unsigned long> npy_shape = npy_data.shape;
-        int floats_in_npy  = npy_vector.size();
-        size_t bytes_in_npy = floats_in_npy * sizeof(float);
-        // add check against header here? could delay till after mb_list init
-        
-        // copy data into host memory buffer
-        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_npy);
-        mem_offset += floats_in_npy;
-    }
-
-    if (verbose) {
-        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("read/malloc data          (npy->host)         %.6fs\n",npy_read_dur);
-    }
-
     // copy data from host into device
     clock_t data_copy_start = clock();
     checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); // no fail, but missing domain?
@@ -301,24 +350,24 @@ int main(int argc, char *argv[]) {
         printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
     }
 
-    // initialise meshblock list on device
+    // initialise MeshBlock list on device
     clock_t mb_alloc_start = clock();
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
     
-    // initialise meshblocks
-    int mb_start = 0;
+    // initialise MeshBlocks on device
+    int mem_start = 0;
     for (int n = 0; n < num_meshblocks; n++) {
         vec3 xl = all_mb_info[n].xl;
         vec3 xr = all_mb_info[n].xr;
         vec3 mb_dims = all_mb_info[n].mb_dims;
-        init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mb_start);
+        init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mem_start);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
-        mb_start += all_mb_info[n].mb_size;
+        mem_start += all_mb_info[n].mb_size;
     }
 
-    // initialise mesh
+    // initialise Mesh on device
     Mesh **mesh;
     checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
     init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
@@ -327,7 +376,7 @@ int main(int argc, char *argv[]) {
     
     if (verbose) {
         float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init MeshBlock     (device)            %.6fs\n",mb_alloc_dur);
+        printf("malloc/init containers    (device)            %.6fs\n",mb_alloc_dur);
     }
 
     // define render shape    
@@ -342,12 +391,10 @@ int main(int argc, char *argv[]) {
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
-        
-        // add loop here to add new meshblocks
 
         // call render
         clock_t render_start = clock();
-        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh); // TODO: add partition support?
+        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
         if (verbose) {
