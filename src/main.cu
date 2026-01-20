@@ -358,7 +358,7 @@ int main(int argc, char *argv[]) {
         err_msg << "Total input memory exceeds VRAM, partitioning currently unsupported\n";
         CUDART_ERROR(err_msg);
     } else {
-        d_bytes = npy_bytes; // allocate entire dataset to device
+        d_bytes = h_bytes; // allocate entire dataset to device
     }
 
     // allocate space on device
