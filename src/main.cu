@@ -227,11 +227,14 @@ int main(int argc, char *argv[]) {
         vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
         int mb_size = npy_vector.size();
         
-        // auto-generate MeshBlock, assume equal spacing in x, y, z and centering at origin
-        float longest_side = (float)std::max_element(npy_shape.begin(), npy_shape.end());
+        //assume equal spacing in x, y, z and centering at origin
+        float longest_side = std::static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
         vec3 mb_extent = mb_dims / longest_side;
         vec3 xl = -0.5 * mb_extent;
         vec3 xr = 0.5 * mb_extent;
+
+        // stash info
+        MeshBlockInfo mb_info;
         mb_info.mb_size = mb_size;
         mb_info.xl = xl;
         mb_info.xr = xr;
@@ -241,6 +244,7 @@ int main(int argc, char *argv[]) {
         // load mb data into host memory
         size_t bytes_in_mb = mb_size * sizeof(float);
         std::memcpy(h_all_data, npy_vector.data(), bytes_in_mb);
+        npy_bytes = bytes_in_mb;
     } else {
         // data is labelled and heterogenous
 
@@ -292,7 +296,7 @@ int main(int argc, char *argv[]) {
         for (int n = 0; n < num_meshblocks; n++) {
             std::string num_str = std::to_string(n);
             auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
-            std::string npy_str = data_dir + "/meshblock" + padded_num_str + ".npy";
+            std::string npy_str = input_str + "/meshblock" + padded_num_str + ".npy";
             npy::npy_data npy_data = npy::read_npy<float>(npy_str);
             std::vector<float> npy_vector = npy_data.data; // populated
             std::vector<unsigned long> npy_shape = npy_data.shape;
@@ -323,8 +327,9 @@ int main(int argc, char *argv[]) {
     size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
             
     // handle memory request excess
-    bool excess_mem = (d_bytes_avail < npy_bytes);
-    if (run_clustering) {
+    bool d_mem_excess = (d_bytes_avail < npy_bytes);
+    size_t d_bytes;
+    if (d_mem_excess) {
         std::stringstream err_msg;
         err_msg << "Total input memory exceeds VRAM, partitioning currently unsupported\n";
         CUDART_ERROR(err_msg);
@@ -341,9 +346,9 @@ int main(int argc, char *argv[]) {
         printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
     }
 
-    // copy data from host into device
+    // copy ALL data from host into device
     clock_t data_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); // no fail, but missing domain?
+    checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
     checkCudaErrors(cudaPeekAtLastError());
     if (verbose) {
         float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
