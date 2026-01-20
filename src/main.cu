@@ -383,12 +383,11 @@ int main(int argc, char *argv[]) {
     clock_t mb_alloc_start = clock();
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
-    
-    std::cout << "finished list init\n";
 
     // initialise MeshBlocks on device
     int mem_start = 0;
     std::cout << "num_mb = " << num_meshblocks << std::endl;
+    std::cout << "d_bytes = " << d_bytes << std::endl;
     for (int n = 0; n < num_meshblocks; n++) {
         vec3 xl = all_mb_info[n].xl;
         vec3 xr = all_mb_info[n].xr;
