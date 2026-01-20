@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
         int mb_size = npy_vector.size();
         
         //assume equal spacing in x, y, z and centering at origin
-        float longest_side = std::static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
+        float longest_side = static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
         vec3 mb_extent = mb_dims / longest_side;
         vec3 xl = -0.5 * mb_extent;
         vec3 xr = 0.5 * mb_extent;
@@ -293,6 +293,7 @@ int main(int argc, char *argv[]) {
         // load mb data into host memory
         npy_read_start = clock();
         num_meshblocks = all_mb_info.size();
+        int mem_offset = 0;
         for (int n = 0; n < num_meshblocks; n++) {
             std::string num_str = std::to_string(n);
             auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
