@@ -388,6 +388,8 @@ int main(int argc, char *argv[]) {
     int mem_start = 0;
     std::cout << "num_mb = " << num_meshblocks << std::endl;
     std::cout << "d_bytes = " << d_bytes << std::endl;
+    std::cout << "first_size = " << all_mb_info[n].mb_size << std::endl;
+
     for (int n = 0; n < num_meshblocks; n++) {
         vec3 xl = all_mb_info[n].xl;
         vec3 xr = all_mb_info[n].xr;
