@@ -305,10 +305,6 @@ int main(int argc, char *argv[]) {
             printf("parsed header             (device)            %.6fs\n",header_init_dur);
         }
 
-        // checking stash in mbinfo
-        MeshBlockInfo mb_info = all_mb_info[0];
-        std::cout << "mb_size = " << mb_info.mb_size << std::endl;
-
         // allocate space on host
         clock_t h_alloc_start = clock();
         h_all_data = (float*) malloc(h_bytes);
@@ -390,6 +386,9 @@ int main(int argc, char *argv[]) {
 
     // initialise MeshBlocks on device
     int mem_start = 0;
+    // checking stash in mbinfo
+    MeshBlockInfo mb_info = all_mb_info[0];
+    std::cout << "mb_size = " << mb_info.mb_size << std::endl;
     std::cout << "num_mb = " << num_meshblocks << std::endl;
     std::cout << "d_bytes = " << d_bytes << std::endl;
     std::cout << "first_size = " << all_mb_info[0].mb_size << std::endl;
