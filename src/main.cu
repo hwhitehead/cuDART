@@ -214,18 +214,21 @@ int main(int argc, char *argv[]) {
 
     // import npy data to host
     std::vector<MeshBlockInfo> all_mb_info = {};
-    size_t npy_bytes;
     int num_meshblocks = 1;
     float *h_all_data = nullptr;
-    clock_t npy_read_start;
+    size_t h_bytes = 0;
     if (homogenous) {
         // data in unlabelled
-        npy_read_start = clock();
+        clock_t npy_read_start = clock();
         npy::npy_data npy_data = npy::read_npy<float>(input_str);
         std::vector<float> npy_vector = npy_data.data; // TODO: check speedup with cudaMallocHost pre-transfer (seems unhelpful)
         std::vector<unsigned long> npy_shape = npy_data.shape;
         vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
         int mb_size = npy_vector.size();
+        if (verbose) {
+            float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+            printf("npy read                  (host)              %.6fs\n",npy_read_dur);
+        }
         
         //assume equal spacing in x, y, z and centering at origin
         float longest_side = static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
@@ -241,10 +244,22 @@ int main(int argc, char *argv[]) {
         mb_info.mb_dims = mb_dims;
         all_mb_info.push_back(mb_info);
 
+        // allocate space on host
+        h_bytes = mb_size * sizeof(float);
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        }
+
         // load mb data into host memory
-        size_t bytes_in_mb = mb_size * sizeof(float);
-        std::memcpy(h_all_data, npy_vector.data(), bytes_in_mb);
-        npy_bytes = bytes_in_mb;
+        clock_t memcpy_start = clock();
+        std::memcpy(h_all_data, npy_vector.data(), h_bytes);
+        if (verbose) { 
+            float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
+            printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
+        }
     } else {
         // data is labelled and heterogenous
 
@@ -277,7 +292,7 @@ int main(int argc, char *argv[]) {
                 }
                 line_count++;
             }
-            npy_bytes = npy_floats * sizeof(float);
+            h_bytes = npy_floats * sizeof(float);
         } else {
             std::stringstream err_msg;
             err_msg << "### FATAL ERROR in main ####\n";
@@ -290,10 +305,19 @@ int main(int argc, char *argv[]) {
             printf("parsed header             (device)            %.6fs\n",header_init_dur);
         }
 
+        // allocate space on host
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        }
+
         // load mb data into host memory
-        npy_read_start = clock();
+        clock_t npy_read_start = clock();
         num_meshblocks = all_mb_info.size();
         int mem_offset = 0;
+        clock_t
         for (int n = 0; n < num_meshblocks; n++) {
             std::string num_str = std::to_string(n);
             auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
@@ -308,12 +332,12 @@ int main(int argc, char *argv[]) {
             std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_mb);
             mem_offset += floats_in_mb;
         } // end mb loop
-    } // end import to host
 
-    if (verbose) {
-        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("read/malloc data          (npy->host)         %.6fs\n",npy_read_dur);
-    }
+        if (verbose) {
+            float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+            printf("npy read/memcpy            (host)              %.6fs\n",npy_read_dur);
+        }
+    } // end import to host
 
     // determine VRAM limitations
     float vram_limit_f = 1e12;
