@@ -392,6 +392,9 @@ int main(int argc, char *argv[]) {
         vec3 xl = all_mb_info[n].xl;
         vec3 xr = all_mb_info[n].xr;
         vec3 mb_dims = all_mb_info[n].mb_dims;
+        std::cout << xl << std::endl;
+        std::cout << xr << std::endl;
+        std::cout << mb_dims << std::endl;
         init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mem_start);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
