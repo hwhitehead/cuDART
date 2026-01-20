@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) {
 
         if (verbose) {
             float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-            printf("npy read/memcpy            (host)              %.6fs\n",npy_read_dur);
+            printf("npy read/memcpy           (host)              %.6fs\n",npy_read_dur);
         }
     } // end import to host
 
@@ -384,6 +384,8 @@ int main(int argc, char *argv[]) {
     MeshBlock **mb_list;
     checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
     
+    std::cout << "finished list init\n";
+
     // initialise MeshBlocks on device
     int mem_start = 0;
     for (int n = 0; n < num_meshblocks; n++) {
@@ -395,6 +397,8 @@ int main(int argc, char *argv[]) {
         checkCudaErrors(cudaDeviceSynchronize());
         mem_start += all_mb_info[n].mb_size;
     }
+
+    std::cout << "finished mb init\n";
 
     // initialise Mesh on device
     Mesh **mesh;
