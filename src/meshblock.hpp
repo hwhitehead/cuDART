@@ -98,7 +98,6 @@ __device__ float MeshBlock::calc_trace(const Ray &r) {
 __global__ void init_meshblock(MeshBlock **mb_list, int mb_index, const vec3 xl, const vec3 xr, vec3 dims, float *data, int mem_start) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        printf("launching mb init\n");
         mb_list[mb_index] = new MeshBlock(xl, xr, dims, data, mem_start);
     }
     return;

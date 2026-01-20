@@ -267,7 +267,6 @@ int main(int argc, char *argv[]) {
         clock_t header_init_start = clock();
         std::string header_str = input_str + "/header.txt";
         std::ifstream header_file(header_str);
-        std::vector<MeshBlockInfo> all_mb_info = {};
         int npy_floats = 0;
         if (header_file.is_open()) {
             std::string line;
@@ -386,13 +385,6 @@ int main(int argc, char *argv[]) {
 
     // initialise MeshBlocks on device
     int mem_start = 0;
-    // checking stash in mbinfo
-    MeshBlockInfo mb_info = all_mb_info[0];
-    std::cout << "mb_size = " << mb_info.mb_size << std::endl;
-    std::cout << "num_mb = " << num_meshblocks << std::endl;
-    std::cout << "d_bytes = " << d_bytes << std::endl;
-    std::cout << "first_size = " << all_mb_info[0].mb_size << std::endl;
-
     for (int n = 0; n < num_meshblocks; n++) {
         vec3 xl = all_mb_info[n].xl;
         vec3 xr = all_mb_info[n].xr;
