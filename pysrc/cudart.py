@@ -91,7 +91,9 @@ class Scene:
         # prepare camera space
         self.build_camera_file()
         if (verbose):
-            print("generated camera file.")
+            print("generated camera file at " + self.temp_camera_file)
+
+        sys.exit()
 
         # check savespace exists
         save_dir = os.path.dirname(self.save_str)
