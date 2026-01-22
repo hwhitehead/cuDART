@@ -32,7 +32,7 @@ class Camera:
         sin_phi = np.sin(phi)
         cos_phi = np.cos(phi)
         self.origin = r * np.array([sin_theta * cos_phi, sin_theta * sin_phi, cos_theta])
-        print(origin)
+        print(self.origin)
         if (target_origin): self.set_target(np.array([0.0, 0.0, 0.0])) # target coordinate origin
 
     def set_cyl_pos(self, R, phi, z, target_origin=False):
