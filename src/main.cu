@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
             }
             camera_file.close();
         } else {
-            std::streamstream err_msg;
+            std::stringstream err_msg;
             err_msg << "### FATAL ERROR in main ###\n";
             err_msg << "Unable to open camera file at " << camera_str << std::endl;
             CUDART_ERROR(err_msg);
