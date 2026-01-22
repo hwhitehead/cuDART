@@ -85,7 +85,7 @@ def render_unlabelled_example():
     print("built scene")
 
     # render and save images
-    scene.render(verbose=verbose)
+    scene.render(verbose = True)
     print("finished rendering raw images")
 
     scene.plot(png_save_str, verbose = True, remove_raw_images = True)
