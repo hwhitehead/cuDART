@@ -93,8 +93,6 @@ class Scene:
         if (verbose):
             print("generated camera file at " + self.temp_camera_file)
 
-        sys.exit()
-
         # check savespace exists
         save_dir = os.path.dirname(self.save_str)
         if not os.path.isdir(save_dir):
