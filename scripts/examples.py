@@ -71,11 +71,9 @@ def render_unlabelled_example():
     phi = (178.0 / 180) * np.pi
     ep = 1e-2 # avoid casts with exact cooordinate alignment
     theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
-    print(theta_ar)
     cameras = []
     for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
-        print(camera.length_X)
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
 

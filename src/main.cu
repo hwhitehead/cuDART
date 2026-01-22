@@ -134,7 +134,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // print timing header
+    if (verbose) {
+        std::cout << "=============================================================\n";
+        std::cout << "|      Activity        |    Location    |      Duration     |\n";
+        std::cout << "=============================================================\n";
+    }
+
     // load camera data and store in vector
+    clock_t camera_read_start = clock();
     std::vector<Camera> cameras = {};
     if (camera_char == nullptr) {
         if (verbose) {
@@ -186,13 +194,12 @@ int main(int argc, char *argv[]) {
             CUDART_ERROR(err_msg);
         }
     }
-
-    // print timing header
     if (verbose) {
-        std::cout << "=============================================================\n";
-        std::cout << "|      Activity        |    Location    |      Duration     |\n";
-        std::cout << "=============================================================\n";
+        float camera_read_dur = (float)(clock() - camera_read_start)/CLOCKS_PER_SEC;
+        printf("camera read             (host)              %.6fs\n",camera_read_dur);
     }
+
+
 
     // load image dimensions from the first camera
     Camera camera = cameras[0];
@@ -238,9 +245,6 @@ int main(int argc, char *argv[]) {
         vec3 mb_extent = mb_dims / longest_side;
         vec3 xl = -0.5 * mb_extent;
         vec3 xr = 0.5 * mb_extent;
-
-        std::cout << "xl = " << xl << std::endl;
-        std::cout << "xr = " << xr << std::endl;
 
         // stash info
         MeshBlockInfo mb_info;
@@ -445,7 +449,6 @@ int main(int argc, char *argv[]) {
             printf("render kernel             (device)            %.6fs\n",render_dur);
         }
 
-
         // copy image data to host
         clock_t img_copy_start = clock();
         checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
@@ -466,7 +469,7 @@ int main(int argc, char *argv[]) {
         npy::write_npy(save_str, npy_img);
         if (verbose) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-            printf("write data                (host->npy)         %.6fs\n",npy_write_dur);
+            printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur);
             float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
             printf("img total                 (host/device)       %.6fs\n",this_img_dur);
             if (img_count == total_images - 1) {
@@ -474,17 +477,16 @@ int main(int argc, char *argv[]) {
             } else {
                 std::cout << "-------------------------------------------------------------\n";
             }
-            
-            
-            
         }
 
         // prepare for next image
-        wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
-        checkCudaErrors(cudaPeekAtLastError());
-        checkCudaErrors(cudaDeviceSynchronize());
-        img_count++;
-    }
+        if (total_images != 1) { // skip wipe if single image output
+            wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
+            checkCudaErrors(cudaPeekAtLastError());
+            checkCudaErrors(cudaDeviceSynchronize());
+            img_count++;
+        } 
+    } // end camera loop
 
     // perform cleanup of device/host data
     clock_t free_start = clock();
