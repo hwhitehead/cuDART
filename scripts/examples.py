@@ -104,4 +104,4 @@ def render_unlabelled_example():
 
 if __name__ == "__main__":
 
-    render_labelled_example()
+    render_unlabelled_example()
