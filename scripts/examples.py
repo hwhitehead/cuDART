@@ -25,54 +25,29 @@ def build_labelled_example():
 
 def render_labelled_example():
 
+    ep = 1e-2 # avoid casts with exact cooordinate alignment
+
     data_dir = os.path.join(host_dir, "inputs/mesh_demo")
     npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/raw")
     png_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
 
-    # build camera
-    camera = Camera()
-    theta = (75.0 / 180) * np.pi
-    phi = (179.0 / 180) * np.pi
-    tilt = (-38.0 / 180) * np.pi
-    camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    camera.num_pixels_X = 1024
-    camera.num_pixels_Y = 1024
-    camera.tilt = tilt
-    camera.length_X = 0.66
-    camera.length_Y = 0.66
+    # build template camera
+    template_camera = Camera()
+    template_camera.num_pixels_X = 512
+    template_camera.num_pixels_Y = 512
+    template_camera.tilt = 0
+    template_camera.length_X = 0.66
+    template_camera.length_Y = 0.66
 
-    # build camera
-    c2 = Camera()
-    theta = (20.0 / 180) * np.pi
-    phi = (179.0 / 180) * np.pi
-    tilt = (-38.0 / 180) * np.pi
-    c2.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    c2.num_pixels_X = 1024
-    c2.num_pixels_Y = 1024
-    c2.tilt = tilt
-    c2.length_X = 0.66
-    c2.length_Y = 0.66
-    cameras = [camera, c2]
-
-
-    # # build template camera
-    # template_camera = Camera()
-    # template_camera.num_pixels_X = 1024
-    # template_camera.num_pixels_Y = 1024
-    # template_camera.tilt = (-38.0 / 180) * np.pi
-    # template_camera.length_X = 0.66
-    # template_camera.length_Y = 0.66
-
-    # # build camera array, inherit from template
-    # num_img = 5
-    # phi = (178.0 / 180) * np.pi
-    # ep = 1e-2 # avoid casts with exact cooordinate alignment
-    # theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
-    # cameras = []
-    # for theta in theta_ar:
-    #     camera = copy.deepcopy(template_camera)
-    #     camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    #     cameras.append(camera)
+    # build camera array, inherit from template
+    num_img = 100
+    phi = ep    
+    theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
+    cameras = []
+    for theta in theta_ar:
+        camera = copy.deepcopy(template_camera)
+        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+        cameras.append(camera)
 
     scene = Scene(data_dir, npy_save_str, cameras)
 
