@@ -156,8 +156,8 @@ int main(int argc, char *argv[]) {
         int line_count = 0, num_pixels_X, num_pixels_Y;
         if (camera_file.is_open()) {
             std::string line;
-            float inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9, inp10, inp11;
             while (std::getline(camera_file, line)) {
+                float inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9, inp10, inp11;
                 std::istringstream iss(line);
                 if (!(iss >> inp0 >> inp1 >> inp2 >> inp3 >> inp4 >> inp5 >> inp6 >> inp7 >> inp8 >> inp9 >> inp10 >> inp11)) {
                     std::stringstream err_msg;

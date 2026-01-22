@@ -59,36 +59,36 @@ def render_unlabelled_example():
     npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
     png_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
 
-    # # build template camera
-    # template_camera = Camera()
-    # template_camera.num_pixels_X = 1024
-    # template_camera.num_pixels_Y = 1024
-    # template_camera.tilt = (-38.0 / 180) * np.pi
-    # template_camera.length_X = 0.66
-    # template_camera.length_Y = 0.66
+    # build template camera
+    template_camera = Camera()
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
+    template_camera.tilt = (-38.0 / 180) * np.pi
+    template_camera.length_X = 0.66
+    template_camera.length_Y = 0.66
 
-    # # build camera array, inherit from template
-    # phi = (178.0 / 180) * np.pi
-    # ep = 1e-2 # avoid casts with exact cooordinate alignment
-    # theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
-    # cameras = []
-    # for theta in theta_ar:
-    #     camera = copy.deepcopy(template_camera)
-    #     camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    #     cameras.append(camera)
+    # build camera array, inherit from template
+    phi = (178.0 / 180) * np.pi
+    ep = 1e-2 # avoid casts with exact cooordinate alignment
+    theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
+    cameras = []
+    for theta in theta_ar:
+        camera = copy.deepcopy(template_camera)
+        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+        cameras.append(camera)
 
-    # build camera
-    camera = Camera()
-    theta = (75.0/ 180) * np.pi
-    phi = (179.0 / 180) * np.pi
-    tilt = (-38.0 / 180) * np.pi
-    camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    camera.num_pixels_X = 1024
-    camera.num_pixels_Y = 1024
-    camera.tilt = tilt
-    camera.length_X = 0.66
-    camera.length_Y = 0.66
-    cameras = [camera] * 5
+    # # build camera
+    # camera = Camera()
+    # theta = (75.0/ 180) * np.pi
+    # phi = (179.0 / 180) * np.pi
+    # tilt = (-38.0 / 180) * np.pi
+    # camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+    # camera.num_pixels_X = 1024
+    # camera.num_pixels_Y = 1024
+    # camera.tilt = tilt
+    # camera.length_X = 0.66
+    # camera.length_Y = 0.66
+    # cameras = [camera] * 5
 
     print("initialised cameras")
 
