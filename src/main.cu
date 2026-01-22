@@ -395,8 +395,6 @@ int main(int argc, char *argv[]) {
         mem_start += all_mb_info[n].mb_size;
     }
 
-    std::cout << "finished mb init\n";
-
     // initialise Mesh on device
     Mesh **mesh;
     checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
@@ -417,7 +415,15 @@ int main(int argc, char *argv[]) {
 
     // iterate over cameras
     int img_count = 0;
-    if (verbose) std::cout << "=============================================================\n";
+    int total_images = cameras.size();
+    if (verbose) {
+        if (total_images == 1) {
+            std::cout << "Starting render cycle...\n";
+        } else {
+            std::cout << "Starting render cycle for " << total_images << "images...\n";
+        }
+        std::cout << "=============================================================\n";
+    }
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
@@ -431,7 +437,7 @@ int main(int argc, char *argv[]) {
             float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
             printf("render kernel             (device)            %.6fs\n",render_dur);
         }
-        if (verbose) std::cout << ".............................................................\n";
+
 
         // copy image data to host
         clock_t img_copy_start = clock();
@@ -456,7 +462,7 @@ int main(int argc, char *argv[]) {
             printf("write data                (host->npy)         %.6fs\n",npy_write_dur);
             float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
             printf("img total                 (host/device)       %.6fs\n",this_img_dur);
-            if (verbose) std::cout << "=============================================================\n";
+            if (img_count != total_images - 1) std::cout << "-------------------------------------------------------------\n";
         }
 
         // prepare for next image
