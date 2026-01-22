@@ -32,14 +32,14 @@ class Camera:
         sin_phi = np.sin(phi)
         cos_phi = np.cos(phi)
         self.origin = r * np.array([sin_theta * cos_phi, sin_theta * sin_phi, cos_theta])
-        if (target_origin): set_target(np.array([0.0, 0.0, 0.0]))
+        if (self.target_origin): set_target(np.array([0.0, 0.0, 0.0])) # target coordinate origin
 
     def set_cyl_pos(self, R, phi, z, target_origin=False):
         self.origin = np.array([R * np.cos(phi), R * np.sin(phi), z])
-        if (target_origin): set_target(np.array([0.0, 0.0, 0.0]))
+        if (self.target_origin): set_target(np.array([0.0, 0.0, 0.0])) # target coordinate origin
 
     def set_target(self, target):
-        self.normal = target - origin
+        self.normal = target - self.origin
 
 class Scene:
     """ 
