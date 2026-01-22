@@ -43,7 +43,7 @@ def render_labelled_example():
 
     # build camera
     c2 = Camera()
-    theta = (10.0 / 180) * np.pi
+    theta = (75.0 / 180) * np.pi
     phi = (179.0 / 180) * np.pi
     tilt = (-38.0 / 180) * np.pi
     c2.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
