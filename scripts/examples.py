@@ -7,6 +7,8 @@ import subprocess, os, sys, copy
 sys.path.append("..")
 from pysrc import *
 
+epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
+
 def build_labelled_example():
 
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
@@ -25,11 +27,11 @@ def build_labelled_example():
 
 def render_labelled_example():
 
-    ep = 1e-2 # avoid casts with exact cooordinate alignment
+    print("cuDART: starting labelled render example...")
 
     data_dir = os.path.join(host_dir, "inputs/mesh_demo")
-    npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/raw")
-    png_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
+    npy_save_str = os.path.join(host_dir, "outputs/labelled/raw")
+    png_save_str = os.path.join(host_dir, "outputs/labelled/img")
 
     # build template camera
     template_camera = Camera()
@@ -48,48 +50,47 @@ def render_labelled_example():
         camera = copy.deepcopy(template_camera)
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
+    print("initialised cameras")
 
     scene = Scene(data_dir, npy_save_str, cameras)
+    print("built scene")
 
     scene.render(verbose = True)
+    print("finished rendering raw images")
+
     scene.plot(png_save_str, verbose = True, remove_raw_images = True)
+    print("unlablled render example finished.")
 
 def render_unlabelled_example():
 
     print("cuDART: starting unlabelled render example...")
 
-    # define statics
-    num_img = 5
-
     # define targets
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
-    npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/raw")
-    png_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
+    npy_save_str = os.path.join(host_dir, "outputs/unlabelled/raw")
+    png_save_str = os.path.join(host_dir, "outputs/unlabelled/img")
 
     # build template camera
     template_camera = Camera()
-    template_camera.num_pixels_X = 1024
-    template_camera.num_pixels_Y = 1024
-    template_camera.tilt = (-38.0 / 180) * np.pi
+    template_camera.num_pixels_X = 512
+    template_camera.num_pixels_Y = 512
+    template_camera.tilt = 0
     template_camera.length_X = 0.66
     template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
-    phi = (178.0 / 180) * np.pi
-    ep = 1e-2 # avoid casts with exact cooordinate alignment
+    num_img = 100
+    phi = ep    
     theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
     cameras = []
     for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-        print(camera)
         cameras.append(camera)
-
     print("initialised cameras")
 
     # generate scene
     scene = Scene(npy_load_str, npy_save_str, cameras)
-
     print("built scene")
 
     # render and save images
