@@ -42,11 +42,15 @@ __host__ void Camera::build_camera() {
 
     // define spanning vectors
     unit_Y = (bias - bias.dot_prod(normal) * bias).vector_norm(); // remove projected component
-    unit_X = normal.cross_prod(unit_Y);
+    unit_X = normal.cross_prod(unit_Y)
+
+    // ensure unitary
+    unit_Y = unit_Y.vector_norm();
+    unit_X = unit_X.vector_norm();
 
     // apply rotation
-    unit_X = unit_X.rotate_about(normal, tilt);
     unit_Y = unit_Y.rotate_about(normal, tilt);
+    unit_X = unit_X.rotate_about(normal, tilt);
 
     // define spatial/pixel extent
     lower_left = origin - 0.5 * length_X * unit_X - 0.5 * length_Y * unit_Y;
