@@ -129,7 +129,7 @@ class Scene:
         # destroy temp camera file if called
         if not self.temp_camera_file == self.camera_file_name:
             if os.path.exists(self.temp_camera_file):
-                os.remove(self.temp_camera_file)
+                #os.remove(self.temp_camera_file)
                 if verbose:
                     print("removed temporary camera file")
 

@@ -33,7 +33,7 @@ def render_labelled_example(verbose=True, remove_data=True):
     camera = Camera()
     theta = (75.0/ 180) * np.pi
     phi = (179.0 / 180) * np.pi
-    tilt = (-38.0/180) * np.pi
+    tilt = (-38.0 / 180) * np.pi
     camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     camera.num_pixels_X = 1024
     camera.num_pixels_Y = 1024
@@ -58,13 +58,13 @@ def render_unlabelled_example(num_img = 5, verbose=True, remove_data=True):
     template_camera = Camera()
     template_camera.num_pixels_X = 1024
     template_camera.num_pixels_Y = 1024
-    template_camera.tilt = (-38.0/180) * np.pi
+    template_camera.tilt = (-38.0 / 180) * np.pi
     template_camera.length_X = 0.66
     template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
     phi = (179.0 / 180) * np.pi
-    ep = 1e-4 # avoid casts with exactly cooordinate alignment
+    ep = 1e-4 # avoid casts with exact cooordinate alignment
     theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
     cameras = []
     for theta in theta_ar:

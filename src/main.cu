@@ -417,12 +417,13 @@ int main(int argc, char *argv[]) {
     int img_count = 0;
     int total_images = cameras.size();
     if (verbose) {
-        if (total_images == 1) {
-            std::cout << "Starting render cycle...\n";
-        } else {
-            std::cout << "Starting render cycle for " << total_images << "images...\n";
-        }
         std::cout << "=============================================================\n";
+        if (total_images == 1) {
+            std::cout << "Starting render for single image...\n";
+        } else {
+            std::cout << "Starting render cycle for " << total_images << " images...\n";
+        }
+        std::cout << "-------------------------------------------------------------\n";
     }
     for (auto &camera : cameras) {
         
@@ -462,7 +463,14 @@ int main(int argc, char *argv[]) {
             printf("write data                (host->npy)         %.6fs\n",npy_write_dur);
             float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
             printf("img total                 (host/device)       %.6fs\n",this_img_dur);
-            if (img_count != total_images - 1) std::cout << "-------------------------------------------------------------\n";
+            if (img_count == total_images - 1) {
+                std::cout << "=============================================================\n";
+            } else {
+                std::cout << "-------------------------------------------------------------\n";
+            }
+            
+            
+            
         }
 
         // prepare for next image
