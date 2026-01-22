@@ -77,8 +77,6 @@ def render_unlabelled_example():
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
 
-    return
-
     print("initialised cameras")
 
     # generate scene
