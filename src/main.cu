@@ -239,6 +239,9 @@ int main(int argc, char *argv[]) {
         vec3 xl = -0.5 * mb_extent;
         vec3 xr = 0.5 * mb_extent;
 
+        std::cout << "xl = " << xl << std::endl;
+        std::cout << "xr = " << xr << std::endl;
+
         // stash info
         MeshBlockInfo mb_info;
         mb_info.mb_size = mb_size;
