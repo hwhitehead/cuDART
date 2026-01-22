@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 
     // load camera data and store in vector
     std::vector<Camera> cameras = {};
-    if (camera_char == nullptr && verbose) {
+    if (camera_char == nullptr) {
         if (verbose) {
             std::cout << "No user specified camera input, falling back to default.\n";
         }
@@ -148,10 +148,10 @@ int main(int argc, char *argv[]) {
         int line_count = 0, num_pixels_X, num_pixels_Y;
         if (camera_file.is_open()) {
             std::string line;
-            float a, b, c, d, e, f;
+            float inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9, inp10, inp11;
             while (std::getline(camera_file, line)) {
                 std::istringstream iss(line);
-                if (!(iss >> a >> b >> c >> d >> e >> f)) {
+                if (!(iss >> inp0 >> inp1 >> inp2 >> inp3 >> inp4 >> inp5 >> inp6 >> inp7 >> inp8 >> inp9 >> inp10 >> inp11)) {
                     std::cout << "### FATAL ERROR in main ###\n";
                     std::cout << "Unable to parse line " << line_count << "of camera file at " << camera_str << std::endl;
                     return 0;
@@ -164,13 +164,13 @@ int main(int argc, char *argv[]) {
                         Camera this_camera;
                         this_camera.num_pixels_X = num_pixels_X;
                         this_camera.num_pixels_Y = num_pixels_Y;
-                        this_camera.R_pos = a;
-                        this_camera.theta_pos = b;
-                        this_camera.phi_pos = c;
-                        this_camera.tilt = d;
-                        this_camera.length_X = e;
-                        this_camera.length_Y = f;
-                        this_camera.update_camera();
+                        this_camera.origin = vec3(inp0, inp1, inp2);
+                        this_camera.normal = vec3(inp3, inp4, inp5);
+                        this_camera.bias = vec3(inp6, inp7, inp8);
+                        this_camera.tilt = inp9;
+                        this_camera.length_X = inp10;
+                        this_camera.length_Y = inp11;
+                        this_camera.build_camera();
                         cameras.push_back(this_camera);
                     }
                 }

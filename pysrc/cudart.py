@@ -8,42 +8,55 @@ str_zfill = 3
 
 class Camera:
     """
-    this class is a basic struct to contain camera properties
+    The Camera class is a basic struct to wrap the image viewing orientation and dimensions
     """
-
-    def __init__(self, R=2.0, theta=0.500001 * np.pi, phi=0.0001, 
-                    num_pixels_X=512, num_pixels_Y=512, length_X=1.0, length_Y=1.0,
-                    bias = np.array([0.0,0.0,1.0]), tilt=0.0):
-        # copy data
-        self.R = R
-        self.theta = theta
-        self.phi = phi
+    def __init__(self, origin = np.array([1.0,0.0,0.0]), normal = np.array([-1.0,0.0,0.0]), bias = np.array([0.0,0.0,1.0]),
+                    num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0):
+        self.origin = origin
+        self.normal = normal
+        self.bias = bias
         self.num_pixels_X = num_pixels_X
         self.num_pixels_Y = num_pixels_Y
         self.length_X = length_X
         self.length_Y = length_Y
         self.bias = bias
         self.tilt = tilt
+        self.num_pixels = num_pixels_X * num_pixels_Y
 
-    def unpack(self): # TODO: accept bias in cmd line
-        return self.R, self.theta, self.phi, self.tilt, self.length_X, self.length_Y # TODO: implement BIAS
+    def header_str(self):
+        return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}".format(*origin, *normal, *bias, tilt, length_X, length_Y)
+    
+    def set_sph_pos(self, r, theta, phi, target_origin=False):
+        sin_theta = np.sin(theta)
+        cos_theta = np.cos(theta)
+        sin_phi = np.sin(phi)
+        cos_phi = np.cos(phi)
+        self.origin = r * np.array([sin_theta * cos_phi, sin_theta * sin_phi, cos_theta])
+        if (target_origin): set_target(np.array([0.0, 0.0, 0.0]))
+
+    def set_cyl_pos(self, R, phi, z, target_origin=False):
+        self.origin = np.array([R * np.cos(phi), R * np.sin(phi), z])
+        if (target_origin): set_target(np.array([0.0, 0.0, 0.0]))
+
+    def set_target(self, target):
+        self.normal = target - origin
 
 class Scene:
     """ 
     this class provides a simple way for the user to call cuDART and process the results
     """
-    def __init__(self, load_str, save_str, cameras=None, camera_file_name=None): 
+    def __init__(self, load_str, save_str, cameras = None, camera_file_name = None): 
 
         # parse load/save strings        
         self.load_str = load_str
         self.save_str = save_str.removesuffix(".png")
 
         if cameras is None:
-            self.cameras = [Camera()]
+            self.cameras = [Camera()] # initialise single default camera
         elif isinstance(cameras, list) or isinstance(cameras, np.ndarray):
-            self.cameras = cameras
+            self.cameras = cameras # pass list type input directly
         else:
-            self.cameras = [cameras]
+            self.cameras = [cameras] # package singel type input
         self.camera_file_name = camera_file_name
 
         if self.camera_file_name is None:
@@ -51,7 +64,7 @@ class Scene:
         else:
             self.temp_camera_file = self.camera_file_name
 
-        # check camera dimensions
+        # check camera dimensions are const across all cameras
         self.num_pixels_X = cameras[0].num_pixels_X
         self.num_pixels_Y = cameras[0].num_pixels_Y
         for camera in self.cameras:
@@ -61,16 +74,19 @@ class Scene:
     def build_camera_file(self):
 
         with open(self.temp_camera_file, "w") as f:
-            f.write("{0} {1} 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y)) # header
+            # add header with const image dimensions (zero packed for istringstream read)
+            f.write("{0} {1} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y))
+            # add line for each camera to run render with
             for camera in self.cameras:
-                f.write("{0} {1} {2} {3} {4} {5}\n".format(*camera.unpack()))
+                f.write(camera.header_str())
+
+    def make_clean(self):
+        subprocess.run(["make","clean"])       
 
     def make(self):
-
-        subprocess.run(["make","clean"])
         subprocess.run(["make"])
 
-    def render(self, profile=False, verbose=False, force_make=False, plot=False, max_mem=None):
+    def render(self, profile = False, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None):
 
         # prepare camera space
         self.build_camera_file()
@@ -88,9 +104,15 @@ class Scene:
             if (verbose):
                 print("unable to located executable, forcing remake.")
             self.make()
+        elif check_make:
+            if verbose:
+                print("checking for updates since last make")
+            self.make()
         elif force_make:
             if verbose:
                 print("forcing remake of executable")
+            self.make_clean()
+            self.make
 
         # call executable        
         command = [path_to_executable, "-i", self.load_str, "-s", self.save_str,"-c",self.temp_camera_file]

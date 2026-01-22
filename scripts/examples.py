@@ -31,9 +31,13 @@ def render_from_mesh(verbose=True, remove_data=True):
 
     # build camera
     camera = Camera()
-    camera.num_pixels_X = 2048
-    camera.num_pixels_Y = 2048
-    camera.tilt = (-38.0/180) * np.pi
+    theta = (75.0/ 180) * np.pi
+    phi = (179.0 / 180) * np.pi
+    tilt = (-38.0/180) * np.pi
+    camera.set_sph_pos(r = 2.0, theta = theta, phi = phi)
+    camera.num_pixels_X = 1024
+    camera.num_pixels_Y = 1024
+    camera.tilt = tilt
     camera.length_X = 0.66
     camera.length_Y = 0.66
     cameras = [camera]
