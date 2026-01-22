@@ -163,7 +163,7 @@ class Scene:
         num_images = len(self.cameras)
         for i in range(num_images):
 
-            load_str = self.npy_load_str + str(i).zfill(str_zfill) + ".npy"
+            load_str = self.npy_save_str + str(i).zfill(str_zfill) + ".npy"
             save_str = save_location + str(i).zfill(str_zfill) + ".png"
 
             img = np.load(load_str)
