@@ -46,7 +46,7 @@ class Camera:
         retstr += "normal = ({0},{1},{2})\n".format(*self.normal)
         retstr += "bias = ({0},{1},{2})".format(*self.bias)
         retstr += "(lx,ly) = ({0},{1})".format(self.length_X, self.length_Y)
-        return restr
+        return retstr
 
 class Scene:
     """ 
