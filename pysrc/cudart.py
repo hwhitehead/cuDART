@@ -44,8 +44,8 @@ class Camera:
     def __str__(self):
         retstr = "origin = ({0},{1},{2})\n".format(*self.origin)
         retstr += "normal = ({0},{1},{2})\n".format(*self.normal)
-        retstr += "bias = ({0},{1},{2})".format(*self.bias)
-        retstr += "(lx,ly) = ({0},{1})".format(self.length_X, self.length_Y)
+        retstr += "bias = ({0},{1},{2})\n".format(*self.bias)
+        retstr += "(lx,ly) = ({0},{1})\n".format(self.length_X, self.length_Y)
         return retstr
 
 class Scene:
