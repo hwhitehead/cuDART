@@ -179,6 +179,7 @@ int main(int argc, char *argv[]) {
                         this_camera.tilt = inp9;
                         this_camera.length_X = inp10;
                         this_camera.length_Y = inp11;
+                        std::cout << "lx, ly = " << this_camera.length_X << ", " << this_camera.length_Y << std::endl;
                         this_camera.build_camera();
                         cameras.push_back(this_camera);
                     }
