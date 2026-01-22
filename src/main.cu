@@ -158,8 +158,8 @@ int main(int argc, char *argv[]) {
                 } else {
                     // read line by line
                     if (line_count == 0) { // read static header
-                        num_pixels_X = a;
-                        num_pixels_Y = b;
+                        num_pixels_X = inp0;
+                        num_pixels_Y = inp1;
                     } else { // read dynamic camera data
                         Camera this_camera;
                         this_camera.num_pixels_X = num_pixels_X;

@@ -35,7 +35,7 @@ __host__ void Camera::build_camera() {
     bias = bias.vector_norm();
     normal = normal.vector_norm();
     if (bias == normal) {
-        std::stringstream << err_msg;
+        std::stringstream err_msg;
         err_msg << "Unable to define unique camera orientation with bias == normal\n";
         CUDART_ERROR(err_msg);
     }
