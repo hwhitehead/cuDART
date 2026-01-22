@@ -59,7 +59,7 @@ def render_labelled_example():
     print("finished rendering raw images")
 
     scene.plot(png_save_str, verbose = True, remove_raw_images = True)
-    print("unlablled render example finished.")
+    print("lablled render example finished.")
 
 def render_unlabelled_example():
 
