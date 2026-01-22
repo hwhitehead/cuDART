@@ -32,6 +32,7 @@ class Camera:
         sin_phi = np.sin(phi)
         cos_phi = np.cos(phi)
         self.origin = r * np.array([sin_theta * cos_phi, sin_theta * sin_phi, cos_theta])
+        print(origin)
         if (target_origin): self.set_target(np.array([0.0, 0.0, 0.0])) # target coordinate origin
 
     def set_cyl_pos(self, R, phi, z, target_origin=False):
@@ -133,7 +134,7 @@ class Scene:
                 if verbose:
                     print("removed temporary camera file")
 
-    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_data=False, verbose=False):
+    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False):
         
         # TODO: add labelling options, axes?
         
@@ -167,7 +168,7 @@ class Scene:
             if (verbose):
                 print("saved png at " + save_str)
 
-            if (remove_data):
+            if (remove_raw_images):
                 os.remove(load_str)
                 if (verbose):
                     print("removed data file at " + load_str)

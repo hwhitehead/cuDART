@@ -47,7 +47,12 @@ def render_labelled_example(verbose=True, remove_data=True):
     scene.render(verbose=verbose)
     scene.plot(png_save_str, verbose=verbose, remove_data=remove_data)
 
-def render_unlabelled_example(num_img = 5, verbose=True, remove_data=True):
+def render_unlabelled_example():
+
+    print("cuDART: starting unlabelled render example...")
+
+    # define statics
+    num_img = 5
 
     # define targets
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
@@ -72,12 +77,23 @@ def render_unlabelled_example(num_img = 5, verbose=True, remove_data=True):
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
 
+    return
+
+    print("initialised cameras")
+
     # generate scene
     scene = Scene(npy_load_str, npy_save_str, cameras)
 
+    print("built scene")
+
     # render and save images
     scene.render(verbose=verbose)
-    scene.plot(png_save_str, verbose=verbose, remove_data=True)
+    print("finished rendering raw images")
+
+    scene.plot(png_save_str, verbose = True, remove_raw_images = True)
+    print("finished rendering rasterised images")
+
+    print("unlablled render example finished.")
 
 if __name__ == "__main__":
 

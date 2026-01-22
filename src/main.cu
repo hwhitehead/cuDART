@@ -152,9 +152,10 @@ int main(int argc, char *argv[]) {
             while (std::getline(camera_file, line)) {
                 std::istringstream iss(line);
                 if (!(iss >> inp0 >> inp1 >> inp2 >> inp3 >> inp4 >> inp5 >> inp6 >> inp7 >> inp8 >> inp9 >> inp10 >> inp11)) {
-                    std::cout << "### FATAL ERROR in main ###\n";
-                    std::cout << "Unable to parse line " << line_count << "of camera file at " << camera_str << std::endl;
-                    return 0;
+                    std::stringstream err_msg;
+                    err_msg << "### FATAL ERROR in main ###\n";
+                    err_msg << "Unable to parse line " << line_count << "of camera file at " << camera_str << std::endl;
+                    CUDART_ERROR(err_msg);
                 } else {
                     // read line by line
                     if (line_count == 0) { // read static header
@@ -178,9 +179,10 @@ int main(int argc, char *argv[]) {
             }
             camera_file.close();
         } else {
-            std::cout << "### FATAL ERROR in main ###\n";
-            std::cout << "Unable to open camera file at " << camera_str << std::endl;
-            return 0;
+            std::streamstream err_msg;
+            err_msg << "### FATAL ERROR in main ###\n";
+            err_msg << "Unable to open camera file at " << camera_str << std::endl;
+            CUDART_ERROR(err_msg);
         }
     }
 
