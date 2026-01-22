@@ -436,7 +436,8 @@ int main(int argc, char *argv[]) {
         
         clock_t this_img_start = clock();
 
-        std::cout << "lx, ly = " << camera.length_X << ", " << camera.length_Y << std::endl;
+        std::cout << "nX, nY = " << camera.num_pixels_X << ", " << camera.num_pixels_Y << std::endl;
+        std::cout << "cam origin = " << camera.origin << std::endl;
 
         // call render
         clock_t render_start = clock();
