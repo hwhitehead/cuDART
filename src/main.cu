@@ -201,8 +201,8 @@ int main(int argc, char *argv[]) {
 
 
     // load image dimensions from the first camera
-    Camera camera = cameras[0];
-    const size_t bytes_in_img = camera.num_pixels * sizeof(float);
+    Camera standard_camera = cameras[0];
+    const size_t bytes_in_img = standard_camera.num_pixels * sizeof(float);
 
     // allocate image space on host
     clock_t img_alloc_start = clock();
@@ -419,8 +419,8 @@ int main(int argc, char *argv[]) {
     // define render shape    
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
-    const dim3 blocks_per_grid(std::ceil((float)camera.num_pixels_X / tx), 
-                                std::ceil((float)camera.num_pixels_Y / ty));
+    const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
+                                std::ceil((float)standard_camera.num_pixels_Y / ty));
 
     // iterate over cameras
     int img_count = 0;
@@ -464,7 +464,7 @@ int main(int argc, char *argv[]) {
         save_str = save_str + padded_num_str + ".npy";
         npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
-        npy_img.shape = {(unsigned long)camera.num_pixels_X, (unsigned long)camera.num_pixels_Y};
+        npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
         npy::write_npy(save_str, npy_img);
         if (verbose) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
@@ -480,7 +480,7 @@ int main(int argc, char *argv[]) {
 
         // prepare for next image
         if (total_images != 1) { // skip wipe if single image output
-            wipe_img<<<blocks_per_grid,threads_per_block>>>(camera, d_img);
+            wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
             checkCudaErrors(cudaPeekAtLastError());
             checkCudaErrors(cudaDeviceSynchronize());
             img_count++;
