@@ -8,14 +8,14 @@ class Camera {
     public:
         // ctors
         __host__ Camera() {origin = vec3(1.0, 0.0, 0.0),
-                                normal = vec3(-1.0, 0.0, 0.0),
-                                bias = vec3(0.0, 0.0, 1.0);
-                                length_X = 1.0;
-                                length_Y = 1.0;
-                                num_pixels_X = 10;
-                                num_pixels_Y = 10;
-                                tilt = 0.0;
-                                build_camera();}
+                            normal = vec3(-1.0, 0.0, 0.0),
+                            bias = vec3(0.0, 0.0, 1.0);
+                            length_X = 1.0;
+                            length_Y = 1.0;
+                            num_pixels_X = 10;
+                            num_pixels_Y = 10;
+                            tilt = 0.0;
+                            build_camera();}
         
         // methods
         __host__ void build_camera();
