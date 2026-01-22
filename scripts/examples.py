@@ -23,7 +23,7 @@ def build_labelled_example():
     mesh.add_meshblock(mb_data, xl_zoom, xr_zoom)
     mesh.write_header()
 
-def render_labelled_example(verbose=True, remove_data=True):
+def render_labelled_example():
 
     data_dir = os.path.join(host_dir, "inputs/mesh_demo")
     npy_save_str = os.path.join(host_dir, "inputs/mesh_demo")
@@ -63,8 +63,8 @@ def render_labelled_example(verbose=True, remove_data=True):
 
     scene = Scene(data_dir, npy_save_str, cameras)
 
-    scene.render(verbose=verbose)
-    scene.plot(png_save_str, verbose=verbose, remove_data=remove_data)
+    scene.render(verbose = True)
+    scene.plot(png_save_str, verbose = True, remove_raw_images = True)
 
 def render_unlabelled_example():
 
