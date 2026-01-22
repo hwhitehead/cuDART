@@ -81,10 +81,18 @@ class Scene:
                 f.write(camera.header_str())
 
     def make_clean(self):
-        subprocess.run(["make","clean"])       
+        try:
+            subprocess.run(["make","clean"])       
+        except Exception as e:
+            err_str = "### FATAL ERROR in __main__ ###\nunable to clean executable"
+            sys.exit(err_str)
 
     def make(self):
-        subprocess.run(["make"])
+        try:
+            subprocess.run(["make"])
+        except Exception as e:
+            err_str = "### FATAL ERROR in __main__ ###\nunable to compile executable"
+            sys.exit(err_str)
 
     def render(self, profile = False, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None):
 
@@ -123,7 +131,10 @@ class Scene:
         if max_mem is not None:
             command = command + ["-m", str(max_mem)]
         print("calling render executable")
-        subprocess.run(command)
+        try:
+            subprocess.run(command)
+        except Exception as e:
+            err_str = "### FATAL ERROR in __main__ ###\nruntime failure in executable"
         print("executable finished.")
 
         # destroy temp camera file if called

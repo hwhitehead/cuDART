@@ -14,18 +14,18 @@ class Camera {
                                 length_Y = 1.0;
                                 num_pixels_X = 10;
                                 num_pixels_Y = 10;
-                                num_pixels = num_pixels_X * num_pixels_Y;
+                                tilt = 0.0;
                                 build_camera();}
-        __host__ void build_camera();
-
+        
         // methods
+        __host__ void build_camera();
         __device__ vec3 calc_pixel_origin(int i, int j) const;
 
         // attributes
-        vec3 origin, normal;                        // orientation generators
+        vec3 origin, normal, bias;                  // orientation generators
         vec3 unit_X, unit_Y, lower_left;            // orientation dependents
         int num_pixels_X, num_pixels_Y, num_pixels; // pixel dimensions 
-        float length_X, length_Y;                   // spatial dimensions
+        float length_X, length_Y, tilt;             // spatial dimensions and tilt
 };
 
 __host__ void Camera::build_camera() {
@@ -33,7 +33,7 @@ __host__ void Camera::build_camera() {
     
     // enforce normalisation
     bias = bias.vector_norm();
-    normal = normal.vector_norm(;)
+    normal = normal.vector_norm();
     if (bias == normal) {
         std::stringstream << err_msg;
         err_msg << "Unable to define unique camera orientation with bias == normal\n";
