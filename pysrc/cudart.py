@@ -52,11 +52,11 @@ class Scene:
     """ 
     this class provides a simple way for the user to call cuDART and process the results
     """
-    def __init__(self, load_str, save_str, cameras = None, camera_file_name = None): 
+    def __init__(self, npy_load_str, save_str, cameras = None, camera_file_name = None): 
 
         # parse load/save strings        
-        self.load_str = load_str
-        self.save_str = save_str.removesuffix(".png")
+        self.npy_load_str = npy_load_str
+        self.npy_save_str = save_str.removesuffix(".png")
 
         if cameras is None:
             self.cameras = [Camera()] # initialise single default camera
@@ -122,7 +122,7 @@ class Scene:
             self.make
 
         # call executable        
-        command = [path_to_executable, "-i", self.load_str, "-s", self.save_str,"-c",self.temp_camera_file]
+        command = [path_to_executable, "-i", self.npy_load_str, "-s", self.save_str,"-c",self.temp_camera_file]
         if profile: 
             command = ["nvprof"] + command
         if verbose:
@@ -163,7 +163,7 @@ class Scene:
         num_images = len(self.cameras)
         for i in range(num_images):
 
-            load_str = self.save_str + str(i).zfill(str_zfill) + ".npy"
+            load_str = self.npy_load_str + str(i).zfill(str_zfill) + ".npy"
             save_str = save_location + str(i).zfill(str_zfill) + ".png"
 
             img = np.load(load_str)

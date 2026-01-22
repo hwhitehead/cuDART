@@ -75,7 +75,7 @@ def render_unlabelled_example():
 
     # define targets
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
-    npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
+    npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/raw")
     png_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
 
     # build template camera
