@@ -34,7 +34,7 @@ def render_from_mesh(verbose=True, remove_data=True):
     theta = (75.0/ 180) * np.pi
     phi = (179.0 / 180) * np.pi
     tilt = (-38.0/180) * np.pi
-    camera.set_sph_pos(r = 2.0, theta = theta, phi = phi)
+    camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     camera.num_pixels_X = 1024
     camera.num_pixels_Y = 1024
     camera.tilt = tilt
