@@ -7,7 +7,7 @@ import subprocess, os, sys, copy
 sys.path.append("..")
 from pysrc import *
 
-def build_mesh():
+def build_labelled_example():
 
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
 
@@ -23,7 +23,7 @@ def build_mesh():
     mesh.add_meshblock(mb_data, xl_zoom, xr_zoom)
     mesh.write_header()
 
-def render_from_mesh(verbose=True, remove_data=True):
+def render_labelled_example(verbose=True, remove_data=True):
 
     data_dir = os.path.join(host_dir, "inputs/mesh_demo")
     npy_save_str = os.path.join(host_dir, "inputs/mesh_demo")
@@ -47,28 +47,29 @@ def render_from_mesh(verbose=True, remove_data=True):
     scene.render(verbose=verbose)
     scene.plot(png_save_str, verbose=verbose, remove_data=remove_data)
 
-def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
+def render_unlabelled_example(num_img = 5, verbose=True, remove_data=True):
 
     # define targets
     npy_load_str = os.path.join(host_dir, "inputs/sn_alt.npy")
-    npy_save_str = os.path.join(host_dir, "outputs/mesh/sn")
-    png_save_str = os.path.join(host_dir, "outputs/mesh/sn")
+    npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
+    png_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
 
     # build template camera
     template_camera = Camera()
-    template_camera.num_pixels_X = 2048
-    template_camera.num_pixels_Y = 2048
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
     template_camera.tilt = (-38.0/180) * np.pi
     template_camera.length_X = 0.66
     template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
-    ep = 1e-4 # avoid purely aligned casts
+    phi = (179.0 / 180) * np.pi
+    ep = 1e-4 # avoid casts with exactly cooordinate alignment
     theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
     cameras = []
     for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
-        camera.theta = theta
+        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
 
     # generate scene
@@ -80,5 +81,4 @@ def demo_scene_gen(num_img = 5, verbose=True, remove_data=True):
 
 if __name__ == "__main__":
 
-    #build_mesh()
-    render_from_mesh()
+    render_unlabelled_example()

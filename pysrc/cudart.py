@@ -187,7 +187,7 @@ class Mesh:
     
     def add_meshblock(self, mb_data, xl, xr):
 
-        # TODO: add check against VRAM to ensure no meshblock exceeds limit
+        # TODO: add check against VRAM to ensure no meshblock exceeds limit, then auto refine
 
         mb_data = mb_data.astype(np.float32)
         npy_str = os.path.join(self.data_dir, "meshblock" + str(self.num_mb).zfill(self.nzfill) + ".npy")
