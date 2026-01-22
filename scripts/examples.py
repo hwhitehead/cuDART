@@ -51,6 +51,7 @@ def render_labelled_example(verbose=True, remove_data=True):
     template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
+    num_img = 5
     phi = (178.0 / 180) * np.pi
     ep = 1e-2 # avoid casts with exact cooordinate alignment
     theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
