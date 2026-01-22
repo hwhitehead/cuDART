@@ -41,6 +41,13 @@ class Camera:
     def set_target(self, target):
         self.normal = target - self.origin
 
+    def __str__(self):
+        retstr = "origin = ({0},{1},{2})\n".format(*self.origin)
+        retstr += "normal = ({0},{1},{2})\n".format(*self.normal)
+        retstr += "bias = ({0},{1},{2})".format(*self.bias)
+        retstr += "(lx,ly) = ({0},{1})".format(self.length_X, self.length_Y)
+        return restr
+
 class Scene:
     """ 
     this class provides a simple way for the user to call cuDART and process the results
