@@ -43,8 +43,8 @@ def render_labelled_example():
 
     # build camera array, inherit from template
     num_img = 100
-    phi = ep    
-    theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
+    phi = epsilon    
+    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
     for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
@@ -80,8 +80,8 @@ def render_unlabelled_example():
 
     # build camera array, inherit from template
     num_img = 100
-    phi = ep    
-    theta_ar = np.linspace(ep,np.pi - ep,num_img, endpoint=False)
+    phi = epsilon    
+    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
     for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
