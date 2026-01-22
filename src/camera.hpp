@@ -42,7 +42,7 @@ __host__ void Camera::build_camera() {
 
     // define spanning vectors
     unit_Y = (bias - bias.dot_prod(normal) * bias).vector_norm(); // remove projected component
-    unit_X = normal.cross_prod(unit_Y)
+    unit_X = normal.cross_prod(unit_Y);
 
     // ensure unitary
     unit_Y = unit_Y.vector_norm();
