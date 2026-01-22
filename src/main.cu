@@ -166,6 +166,7 @@ int main(int argc, char *argv[]) {
                         this_camera.num_pixels_X = num_pixels_X;
                         this_camera.num_pixels_Y = num_pixels_Y;
                         this_camera.origin = vec3(inp0, inp1, inp2);
+                        std::cout << this_camera.origin << std::endl;
                         this_camera.normal = vec3(inp3, inp4, inp5);
                         this_camera.bias = vec3(inp6, inp7, inp8);
                         this_camera.tilt = inp9;
