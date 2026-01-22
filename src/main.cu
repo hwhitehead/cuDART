@@ -179,7 +179,6 @@ int main(int argc, char *argv[]) {
                         this_camera.tilt = inp9;
                         this_camera.length_X = inp10;
                         this_camera.length_Y = inp11;
-                        std::cout << "lx, ly = " << this_camera.length_X << ", " << this_camera.length_Y << std::endl;
                         this_camera.build_camera();
                         cameras.push_back(this_camera);
                     }
@@ -198,8 +197,6 @@ int main(int argc, char *argv[]) {
         float camera_read_dur = (float)(clock() - camera_read_start)/CLOCKS_PER_SEC;
         printf("camera read               (host)              %.6fs\n",camera_read_dur);
     }
-
-
 
     // load image dimensions from the first camera
     Camera standard_camera = cameras[0];
@@ -438,6 +435,8 @@ int main(int argc, char *argv[]) {
     for (auto &camera : cameras) {
         
         clock_t this_img_start = clock();
+
+        std::cout << "lx, ly = " << camera.length_X << ", " << camera.length_Y << std::endl;
 
         // call render
         clock_t render_start = clock();
