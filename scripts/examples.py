@@ -26,7 +26,7 @@ def build_labelled_example():
 def render_labelled_example():
 
     data_dir = os.path.join(host_dir, "inputs/mesh_demo")
-    npy_save_str = os.path.join(host_dir, "inputs/mesh_demo/raw")
+    npy_save_str = os.path.join(host_dir, "outputs/mesh_demo/raw")
     png_save_str = os.path.join(host_dir, "outputs/mesh_demo/img")
 
     # # build camera
