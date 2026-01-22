@@ -88,7 +88,7 @@ def render_unlabelled_example():
     camera.tilt = tilt
     camera.length_X = 0.66
     camera.length_Y = 0.66
-    cameras = [camera]
+    cameras = [camera] * 5
 
     print("initialised cameras")
 
