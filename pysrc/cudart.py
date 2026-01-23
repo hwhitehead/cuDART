@@ -1,10 +1,54 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os, sys, subprocess
+import os, sys, subprocess, copy
 import glob
 
 host_dir = "/mnt/users/hww27/cuDART"
 str_zfill = 3
+
+def set_plot_defaults(use_tex = True):
+    """
+    assign default plot settings before figure creation
+    """
+    ## FIGURE
+
+    # test for tex environment
+    if use_tex:
+        plt.rcParams["text.usetex"] = "True"
+        plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
+
+        # FONT
+        plt.rcParams['font.serif']=['cm']
+        plt.rcParams['font.family']='serif'
+        plt.rcParams['font.serif']=['cm']
+    else:
+        plt.rcParams["text.usetex"] = "False"
+
+    plt.rcParams['font.size']=8 # defval 18
+    plt.rcParams['xtick.labelsize']=8
+    plt.rcParams['ytick.labelsize']=8
+    plt.rcParams['legend.fontsize']=8
+    plt.rcParams['axes.titlesize']=8
+    plt.rcParams['axes.labelsize']=8
+    plt.rcParams['axes.linewidth']=1.5
+    plt.rcParams["lines.linewidth"] = 2.2
+    ## TICKS
+    plt.rcParams['xtick.top']='False'
+    plt.rcParams['xtick.bottom']='True'
+    plt.rcParams['xtick.minor.visible']='True'
+    plt.rcParams['xtick.direction']='out'
+    plt.rcParams['ytick.left']='True'
+    plt.rcParams['ytick.right']='True'
+    plt.rcParams['ytick.minor.visible']='True'
+    plt.rcParams['ytick.direction']='out'
+    plt.rcParams['xtick.major.width']=1.5
+    plt.rcParams['xtick.minor.width']=1
+    plt.rcParams['xtick.major.size']=3
+    plt.rcParams['xtick.minor.size']=9/4
+    plt.rcParams['ytick.major.width']=1.5
+    plt.rcParams['ytick.minor.width']=1
+    plt.rcParams['ytick.major.size']=3
+    plt.rcParams['ytick.minor.size']=9/4
 
 class Camera:
     """
@@ -212,5 +256,139 @@ class Mesh:
             for mb_header in self.mb_headers:
                 f.write("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}\n".format(*mb_header))
 
+class BSpline:
 
+    # referencing: https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/INT-APP/CURVE-INT-global.html
 
+    def __init__(self, p, D_array, mode="chord", len_power=0.5):
+        # load data
+        self.D_array = D_array
+        self.n = np.shape(D_array)[0] - 1
+        if (p > self.n):
+            raise Exception("degree must be less than or equal to number of data points")
+        self.p = p # order
+        self.m = self.n + self.p + 1
+        num_middle = (self.m + 1) - 2 * (self.p + 1)
+        self.u_list = [0] * (self.p + 1) + np.linspace(0, 1, num_middle + 2)[1:-1].tolist() + [1] * (self.p + 1)
+
+        # package data
+        self.set_spacing(mode, len_power)
+        self.build_N_array()
+
+        # solve data
+        self.solve_P()
+
+    def set_spacing(self, mode, len_power):
+        if mode == "uniform":
+            self.t_list = np.linspace(0, 1, self.n+1)
+        elif mode in ["chord", "centripetal"]:
+            if mode == "chord":
+                len_power = 1.0
+            sides = self.D_array[1:,:] - self.D_array[:-1,:] # D_{k+1} - D_k
+            lengths = np.sum(np.power(np.abs(sides),len_power), axis=1)
+            total_length = np.sum(lengths)
+            t_list = np.zeros(shape=self.n+1)
+            t_list[-1] = 1
+            for i in range(1,self.n):
+                t_list[i] = t_list[i-1] + lengths[i] / total_length
+            self.t_list = t_list
+        else:
+            raise Exception("unable to recognised mode, select form [\"uniform\",\"chord\",\"centripetal\"]")
+
+        self.tl = self.t_list[0]
+        self.tr = self.t_list[-1]
+
+    def build_N_row(self, u):
+
+        # init row as zero
+        N_row = np.zeros(shape=(self.n+1))
+
+        # handle edge cases
+        if u == self.u_list[0]:
+            N_row[0] = 1.0
+            return N_row
+        elif u == self.u_list[-1]:
+            N_row[self.n] = 1.0
+            return N_row
+
+        k = np.argmax(self.u_list > u) - 1
+
+        # loop over degrees
+        N_row[k] = 1.0
+        for d in range(1,self.p+1):
+            N_row[k-d] = N_row[k-d+1] * (self.u_list[k+1] - u) / (self.u_list[k+1] - self.u_list[k-d+1])
+            for i in range(k-d+1,k):
+                N_row[i] = N_row[i] * (u - self.u_list[i]) / (self.u_list[i+d] - self.u_list[i])
+                N_row[i] += N_row[i+1] * (self.u_list[i+d+1] - u) / (self.u_list[i+d+1] - self.u_list[i+1])
+            N_row[k] = N_row[k] * (u - self.u_list[k]) / (self.u_list[k+d] - self.u_list[k])
+
+        return N_row
+
+    def build_N_array(self):
+        N_array = np.zeros(shape=(self.n+1, self.n+1))
+        for row, t in enumerate(self.t_list):
+            N_row = self.build_N_row(t)
+            N_array[row,:] = N_row
+        self.N_array = N_array
+
+    def solve_P(self):
+        # solve lin equation set for each column
+        P_array = np.zeros(shape=(self.n+1, 3))
+        for i in range(3):
+            D_column = self.D_array[:,i]
+            P_column = np.linalg.solve(self.N_array, D_column)
+            P_array[:,i] = P_column
+
+        self.P_array = P_array
+
+    def eval_spline(self, t_span):
+
+        C = np.zeros(shape=(np.size(t_span),3))
+        for i, t in enumerate(t_span):
+            N_coeffs = self.build_N_row(t)
+            C_i = np.zeros(shape=(3))
+            for j in range(self.n+1):
+                C_i += N_coeffs[j] * self.P_array[j,:]
+            C[i,:] = C_i
+
+        return C
+
+class GuidedCamera:
+
+    def __init__(self, checkpoints = None, targets = None):
+        self.checkpoints = checkpoints
+        self.targets = targets
+
+    def generate_cameras(self, p = 3, mode = "chord", num_img = 100, template_camera = None, camera_times = None):
+        if template_camera is None:
+            template_camera = Camera()
+            template_camera.num_pixels_X = 512
+            template_camera.num_pixels_Y = 512
+            template_camera.tilt = 0
+            template_camera.length_X = 0.66
+            template_camera.length_Y = 0.66
+
+        if self.checkpoints is None:
+            raise Exception("require checkpoints set before camera generation")
+
+        # if self.targets is None:
+        #     self.targets = [0,0,0]
+        # elif np.shape(self.targets)[0] > 1:
+        #     raise Exception("multi target currently unsupported")
+
+        if camera_times is None: # even spacing
+            self.camera_times = np.linspace(0, 1, num_img)
+        else: # normalise
+            max_time = np.max(camera_times)
+            self.camera_times = np.array(camera_times) / max_time
+
+        self.origin_spline = BSpline(p, self.checkpoints, mode)
+        origins = self.origin_spline.eval_spline(self.camera_times)
+        cameras = []
+        for i in range(num_img):
+            camera = copy.deepcopy(template_camera)
+            camera.origin = origins[i,:]
+            camera.set_target(self.targets[0]) # single target for now
+            cameras.append(camera)
+
+        return cameras

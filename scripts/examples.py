@@ -102,6 +102,48 @@ def render_unlabelled_example():
 
     print("unlablled render example finished.")
 
+def guided_camera_example():
+
+    checkpoints = np.array([[1, 1, 0], [2, 2, 0], [3, 2, 0], [3, 4, 0], [1, 3, 0], [-1, 2, 0], [-1, 0, 0], [2, 0, 0]])
+    target = np.array([[0,1,0]])
+    gcam = GuidedCamera(checkpoints = checkpoints, targets=target)
+
+    num_imgs = 10
+
+    camera_times = np.linspace(0, 1, num_imgs)
+    cameras = gcam.generate_cameras(num_img = num_imgs, camera_times = camera_times, mode="chord")
+
+    set_plot_defaults()
+    fig = plt.figure()
+    gs = fig.add_gridspec(1,2,width_ratios=np.array([1,0.05]))
+    ax = fig.add_subplot(gs[:,0])
+    cax = fig.add_subplot(gs[:,1])
+
+    # plot checkpoints
+    ax.scatter(gcam.checkpoints[:, 0], gcam.checkpoints[:, 1], color='k',marker='x', label="Checkpoints")  # x-y plot
+
+    # plot origin spline
+    t_span = np.linspace(0,1,100)
+    origin_spline_guide = gcam.origin_spline.eval_spline(t_span)
+    ax.plot(origin_spline_guide[:,0], origin_spline_guide[:,1], color='k', linestyle = "dotted", zorder=-5, label="Guide")
+
+    normal_len = 0.2
+    ax.scatter([],[],color='r', label="Cameras")
+    ax.scatter(target[0, 0], target[0, 1], color='b', label="Target")
+    arrow_kwargs = {"head_width": 0.05, "width": 0.02, "zorder": -10}
+    for camera in cameras:
+        # plot camera positions
+        ax.scatter(camera.origin[0], camera.origin[1], color='r')
+        # add normals
+        ax.arrow(camera.origin[0], camera.origin[1], camera.normal[0] * normal_len, camera.normal[1] * normal_len, color='b', **arrow_kwargs)
+
+    ax.legend(loc="upper left", frameon=False)
+    plt.subplots_adjust(hspace=0, wspace=0)
+    fig.savefig("guided_cam.png", dpi=300, bbox_inches="tight")
+    plt.close("all")
+
+
+
 if __name__ == "__main__":
 
-    render_unlabelled_example()
+    guided_camera_example()
