@@ -178,7 +178,7 @@ def render_jet():
     scene.render(verbose = True)
     print("finished rendering raw images")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=20, vmax=23)
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=17, vmax=20)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")

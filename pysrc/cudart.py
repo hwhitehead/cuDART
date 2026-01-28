@@ -198,11 +198,13 @@ class Scene:
         # define persistent figure
         fig = plt.figure(figsize=(10.0/3,10.0/3))
         ax = fig.add_subplot()
+        ax.set_facecolor("k")
         plt.subplots_adjust(hspace=0, wspace=0)
         X = np.linspace(0,1,self.num_pixels_X+1)
         Y = np.linspace(0,1,self.num_pixels_Y+1)
         XX, YY = np.meshgrid(X, Y, indexing="ij")
-        ax.axis("off")
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
 
         num_images = len(self.cameras)
         for i in range(num_images):
@@ -211,9 +213,6 @@ class Scene:
             save_str = save_location + str(i).zfill(str_zfill) + ".png"
 
             img = np.load(load_str)
-
-            print(np.max(img))
-            print(np.min(img))
 
             pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
