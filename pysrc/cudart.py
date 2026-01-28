@@ -212,6 +212,9 @@ class Scene:
 
             img = np.load(load_str)
 
+            print(np.max(img))
+            print(np.min(img))
+
             pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
             pc.remove()
