@@ -142,8 +142,49 @@ def guided_camera_example():
     fig.savefig("guided_cam.png", dpi=300, bbox_inches="tight")
     plt.close("all")
 
+def render_jet():
+
+    print("cuDART: starting jet render example...")
+
+    # define targets
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/blurred_0490.npy"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/img"
+
+    # build template camera
+    template_camera = Camera()
+    template_camera.num_pixels_X = 512
+    template_camera.num_pixels_Y = 512
+    template_camera.tilt = 0
+    template_camera.length_X = 0.66
+    template_camera.length_Y = 0.66
+
+    # build camera array, inherit from template
+    num_img = 100
+    theta = 0.5 * np.pi + epsilon    
+    phi_ar = np.linspace(epsilon,2 * np.pi - epsilon,num_img, endpoint=False)
+    cameras = []
+    for theta in theta_ar:
+        camera = copy.deepcopy(template_camera)
+        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+        cameras.append(camera)
+    print("initialised cameras")
+
+    # generate scene
+    scene = Scene(npy_load_str, npy_save_str, cameras)
+    print("built scene")
+
+    # render and save images
+    scene.render(verbose = True)
+    print("finished rendering raw images")
+
+    scene.plot(png_save_str, verbose = True, remove_raw_images = True)
+    print("finished rendering rasterised images")
+
+    print("unlablled render example finished.")
+
 
 
 if __name__ == "__main__":
 
-    guided_camera_example()
+    render_jet()
