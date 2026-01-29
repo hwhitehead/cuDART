@@ -4,7 +4,14 @@
   <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/rotate.gif alt=animated/>
 </p>
 <p align="center"">
-  <em> Animation of a supernova-jet simulation snapshot, featuring 200 viewpoints each yielding a 2048<sup>2</sup> image. Raw image data for each frame generated in ~150ms, during which 4 million rays were cast through a simulation domain hosting over 400 million (750<sup>3</sup>) cells.</em>
+  <em> Animation of a supernova-jet simulation snapshot, featuring 200 viewpoints each yielding a 2048<sup>2</sup> image. Raw image data for each frame generated in ~150ms, during which 4 million rays were cast through a simulation domain hosting over 400 million (750<sup>3</sup>) cells. Simulation data featured in <a href="https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract">this paper</a></em>
+</p>
+
+<p align="center">
+  <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/blurred_jet.gif alt=animated/>
+</p>
+<p align="center"">
+  <em> Animation of a relativistic jet launched from an Active Galactic Nucleus, using data featured in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this paper</a></em>
 </p>
 
 This repository contains a lightweight set of tools for raytracing heterogenous orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
