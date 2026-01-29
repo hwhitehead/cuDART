@@ -7,57 +7,55 @@
 class Camera {
     public:
         // ctors
-        __host__ Camera()  {R_pos = 2.0;
-                            theta_pos = M_PI / 2.0 + 0.00001;
-                            phi_pos = 0.0 + 0.0000001;
+        __host__ Camera() {origin = vec3(1.0, 0.0, 0.0),
+                            normal = vec3(-1.0, 0.0, 0.0),
+                            bias = vec3(0.0, 0.0, 1.0);
                             length_X = 1.0;
                             length_Y = 1.0;
-                            num_pixels_X = 9;
-                            num_pixels_Y = 9;
-                            num_pixels = num_pixels_X * num_pixels_Y;
-                            bias = vec3(0,0,1);
+                            num_pixels_X = 10;
+                            num_pixels_Y = 10;
                             tilt = 0.0;
-                            update_camera();}
-        __host__ void update_camera();
-        __host__ void print_camera();
+                            build_camera();}
+        
+        // methods
+        __host__ void build_camera();
+        __device__ vec3 calc_pixel_origin(int i, int j) const;
 
-        // routines
-        __device__ vec3 calc_pixel_origin(int i, int j) const;                           
-
-        // internals
-        float R_pos, theta_pos, phi_pos, tilt;
-        vec3 origin, normal;
-        int num_pixels_X, num_pixels_Y, num_pixels;
-        float length_X, length_Y;
-        vec3 bias, unit_X, unit_Y, lower_left;
+        // attributes
+        vec3 origin, normal, bias;                  // orientation generators
+        vec3 unit_X, unit_Y, lower_left;            // orientation dependents
+        int num_pixels_X, num_pixels_Y, num_pixels; // pixel dimensions 
+        float length_X, length_Y, tilt;             // spatial dimensions and tilt
 };
 
-__host__ void Camera::print_camera() {
-    std::cout << "Image size = (" << num_pixels_X << "," << num_pixels_Y << ")\n";
-    std::cout << num_pixels << " pixels total\n";
-    std::cout << "origin = " << origin << std::endl;
-    std::cout << "normal = " << normal << std::endl;
-    std::cout << "unit_X = " << unit_X << std::endl;
-    std::cout << "unit_Y = " << unit_Y << std::endl;
-    std::cout << "lower left = " << lower_left << std::endl;
-}
-
-__host__ void Camera::update_camera() {
-    // calculate position
-    origin = R_pos * vec3(sin(theta_pos) * cos(phi_pos),
-                            sin(theta_pos) * sin(phi_pos),
-                            cos(theta_pos));
+__host__ void Camera::build_camera() {
+    // initialise dependent properties for Camera object
     
-    // calculate orientation
-    unit_X = (bias.cross_prod(origin)).vector_norm();
-    unit_Y = (origin.cross_prod(unit_X)).vector_norm();
-    normal = -origin.vector_norm();
-    unit_X = unit_X.rotate_about(normal, tilt);
-    unit_Y = unit_Y.rotate_about(normal, tilt);
+    // enforce normalisation
+    bias = bias.vector_norm();
+    normal = normal.vector_norm();
+    if (bias == normal) {
+        std::stringstream err_msg;
+        err_msg << "Unable to define unique camera orientation with bias == normal\n";
+        CUDART_ERROR(err_msg);
+    }
 
-    // define screen size
+    // define spanning vectors
+    unit_Y = (bias - bias.dot_prod(normal) * normal).vector_norm(); // remove projected component
+    unit_X = normal.cross_prod(unit_Y);
+
+    // ensure unitary
+    unit_Y = unit_Y.vector_norm();
+    unit_X = unit_X.vector_norm();
+
+    // apply rotation
+    unit_Y = unit_Y.rotate_about(normal, tilt);
+    unit_X = unit_X.rotate_about(normal, tilt);
+
+    // define spatial/pixel extent
     lower_left = origin - 0.5 * length_X * unit_X - 0.5 * length_Y * unit_Y;
     num_pixels = num_pixels_X * num_pixels_Y;
+    return;
 }
 
 __device__ vec3 Camera::calc_pixel_origin(const int i, const int j) const {

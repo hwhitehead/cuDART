@@ -1,6 +1,8 @@
 #ifndef TOOLS_HPP_
 #define TOOLS_HPP_
 
+#define CUDART_ERROR(x) std::cout << x.str(); std::exit(EXIT_FAILURE);
+
 #define checkCudaErrors(val) check_cuda( (val), #val, __FILE__, __LINE__ )
 void check_cuda(cudaError_t result, char const *const func, const char *const file, int const line) {
     if (result) {
@@ -11,5 +13,7 @@ void check_cuda(cudaError_t result, char const *const func, const char *const fi
         exit(99);
     }
 }
+
+
 
 #endif
