@@ -147,7 +147,7 @@ def render_jet():
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror.npy"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/img"
 
