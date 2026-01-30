@@ -169,9 +169,9 @@ int main(int argc, char *argv[]) {
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
     if (labelled_data) {
-        load_labelled_meshblock(input_str, all_mb_info, h_all_data, h_bytes, verbose);
+        load_labelled_meshblocks(input_str, all_mb_info, h_all_data, h_bytes, verbose);
     } else {
-        load_unlabelled_meshblocks(input_str, all_mb_info, h_all_data, h_bytes, verbose);
+        load_unlabelled_meshblock(input_str, all_mb_info, h_all_data, h_bytes, verbose);
     }
     int num_meshblocks = all_mb_info.size();
 
