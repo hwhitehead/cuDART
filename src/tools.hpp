@@ -14,7 +14,7 @@ void check_cuda(cudaError_t result, char const *const func, const char *const fi
     }
 }
 
-size_t calc_vram_limit(char *mem_char, float tolerance) {
+size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
     // calculate available vram with user ceil
     
     float vram_limit_f = 1e12;
@@ -23,7 +23,7 @@ size_t calc_vram_limit(char *mem_char, float tolerance) {
     }
     size_t free_t, total_t;
     checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
-    float vram_free_f = static_cast<float>(free_t) * vram_tolerance;
+    float vram_free_f = static_cast<float>(free_t) * tolerance;
     float vram_avail_f = std::min(vram_free_f, vram_limit_f);
     size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
             

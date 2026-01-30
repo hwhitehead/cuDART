@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 
     // determine VRAM limitations
     float tolerance = 0.95; // use this fraction of available vram
-    size_t d_bytes = calc_vram_limit(mem_char, tolerance);
+    size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
 
     // allocate space on device
     clock_t d_data_alloc_start = clock();
