@@ -83,6 +83,84 @@ __host__ void load_unlabelled_meshblock(std::string input_str, std::vector<MeshB
     return;
 }
 
+__host__ void load_labelled_meshblocks(std::string input_str, std::vector<MeshBlockInfo> &all_mb_info, float* &h_all_data, size_t &h_bytes, bool verbose) {
+    // load heterogeneous meshblock info, allocate host memory and load data
+
+    // read header data
+    clock_t header_init_start = clock();
+    std::string header_str = input_str + "/header.txt";
+    std::ifstream header_file(header_str);
+    int npy_floats = 0;
+    if (header_file.is_open()) {
+        std::string line;
+        int line_count = 0;
+        int mb_size, nx, ny, nz;
+        float xl, yl, zl, xr, yr, zr;
+        while (std::getline(header_file, line)) {
+            std::istringstream iss(line);
+            if (!(iss >> mb_size >> nx >> ny >> nz >> xl >> yl >> zl >> xr >> yr >> zr)) {
+                std::stringstream err_msg;
+                err_msg << "### FATAL ERROR in main ###\n";
+                err_msg << "Unable to parse line " << line_count << " of header file at " << header_str << std::endl;
+                CUDART_ERROR(err_msg);
+            } else {
+                MeshBlockInfo mb_info;
+                mb_info.mb_size = mb_size;
+                mb_info.xl = vec3(xl,yl,zl);
+                mb_info.xr = vec3(xr,yr,zr);
+                mb_info.mb_dims = vec3(nx,ny,nz);
+                all_mb_info.push_back(mb_info);
+                npy_floats += mb_size;
+            }
+            line_count++;
+        }
+        h_bytes = npy_floats * sizeof(float);
+    } else {
+        std::stringstream err_msg;
+        err_msg << "### FATAL ERROR in main ####\n";
+        err_msg << "Unable to open header file at " << header_str << std::endl;
+        CUDART_ERROR(err_msg);
+    } // end header read
+
+    if (verbose) { 
+        float header_init_dur = (float)(clock() - header_init_start)/CLOCKS_PER_SEC;
+        printf("parsed header             (device)            %.6fs\n",header_init_dur);
+    }
+
+    // allocate space on host
+    clock_t h_alloc_start = clock();
+    h_all_data = (float*) malloc(h_bytes);
+    if (verbose) { 
+        float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+    }
+
+    // load mb data into host memory
+    clock_t npy_read_start = clock();
+    num_meshblocks = all_mb_info.size();
+    int mem_offset = 0;
+    for (int n = 0; n < num_meshblocks; n++) {
+        std::string num_str = std::to_string(n);
+        auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
+        std::string npy_str = input_str + "/meshblock" + padded_num_str + ".npy";
+        npy::npy_data npy_data = npy::read_npy<float>(npy_str);
+        std::vector<float> npy_vector = npy_data.data; // populated
+        std::vector<unsigned long> npy_shape = npy_data.shape;
+        int floats_in_mb  = npy_vector.size();
+        size_t bytes_in_mb = floats_in_mb * sizeof(float);
+        
+        // copy data into host memory buffer
+        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_mb);
+        mem_offset += floats_in_mb;
+    } // end mb loop
+
+    if (verbose) {
+        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+        printf("npy read/memcpy           (host)              %.6fs\n",npy_read_dur);
+    }
+    return;
+}
+
 __device__ float MeshBlock::calc_trace(const Ray &r) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;

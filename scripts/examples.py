@@ -192,4 +192,4 @@ def render_jet():
 
 if __name__ == "__main__":
 
-    render_jet()
+    render_labelled_example()
