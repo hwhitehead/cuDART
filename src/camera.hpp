@@ -28,7 +28,7 @@ class Camera {
         float length_X, length_Y, tilt;             // spatial dimensions and tilt
 };
 
-__host__ void load_cameras(std::vector<Camera> cameras, char *read_char, bool verbose) {
+__host__ void load_cameras(std::vector<Camera> cameras, char *camera_char, bool verbose) {
     // load camera data into a vector from camera .txt file
 
     clock_t camera_read_start = clock();
