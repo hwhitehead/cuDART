@@ -167,7 +167,6 @@ int main(int argc, char *argv[]) {
 
     // import npy data to host
     std::vector<MeshBlockInfo> all_mb_info = {};
-    int num_meshblocks = 1;
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
     if (homogenous) {
@@ -175,6 +174,7 @@ int main(int argc, char *argv[]) {
     } else {
         load_labelled_meshblocks(input_str, all_mb_info, h_all_data, h_bytes, verbose);
     }
+    int num_meshblocks = all_mb_info.size();
 
     // determine VRAM limitations
     float vram_limit_f = 1e12;

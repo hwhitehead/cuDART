@@ -137,10 +137,9 @@ __host__ void load_labelled_meshblocks(std::string input_str, std::vector<MeshBl
 
     // load mb data into host memory
     clock_t npy_read_start = clock();
-    num_meshblocks = all_mb_info.size();
     int mem_offset = 0;
     size_t num_zero_pad = 3;
-    for (int n = 0; n < num_meshblocks; n++) {
+    for (int n = 0; n < all_mb_info.size(); n++) {
         std::string num_str = std::to_string(n);
         auto padded_num_str = std::string(num_zero_pad - std::min(num_zero_pad, num_str.length()), '0') + num_str;
         std::string npy_str = input_str + "/meshblock" + padded_num_str + ".npy";
