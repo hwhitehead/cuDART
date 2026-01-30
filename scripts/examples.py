@@ -153,8 +153,8 @@ def render_jet():
 
     # build template camera
     template_camera = Camera()
-    template_camera.num_pixels_X = 512
-    template_camera.num_pixels_Y = 512
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
     template_camera.tilt = (60.0 / 180) * np.pi
     template_camera.length_X = 0.66
     template_camera.length_Y = 0.66
