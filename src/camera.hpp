@@ -28,6 +28,16 @@ class Camera {
         float length_X, length_Y, tilt;             // spatial dimensions and tilt
 };
 
+__global__ void wipe_img(Camera camera, float *img) {
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+    img[pixel_index] = 0; // reset image
+    return;
+}
+
 __host__ void load_cameras(std::vector<Camera> &cameras, char *camera_char, bool verbose) {
     // load camera data into a vector from camera .txt file
 

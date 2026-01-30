@@ -21,6 +21,22 @@ class Mesh {
         int num_meshblocks;
 };
 
+__global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh) {
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+
+    // initialise ray
+    vec3 pixel_origin = camera.calc_pixel_origin(i, j);
+    Ray pixel_ray(pixel_origin, camera.normal);
+    
+    // calculate pixel value from MeshBlock data
+    img[pixel_index] += (*mesh)->calc_trace(pixel_ray);
+    return;
+}
+
 __global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) { // allow mb to added here?
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
