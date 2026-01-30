@@ -39,7 +39,7 @@ __host__ void load_cameras(std::vector<Camera> cameras, char *camera_char, bool 
             std::cout << "No user specified camera input, falling back to default.\n";
         }
         Camera default_camera;
-        cameras.push_pack(default_camera);
+        cameras.push_back(default_camera);
         return;
     }
 
