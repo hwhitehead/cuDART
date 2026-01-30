@@ -40,4 +40,9 @@ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
     return d_bytes;
 }
 
+__host__ std::string zero_pad_str(int value, int num_zero_pad) {
+    std::string num_str = std::to_string(value);
+    return std::string(num_zero_pad - std::min(num_zero_pad, num_str.length()), '0') + num_str;
+}
+
 #endif

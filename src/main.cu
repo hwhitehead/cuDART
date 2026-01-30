@@ -91,6 +91,7 @@ int main(int argc, char *argv[]) {
         err_msg << "No input file or output file specified.\n";
         CUDART_ERROR(err_msg);
     }
+    std::string save_str_header(save_char);
 
     // determine run mode type (labelled or unlabelled)
     bool labelled_data = false;
@@ -140,7 +141,7 @@ int main(int argc, char *argv[]) {
     }
 
     // import npy data to host
-    std::vector<MeshBlockInfo> all_mb_info = {};
+    std::vector<MeshBlockInfo> all_mb_info;
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
     if (labelled_data) {
@@ -220,10 +221,7 @@ int main(int argc, char *argv[]) {
 
         // save data
         clock_t npy_write_start = clock();
-        std::string save_str(save_char);
-        std::string num_str = std::to_string(img_count);
-        auto padded_num_str = std::string(num_zero_pad - std::min(num_zero_pad, num_str.length()), '0') + num_str;
-        save_str = save_str + padded_num_str + ".npy";
+        std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
         npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
         npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
