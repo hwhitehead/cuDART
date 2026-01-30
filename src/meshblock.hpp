@@ -35,10 +35,11 @@ class MeshBlock {
         vec3 xl, xr, dx, mb_dims;
 };
 
-__host__ void load_unlabelled_meshblock(std::string input_str, std::vector<MeshBlockInfo> &all_mb_info, float* &h_all_data, size_t &h_bytes, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool verbose) {
     // load single homgenous meshblock info, allocate host memory and load data
 
     clock_t npy_read_start = clock();
+    std::vector<MeshBlockInfo> all_mb_info = {};
     npy::npy_data npy_data = npy::read_npy<float>(input_str);
     std::vector<float> npy_vector = npy_data.data; 
     std::vector<unsigned long> npy_shape = npy_data.shape;
@@ -80,10 +81,10 @@ __host__ void load_unlabelled_meshblock(std::string input_str, std::vector<MeshB
         printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
     }
 
-    return;
+    return all_mb_info;
 }
 
-__host__ void load_labelled_meshblocks(std::string input_str, std::vector<MeshBlockInfo> &all_mb_info, float* &h_all_data, size_t &h_bytes, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool verbose) {
     // load heterogeneous meshblock info, allocate host memory and load data
 
     // read header data
@@ -158,7 +159,8 @@ __host__ void load_labelled_meshblocks(std::string input_str, std::vector<MeshBl
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("npy read/memcpy           (host)              %.6fs\n",npy_read_dur);
     }
-    return;
+
+    return all_mb_info;
 }
 
 __device__ float MeshBlock::calc_trace(const Ray &r) {
