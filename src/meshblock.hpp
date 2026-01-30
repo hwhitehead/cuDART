@@ -142,7 +142,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     int mem_offset = 0;
     size_t num_zero_pad = 3;
     for (int n = 0; n < all_mb_info.size(); n++) {
-        std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy"
+        std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy";
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
         std::vector<float> npy_vector = npy_data.data; // populated
         std::vector<unsigned long> npy_shape = npy_data.shape;
