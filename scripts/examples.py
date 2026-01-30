@@ -147,7 +147,7 @@ def render_jet():
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/midblur0490.npy"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/img"
 
@@ -155,7 +155,7 @@ def render_jet():
     template_camera = Camera()
     template_camera.num_pixels_X = 512
     template_camera.num_pixels_Y = 512
-    template_camera.tilt = 0
+    template_camera.tilt = (30.0 / 180) * np.pi
     template_camera.length_X = 0.66
     template_camera.length_Y = 0.66
 
@@ -182,8 +182,6 @@ def render_jet():
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
-
-
 
 if __name__ == "__main__":
 
