@@ -35,6 +35,54 @@ class MeshBlock {
         vec3 xl, xr, dx, mb_dims;
 };
 
+__host__ void load_unlabelled_meshblock(std::vector<MeshBlockInfo> &all_mb_info, float* &h_all_data, size_t &h_bytes, bool verbose) {
+    // load single homgenous meshblock info, allocate host memory and load data
+
+    clock_t npy_read_start = clock();
+    npy::npy_data npy_data = npy::read_npy<float>(input_str);
+    std::vector<float> npy_vector = npy_data.data; 
+    std::vector<unsigned long> npy_shape = npy_data.shape;
+    vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
+    int mb_size = npy_vector.size();
+    if (verbose) {
+        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+        printf("npy read                  (host)              %.6fs\n",npy_read_dur);
+    }
+    
+    //assume equal spacing in x, y, z and centering at origin
+    float longest_side = static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
+    vec3 mb_extent = mb_dims / longest_side;
+    vec3 xl = -0.5 * mb_extent;
+    vec3 xr = 0.5 * mb_extent;
+
+    // stash info
+    MeshBlockInfo mb_info;
+    mb_info.mb_size = mb_size;
+    mb_info.xl = xl;
+    mb_info.xr = xr;
+    mb_info.mb_dims = mb_dims;
+    all_mb_info.push_back(mb_info);
+
+    // allocate space on host
+    h_bytes = mb_size * sizeof(float);
+    clock_t h_alloc_start = clock();
+    h_all_data = (float*) malloc(h_bytes);
+    if (verbose) { 
+        float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+    }
+
+    // load mb data into host memory
+    clock_t memcpy_start = clock();
+    std::memcpy(h_all_data, npy_vector.data(), h_bytes);
+    if (verbose) { 
+        float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
+        printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
+    }
+
+    return;
+}
+
 __device__ float MeshBlock::calc_trace(const Ray &r) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;
