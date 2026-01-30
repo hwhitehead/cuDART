@@ -51,7 +51,7 @@ __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
         }
         Camera default_camera;
         cameras.push_back(default_camera);
-        return;
+        return cameras;
     }
 
     // given valid char, load from .txt file
