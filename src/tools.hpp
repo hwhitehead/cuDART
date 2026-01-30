@@ -14,6 +14,30 @@ void check_cuda(cudaError_t result, char const *const func, const char *const fi
     }
 }
 
-
+size_t calc_vram_limit(char *mem_char, float tolerance) {
+    // calculate available vram with user ceil
+    
+    float vram_limit_f = 1e12;
+    if (mem_char != nullptr) {
+        vram_limit_f = static_cast<float>(std::atof(mem_char)) * 1e9;
+    }
+    size_t free_t, total_t;
+    checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
+    float vram_free_f = static_cast<float>(free_t) * vram_tolerance;
+    float vram_avail_f = std::min(vram_free_f, vram_limit_f);
+    size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
+            
+    // handle memory request excess
+    bool d_mem_excess = (d_bytes_avail < h_bytes);
+    size_t d_bytes;
+    if (d_mem_excess) {
+        std::stringstream err_msg;
+        err_msg << "Total input memory exceeds VRAM, partitioning currently unsupported\n";
+        CUDART_ERROR(err_msg);
+    } else {
+        d_bytes = h_bytes; // allocate entire dataset to device
+    }
+    return d_bytes;
+}
 
 #endif

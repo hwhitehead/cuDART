@@ -176,27 +176,8 @@ int main(int argc, char *argv[]) {
     int num_meshblocks = all_mb_info.size();
 
     // determine VRAM limitations
-    float vram_limit_f = 1e12;
-    if (mem_char != nullptr) {
-        vram_limit_f = static_cast<float>(std::atof(mem_char)) * 1e9;
-    }
-    size_t free_t, total_t;
-    float vram_tolerance = 0.9; // undercut free by this tolerance
-    checkCudaErrors(cudaMemGetInfo(&free_t,&total_t));
-    float vram_free_f = static_cast<float>(free_t) * vram_tolerance;
-    float vram_avail_f = std::min(vram_free_f, vram_limit_f);
-    size_t d_bytes_avail = static_cast<size_t>(vram_avail_f);
-            
-    // handle memory request excess
-    bool d_mem_excess = (d_bytes_avail < h_bytes);
-    size_t d_bytes;
-    if (d_mem_excess) {
-        std::stringstream err_msg;
-        err_msg << "Total input memory exceeds VRAM, partitioning currently unsupported\n";
-        CUDART_ERROR(err_msg);
-    } else {
-        d_bytes = h_bytes; // allocate entire dataset to device
-    }
+    float tolerance = 0.95; // use this fraction of available vram
+    size_t d_bytes = calc_vram_limit(mem_char, tolerance);
 
     // allocate space on device
     clock_t d_data_alloc_start = clock();
@@ -220,34 +201,6 @@ int main(int argc, char *argv[]) {
     MeshBlock **mb_list;
     Mesh **mesh;
     build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
-
-    // clock_t mb_alloc_start = clock();
-    // MeshBlock **mb_list;
-    // checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
-
-    // // initialise MeshBlocks on device
-    // int mem_start = 0;
-    // for (int n = 0; n < num_meshblocks; n++) {
-    //     vec3 xl = all_mb_info[n].xl;
-    //     vec3 xr = all_mb_info[n].xr;
-    //     vec3 mb_dims = all_mb_info[n].mb_dims;
-    //     init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mem_start);
-    //     checkCudaErrors(cudaPeekAtLastError());
-    //     checkCudaErrors(cudaDeviceSynchronize());
-    //     mem_start += all_mb_info[n].mb_size;
-    // }
-
-    // // initialise Mesh on device
-    // Mesh **mesh;
-    // checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
-    // init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
-    // checkCudaErrors(cudaPeekAtLastError());
-    // checkCudaErrors(cudaDeviceSynchronize());
-    
-    // if (verbose) {
-    //     float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-    //     printf("malloc/init containers    (device)            %.6fs\n",mb_alloc_dur);
-    // }
 
     // define render shape    
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
