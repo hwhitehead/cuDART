@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
     if (homogenous) {
-        load_unlabelled_meshblock(input_str, all_mb_info, h_all_data, h_btyes, verbose);
+        load_unlabelled_meshblock(input_str, all_mb_info, h_all_data, h_bytes, verbose);
     }
     // if (homogenous) {
     //     // data in unlabelled
