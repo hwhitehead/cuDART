@@ -50,7 +50,7 @@ __device__ float Mesh::calc_trace(const Ray &r) {
     return total_trace;
 }
 
-__host__ void build_containers(std::vector<MeshBlockInfo> all_mb_info, MeshBlock** &mb_list, Mesh** &mesh, bool verbose) {
+__host__ void build_containers(std::vector<MeshBlockInfo> all_mb_info, float* &d_data, MeshBlock** &mb_list, Mesh** &mesh, bool verbose) {
     // allocate and initalise data containers (meshblock, meshblock list, mesh)
 
     clock_t container_alloc_start = clock();

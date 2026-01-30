@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
     // initialise MeshBlock list on device
     MeshBlock **mb_list;
     Mesh **mesh;
-    build_containers(all_mb_info, mb_list, mesh, verbose);
+    build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
 
     // clock_t mb_alloc_start = clock();
     // MeshBlock **mb_list;
