@@ -35,7 +35,7 @@ class MeshBlock {
         vec3 xl, xr, dx, mb_dims;
 };
 
-__host__ void load_unlabelled_meshblock(std::vector<MeshBlockInfo> &all_mb_info, float* &h_all_data, size_t &h_bytes, bool verbose) {
+__host__ void load_unlabelled_meshblock(std::string input_str, std::vector<MeshBlockInfo> &all_mb_info, float* &h_all_data, size_t &h_bytes, bool verbose) {
     // load single homgenous meshblock info, allocate host memory and load data
 
     clock_t npy_read_start = clock();
