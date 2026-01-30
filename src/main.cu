@@ -116,18 +116,18 @@ int main(int argc, char *argv[]) {
         CUDART_ERROR(err_msg);
     }
 
-    // determine run mode type (heterogenous or homogenous)
-    bool homogenous = true;
+    // determine run mode type (labelled or unlabelled)
+    bool labelled_data = false;
     const std::string input_str(input_char);
     const std::filesystem::path input_path(input_char);
     if (std::filesystem::is_directory(input_path)) {
-        homogenous = false;
+        labelled_data = true;
     } else {
         std::string npy_suffix = ".npy";
         if (input_path.extension() != npy_suffix) {
             std::stringstream err_msg;
             err_msg << "### FATAL ERROR in main\n";
-            err_msg << "Input path must be .npy file (homogenous mode) or directory (heterogenous mode)\n";
+            err_msg << "Input path must be .npy file (unlabelled data) or directory (labelled data)\n";
             CUDART_ERROR(err_msg);
         }
     }
@@ -168,10 +168,10 @@ int main(int argc, char *argv[]) {
     std::vector<MeshBlockInfo> all_mb_info = {};
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
-    if (homogenous) {
-        load_unlabelled_meshblock(input_str, all_mb_info, h_all_data, h_bytes, verbose);
+    if (labelled_data) {
+        load_labelled_meshblock(input_str, all_mb_info, h_all_data, h_bytes, verbose);
     } else {
-        load_labelled_meshblocks(input_str, all_mb_info, h_all_data, h_bytes, verbose);
+        load_unlabelled_meshblocks(input_str, all_mb_info, h_all_data, h_bytes, verbose);
     }
     int num_meshblocks = all_mb_info.size();
 
@@ -217,33 +217,37 @@ int main(int argc, char *argv[]) {
     }
 
     // initialise MeshBlock list on device
-    clock_t mb_alloc_start = clock();
     MeshBlock **mb_list;
-    checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
-
-    // initialise MeshBlocks on device
-    int mem_start = 0;
-    for (int n = 0; n < num_meshblocks; n++) {
-        vec3 xl = all_mb_info[n].xl;
-        vec3 xr = all_mb_info[n].xr;
-        vec3 mb_dims = all_mb_info[n].mb_dims;
-        init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mem_start);
-        checkCudaErrors(cudaPeekAtLastError());
-        checkCudaErrors(cudaDeviceSynchronize());
-        mem_start += all_mb_info[n].mb_size;
-    }
-
-    // initialise Mesh on device
     Mesh **mesh;
-    checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
-    init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
+    build_containers(all_mb_info, mb_list, mesh, verbose);
+
+    // clock_t mb_alloc_start = clock();
+    // MeshBlock **mb_list;
+    // checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
+
+    // // initialise MeshBlocks on device
+    // int mem_start = 0;
+    // for (int n = 0; n < num_meshblocks; n++) {
+    //     vec3 xl = all_mb_info[n].xl;
+    //     vec3 xr = all_mb_info[n].xr;
+    //     vec3 mb_dims = all_mb_info[n].mb_dims;
+    //     init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mem_start);
+    //     checkCudaErrors(cudaPeekAtLastError());
+    //     checkCudaErrors(cudaDeviceSynchronize());
+    //     mem_start += all_mb_info[n].mb_size;
+    // }
+
+    // // initialise Mesh on device
+    // Mesh **mesh;
+    // checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
+    // init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
+    // checkCudaErrors(cudaPeekAtLastError());
+    // checkCudaErrors(cudaDeviceSynchronize());
     
-    if (verbose) {
-        float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init containers    (device)            %.6fs\n",mb_alloc_dur);
-    }
+    // if (verbose) {
+    //     float mb_alloc_dur = (float)(clock() - mb_alloc_start)/CLOCKS_PER_SEC;
+    //     printf("malloc/init containers    (device)            %.6fs\n",mb_alloc_dur);
+    // }
 
     // define render shape    
     int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
@@ -325,6 +329,7 @@ int main(int argc, char *argv[]) {
     checkCudaErrors(cudaFree(d_img));
     checkCudaErrors(cudaFree(mesh));
     checkCudaErrors(cudaFree(d_data));
+    checkCudaErrors(cudaFree(mb_list));
     free(h_all_data);
     free(img);
     cudaDeviceReset();
