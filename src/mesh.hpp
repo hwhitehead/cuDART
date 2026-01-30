@@ -2,6 +2,7 @@
 #define MESH_HPP_
 
 #include "vec3.hpp"
+#include "meshblock.hpp"
 
 // THIS CODE IS WIP AND NOT ACTIVE IN MAIN
 
@@ -19,6 +20,22 @@ class Mesh {
         MeshBlock **mb_list;
         int num_meshblocks;
 };
+
+__global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh) {
+    // idenitfy relevant pixel for this thread
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+
+    // initialise ray
+    vec3 pixel_origin = camera.calc_pixel_origin(i, j);
+    Ray pixel_ray(pixel_origin, camera.normal);
+    
+    // calculate pixel value from MeshBlock data
+    img[pixel_index] += (*mesh)->calc_trace(pixel_ray);
+    return;
+}
 
 __global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) { // allow mb to added here?
     int i = threadIdx.x + blockIdx.x * blockDim.x;
@@ -48,5 +65,41 @@ __device__ float Mesh::calc_trace(const Ray &r) {
     }
     return total_trace;
 }
+
+__host__ void build_containers(std::vector<MeshBlockInfo> all_mb_info, float* &d_data, MeshBlock** &mb_list, Mesh** &mesh, bool verbose) {
+    // allocate and initalise data containers (meshblock, meshblock list, mesh)
+
+    clock_t container_alloc_start = clock();
+
+    // allocate memory on device for meshblock list
+    int num_meshblocks = all_mb_info.size();
+    checkCudaErrors(cudaMalloc((void **)&mb_list, num_meshblocks * sizeof(MeshBlock *)));
+
+    // allocate and intialise meshblocks on device
+    int mem_start = 0;
+    for (int n = 0; n < num_meshblocks; n++) {
+        vec3 xl = all_mb_info[n].xl;
+        vec3 xr = all_mb_info[n].xr;
+        vec3 mb_dims = all_mb_info[n].mb_dims;
+        init_meshblock<<<1,1>>>(mb_list, n, xl, xr, mb_dims, d_data, mem_start);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+        mem_start += all_mb_info[n].mb_size;
+    }
+
+    // allocate and initialise mesh on device
+    checkCudaErrors(cudaMalloc((void **)&mesh, sizeof(Mesh * ))); 
+    init_mesh<<<1,1>>>(mesh, mb_list, num_meshblocks);
+    checkCudaErrors(cudaPeekAtLastError());
+    checkCudaErrors(cudaDeviceSynchronize());
+
+    if (verbose) {
+        float container_alloc_dur = (float)(clock() - container_alloc_start)/CLOCKS_PER_SEC;
+        printf("malloc/init containers    (device)            %.6fs\n",container_alloc_dur);
+    }
+    
+    return;
+}
+
 
 #endif
