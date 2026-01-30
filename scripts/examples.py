@@ -161,13 +161,20 @@ def render_jet():
 
     # build camera array, inherit from template
     num_img = 100
-    theta = 0.5 * np.pi + epsilon    
-    phi_ar = np.linspace(epsilon,2 * np.pi - epsilon,num_img, endpoint=False)
+    phi = epsilon
+    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
-    for phi in phi_ar:
+    for theta in theta_ar:
         camera = copy.deepcopy(template_camera)
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
+    # theta = 0.5 * np.pi + epsilon    
+    # phi_ar = np.linspace(epsilon,2 * np.pi - epsilon,num_img, endpoint=False)
+    # cameras = []
+    # for phi in phi_ar:
+    #     camera = copy.deepcopy(template_camera)
+    #     camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+    #     cameras.append(camera)
     print("initialised cameras")
 
     # generate scene
