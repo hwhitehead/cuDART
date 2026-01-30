@@ -89,6 +89,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
 
     // read header data
     clock_t header_init_start = clock();
+    std::vector<MeshBlockInfo> all_mb_info = {};
     std::string header_str = input_str + "/header.txt";
     std::ifstream header_file(header_str);
     int npy_floats = 0;
