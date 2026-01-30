@@ -38,10 +38,11 @@ __global__ void wipe_img(Camera camera, float *img) {
     return;
 }
 
-__host__ void load_cameras(std::vector<Camera> &cameras, char *camera_char, bool verbose) {
+__host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
     // load camera data into a vector from camera .txt file
 
     clock_t camera_read_start = clock();
+    std::vector<Camera> cameras = {]};
 
     // handle null char
     if (camera_char == nullptr) {
@@ -99,7 +100,7 @@ __host__ void load_cameras(std::vector<Camera> &cameras, char *camera_char, bool
         float camera_read_dur = (float)(clock() - camera_read_start)/CLOCKS_PER_SEC;
         printf("camera read               (host)              %.6fs\n",camera_read_dur);
     }
-    return;
+    return cameras;
 }
 
 __host__ void Camera::build_camera() {

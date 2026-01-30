@@ -116,8 +116,7 @@ int main(int argc, char *argv[]) {
     }
 
     // load camera data and store in vector
-    std::vector<Camera> cameras = {};
-    load_cameras(cameras, camera_char, verbose);
+    std::vector<Camera> cameras = load_cameras(camera_char, verbose);
     
     // load image dimensions from the first camera
     Camera standard_camera = cameras[0];
