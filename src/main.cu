@@ -50,7 +50,6 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh) {
 int main(int argc, char *argv[]) {
 
     // start general timer
-    if (verbose) std::cout << "Starting cuDART (verbose)...\n";
     clock_t main_start = clock();
 
     // define space for user settings
