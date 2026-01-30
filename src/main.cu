@@ -50,9 +50,8 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh) {
 int main(int argc, char *argv[]) {
 
     // start general timer
-    std::cout << "Starting cuDART (verbose)...\n";
+    if (verbose) std::cout << "Starting cuDART (verbose)...\n";
     clock_t main_start = clock();
-    size_t num_zeros = 3;
 
     // define space for user settings
     std::string cudart_version = "version 0.5 - January 2026";
@@ -256,6 +255,7 @@ int main(int argc, char *argv[]) {
     // iterate over cameras
     int img_count = 0;
     int total_images = cameras.size();
+    size_t num_zero_pad = 3;
     if (verbose) {
         std::cout << "=============================================================\n";
         if (total_images == 1) {
@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
         clock_t npy_write_start = clock();
         std::string save_str(save_char);
         std::string num_str = std::to_string(img_count);
-        auto padded_num_str = std::string(num_zeros - std::min(num_zeros, num_str.length()), '0') + num_str;
+        auto padded_num_str = std::string(num_zero_pad - std::min(num_zero_pad, num_str.length()), '0') + num_str;
         save_str = save_str + padded_num_str + ".npy";
         npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
