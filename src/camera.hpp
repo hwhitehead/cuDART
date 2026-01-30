@@ -42,7 +42,7 @@ __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
     // load camera data into a vector from camera .txt file
 
     clock_t camera_read_start = clock();
-    std::vector<Camera> cameras = {]};
+    std::vector<Camera> cameras = {};
 
     // handle null char
     if (camera_char == nullptr) {
