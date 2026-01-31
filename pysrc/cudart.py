@@ -277,7 +277,7 @@ class Scene:
         x_span = np.linspace(0,1,num_images)
         tax.set_xlim([0,1])
         tax.plot(x_span, np.log10(lum_ar), color='k')
-        tax.yaxis.set_visible("off")
+        tax.set_ylim([22, 24])
         tax.xaxis.set_ticks([])
         tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
         tax.xaxis.set_label_position("top")
