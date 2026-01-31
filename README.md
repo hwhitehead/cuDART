@@ -8,11 +8,11 @@
 </p>
 
 <p align="center">
-  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/gamma10_unboosted.gif alt=animated/>
-  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/gamma10_boosted.gif alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/gamma10_unboosted.gif width="48" alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/blurred_jet.gif width="48" alt=animated/>
 </p>
 <p align="center"">
-  <em> Animation of a relativistic jet launched from an Active Galactic Nucleus, using data featured in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this pape. On the left, tracing of the raw emissivity. On the right, tracing of the boosted emissivity, with $\Gamma = \Gamma_z=10$.</a></em>
+  <em> Animation of a relativistic jet launched from an Active Galactic Nucleus, using data featured in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this paper</a>. On the left, tracing of the raw emissivity. On the right, tracing of the boosted emissivity, with $\Gamma = \Gamma_z=10$.</em>
 </p>
 
 This repository contains a lightweight set of tools for raytracing heterogenous orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. As well as properties independent of line-of-sight, such as density, `cuDART` supports relativistic beaming of emissivity when provided with velocity data. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
