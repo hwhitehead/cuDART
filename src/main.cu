@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (relativistic && (not labelled_data)) {
-        std::stringstrem err_msg;
+        std::stringstream err_msg;
         err_msg << "### FATAL ERROR in main\n";
         err_msg << "Relativistic boosting only supported for labelled data sets\n";
         CUDART_ERROR(err_msg);
@@ -158,7 +158,7 @@ int main(int argc, char *argv[]) {
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
     if (labelled_data) {
-        all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, verbose);
+        all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, verbose, relativistic);
     } else {
         all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, verbose);
     }
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 
         // call render
         clock_t render_start = clock();
-        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh);
+        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, relativistic);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
         if (verbose) {
