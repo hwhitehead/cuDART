@@ -178,7 +178,7 @@ def render_jet(relativistic=False):
     scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=22)
+    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
