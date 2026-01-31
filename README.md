@@ -1,15 +1,15 @@
 # cuDART: CUDA + DDA Accelerated Ray Tracing (v0.6)
 
 <p align="center">
-  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/rotate.gif width = "600" alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/rotate.gif width = "600" alt=animated/>
 </p>
 <p align="center"">
   <em> Animation of a supernova-jet simulation snapshot, featuring 200 viewpoints each yielding a 2048<sup>2</sup> image. Raw image data for each frame generated in ~150ms, during which 4 million rays were cast through a simulation domain hosting over 400 million (750<sup>3</sup>) cells. Simulation data featured in <a href="https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract">this paper.</a></em>
 </p>
 
 <p align="center">
-  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/gamma10_unboosted.gif width="400" alt=animated/>
-  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/gamma10_boosted.gif width="400" alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/gamma10_unboosted.gif width="400" alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/gamma10_boosted.gif width="400" alt=animated/>
 </p>
 <p align="center"">
   <em> Animation of a relativistic jet launched from an Active Galactic Nucleus, using data featured in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this paper</a>. On the left, tracing of the raw emissivity. On the right, tracing of the boosted emissivity, with Gamma = 10 along the jet.</em>
