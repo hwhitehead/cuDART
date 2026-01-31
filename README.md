@@ -1,4 +1,4 @@
-# cuDART: CUDA + DDA Accelerated Ray Tracing (v0.4)
+# cuDART: CUDA + DDA Accelerated Ray Tracing (v0.6)
 
 <p align="center">
   <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/rotate.gif alt=animated/>
@@ -14,7 +14,7 @@
   <em> Animation of a relativistic jet launched from an Active Galactic Nucleus, using data featured in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this paper</a></em>
 </p>
 
-This repository contains a lightweight set of tools for raytracing heterogenous orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
+This repository contains a lightweight set of tools for raytracing heterogenous orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. As well as properties independent of line-of-sight, such as density, `cuDART` supports relativistic beaming of emissivity when provided with velocity data. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
 
 ## Usage
 
@@ -28,6 +28,7 @@ The `bin/cudart` executable accepts the following flags:
 - `-i <dir>`    specifies the preperatory direction to read
 - `-c <file>`   specifies the input `.txt` file specifying the camera(s) (dimension, position and orientation)
 - `-s <file>`   specifies the raw img `.npy` save location (appended numerically for multiple traces)
+- `-r`          flags render for relativistic beaming (requires velocity data)
 - `-m <value>`  species the maximum allowed VRAM usage
 - `-v`          flags for verbose execution (prints progress to stdout)
 
@@ -39,6 +40,9 @@ Upon execution:
 5. The populated image buffer is copied to the host, and saved to the output `.npy` file
 6. Steps 4 and 5 are repeated for all cameras specified in the `.txt` file
 7. The program frees all associated memory registers (device and host) and terminates 
+
+## Data Formats
+`cuDART` accepts data in the form of `.npy` files, which *must* contain an array of `float32` entries. If not flagged for relativisitic beaming, the array should be of shape `(nx,ny,nz)`, with each entry populated by data to be traced at each spatial position. If relativistic beaming is included, an extra rank is required to pass data to trace, and velocity data in units of the the speed of light in each cardinal direction e.g. as $\beta_x = v_x / c$. The resulting array will have shape `(nx,ny,nz,4)` where the fourth index covers `(emm,beta_x,beta_y,beta_z)` for each spatial position. 
 
 ## Performance
 `cuDART` is bottlenecked primarily by I/O; the actual tracing of meshes and image writes are performed exceptionally quickly. The main overhead occurs at executable intialisation, due to the cost of launching a GPU context and reading the `.npy` file into host memory, usually taking O(1)s. CUDA-type operations are MUCH faster, copying the data into device memory and generating an image from this data takes only O(100)ms. For sensible image dimsions, the data transfer to device is more expensive than the trace operation itself (see profiling [here](https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.txt)). As such, peak efficiency with `cuDART` is achieved when many images are taken using the same data set e.g. many lines-of-sight. Comparing a 100 image render to a single image, `cuDART` transitions from 16% of the runtime attributed to the render kernel up to 95%. Users acting as admin may wish to look into [persistence daemons](https://docs.nvidia.com/deploy/driver-persistence/overview.html) for the NVIDIA kernel; especially for short/simple renders the majority of the runtime can be occupied by the application start latency which can be bypassed by ensuring a kernel persists between executions.  

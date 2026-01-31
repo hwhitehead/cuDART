@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     clock_t main_start = clock();
 
     // define space for user settings
-    std::string cudart_version = "version 0.5 - January 2026";
+    std::string cudart_version = "version 0.6 - January 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     bool verbose = false, relativistic = false;
 
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
         all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, relativistic, verbose);
     }
     int num_meshblocks = all_mb_info.size();
-    
+
     // determine VRAM limitations
     float tolerance = 0.95; // use this fraction of available vram
     size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);

@@ -38,8 +38,8 @@ def render_labelled_example():
     template_camera.num_pixels_X = 512
     template_camera.num_pixels_Y = 512
     template_camera.tilt = 0
-    template_camera.length_X = 0.66
-    template_camera.length_Y = 0.66
+    template_camera.length_X = 0.75
+    template_camera.length_Y = 0.75
 
     # build camera array, inherit from template
     num_img = 100
@@ -75,8 +75,8 @@ def render_unlabelled_example():
     template_camera.num_pixels_X = 512
     template_camera.num_pixels_Y = 512
     template_camera.tilt = 0
-    template_camera.length_X = 0.66
-    template_camera.length_Y = 0.66
+    template_camera.length_X = 0.75
+    template_camera.length_Y = 0.75
 
     # build camera array, inherit from template
     num_img = 100
@@ -178,11 +178,11 @@ def render_jet(relativistic=False):
     scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=17, vmax=20)
+    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
 
 if __name__ == "__main__":
 
-    render_unlabelled_example()
+    render_jet()
