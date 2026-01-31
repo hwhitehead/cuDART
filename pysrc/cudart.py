@@ -137,7 +137,7 @@ class Scene:
     def make(self):
         subprocess.run(["make"], check = True)
 
-    def render(self, profile = False, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None):
+    def render(self, profile = False, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False):
 
         # prepare camera space
         self.build_camera_file()
@@ -173,6 +173,8 @@ class Scene:
             command = command + ["-v"]
         if max_mem is not None:
             command = command + ["-m", str(max_mem)]
+        if relativistic:
+            command = command + ["-r"]
         print("calling render executable")
         subprocess.run(command, check = True)
         print("executable finished.")
@@ -226,6 +228,90 @@ class Scene:
                     print("removed data file at " + load_str)
 
         plt.close("all")
+
+    def calc_lightcurve(self, save_location):
+
+        save_location = save_location.removesuffix(".png") # strip as needed
+
+        num_raws = len(self.cameras)
+        lum_ar = np.zeros(shape=(num_raws))
+        for i in range(num_raws):
+
+            raw_str = self.npy_save_str + str(i).zfill(str_zfill) + ".npy"
+            raw_img = np.load(raw_str)
+            lum = np.sum(raw_img)
+            lum_ar[i] = lum
+
+        return lum_ar
+
+    def plot_wlightcurve(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False):
+        
+        save_location = save_location.removesuffix(".png") # strip as needed
+        lum_ar = self.calc_lightcurve(save_location)
+
+        # check savespace exists
+        save_dir = os.path.dirname(save_location)
+        if not os.path.isdir(save_dir):
+            os.mkdir(save_dir)
+
+        # define persistent figure
+        height_ratios = np.array([0.3,1])
+        width_ratios = np.array([1,0.05])
+        set_plot_defaults(False)
+        h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+        fig = plt.figure(figsize=(10.0/3,10.0/3 * h_over_w))
+        gs = fig.add_gridspec(2,2,height_ratios=height_ratios,width_ratios=width_ratios)
+        ax = fig.add_subplot(gs[1,0])
+        tax = fig.add_subplot(gs[0,0])
+        cax = fig.add_subplot(gs[1,1])
+        ax.set_facecolor("k")
+        plt.subplots_adjust(hspace=0, wspace=0)
+        X = np.linspace(0,1,self.num_pixels_X+1)
+        Y = np.linspace(0,1,self.num_pixels_Y+1)
+        XX, YY = np.meshgrid(X, Y, indexing="ij")
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
+
+        # plot header
+        num_images = len(self.cameras)
+        x_span = np.linspace(0,1,num_images)
+        tax.set_xlim([0,1])
+        tax.plot(x_span, np.log10(lum_ar), color='k')
+        tax.set_ylim([22, 24.2])
+        tax.xaxis.set_ticks([])
+        tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
+        tax.xaxis.set_label_position("top")
+
+        # plot colorbar
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+        fig.colorbar(sm, cax=cax, orientation="vertical")
+        cax.yaxis.tick_right()
+        cax.yaxis.set_label_position("right")
+        cax.set_ylabel(r"log$_{10}$ Intensity [arb.]")
+
+        # plot inserts
+        for i in range(num_images):
+
+            load_str = self.npy_save_str + str(i).zfill(str_zfill) + ".npy"
+            save_str = save_location + str(i).zfill(str_zfill) + ".png"
+
+            img = np.load(load_str)
+            tstamp = tax.axvline(x=x_span[i], color='k', alpha=0.2)
+
+            pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
+            fig.savefig(save_str, dpi=300, bbox_inches="tight")
+            pc.remove()
+            tstamp.remove()
+            if (verbose):
+                print("saved png at " + save_str)
+
+            if (remove_raw_images):
+                os.remove(load_str)
+                if (verbose):
+                    print("removed data file at " + load_str)
+
+        plt.close("all")
+
 
 class Mesh:
 

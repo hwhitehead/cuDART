@@ -38,8 +38,8 @@ def render_labelled_example():
     template_camera.num_pixels_X = 512
     template_camera.num_pixels_Y = 512
     template_camera.tilt = 0
-    template_camera.length_X = 0.66
-    template_camera.length_Y = 0.66
+    template_camera.length_X = 0.75
+    template_camera.length_Y = 0.75
 
     # build camera array, inherit from template
     num_img = 100
@@ -75,8 +75,8 @@ def render_unlabelled_example():
     template_camera.num_pixels_X = 512
     template_camera.num_pixels_Y = 512
     template_camera.tilt = 0
-    template_camera.length_X = 0.66
-    template_camera.length_Y = 0.66
+    template_camera.length_X = 0.75
+    template_camera.length_Y = 0.75
 
     # build camera array, inherit from template
     num_img = 100
@@ -142,12 +142,12 @@ def guided_camera_example():
     fig.savefig("guided_cam.png", dpi=300, bbox_inches="tight")
     plt.close("all")
 
-def render_jet():
+def render_jet(relativistic=False):
 
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror.npy"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror_relativistic_10.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/img"
 
@@ -168,13 +168,6 @@ def render_jet():
         camera = copy.deepcopy(template_camera)
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
-    # theta = 0.5 * np.pi + epsilon    
-    # phi_ar = np.linspace(epsilon,2 * np.pi - epsilon,num_img, endpoint=False)
-    # cameras = []
-    # for phi in phi_ar:
-    #     camera = copy.deepcopy(template_camera)
-    #     camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    #     cameras.append(camera)
     print("initialised cameras")
 
     # generate scene
@@ -182,14 +175,14 @@ def render_jet():
     print("built scene")
 
     # render and save images
-    scene.render(verbose = True)
+    scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=17, vmax=20)
+    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
 
 if __name__ == "__main__":
 
-    render_labelled_example()
+    render_jet(True)

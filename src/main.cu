@@ -29,9 +29,9 @@ int main(int argc, char *argv[]) {
     clock_t main_start = clock();
 
     // define space for user settings
-    std::string cudart_version = "version 0.5 - January 2026";
+    std::string cudart_version = "version 0.6 - January 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
-    bool verbose = false;
+    bool verbose = false, relativistic = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
                 case 'h':
                     break;
                 case 'v':
+                    break;
+                case 'r':
                     break;
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) {
@@ -65,6 +67,9 @@ int main(int argc, char *argv[]) {
                 case 'v':
                     verbose = true;
                     break;
+                case 'r':
+                    relativistic = true;
+                    break;
                 case 'c':
                     camera_char = argv[++i];
                     break;
@@ -76,6 +81,7 @@ int main(int argc, char *argv[]) {
                     std::cout << " -i <file>    specify input file [.npy]\n";
                     std::cout << " -s <file>    specify render save file [.ppm]\n";
                     std::cout << " -c <file>    specify camera data file [.txt]\n";
+                    std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
                     std::cout << " -v           verbosity flag\n";
                     std::cout << " -h           this help message\n"; 
@@ -145,9 +151,9 @@ int main(int argc, char *argv[]) {
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
     if (labelled_data) {
-        all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, verbose);
+        all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, relativistic, verbose);
     } else {
-        all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, verbose);
+        all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, relativistic, verbose);
     }
     int num_meshblocks = all_mb_info.size();
 
@@ -203,7 +209,7 @@ int main(int argc, char *argv[]) {
 
         // call render
         clock_t render_start = clock();
-        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh);
+        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, relativistic);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
         if (verbose) {
