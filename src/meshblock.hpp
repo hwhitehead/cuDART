@@ -9,6 +9,7 @@
 
 struct MeshBlockInfo {
     int mb_size;
+    bool relativistic;
     vec3 mb_dims, xl, xr;
 };
 
@@ -46,6 +47,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
     int mb_size = npy_shape[0] * npy_shape[1] * npy_shape[2];
     int data_size = mb_size * npy_shape[3];
+    bool beta_in_data = (npy_shape.size() > 3); // does data vector contain beta info?
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("npy read                  (host)              %.6fs\n",npy_read_dur);
@@ -63,6 +65,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     mb_info.xl = xl;
     mb_info.xr = xr;
     mb_info.mb_dims = mb_dims;
+    mb_info.beta_in_data = beta_in_data;
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
@@ -148,6 +151,8 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
         std::vector<float> npy_vector = npy_data.data; // populated
         std::vector<unsigned long> npy_shape = npy_data.shape;
+        bool beta_in_data = (npy_shape.size() > 3);
+        all_mb_info[n].beta_in_data = beta_in_data;
         
         // check dimensions
         if ((npy_shape.size() == 3) && (relativistic)) {
@@ -217,15 +222,19 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic) {
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
                             + cell[1] * (int)mb_dims[2] + cell[2];
             int data_index = mem_start;
+            if (beta_in_data) {
+                data_index += cell_index * 4;
+            } else {
+                data_index += cell_index;
+            }
+            
             if (relativistic) {
-                data_index += cell_index * 4; // allow for emm and velocity data
                 vec3 beta_vec(all_data[data_index+1],
                                 all_data[data_index+2],
                                 all_data[data_index+3]);
                 float doppler_fac = calc_doppler_fac(beta_vec, r.normal);
                 trace += dwell * doppler_fac * all_data[data_index];
             } else {
-                data_index += cell_index;
                 trace += dwell * all_data[data_index];
             }            
             
