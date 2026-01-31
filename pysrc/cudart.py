@@ -280,15 +280,17 @@ class Scene:
         x_span = np.linspace(0,1,num_images)
         tax.set_xlim([0,1])
         tax.plot(x_span, np.log10(lum_ar), color='k')
-        tax.xaxis.set_visible("off")
-        tax.set_ylabel("Luminosity [arb]")
+        tax.yaxis.set_visible("off")
+        tax.xaxis.set_ticks([])
+        tax.set_xlabel("Luminosity [arb.]")
+        tax.xaxis.set_label_position("top")
 
         # plot colorbar
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
         fig.colorbar(sm, cax=cax, orientation="vertical")
         cax.yaxis.tick_right()
         cax.yaxis.set_label_position("right")
-        cax.set_ylabel("Intensity [arb]")
+        cax.set_ylabel("Intensity [arb.]")
 
         # plot inserts
         for i in range(num_images):

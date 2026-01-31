@@ -168,13 +168,6 @@ def render_jet(relativistic=False):
         camera = copy.deepcopy(template_camera)
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
-    # theta = 0.5 * np.pi + epsilon    
-    # phi_ar = np.linspace(epsilon,2 * np.pi - epsilon,num_img, endpoint=False)
-    # cameras = []
-    # for phi in phi_ar:
-    #     camera = copy.deepcopy(template_camera)
-    #     camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    #     cameras.append(camera)
     print("initialised cameras")
 
     # generate scene
@@ -185,7 +178,7 @@ def render_jet(relativistic=False):
     scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=17, vmax=20)
+    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=22)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
