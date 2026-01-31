@@ -158,9 +158,9 @@ int main(int argc, char *argv[]) {
     float *h_all_data = nullptr;
     size_t h_bytes = 0;
     if (labelled_data) {
-        all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, verbose, relativistic);
+        all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, relativistic, verbose);
     } else {
-        all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, verbose);
+        all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, relativistic, verbose);
     }
     int num_meshblocks = all_mb_info.size();
 

@@ -35,7 +35,7 @@ class MeshBlock {
         vec3 xl, xr, dx, mb_dims;
 };
 
-__host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
     // load single homgenous meshblock info, allocate host memory and load data
 
     clock_t npy_read_start = clock();
@@ -44,7 +44,8 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     std::vector<float> npy_vector = npy_data.data; 
     std::vector<unsigned long> npy_shape = npy_data.shape;
     vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
-    int mb_size = npy_vector.size();
+    int mb_size = npy_shape[0] * npy_shape[1] * npy_shape[2];
+    int data_size = mb_size * npy_shape[3];
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("npy read                  (host)              %.6fs\n",npy_read_dur);
@@ -65,7 +66,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
-    h_bytes = mb_size * sizeof(float);
+    h_bytes = data_size * sizeof(float);
     clock_t h_alloc_start = clock();
     h_all_data = (float*) malloc(h_bytes);
     if (verbose) { 
