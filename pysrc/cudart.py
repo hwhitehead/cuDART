@@ -137,7 +137,7 @@ class Scene:
     def make(self):
         subprocess.run(["make"], check = True)
 
-    def render(self, profile = False, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None):
+    def render(self, profile = False, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False):
 
         # prepare camera space
         self.build_camera_file()
@@ -173,6 +173,8 @@ class Scene:
             command = command + ["-v"]
         if max_mem is not None:
             command = command + ["-m", str(max_mem)]
+        if relativistic:
+            command = command + ["-r"]
         print("calling render executable")
         subprocess.run(command, check = True)
         print("executable finished.")

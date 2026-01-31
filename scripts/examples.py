@@ -142,12 +142,12 @@ def guided_camera_example():
     fig.savefig("guided_cam.png", dpi=300, bbox_inches="tight")
     plt.close("all")
 
-def render_jet():
+def render_jet(relativistic=false):
 
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror.npy"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror_relativistic.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/img"
 
@@ -182,7 +182,7 @@ def render_jet():
     print("built scene")
 
     # render and save images
-    scene.render(verbose = True)
+    scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
     scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=17, vmax=20)
@@ -192,4 +192,4 @@ def render_jet():
 
 if __name__ == "__main__":
 
-    render_labelled_example()
+    render_jet(True)

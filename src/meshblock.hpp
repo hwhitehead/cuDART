@@ -84,7 +84,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     return all_mb_info;
 }
 
-__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativstic, bool verbose) {
     // load heterogeneous meshblock info, allocate host memory and load data
 
     // read header data
@@ -142,15 +142,23 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     int mem_offset = 0;
     size_t num_zero_pad = 3;
     for (int n = 0; n < all_mb_info.size(); n++) {
+        // load meshblock data as (nx,ny,nz,p) where p = 1 or 4
         std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy";
         npy::npy_data npy_data = npy::read_npy<float>(npy_str);
         std::vector<float> npy_vector = npy_data.data; // populated
         std::vector<unsigned long> npy_shape = npy_data.shape;
+        
+        // check dimensions
+        if ((npy_shape.size() == 3) && (relativistic)) {
+            std::stringstream err_msg;
+            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "missing velocity data in " << npy_str << std::endl;
+        }        
         int floats_in_mb  = npy_vector.size();
         size_t bytes_in_mb = floats_in_mb * sizeof(float);
-        
-        // copy data into host memory buffer
-        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_mb);
+    
+        // copy emissivity data into host memory buffer
+        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_mb);        
         mem_offset += floats_in_mb;
     } // end mb loop
 
@@ -162,7 +170,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     return all_mb_info;
 }
 
-__device__ float MeshBlock::calc_trace(const Ray &r) {
+__device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;
     bool hit = calc_mb_intercept(r, tl, tr);
@@ -207,9 +215,19 @@ __device__ float MeshBlock::calc_trace(const Ray &r) {
             // add local cell to trace 
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
                             + cell[1] * (int)mb_dims[2] + cell[2];
-            int data_index = mem_start + cell_index;
-            trace += dwell * all_data[data_index];
-
+            int data_index = mem_start;
+            if (relativistic) {
+                data_index += cell_index * 4; // allow for emm and velocity data
+                vec3 beta_vec(all_data[data_index+1],
+                                all_data[data_index+2],
+                                all_data[data_index+3]);
+                float doppler_fac = calc_doppler_fac(beta_vec, r.normal);
+                trace += dwell * doppler_fac * all_data[data_index];
+            } else {
+                data_index += cell_index;
+                trace += dwell * all_data[data_index];
+            }            
+            
             // update position of ray head
             t_current = next_t_cross[axis]; // += dwell
             cell[axis] += step_dir[axis];

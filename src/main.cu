@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     // define space for user settings
     std::string cudart_version = "version 0.5 - January 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
-    bool verbose = false;
+    bool verbose = false, relativistic = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
                 case 'h':
                     break;
                 case 'v':
+                    break;
+                case 'r':
                     break;
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) {
@@ -65,6 +67,9 @@ int main(int argc, char *argv[]) {
                 case 'v':
                     verbose = true;
                     break;
+                case 'r':
+                    relativistic = true;
+                    break;
                 case 'c':
                     camera_char = argv[++i];
                     break;
@@ -76,6 +81,7 @@ int main(int argc, char *argv[]) {
                     std::cout << " -i <file>    specify input file [.npy]\n";
                     std::cout << " -s <file>    specify render save file [.ppm]\n";
                     std::cout << " -c <file>    specify camera data file [.txt]\n";
+                    std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
                     std::cout << " -v           verbosity flag\n";
                     std::cout << " -h           this help message\n"; 
@@ -107,6 +113,13 @@ int main(int argc, char *argv[]) {
             err_msg << "Input path must be .npy file (unlabelled data) or directory (labelled data)\n";
             CUDART_ERROR(err_msg);
         }
+    }
+
+    if (relativistic) && (not labelled_data) {
+        std::stringstrem err_msg;
+        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "Relativistic boosting only supported for labelled data sets\n";
+        CUDART_ERROR(err_msg);
     }
 
     // print timing header
