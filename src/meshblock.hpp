@@ -8,8 +8,8 @@
 #include "tools.hpp"
 
 struct MeshBlockInfo {
-    int mb_size;
-    bool relativistic;
+    int mb_size, mem_start, mb_index;
+    bool beta_in_data;
     vec3 mb_dims, xl, xr;
 };
 
@@ -19,7 +19,8 @@ class MeshBlock {
     public:
         // ctors
         __device__ MeshBlock() {}
-        __device__ MeshBlock(const vec3 xleft, const vec3 xright, const vec3 dims, float *all_data, int mem_start);
+        __device__ MeshBlock(MeshBlockInfo mb_info, float *all_data);
+
 
         // routines
         __device__ bool calc_mb_intercept(const Ray &r, float &tl, float &tr);
@@ -34,6 +35,7 @@ class MeshBlock {
         float sum;
         int mb_size, mem_start;
         vec3 xl, xr, dx, mb_dims;
+        bool beta_in_data;
 };
 
 __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
@@ -66,6 +68,8 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     mb_info.xr = xr;
     mb_info.mb_dims = mb_dims;
     mb_info.beta_in_data = beta_in_data;
+    mb_info.mem_start = 0;
+    mb_info.mb_index = 0;
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
@@ -153,6 +157,8 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
         std::vector<unsigned long> npy_shape = npy_data.shape;
         bool beta_in_data = (npy_shape.size() > 3);
         all_mb_info[n].beta_in_data = beta_in_data;
+        all_mb_info[n].mem_start = mem_offset;
+        all_mb_info[n].mb_index = n;
         
         // check dimensions
         if ((npy_shape.size() == 3) && (relativistic)) {
@@ -250,10 +256,10 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic) {
     return trace;
 }
 
-__global__ void init_meshblock(MeshBlock **mb_list, int mb_index, const vec3 xl, const vec3 xr, vec3 dims, float *data, int mem_start) {
+__global__ void init_meshblock(MeshBlockInfo mb_info, MeshBlock **mb_list, float *data) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        mb_list[mb_index] = new MeshBlock(xl, xr, dims, data, mem_start);
+        mb_list[mb_index] = new MeshBlock(mb_info, data);
     }
     return;
 }
@@ -279,13 +285,13 @@ __device__ int MeshBlock::int_clamp(float f, float l, float r) {
     return max(l, min(std::floor(f), r));
 }
 
-__device__ MeshBlock::MeshBlock(const vec3 xleft, const vec3 xright, const vec3 dims, float *data, int m_start) {
-    xl = xleft;
-    xr = xright;
+__device__ MeshBlock::MeshBlock(MeshBlockInfo mb_info, float *data) {
+    xl = mb_info.xl;
+    xr = mb_info.xr;
     all_data = data;
-    mem_start = m_start;
-    mb_dims = dims;
-    mb_size = (int)mb_dims[0] * (int)mb_dims[1] * (int)mb_dims[2];
+    mem_start = mb_info.mem_start;
+    mb_dims = mb_info.mb_dims;
+    mb_size = mb_info.mb_size;
     dx = (xr - xl) / mb_dims;
 }
 
