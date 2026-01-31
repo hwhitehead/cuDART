@@ -142,7 +142,7 @@ def guided_camera_example():
     fig.savefig("guided_cam.png", dpi=300, bbox_inches="tight")
     plt.close("all")
 
-def render_jet(relativistic=false):
+def render_jet(relativistic=False):
 
     print("cuDART: starting jet render example...")
 
