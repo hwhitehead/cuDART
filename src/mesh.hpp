@@ -78,6 +78,8 @@ __host__ void build_containers(std::vector<MeshBlockInfo> all_mb_info, float* &d
     // allocate and intialise meshblocks on device
     int mem_start = 0;
     for (int n = 0; n < num_meshblocks; n++) {
+        std::cout << all_mb_info[n].mb_size << std::endl;
+        std::cout << all_mb_info[n].mem_start << std::endl;
         init_meshblock<<<1,1>>>(all_mb_info[n], mb_list, d_data);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());

@@ -156,8 +156,7 @@ int main(int argc, char *argv[]) {
         all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, relativistic, verbose);
     }
     int num_meshblocks = all_mb_info.size();
-    std::cout << "mb_size = " << all_mb_info[0].mb_size << std::endl;
-
+    
     // determine VRAM limitations
     float tolerance = 0.95; // use this fraction of available vram
     size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
