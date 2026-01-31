@@ -293,6 +293,7 @@ __device__ MeshBlock::MeshBlock(MeshBlockInfo mb_info, float *data) {
     mb_dims = mb_info.mb_dims;
     mb_size = mb_info.mb_size;
     dx = (xr - xl) / mb_dims;
+    beta_in_data = mb_info.beta_in_data;
 }
 
 __device__ bool MeshBlock::calc_mb_intercept(const Ray &r, float &tl, float &tr) {
