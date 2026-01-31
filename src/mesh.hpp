@@ -14,7 +14,7 @@ class Mesh {
         __device__ Mesh(MeshBlock **l, int num_mb) {mb_list = l, num_meshblocks = num_mb;}
         
         // routines
-        __device__ float calc_trace(const Ray &r);
+        __device__ float calc_trace(const Ray &r, bool relativistic);
 
         // members
         MeshBlock **mb_list;
