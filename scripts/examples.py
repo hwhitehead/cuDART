@@ -185,4 +185,5 @@ def render_jet(relativistic=False):
 
 if __name__ == "__main__":
 
-    render_jet(False)
+    render_labelled_example()
+    render_unlabelled_example()
