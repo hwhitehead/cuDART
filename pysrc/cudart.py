@@ -282,7 +282,7 @@ class Scene:
         tax.plot(x_span, np.log10(lum_ar), color='k')
         tax.yaxis.set_visible("off")
         tax.xaxis.set_ticks([])
-        tax.set_xlabel("Luminosity [arb.]")
+        tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
         tax.xaxis.set_label_position("top")
 
         # plot colorbar
@@ -290,7 +290,7 @@ class Scene:
         fig.colorbar(sm, cax=cax, orientation="vertical")
         cax.yaxis.tick_right()
         cax.yaxis.set_label_position("right")
-        cax.set_ylabel("Intensity [arb.]")
+        cax.set_ylabel(r"log$_{10}$ Intensity [arb.]")
 
         # plot inserts
         for i in range(num_images):
