@@ -48,8 +48,9 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     std::vector<unsigned long> npy_shape = npy_data.shape;
     vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
     int mb_size = npy_shape[0] * npy_shape[1] * npy_shape[2];
-    int data_size = mb_size * npy_shape[3];
+    int data_size = mb_size;
     bool beta_in_data = (npy_shape.size() > 3); // does data vector contain beta info?
+    if (beta_in_data) data_size *= npy_shape[3];
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("npy read                  (host)              %.6fs\n",npy_read_dur);
