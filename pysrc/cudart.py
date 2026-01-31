@@ -238,7 +238,7 @@ class Scene:
         for i in range(num_raws):
 
             raw_str = self.npy_save_str + str(i).zfill(str_zfill) + ".npy"
-            raw_img = np.load(load_str)
+            raw_img = np.load(raw_str)
             lum = np.sum(raw_img)
             lum_ar[i] = lum
 
