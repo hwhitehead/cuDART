@@ -249,9 +249,6 @@ class Scene:
         save_location = save_location.removesuffix(".png") # strip as needed
         lum_ar = self.calc_lightcurve(save_location)
 
-        print(np.max(lum_ar))
-        print(np.min(lum_ar))
-
         # check savespace exists
         save_dir = os.path.dirname(save_location)
         if not os.path.isdir(save_dir):
