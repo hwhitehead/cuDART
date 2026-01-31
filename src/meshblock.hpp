@@ -25,7 +25,7 @@ class MeshBlock {
         __device__ int int_clamp(float f, float l, float r);
         __device__ vec3 get_edge(bool sign) {return (sign) ? xr : xl;}
         __device__ void print_data();
-        __device__ float calc_trace(const Ray &r);
+        __device__ float calc_trace(const Ray &r, bool relativistic);
 
         // public properties
         const int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
@@ -84,7 +84,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     return all_mb_info;
 }
 
-__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativstic, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
     // load heterogeneous meshblock info, allocate host memory and load data
 
     // read header data
