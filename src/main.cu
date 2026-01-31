@@ -115,13 +115,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (relativistic && (not labelled_data)) {
-        std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main\n";
-        err_msg << "Relativistic boosting only supported for labelled data sets\n";
-        CUDART_ERROR(err_msg);
-    }
-
     // print timing header
     if (verbose) {
         std::cout << "=============================================================\n";
