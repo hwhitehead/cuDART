@@ -259,7 +259,7 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic) {
 __global__ void init_meshblock(MeshBlockInfo mb_info, MeshBlock **mb_list, float *data) {
     int thr_idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (thr_idx == 0) {
-        mb_list[mb_index] = new MeshBlock(mb_info, data);
+        mb_list[mb_info.mb_index] = new MeshBlock(mb_info, data);
     }
     return;
 }
