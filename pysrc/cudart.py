@@ -258,7 +258,7 @@ class Scene:
             os.mkdir(save_dir)
 
         # define persistent figure
-        height_ratios = np.array([0.2,1])
+        height_ratios = np.array([0.3,1])
         width_ratios = np.array([1,0.05])
         set_plot_defaults(False)
         h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
@@ -278,7 +278,8 @@ class Scene:
         # plot header
         num_images = len(self.cameras)
         x_span = np.linspace(0,1,num_images)
-        tax.plot(x_span, lum_ar)
+        tax.set_xlim([0,1])
+        tax.plot(x_span, np.log10(lum_ar), color='k')
         tax.xaxis.set_visible("off")
         tax.set_ylabel("Luminosity [arb]")
 
@@ -296,10 +297,12 @@ class Scene:
             save_str = save_location + str(i).zfill(str_zfill) + ".png"
 
             img = np.load(load_str)
+            tstamp = tax.axvline(x=x_span[i], color='k', alpha=0.2)
 
             pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
             pc.remove()
+            tstamp.remove()
             if (verbose):
                 print("saved png at " + save_str)
 
