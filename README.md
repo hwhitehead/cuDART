@@ -1,10 +1,10 @@
 # cuDART: CUDA + DDA Accelerated Ray Tracing (v0.6)
 
 <p align="center">
-  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/rotate.gif width = "700" alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/gamma/docs/rotate.gif width = "600" alt=animated/>
 </p>
 <p align="center"">
-  <em> Animation of a supernova-jet simulation snapshot, featuring 200 viewpoints each yielding a 2048<sup>2</sup> image. Raw image data for each frame generated in ~150ms, during which 4 million rays were cast through a simulation domain hosting over 400 million (750<sup>3</sup>) cells. Simulation data featured in <a href="https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract">this paper</a></em>
+  <em> Animation of a supernova-jet simulation snapshot, featuring 200 viewpoints each yielding a 2048<sup>2</sup> image. Raw image data for each frame generated in ~150ms, during which 4 million rays were cast through a simulation domain hosting over 400 million (750<sup>3</sup>) cells. Simulation data featured in <a href="https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract">this paper.</a></em>
 </p>
 
 <p align="center">
@@ -43,7 +43,7 @@ Upon execution:
 7. The program frees all associated memory registers (device and host) and terminates 
 
 ## Data Formats
-`cuDART` accepts data in the form of `.npy` files, which *must* contain an array of `float32` entries. If not flagged for relativisitic beaming, the array should be of shape `(nx,ny,nz)`, with each entry populated by data to be traced at each spatial position. If relativistic beaming is included, an extra rank is required to pass data to trace, and velocity data in units of the the speed of light in each cardinal direction e.g. as $\beta_x = v_x / c$. The resulting array will have shape `(nx,ny,nz,4)` where the fourth index covers `(emm,beta_x,beta_y,beta_z)` for each spatial position. 
+`cuDART` accepts data in the form of `.npy` files, which *must* contain an array of `float32` entries. If not flagged for relativisitic beaming, the array should be of shape `(nx,ny,nz)`, with each entry populated by data to be traced at each spatial position. If relativistic beaming is included, an extra rank is required to pass data to trace, and velocity data in units of the the speed of light in each cardinal direction e.g. as $\beta_x = v_x / c$. The resulting array will have shape `(nx,ny,nz,4)` where the fourth index covers `(tracer,beta_x,beta_y,beta_z)` for each spatial position. 
 
 ## Performance
 `cuDART` is bottlenecked primarily by I/O; the actual tracing of meshes and image writes are performed exceptionally quickly. The main overhead occurs at executable intialisation, due to the cost of launching a GPU context and reading the `.npy` file into host memory, usually taking O(1)s. CUDA-type operations are MUCH faster, copying the data into device memory and generating an image from this data takes only O(100)ms. For sensible image dimsions, the data transfer to device is more expensive than the trace operation itself (see profiling [here](https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.txt)). As such, peak efficiency with `cuDART` is achieved when many images are taken using the same data set e.g. many lines-of-sight. Comparing a 100 image render to a single image, `cuDART` transitions from 16% of the runtime attributed to the render kernel up to 95%. Users acting as admin may wish to look into [persistence daemons](https://docs.nvidia.com/deploy/driver-persistence/overview.html) for the NVIDIA kernel; especially for short/simple renders the majority of the runtime can be occupied by the application start latency which can be bypassed by ensuring a kernel persists between executions.  
