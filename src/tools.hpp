@@ -4,7 +4,7 @@
 #define CUDART_ERROR(x) std::cout << x.str(); std::exit(EXIT_FAILURE);
 
 #define checkCudaErrors(val) check_cuda( (val), #val, __FILE__, __LINE__ )
-void check_cuda(cudaError_t result, char const *const func, const char *const file, int const line) {
+__host__ void check_cuda(cudaError_t result, char const *const func, const char *const file, int const line) {
     if (result) {
         std::cerr << "CUDA error = " << static_cast<unsigned int>(result) << " at " <<
         file << ":" << line << " '" << func << "' \n";
@@ -13,8 +13,12 @@ void check_cuda(cudaError_t result, char const *const func, const char *const fi
         exit(99);
     }
 }
+__host__ bool check_file_accessible(const std::string& name) {
+  struct stat buffer;   
+  return (stat (name.c_str(), &buffer) == 0); 
+}
 
-size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
+__host__ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
     // calculate available vram with user ceil
     
     float vram_limit_f = 1e12;
