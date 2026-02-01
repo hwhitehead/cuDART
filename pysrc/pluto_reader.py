@@ -317,9 +317,9 @@ class PlutoReader:
                 mirrored_data = np.zeros(shape=(dim,dim, 2 * dim), dtype=np.float32) 
                 mirrored_data[:, :, dim:] = emm_data
                 mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
-                self.emm_npy_data[short_frequency] = mirrored_data
+                self.emm_npy_data[frequency] = mirrored_data
                 continue
             else:
-                self.emm_npy_data[short_frequency] = emm_data
+                self.emm_npy_data[frequency] = emm_data
 
 
