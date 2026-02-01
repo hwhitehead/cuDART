@@ -244,7 +244,7 @@ class PlutoReader:
 
     def emm_to_npy(self, snapshot_num, frequencies = ["J_1000MHz"], sparse_step = 10, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
 
-        if not isinstance(frequencies):
+        if not isinstance(frequencies, list):
             if frequencies.lower == "all":
                 frequncies = self.all_frequencies
 
