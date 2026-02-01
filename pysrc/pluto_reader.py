@@ -214,7 +214,7 @@ class Units:
 
 class PlutoReader:
 
-    def __init__(self, load_dir, snapshot_num, config_file = "config.ini"):
+    def __init__(self, load_dir, snapshot_num, config_file):
         self.load_dir = load_dir
         self.snapshot_num = snapshot_num
         self.units = Units(config_file)
