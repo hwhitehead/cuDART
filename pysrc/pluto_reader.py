@@ -318,7 +318,6 @@ class PlutoReader:
                 mirrored_data[:, :, dim:] = emm_data
                 mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
                 self.emm_npy_data[frequency] = mirrored_data
-                continue
             else:
                 self.emm_npy_data[frequency] = emm_data
 
