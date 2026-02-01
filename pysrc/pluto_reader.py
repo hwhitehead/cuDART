@@ -244,8 +244,9 @@ class PlutoReader:
 
     def emm_to_npy(self, snapshot_num, frequencies = ["J_1000MHz"], sparse_step = 10, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
 
-        if frequencies.lower == "all":
-            frequncies = self.all_frequencies
+        if not isinstance(frequencies):
+            if frequencies.lower == "all":
+                frequncies = self.all_frequencies
 
         # Calculate the midpoints of the cells in each direction
         midpoints1 = ((self.xr[1][::sparse_step][:-1] + self.xr[1][::sparse_step][1:]) / 2.0).round(3)
