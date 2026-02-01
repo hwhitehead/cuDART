@@ -279,7 +279,7 @@ class PlutoReader:
         particles['x3bin'] = pd.cut(particles.x3, self.xr[3][::sparse_step], labels=midpoints3).astype(float).round(3)
 
         # Average over the particles in each cell and create dataframe of the results. If a cell has no particles we fill the cell with 0, because we are about to add it to an array of zeros
-        self.emm_data_all = {}
+        self.emm_npy_data = {}
         for frequency in frequencies: 
             piv = pd.pivot_table(particles, index='x3bin', columns=['x1bin', 'x2bin'], aggfunc={"emm_freq_" + frequency[2:]: 'mean'}).fillna(0.0)
             piv.columns = piv.columns.droplevel(0)
@@ -315,9 +315,9 @@ class PlutoReader:
                 mirrored_data = np.zeros(shape=(dim,dim, 2 * dim), dtype=np.float32) 
                 mirrored_data[:, :, dim:] = emm_data
                 mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
-                self.emm_data_all[frequency] = mirrored_data
+                self.emm_npy_data[frequency] = mirrored_data
                 continue
             else:
-                self.emm_data_all[frequency] = emm_data
+                self.emm_npy_data[frequency] = emm_data
 
 

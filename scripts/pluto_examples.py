@@ -17,14 +17,14 @@ def run_pluto_convert_example():
     apply_blur = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
     frequencies = ["J_1000MHz"]
-    emm_data = preader.emm_to_npy(snapshot_num = 490,
-                                    sparse_step = 4, 
-                                    num_pfiles = 7, 
-                                    apply_blur = apply_blur,
-                                    blur_kwargs = blur_kwargs)
+    preader.emm_to_npy(snapshot_num = 490,
+                        sparse_step = 4, 
+                        num_pfiles = 7, 
+                        apply_blur = apply_blur,
+                        blur_kwargs = blur_kwargs)
     for frequency in frequencies:
         save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
-        np.save(save_str, emm_data[frequency])
+        np.save(save_str, preader.emm_npy_data[frequency])
 
 if __name__ == "__main__":
 
