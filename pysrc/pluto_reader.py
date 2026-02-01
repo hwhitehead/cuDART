@@ -242,11 +242,13 @@ class PlutoReader:
         self.domain["zend"] = self.xr[3].max()
         return loader
 
-    def emm_to_npy(self, snapshot_num, frequencies = ["J_1000MHz"], sparse_step = 10, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
+    def emm_to_npy(self, snapshot_num, frequencies = ["1000MHz"], sparse_step = 10, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
 
         if not isinstance(frequencies, list):
             if frequencies.lower == "all":
                 frequncies = self.all_frequencies
+            else:
+                raise Exception("invalid pass to 'frequencies', accept list or 'all'")
 
         # Calculate the midpoints of the cells in each direction
         midpoints1 = ((self.xr[1][::sparse_step][:-1] + self.xr[1][::sparse_step][1:]) / 2.0).round(3)
@@ -258,7 +260,7 @@ class PlutoReader:
             P = pr.ploadparticles(ns=snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
             emissivities = []
             for frequency in frequencies:
-                emm_local = np.reshape(P.color[:, self.all_frequencies[frequency]], P.x1.shape)
+                emm_local = np.reshape(P.color[:, self.all_frequencies["J_" + frequency]], P.x1.shape)
                 emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
                 emissivities.append(emm_local)
 
@@ -315,9 +317,9 @@ class PlutoReader:
                 mirrored_data = np.zeros(shape=(dim,dim, 2 * dim), dtype=np.float32) 
                 mirrored_data[:, :, dim:] = emm_data
                 mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
-                self.emm_npy_data[frequency] = mirrored_data
+                self.emm_npy_data[short_frequency] = mirrored_data
                 continue
             else:
-                self.emm_npy_data[frequency] = emm_data
+                self.emm_npy_data[short_frequency] = emm_data
 
 
