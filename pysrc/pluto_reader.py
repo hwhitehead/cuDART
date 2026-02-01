@@ -258,16 +258,16 @@ class PlutoReader:
             P = pr.ploadparticles(ns=snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
             emissivities = []
             for frequency in frequencies:
-                emm_local = np.reshape(P.color[:, self.frequencies[frequency]], P.x1.shape)
+                emm_local = np.reshape(P.color[:, self.all_frequencies[frequency]], P.x1.shape)
                 emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
                 emissivities.append(emm_local)
 
             if i == 0:
                 particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
-                                            columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float32Dtype())
+                                            columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in frequencies], dtype=pd.Float32Dtype())
             else:
                 particles_section = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
-                                            columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float32Dtype())
+                                            columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in frequencies], dtype=pd.Float32Dtype())
                 particles = pd.concat([particles, particles_section])  # Append the particles from this file to the existing DataFrame
             # except:
             #     if verbose:
