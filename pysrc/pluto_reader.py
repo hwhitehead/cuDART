@@ -248,26 +248,26 @@ class PlutoReader:
         midpoints3 = ((self.xr[3][::sparse_step][:-1] + self.xr[3][::sparse_step][1:]) / 2.0).round(3)
 
         for i in range(num_pfiles):  
-            # try:
-            P = pr.ploadparticles(ns=self.snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
-            emissivities = []
-            for frequency in self.frequencies:
-                emm_local = np.reshape(P.color[:, self.frequencies[frequency]], P.x1.shape)
-                emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
-                emissivities.append(emm_local)
+            try:
+                P = pr.ploadparticles(ns=self.snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
+                emissivities = []
+                for frequency in self.frequencies:
+                    emm_local = np.reshape(P.color[:, self.frequencies[frequency]], P.x1.shape)
+                    emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
+                    emissivities.append(emm_local)
 
-            print(np.shape(P.x1))
-            print(np.shape(emissivities))
-            if i == 0:
-                particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
-                                            columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float64Dtype())
-            else:
-                particles_section = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
-                                            columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float64Dtype())
-                particles = pd.concat([particles, particles_section])  # Append the particles from this file to the existing DataFrame
-            # except:
-            #     if verbose:
-            #         print(f"File {i} not loaded - check whether it exists")
+                print(np.shape(P.x1))
+                print(np.shape(emissivities))
+                if i == 0:
+                    particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
+                                                columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float64Dtype())
+                else:
+                    particles_section = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
+                                                columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float64Dtype())
+                    particles = pd.concat([particles, particles_section])  # Append the particles from this file to the existing DataFrame
+            except:
+                if verbose:
+                    print(f"File {i} not loaded - check whether it exists")
 
         # Separate the particles by position into cells and label these cells by their midpoints.
         particles['x1bin'] = pd.cut(particles.x1, self.xr[1][::sparse_step], labels=midpoints1).astype(float).round(3)
@@ -289,4 +289,6 @@ class PlutoReader:
             piv_full.columns.set_names('(x1bin,x2bin)', inplace=True)
 
             emm_data = piv_full.to_numpy(dtype=np.float32)
+            dim = np.shape(emm_data)[0]
+            emm_data = emm_data.reshape((dim,dim,dim))
             return emm_data
