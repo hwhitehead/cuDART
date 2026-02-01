@@ -13,10 +13,6 @@ __host__ void check_cuda(cudaError_t result, char const *const func, const char 
         exit(99);
     }
 }
-__host__ bool check_file_accessible(const std::string& name) {
-  struct stat buffer;   
-  return (stat (name.c_str(), &buffer) == 0); 
-}
 
 __host__ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
     // calculate available vram with user ceil
