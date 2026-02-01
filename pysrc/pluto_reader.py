@@ -1,4 +1,6 @@
 # python toolkit for reading particle data from PLUTO into cuDART legible .npy arrays
+# this toolkit is built directly upon pre-existing routines developed by Emma Elley at https://github.com/emmaelley/jet_analyst (private)
+
 
 import pyPLUTO.ploadparticles as pr
 import pandas as pd
@@ -6,6 +8,7 @@ import numpy as np
 import os, sys, configparser
 import vtk
 from vtk.util import numpy_support
+from scipy.ndimage import gaussian_filter
 
 class VTKLoader:
 	def __init__(self,data_dir):
@@ -32,10 +35,10 @@ class VTKLoader:
 		self.datadir = data_dir
 
 		#reads grid file to get x1 x2 and x3 arrays 
-		self.ReadGridFile(data_dir+'grid.out')
+		self.ReadGridFile(os.path.join(data_dir,'grid.out'))
 
 		#read vtk.out file to get timing and variables
-		self.ReadVarFile(data_dir+'vtk.out')
+		self.ReadVarFile(os.path.join(data_dir,'vtk.out'))
 
 		#set up variables as instance attributes
 		for var in self.vars:
@@ -219,6 +222,7 @@ class PlutoReader:
         self.snapshot_num = snapshot_num
         self.units = Units(config_file)
         self.frequencies = Frequencies(config_file).frequencies
+        print(self.frequencies)
         self.vtk_loader = self.invoke_vtk_loader()
 
     def invoke_vtk_loader(self):
@@ -240,7 +244,7 @@ class PlutoReader:
         self.domain["zend"] = self.xr[3].max()
         return loader
 
-    def emm_to_npy(self, sparse_step = 4, verbose = True, num_pfiles = 10):
+    def emm_to_npy(self, sparse_step = 4, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
 
         # Calculate the midpoints of the cells in each direction
         midpoints1 = ((self.xr[1][::sparse_step][:-1] + self.xr[1][::sparse_step][1:]) / 2.0).round(3)
@@ -289,4 +293,28 @@ class PlutoReader:
             emm_data = piv_full.to_numpy(dtype=np.float32)
             dim = np.shape(emm_data)[0]
             emm_data = emm_data.reshape((dim,dim,dim))
+            emm_data = np.einsum("kji->ijk", emm_data)
+            
+            if apply_blur:
+                if blur_kwargs is None:
+                    sigma = 2
+                    window = 2
+                else:
+                    try:
+                        sigma = blur_kwargs["sigma"]
+                        window = blur_kwargs["window"]
+                    except:
+                        raise Exception("blur_kwarg must be a dictionary containing keyed values for 'sigma' and 'window'")
+                truncate = (((window) / 2) - 0.5) / sigma
+                emm_data = gaussian_filter(emm_data, sigma=sigma, truncate=truncate)
+
+            if mirror:
+                mirrored_data = np.zeros(shape=(dim,dim, 2 * dim), dtype=np.float32) 
+                mirrored_data[:, :, dim:] = emm_data
+                mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
+                return mirrored_data
+            else:
+                return emm_data
+            
             return emm_data
+
