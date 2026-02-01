@@ -22,7 +22,7 @@ def run_pluto_convert_example():
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         blur_kwargs = blur_kwargs)
-    for key, values in preader.emm_npy_data:
+    for key, values in preader.emm_npy_data.items():
         print(key)
     for frequency in frequencies:
         save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
