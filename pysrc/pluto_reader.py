@@ -218,7 +218,7 @@ class PlutoReader:
         self.load_dir = load_dir
         self.snapshot_num = snapshot_num
         self.units = Units(config_file)
-        self.frequencies = Frequencies(config_file)
+        self.frequencies = Frequencies(config_file).frequencies
         self.vtk_loader = self.invoke_vtk_loader()
 
     def invoke_vtk_loader(self):
