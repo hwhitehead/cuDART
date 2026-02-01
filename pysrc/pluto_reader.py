@@ -217,12 +217,10 @@ class Units:
 
 class PlutoReader:
 
-    def __init__(self, load_dir, snapshot_num, config_file):
+    def __init__(self, load_dir, config_file):
         self.load_dir = load_dir
-        self.snapshot_num = snapshot_num
         self.units = Units(config_file)
-        self.frequencies = Frequencies(config_file).frequencies
-        print(self.frequencies)
+        self.all_frequencies = Frequencies(config_file).frequencies
         self.vtk_loader = self.invoke_vtk_loader()
 
     def invoke_vtk_loader(self):
@@ -244,7 +242,10 @@ class PlutoReader:
         self.domain["zend"] = self.xr[3].max()
         return loader
 
-    def emm_to_npy(self, sparse_step = 4, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
+    def emm_to_npy(self, snapshot_num, frequencies = ["J_1000MHz"], sparse_step = 10, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
+
+        if frequencies.lower == "all":
+            frequncies = self.all_frequencies
 
         # Calculate the midpoints of the cells in each direction
         midpoints1 = ((self.xr[1][::sparse_step][:-1] + self.xr[1][::sparse_step][1:]) / 2.0).round(3)
@@ -253,9 +254,9 @@ class PlutoReader:
 
         for i in range(num_pfiles):  
             try:
-                P = pr.ploadparticles(ns=self.snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
+                P = pr.ploadparticles(ns=snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
                 emissivities = []
-                for frequency in self.frequencies:
+                for frequency in frequencies:
                     emm_local = np.reshape(P.color[:, self.frequencies[frequency]], P.x1.shape)
                     emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
                     emissivities.append(emm_local)
@@ -277,7 +278,8 @@ class PlutoReader:
         particles['x3bin'] = pd.cut(particles.x3, self.xr[3][::sparse_step], labels=midpoints3).astype(float).round(3)
 
         # Average over the particles in each cell and create dataframe of the results. If a cell has no particles we fill the cell with 0, because we are about to add it to an array of zeros
-        for frequency in self.frequencies: # valid for only single freq currently
+        self.emm_data_all = {}
+        for frequency in frequencies: 
             piv = pd.pivot_table(particles, index='x3bin', columns=['x1bin', 'x2bin'], aggfunc={"emm_freq_" + frequency[2:]: 'mean'}).fillna(0.0)
             piv.columns = piv.columns.droplevel(0)
 
@@ -312,9 +314,9 @@ class PlutoReader:
                 mirrored_data = np.zeros(shape=(dim,dim, 2 * dim), dtype=np.float32) 
                 mirrored_data[:, :, dim:] = emm_data
                 mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
-                return mirrored_data
+                self.emm_data_all[frequency] = mirrored_data
+                continue
             else:
-                return emm_data
-            
-            return emm_data
+                self.emm_data_all[frequency] = emm_data
+
 

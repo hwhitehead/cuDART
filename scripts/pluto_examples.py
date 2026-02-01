@@ -10,17 +10,21 @@ def run_pluto_convert_example():
 
     config_file = "/mnt/kocsis1/cuDART_wdir/jet_analyst/config.ini"
     load_dir = "/mnt/kocsis1/cuDART_wdir/jet_data/"
-    save_str = "/mnt/kocsis1/cuDART_wdir/emm_data.npy"
+    save_dir = "/mnt/kocsis1/cuDART_wdir/emm_data/"
     
-    preader = PlutoReader(load_dir, 490, config_file)
+    preader = PlutoReader(load_dir, config_file)
     
     apply_blur = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
-    emm_data = preader.emm_to_npy(sparse_step = 4, 
+    frequencies = ["J_1000MHz"]
+    emm_data = preader.emm_to_npy(snapshot_num = 490,
+                                    sparse_step = 4, 
                                     num_pfiles = 7, 
                                     apply_blur = apply_blur,
                                     blur_kwargs = blur_kwargs)
-    np.save(save_str, emm_data)
+    for frequency in frequencies:
+        save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
+        np.save(save_str, emm_data[frequency])
 
 if __name__ == "__main__":
 
