@@ -1,5 +1,10 @@
+# external imports
 import sys, os, gc
 import numpy as np
+
+# local import
+sys.path.append("..")
+from pysrc import *
 
 def run_pluto_convert_example():
 
