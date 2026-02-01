@@ -259,10 +259,10 @@ class PlutoReader:
             print(np.shape(P.x1))
             print(np.shape(emissivities))
             if i == 0:
-                particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities)[:, :, 0].T,
+                particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
                                             columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float64Dtype())
             else:
-                particles_section = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities)[:, :, 0].T,
+                particles_section = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
                                             columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float64Dtype())
                 particles = pd.concat([particles, particles_section])  # Append the particles from this file to the existing DataFrame
             # except:
