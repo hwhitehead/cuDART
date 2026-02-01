@@ -256,8 +256,6 @@ class PlutoReader:
                     emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
                     emissivities.append(emm_local)
 
-                print(np.shape(P.x1))
-                print(np.shape(emissivities))
                 if i == 0:
                     particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
                                                 columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in self.frequencies], dtype=pd.Float64Dtype())
