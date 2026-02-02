@@ -24,7 +24,7 @@ def extract_pluto_data_example():
     preader.emm_to_npy(snapshot_num = 490,
                         save_dir = emm_dir,
                         frequencies = frequencies,
-                        sparse_step = 4, 
+                        sparse_step = 2, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         apply_mirror = apply_mirror,
