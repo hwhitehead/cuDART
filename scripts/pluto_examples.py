@@ -6,6 +6,8 @@ import numpy as np
 sys.path.append("..")
 from pysrc import *
 
+epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
+
 def extract_pluto_data_example():
 
     config_file = "/mnt/kocsis1/cuDART_wdir/jet_analyst/config.ini"
