@@ -97,8 +97,8 @@ def render_pluto_data_example(relativistic=False):
     template_camera.num_pixels_X = 1024
     template_camera.num_pixels_Y = 1024
     template_camera.tilt = (60.0 / 180) * np.pi
-    template_camera.length_X = 0.66
-    template_camera.length_Y = 0.66
+    template_camera.length_X = 0.1
+    template_camera.length_Y = 0.1
 
     # build camera array, inherit from template
     num_img = 100
@@ -119,7 +119,7 @@ def render_pluto_data_example(relativistic=False):
     scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
