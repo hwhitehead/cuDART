@@ -450,13 +450,6 @@ class PlutoParticleReader:
             else:
                 # save emissivity alone
                 np.save(save_str, emm_data)
-            
-
-            
-
-
-
-
 
     def count_particle_files(self, snapshot_num, num_zfill = 4):
 
@@ -467,11 +460,11 @@ class PlutoParticleReader:
 
     def mirror_data(self, input_ar):
 
-        mirrored_shape = np.array(np.shape(input_ar))
-        mirrored_shape[2] *= 2 # dupe along z
+        input_shape = np.array(np.shape(input_ar))
+        mirrored_shape = input_shape * np.array([1,1,2])
         mirrored_ar = np.zeros(shape=mirrored_shape, dtype=np.float32)
-        mirrored_ar[:,:,dim:] = input
-        mirrored_ar[:,:,:dim] = input[:,:,::-1]
+        mirrored_ar[:,:,input_shape[2]:] = input_ar
+        mirrored_ar[:,:,:input_shape[2]] = input_ar[:,:,::-1]
         return mirrored_ar
 
     def blur_data(self, input_ar, blur_kwargs = None):
