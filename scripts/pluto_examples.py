@@ -16,15 +16,15 @@ def extract_pluto_data_example():
 
     preader = PlutoParticleReader(load_dir, config_file)
     
-    apply_blur = False
-    apply_mirror = False
+    apply_blur = True
+    apply_mirror = True
     apply_boost = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
     frequencies = ["1000MHz"]
     preader.emm_to_npy(snapshot_num = 490,
                         save_dir = emm_dir,
                         frequencies = frequencies,
-                        sparse_step = 10, 
+                        sparse_step = 4s, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         apply_mirror = apply_mirror,
