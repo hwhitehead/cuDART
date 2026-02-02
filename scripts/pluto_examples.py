@@ -74,7 +74,7 @@ def render_pluto_data_example(relativistic=False):
 
 def test_array():
 
-    load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy""
+    load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     data = np.load(load_str)
     print(np.shape(data))
     print(np.isnan(data).any())
