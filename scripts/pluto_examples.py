@@ -34,6 +34,9 @@ def run_pluto_convert_example():
     max_vx1 = np.max(boosted_data[...,1])
     max_vx2 = np.max(boosted_data[...,2])
     max_vx3 = np.max(boosted_data[...,3])
+    print(max_vx1)
+    print(max_vx2)
+    print(max_vx3)
 
 if __name__ == "__main__":
 
