@@ -205,7 +205,6 @@ class Units:
     def __init__(self, config_file):
         config = configparser.ConfigParser()
         config.read(config_file)
-        print(config['conversions']['prs'])
         self.prs = float(config['conversions']['prs'])
         self.rho = float(config['conversions']['rho'])
         self.v = float(config['conversions']['v'])
@@ -441,7 +440,7 @@ class PlutoParticleReader:
             save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
             if apply_boost:
                 # stack with velocity data and save
-                boosted_shape = np.array(np.shape(emm_data)).append([4])
+                boosted_shape = np.append(np.array(np.shape(emm_data)), [4])
                 boosted_data = np.zeros(shape=boosted_shape, dtype=np.float32)
                 boosted_data[..., 0] = emm_data
                 boosted_data[..., 1] = vel_npy_data["vx1"]
