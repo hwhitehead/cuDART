@@ -185,4 +185,4 @@ def render_jet(relativistic=False):
 
 if __name__ == "__main__":
 
-    render_jet(True)
+    render_jet(False)
