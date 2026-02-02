@@ -19,7 +19,7 @@ def run_pluto_convert_example():
     frequencies = ["1000MHz"]
     preader.emm_to_npy(snapshot_num = 490,
                         frequencies = frequencies,
-                        sparse_step = 1, 
+                        sparse_step = 2, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         blur_kwargs = blur_kwargs)
