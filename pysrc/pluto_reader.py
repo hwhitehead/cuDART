@@ -395,10 +395,11 @@ class PlutoParticleReader:
                 dim = np.shape(vel_data)[0]
                 vel_data = vel_data.reshape((dim,dim,dim))
                 vel_data = np.einsum("kji->ijk", vel_data)
-                
+                print(np.shape(vel_data))
+
                 # apply post-processing
                 if apply_blur:
-                    vel_data = self.blur_data(vel_data)
+                    vel_data = self.blur_data(vel_data, blur_kwargs)
 
                 if apply_mirror:
                     vel_data = self.mirror_data(vel_data)
@@ -465,7 +466,7 @@ class PlutoParticleReader:
 
     def mirror_data(self, input_ar):
 
-        mirrored_shape = input_ar.shape()
+        mirrored_shape = np.shape(input_ar)
         mirrored_shape[2] *= 2 # dupe along z
         mirrored_ar = np.zeros(shape=mirrored_shape, dtype=np.float32)
         mirrored_ar[:,:,dim:] = input
