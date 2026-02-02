@@ -22,7 +22,7 @@ def run_pluto_convert_example():
     preader.emm_to_npy(snapshot_num = 490,
                         save_dir = emm_dir,
                         frequencies = frequencies,
-                        sparse_step = 2, 
+                        sparse_step = 10, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         apply_mirror = apply_mirror,
