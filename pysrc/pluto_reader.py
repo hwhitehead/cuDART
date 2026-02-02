@@ -312,7 +312,10 @@ class PlutoParticleReader:
                     vel_data = self.blur_data(vel_data, blur_kwargs)
 
                 if apply_mirror:
-                    vel_data = self.mirror_data(vel_data)
+                    if vel_str == "vx3":
+                        vel_data = self.mirror_data(vel_data, flip = True)
+                    else:
+                        vel_data = self.mirror_data(vel_data)
 
                 vel_npy_data[vel_str] = vel_data
             if verbose:
@@ -374,13 +377,16 @@ class PlutoParticleReader:
         particle_file_count = sum(1 for file in file_list if sub_string in file)
         return particle_file_count
 
-    def mirror_data(self, input_ar):
+    def mirror_data(self, input_ar, flip = False):
 
         input_shape = np.array(np.shape(input_ar))
         mirrored_shape = input_shape * np.array([1,1,2])
         mirrored_ar = np.zeros(shape=mirrored_shape, dtype=np.float32)
         mirrored_ar[:,:,input_shape[2]:] = input_ar
-        mirrored_ar[:,:,:input_shape[2]] = input_ar[:,:,::-1]
+        if flip:
+            mirrored_ar[:,:,:input_shape[2]] = -input_ar[:,:,::-1]
+        else:
+            mirrored_ar[:,:,:input_shape[2]] = input_ar[:,:,::-1]
         return mirrored_ar
 
     def blur_data(self, input_ar, blur_kwargs = None):
