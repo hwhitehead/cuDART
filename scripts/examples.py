@@ -147,7 +147,7 @@ def render_jet(relativistic=False):
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror_relativistic_10.npy"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/img"
 

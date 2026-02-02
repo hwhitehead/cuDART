@@ -14,15 +14,15 @@ def run_pluto_convert_example():
 
     preader = PlutoParticleReader(load_dir, config_file)
     
-    apply_blur = True
-    apply_mirror = True
+    apply_blur = False
+    apply_mirror = False
     apply_boost = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
     frequencies = ["1000MHz"]
     preader.emm_to_npy(snapshot_num = 490,
                         save_dir = emm_dir,
                         frequencies = frequencies,
-                        sparse_step = 10, 
+                        sparse_step = 5, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         apply_mirror = apply_mirror,
@@ -34,9 +34,12 @@ def run_pluto_convert_example():
     max_vx1 = np.max(boosted_data[...,1])
     max_vx2 = np.max(boosted_data[...,2])
     max_vx3 = np.max(boosted_data[...,3])
-    print(max_vx1)
-    print(max_vx2)
-    print(max_vx3)
+    min_vx1 = np.min(boosted_data[...,1])
+    min_vx2 = np.min(boosted_data[...,2])
+    min_vx3 = np.min(boosted_data[...,3])
+    print(min_vx1, max_vx1)
+    print(min_vx2, max_vx2)
+    print(min_vx3, max_vx3)
 
 if __name__ == "__main__":
 
