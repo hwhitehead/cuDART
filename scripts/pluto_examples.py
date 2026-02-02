@@ -17,7 +17,7 @@ def run_pluto_convert_example():
     apply_blur = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
     frequencies = ["1000MHz"]
-    preader.emm_to_npy(snapshot_num = 490,
+    preader.boosted_emm_to_npy(snapshot_num = 490,
                         save_dir = emm_dir,
                         frequencies = frequencies,
                         sparse_step = 2, 
