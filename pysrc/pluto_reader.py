@@ -395,7 +395,6 @@ class PlutoParticleReader:
                 dim = np.shape(vel_data)[0]
                 vel_data = vel_data.reshape((dim,dim,dim))
                 vel_data = np.einsum("kji->ijk", vel_data)
-                print(np.shape(vel_data))
 
                 # apply post-processing
                 if apply_blur:
@@ -437,11 +436,13 @@ class PlutoParticleReader:
 
             if apply_mirror:
                 emm_data = self.mirror_data(emm_data)
+                
 
             save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
             if apply_boost:
                 # stack with velocity data and save
-                boosted_data = np.zeros(shape=(dim,dim,dim,4), dtype=np.float32)
+                boosted_shape = np.array(np.shape(emm_data)).append([4])
+                boosted_data = np.zeros(shape=boosted_shape, dtype=np.float32)
                 boosted_data[..., 0] = emm_data
                 boosted_data[..., 1] = vel_npy_data["vx1"]
                 boosted_data[..., 2] = vel_npy_data["vx2"]
