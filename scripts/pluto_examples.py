@@ -29,10 +29,6 @@ def run_pluto_convert_example():
                         apply_boost = apply_boost,
                         blur_kwargs = blur_kwargs)
 
-    for frequency in frequencies:
-        save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
-        np.save(save_str, preader.emm_npy_data[frequency])
-
 if __name__ == "__main__":
 
     run_pluto_convert_example()

@@ -240,94 +240,6 @@ class PlutoParticleReader:
         self.domain["zend"] = self.xr[3].max()
         return loader
 
-    # def emm_to_npy(self, snapshot_num, frequencies = ["1000MHz"], sparse_step = 10, verbose = True, num_pfiles = None, apply_blur = False, blur_kwargs = None, mirror = True, force_gc = True):
-
-    #     if not isinstance(frequencies, list):
-    #         if frequencies.lower == "all":
-    #             frequncies = self.all_frequencies
-    #         else:
-    #             raise Exception("invalid pass to 'frequencies', accept list or 'all'")
-
-    #     # Calculate the midpoints of the cells in each direction
-    #     midpoints1 = ((self.xr[1][::sparse_step][:-1] + self.xr[1][::sparse_step][1:]) / 2.0).round(3)
-    #     midpoints2 = ((self.xr[2][::sparse_step][:-1] + self.xr[2][::sparse_step][1:]) / 2.0).round(3)
-    #     midpoints3 = ((self.xr[3][::sparse_step][:-1] + self.xr[3][::sparse_step][1:]) / 2.0).round(3)
-
-    #     if num_pfiles is None:
-    #         num_pfiles = self.count_particle_files(snapshot_num)
-
-    #     for i in range(num_pfiles):  
-    #         # try:
-    #         P = pr.ploadparticles(ns=snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
-    #         emissivities = []
-    #         for frequency in frequencies:
-    #             emm_local = np.reshape(P.color[:, self.all_frequencies["J_" + frequency]], P.x1.shape)
-    #             emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
-    #             emissivities.append(emm_local)
-
-    #         if i == 0:
-    #             particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
-    #                                         columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in frequencies], dtype=pd.Float32Dtype())
-    #         else:
-    #             particles_section = pd.DataFrame(np.array([P.x1, P.x2, P.x3]+emissivities).T,
-    #                                         columns=["x1", "x2", "x3"] + ["emm_freq_" + frequency[2:] for frequency in frequencies], dtype=pd.Float32Dtype())
-    #             particles = pd.concat([particles, particles_section])  # Append the particles from this file to the existing DataFrame
-    #         # except:
-    #         #     if verbose:
-    #         #         print(f"File {i} not loaded - check whether it exists")
-
-    #     # Separate the particles by position into cells and label these cells by their midpoints.
-    #     particles['x1bin'] = pd.cut(particles.x1, self.xr[1][::sparse_step], labels=midpoints1).astype(float).round(3)
-    #     particles['x2bin'] = pd.cut(particles.x2, self.xr[2][::sparse_step], labels=midpoints2).astype(float).round(3)
-    #     particles['x3bin'] = pd.cut(particles.x3, self.xr[3][::sparse_step], labels=midpoints3).astype(float).round(3)
-
-    #     # Average over the particles in each cell and create dataframe of the results. If a cell has no particles we fill the cell with 0, because we are about to add it to an array of zeros
-    #     self.emm_npy_data = {}
-    #     for frequency in frequencies: 
-    #         piv = pd.pivot_table(particles, index='x3bin', columns=['x1bin', 'x2bin'], aggfunc={"emm_freq_" + frequency[2:]: 'mean'}).fillna(0.0)
-    #         piv.columns = piv.columns.droplevel(0)
-
-    #         # To get the shape of the numpy array consistent for every frame, we first make an array of zeros of the correct shape and then add the pivot table made in the last step to this
-    #         X, Y = np.meshgrid(midpoints1, midpoints2)
-    #         every_XY_pair = [(float(X[i, j]), float(Y[i, j])) for i in range(X.shape[0]) for j in range(X.shape[1])]
-    #         zeros = pd.DataFrame(0, columns=every_XY_pair, index=midpoints3)
-    #         piv.columns = piv.columns.to_flat_index()
-    #         piv_full = zeros.add(piv, fill_value=0.0)
-    #         if force_gc:
-    #             del piv
-    #             gc.collect()
-    #         piv_full.index.set_names('x3bin', inplace=True)
-    #         piv_full.columns.set_names('(x1bin,x2bin)', inplace=True)
-
-    #         emm_data = piv_full.to_numpy(dtype=np.float32)
-    #         if force_gc:
-    #             del piv_full
-    #             gc.collect()
-    #         dim = np.shape(emm_data)[0]
-    #         emm_data = emm_data.reshape((dim,dim,dim))
-    #         emm_data = np.einsum("kji->ijk", emm_data)
-            
-    #         if apply_blur:
-    #             if blur_kwargs is None:
-    #                 sigma = 2
-    #                 window = 2
-    #             else:
-    #                 try:
-    #                     sigma = blur_kwargs["sigma"]
-    #                     window = blur_kwargs["window"]
-    #                 except:
-    #                     raise Exception("blur_kwarg must be a dictionary containing keyed values for 'sigma' and 'window'")
-    #             truncate = (((window) / 2) - 0.5) / sigma
-    #             emm_data = gaussian_filter(emm_data, sigma=sigma, truncate=truncate)
-
-    #         if mirror:
-    #             mirrored_data = np.zeros(shape=(dim, dim, 2 * dim), dtype=np.float32) 
-    #             mirrored_data[:, :, dim:] = emm_data
-    #             mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
-    #             self.emm_npy_data[frequency] = mirrored_data
-    #         else:
-    #             self.emm_npy_data[frequency] = emm_data
-
     def emm_to_npy(self, snapshot_num, save_dir, frequencies = ["1000MHz"], sparse_step = 10, verbose = True, num_pfiles = None, apply_blur = False, blur_kwargs = None, apply_mirror = True, force_gc = True, apply_boost = False):
 
         if not isinstance(frequencies, list):
@@ -403,6 +315,8 @@ class PlutoParticleReader:
                     vel_data = self.mirror_data(vel_data)
 
                 vel_npy_data[vel_str] = vel_data
+            if verbose:
+                print("extracted velocity data")
         
         # extract emissivity data
         for frequency in frequencies: 
@@ -436,7 +350,6 @@ class PlutoParticleReader:
             if apply_mirror:
                 emm_data = self.mirror_data(emm_data)
                 
-
             save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
             if apply_boost:
                 # stack with velocity data and save
@@ -450,6 +363,9 @@ class PlutoParticleReader:
             else:
                 # save emissivity alone
                 np.save(save_str, emm_data)
+            
+            if verbose:
+                print("saved emissivity data at " + frequency)
 
     def count_particle_files(self, snapshot_num, num_zfill = 4):
 
