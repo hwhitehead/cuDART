@@ -14,8 +14,8 @@ def run_pluto_convert_example():
 
     preader = PlutoParticleReader(load_dir, config_file)
     
-    apply_blur = False
-    apply_mirror = False
+    apply_blur = True
+    apply_mirror = True
     apply_boost = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
     frequencies = ["1000MHz"]
