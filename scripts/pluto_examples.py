@@ -51,7 +51,7 @@ def render_pluto_helix(relativistic = False):
     # build camera array, inherit from template
     num_img = 100
     num_checkpoints = 8
-    z_vals = np.linspace(-0.5, 0.5, num_checkpoints)
+    z_vals = np.linspace(-0.45, 0.45, num_checkpoints)
     thetas = [0.5 * np.pi * x for x in range(num_checkpoints)]
     radius = 0.5
     x_vals = radius * np.cos(thetas)
@@ -78,7 +78,7 @@ def render_pluto_helix(relativistic = False):
     scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
@@ -119,7 +119,7 @@ def render_pluto_data_example(relativistic=False):
     scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
+    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
