@@ -49,8 +49,8 @@ __device__ float calc_doppler_fac(vec3 beta_vec, vec3 view_vec) {
     // calculate doppler boosting factor for a given bulk velocity and view
     float beta = beta_vec.vector_mag();
     float gamma = 1.0 / sqrt(1 - beta * beta);
-    float cos_theta = beta_vec.dot_prod(view_vec) / beta; // view_vec assumed unit vec
-    return 1.0 / (gamma * (1 - beta * cos_theta));
+    float beta_cos_theta = beta_vec.dot_prod(view_vec); // view_vec assumed unit vec
+    return 1.0 / (gamma * (1 - beta_cos_theta));
 }
 
 #endif
