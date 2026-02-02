@@ -319,7 +319,6 @@ class Scene:
 
         plt.close("all")
 
-
 class Mesh:
 
     def __init__(self, data_dir, nzfill=3):

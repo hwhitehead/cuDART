@@ -31,6 +31,58 @@ def extract_pluto_data_example():
                         apply_boost = apply_boost,
                         blur_kwargs = blur_kwargs)
 
+def render_pluto_helix()
+
+    print("cuDART: starting jet render example...")
+
+    # define targets
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/img"
+
+    # build template camera
+    template_camera = Camera()
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
+    template_camera.tilt = (0.0 / 180) * np.pi
+    template_camera.length_X = 0.66
+    template_camera.length_Y = 0.66
+
+    # build camera array, inherit from template
+    num_img = 100
+    num_checkpoints = 8
+    z_vals = np.linspace(-0.5, 0.5, num_checkpoints)
+    thetas = [0.5 * np.pi * x for x in range(num_checkpoints)]
+    radius = 0.5
+    x_vals = radius * np.cos(thetas)
+    y_vals = radius * np.sin(thetas)
+    checkpoints = np.zeros(shape=(num_checkpoints, 3))
+    checkpoints[:, 0] = x_vals
+    checkpoints[:, 1] = y_vals
+    checkpoints[:, 2] = z_vals
+    target = np.array([0,0,0])
+    gcam = GuidedCamera(checkpoints = checkpoints, targets = target)
+
+    camera_times = np.linspace(0, 1, num_img)
+    cameras = gcam.generate_cameras(num_img = num_imgs, camera_times = camera_times, mode = "chord")
+    for i in range(num_img):
+        this_origin = cameras[i].origin
+        this_target = np.array([0,0,this_origin[2]])
+        cameras[i].set_target(this_target)
+    
+    # generate scene
+    scene = Scene(npy_load_str, npy_save_str, cameras)
+    print("built scene")
+
+    # render and save images
+    scene.render(verbose = True, relativistic = relativistic)
+    print("finished rendering raw images")
+
+    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
+    print("finished rendering rasterised images")
+
+    print("unlablled render example finished.")
+
 def render_pluto_data_example(relativistic=False):
 
     print("cuDART: starting jet render example...")
@@ -72,19 +124,8 @@ def render_pluto_data_example(relativistic=False):
 
     print("unlablled render example finished.")
 
-def print_vel_data():
-
-    load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    data = np.load(load_str)
-    vx = data[:,:,:,1]
-    vy = data[:,:,:,2]
-    vz = data[:,:,:,3]
-    print(np.min(vx), np.max(vx))
-    print(np.min(vy), np.max(vy))
-    print(np.min(vz), np.max(vz))
-
 if __name__ == "__main__":
 
     #extract_pluto_data_example()
     #render_pluto_data_example(True)
-    print_vel_data()
+    render_pluto_helix()
