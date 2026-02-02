@@ -72,13 +72,7 @@ def render_pluto_data_example(relativistic=False):
 
     print("unlablled render example finished.")
 
-def test_array():
-
-    load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    data = np.load(load_str)
-    print(np.shape(data))
-    print(np.isnan(data).any())
-
 if __name__ == "__main__":
 
-    test_array()
+    extract_pluto_data_example()
+    render_pluto_data_example()
