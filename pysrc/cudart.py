@@ -283,7 +283,9 @@ class Scene:
         #tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
         tax.set_xlabel(r"$\left(L - \langle L \rangle\right)/ \langle L \rangle$")
         tax.axhline(y=0, color='k', linestyle="dashed", zorder=-10)
-        tax.set_ylim([-1,1])
+        tax.set_ylim([-0.4,0.4])
+        tax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
+        tax.set_yticklabels(["-40%", "-20%", "mean", "+20%", "+40%"])
         tax.xaxis.set_label_position("top")
         tax.xaxis.set_ticks([])
 
@@ -292,7 +294,7 @@ class Scene:
         fig.colorbar(sm, cax=cax, orientation="vertical")
         cax.yaxis.tick_right()
         cax.yaxis.set_label_position("right")
-        cax.set_ylabel(r"log$_{10}$ Intensity [arb.]")
+        cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)")
 
         # plot inserts
         for i in range(num_images):
