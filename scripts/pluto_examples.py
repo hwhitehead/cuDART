@@ -24,7 +24,7 @@ def extract_pluto_data_example():
     preader.emm_to_npy(snapshot_num = 490,
                         save_dir = emm_dir,
                         frequencies = frequencies,
-                        sparse_step = 2, 
+                        sparse_step = 1, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         apply_mirror = apply_mirror,
@@ -126,6 +126,5 @@ def render_pluto_data_example(relativistic=False):
 
 if __name__ == "__main__":
 
-    #extract_pluto_data_example()
-    #render_pluto_data_example(True)
-    render_pluto_helix(True)
+    extract_pluto_data_example()
+    render_pluto_data_example(False)
