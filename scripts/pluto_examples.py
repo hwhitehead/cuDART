@@ -15,14 +15,18 @@ def run_pluto_convert_example():
     preader = PlutoParticleReader(load_dir, config_file)
     
     apply_blur = True
+    apply_mirror = True
+    apply_boost = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
     frequencies = ["1000MHz"]
-    preader.boosted_emm_to_npy(snapshot_num = 490,
+    preader.emm_to_npy(snapshot_num = 490,
                         save_dir = emm_dir,
                         frequencies = frequencies,
                         sparse_step = 2, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
+                        apply_mirror = apply_mirror,
+                        apply_boost = apply_boost,
                         blur_kwargs = blur_kwargs)
 
     for frequency in frequencies:
