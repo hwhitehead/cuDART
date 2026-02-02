@@ -1,6 +1,5 @@
 # python toolkit for reading particle data from PLUTO into cuDART legible .npy arrays
-# this toolkit is built directly upon pre-existing routines developed by Emma Elley at https://github.com/emmaelley/jet_analyst (private)
-
+# this toolkit is built directly upon pre-existing routines developed by E. Elley at https://github.com/emmaelley/jet_analyst (private)
 
 import pyPLUTO.ploadparticles as pr
 import pandas as pd
@@ -215,7 +214,7 @@ class Units:
         self.undersampling_factor = float(config['conversions']['undersampling_factor'])
         self.time = float(config['conversions']['time'])
 
-class PlutoReader:
+class PlutoParticleReader:
 
     def __init__(self, load_dir, config_file):
         self.load_dir = load_dir

@@ -12,14 +12,14 @@ def run_pluto_convert_example():
     load_dir = "/mnt/kocsis1/cuDART_wdir/jet_data/"
     save_dir = "/mnt/kocsis1/cuDART_wdir/emm_data/"
     
-    preader = PlutoReader(load_dir, config_file)
+    preader = PlutoParticleReader(load_dir, config_file)
     
     apply_blur = True
     blur_kwargs = {"sigma" : 2, "window" : 2}
-    frequencies = ["1000MHz", "67000MHz"]
+    frequencies = ["1000MHz"]
     preader.emm_to_npy(snapshot_num = 490,
                         frequencies = frequencies,
-                        sparse_step = 4, 
+                        sparse_step = 1, 
                         num_pfiles = 7, 
                         apply_blur = apply_blur,
                         blur_kwargs = blur_kwargs)
