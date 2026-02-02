@@ -31,7 +31,7 @@ def extract_pluto_data_example():
                         apply_boost = apply_boost,
                         blur_kwargs = blur_kwargs)
 
-def render_pluto_helix():
+def render_pluto_helix(relativistic = False):
 
     print("cuDART: starting jet render example...")
 
@@ -128,4 +128,4 @@ if __name__ == "__main__":
 
     #extract_pluto_data_example()
     #render_pluto_data_example(True)
-    render_pluto_helix()
+    render_pluto_helix(True)
