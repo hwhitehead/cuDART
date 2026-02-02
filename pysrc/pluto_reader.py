@@ -4,7 +4,7 @@
 import pyPLUTO.ploadparticles as pr
 import pandas as pd
 import numpy as np
-import os, sys, configparser
+import os, sys, configparser, gc
 import vtk
 from vtk.util import numpy_support
 from scipy.ndimage import gaussian_filter
@@ -241,7 +241,7 @@ class PlutoParticleReader:
         self.domain["zend"] = self.xr[3].max()
         return loader
 
-    def emm_to_npy(self, snapshot_num, frequencies = ["1000MHz"], sparse_step = 10, verbose = True, num_pfiles = 10, apply_blur = False, blur_kwargs = None, mirror = True):
+    def emm_to_npy(self, snapshot_num, frequencies = ["1000MHz"], sparse_step = 10, verbose = True, num_pfiles = None, apply_blur = False, blur_kwargs = None, mirror = True, force_gc = True):
 
         if not isinstance(frequencies, list):
             if frequencies.lower == "all":
@@ -254,9 +254,13 @@ class PlutoParticleReader:
         midpoints2 = ((self.xr[2][::sparse_step][:-1] + self.xr[2][::sparse_step][1:]) / 2.0).round(3)
         midpoints3 = ((self.xr[3][::sparse_step][:-1] + self.xr[3][::sparse_step][1:]) / 2.0).round(3)
 
+        if num_pfiles is None:
+            num_pfiles = self.count_particle_files(snapshot_num)
+
         for i in range(num_pfiles):  
             # try:
             P = pr.ploadparticles(ns=snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
+            print(P.__dict__)
             emissivities = []
             for frequency in frequencies:
                 emm_local = np.reshape(P.color[:, self.all_frequencies["J_" + frequency]], P.x1.shape)
@@ -291,10 +295,16 @@ class PlutoParticleReader:
             zeros = pd.DataFrame(0, columns=every_XY_pair, index=midpoints3)
             piv.columns = piv.columns.to_flat_index()
             piv_full = zeros.add(piv, fill_value=0.0)
+            if force_gc:
+                del piv
+                gc.collect()
             piv_full.index.set_names('x3bin', inplace=True)
             piv_full.columns.set_names('(x1bin,x2bin)', inplace=True)
 
             emm_data = piv_full.to_numpy(dtype=np.float32)
+            if force_gc:
+                del piv_full
+                gc.collect()
             dim = np.shape(emm_data)[0]
             emm_data = emm_data.reshape((dim,dim,dim))
             emm_data = np.einsum("kji->ijk", emm_data)
@@ -313,11 +323,16 @@ class PlutoParticleReader:
                 emm_data = gaussian_filter(emm_data, sigma=sigma, truncate=truncate)
 
             if mirror:
-                mirrored_data = np.zeros(shape=(dim,dim, 2 * dim), dtype=np.float32) 
+                mirrored_data = np.zeros(shape=(dim, dim, 2 * dim), dtype=np.float32) 
                 mirrored_data[:, :, dim:] = emm_data
                 mirrored_data[:, :, :dim] = emm_data[:, :, ::-1]
                 self.emm_npy_data[frequency] = mirrored_data
             else:
                 self.emm_npy_data[frequency] = emm_data
 
+    def count_particle_files(self, snapshot_num, num_zfill = 4):
 
+        file_list = os.listdir(self.load_dir)
+        sub_string = "particles." + str(snapshot_num).zfill(num_zfill)
+        particle_file_count = sum(1 for file in file_list if sub_string in file)
+        return particle_file_count
