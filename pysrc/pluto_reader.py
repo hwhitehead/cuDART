@@ -358,10 +358,10 @@ class PlutoParticleReader:
                 # stack with velocity data and save
                 boosted_shape = np.append(np.array(np.shape(emm_data)), [4])
                 boosted_data = np.zeros(shape=boosted_shape, dtype=np.float32)
-                boosted_data[..., 0] = emm_data
-                boosted_data[..., 1] = 0.0 #np.abs(vel_npy_data["vx1"])
-                boosted_data[..., 2] = 0.0 #np.abs(vel_npy_data["vx2"])
-                boosted_data[..., 3] = 0.0 #np.abs(vel_npy_data["vx3"])
+                boosted_data[:, :, :, 0] = emm_data
+                boosted_data[:, :, :, 1] = vel_npy_data["vx1"]
+                boosted_data[:, :, :, 2] = vel_npy_data["vx2"]
+                boosted_data[:, :, :, 3] = vel_npy_data["vx3"]
                 np.save(save_str, boosted_data.astype(np.float32))
             else:
                 # save emissivity alone
