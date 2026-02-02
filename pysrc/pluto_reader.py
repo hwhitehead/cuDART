@@ -440,7 +440,7 @@ class PlutoParticleReader:
 
             save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
             if apply_boost:
-                # stack with velocity data
+                # stack with velocity data and save
                 boosted_data = np.zeros(shape=(dim,dim,dim,4), dtype=np.float32)
                 boosted_data[..., 0] = emm_data
                 boosted_data[..., 1] = vel_npy_data["vx1"]
@@ -448,6 +448,7 @@ class PlutoParticleReader:
                 boosted_data[..., 3] = vel_npy_data["vx3"]
                 np.save(save_str, boosted_data)
             else:
+                # save emissivity alone
                 np.save(save_str, emm_data)
             
 
@@ -466,7 +467,7 @@ class PlutoParticleReader:
 
     def mirror_data(self, input_ar):
 
-        mirrored_shape = np.shape(input_ar)
+        mirrored_shape = np.array(np.shape(input_ar))
         mirrored_shape[2] *= 2 # dupe along z
         mirrored_ar = np.zeros(shape=mirrored_shape, dtype=np.float32)
         mirrored_ar[:,:,dim:] = input
