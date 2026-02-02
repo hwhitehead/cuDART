@@ -49,8 +49,8 @@ def render_pluto_helix(relativistic = False):
     template_camera.length_Y = 0.1
 
     # build camera array, inherit from template
-    num_img = 100
-    num_checkpoints = 8
+    num_img = 300
+    num_checkpoints = 32
     z_vals = np.linspace(-0.45, 0.45, num_checkpoints)
     thetas = [0.5 * np.pi * x for x in range(num_checkpoints)]
     radius = 0.5
