@@ -64,7 +64,7 @@ def render_pluto_helix():
     gcam = GuidedCamera(checkpoints = checkpoints, targets = target)
 
     camera_times = np.linspace(0, 1, num_img)
-    cameras = gcam.generate_cameras(num_img = num_imgs, camera_times = camera_times, mode = "chord")
+    cameras = gcam.generate_cameras(num_img = num_img, camera_times = camera_times, mode = "chord")
     for i in range(num_img):
         this_origin = cameras[i].origin
         this_target = np.array([0,0,this_origin[2]])
