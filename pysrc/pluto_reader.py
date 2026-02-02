@@ -362,10 +362,10 @@ class PlutoParticleReader:
                 boosted_data[..., 1] = vel_npy_data["vx1"]
                 boosted_data[..., 2] = vel_npy_data["vx2"]
                 boosted_data[..., 3] = vel_npy_data["vx3"]
-                np.save(save_str, boosted_data)
+                np.save(save_str, boosted_data.astype(np.float32))
             else:
                 # save emissivity alone
-                np.save(save_str, emm_data)
+                np.save(save_str, emm_data.astype(np.float32))
             
             if verbose:
                 print("saved emissivity data at " + frequency)
