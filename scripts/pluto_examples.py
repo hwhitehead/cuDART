@@ -45,8 +45,8 @@ def render_pluto_helix(relativistic = False):
     template_camera.num_pixels_X = 1024
     template_camera.num_pixels_Y = 1024
     template_camera.tilt = (0.0 / 180) * np.pi
-    template_camera.length_X = 0.66
-    template_camera.length_Y = 0.66
+    template_camera.length_X = 0.1
+    template_camera.length_Y = 0.1
 
     # build camera array, inherit from template
     num_img = 100
@@ -64,7 +64,7 @@ def render_pluto_helix(relativistic = False):
     gcam = GuidedCamera(checkpoints = checkpoints, targets = target)
 
     camera_times = np.linspace(0, 1, num_img)
-    cameras = gcam.generate_cameras(num_img = num_img, camera_times = camera_times, mode = "chord")
+    cameras = gcam.generate_cameras(template_camera = template_camera, num_img = num_img, camera_times = camera_times, mode = "chord")
     for i in range(num_img):
         this_origin = cameras[i].origin
         this_target = np.array([0,0,this_origin[2]])
@@ -97,8 +97,8 @@ def render_pluto_data_example(relativistic=False):
     template_camera.num_pixels_X = 1024
     template_camera.num_pixels_Y = 1024
     template_camera.tilt = (60.0 / 180) * np.pi
-    template_camera.length_X = 0.1
-    template_camera.length_Y = 0.1
+    template_camera.length_X = 0.66
+    template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
     num_img = 100
