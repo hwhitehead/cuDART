@@ -29,6 +29,12 @@ def run_pluto_convert_example():
                         apply_boost = apply_boost,
                         blur_kwargs = blur_kwargs)
 
+    load_str = os.path.join(emm_dir, "emm_" + frequencies[0] + ".npy")
+    boosted_data = np.load(load_str)
+    max_vx1 = np.max(boosted_data[...,1])
+    max_vx2 = np.max(boosted_data[...,2])
+    max_vx3 = np.max(boosted_data[...,3])
+
 if __name__ == "__main__":
 
     run_pluto_convert_example()
