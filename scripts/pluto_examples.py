@@ -72,7 +72,19 @@ def render_pluto_data_example(relativistic=False):
 
     print("unlablled render example finished.")
 
+def print_vel_data():
+
+    load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    data = np.load(load_str)
+    vx = data[:,:,:,1]
+    vy = data[:,:,:,2]
+    vz = data[:,:,:,3]
+    print(np.min(vx), np.max(vx))
+    print(np.min(vy), np.max(vy))
+    print(np.min(vz), np.max(vz))
+
 if __name__ == "__main__":
 
     #extract_pluto_data_example()
-    render_pluto_data_example(True)
+    #render_pluto_data_example(True)
+    print_vel_data()
