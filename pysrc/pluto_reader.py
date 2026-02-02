@@ -221,6 +221,7 @@ class PlutoParticleReader:
         self.units = Units(config_file)
         self.all_frequencies = Frequencies(config_file).frequencies
         self.vtk_loader = self.invoke_vtk_loader()
+        self.vel_npy_data = None
 
     def invoke_vtk_loader(self):
 
@@ -260,7 +261,6 @@ class PlutoParticleReader:
         for i in range(num_pfiles):  
             # try:
             P = pr.ploadparticles(ns=snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
-            print(P.__dict__)
             emissivities = []
             for frequency in frequencies:
                 emm_local = np.reshape(P.color[:, self.all_frequencies["J_" + frequency]], P.x1.shape)
@@ -330,9 +330,162 @@ class PlutoParticleReader:
             else:
                 self.emm_npy_data[frequency] = emm_data
 
+    def boosted_emm_to_npy(self, snapshot_num, save_dir, frequencies = ["1000MHz"], sparse_step = 10, verbose = True, num_pfiles = None, apply_blur = False, blur_kwargs = None, apply_mirror = True, force_gc = True):
+
+        if not isinstance(frequencies, list):
+            if frequencies.lower == "all":
+                frequncies = self.all_frequencies
+            else:
+                raise Exception("invalid pass to 'frequencies', accept list or 'all'")
+
+        # Calculate the midpoints of the cells in each direction
+        midpoints1 = ((self.xr[1][::sparse_step][:-1] + self.xr[1][::sparse_step][1:]) / 2.0).round(3)
+        midpoints2 = ((self.xr[2][::sparse_step][:-1] + self.xr[2][::sparse_step][1:]) / 2.0).round(3)
+        midpoints3 = ((self.xr[3][::sparse_step][:-1] + self.xr[3][::sparse_step][1:]) / 2.0).round(3)
+
+        if num_pfiles is None:
+            num_pfiles = self.count_particle_files(snapshot_num)
+
+        vel_strs = ["vx1", "vx2", "vx3"]
+        for i in range(num_pfiles):  
+            P = pr.ploadparticles(ns=snapshot_num, w_dir=self.load_dir, datatype='flt', ptype='LP',chnum=i)  # Should be safe to change this to other datatypes, but untested.
+            emissivities = []
+            for frequency in frequencies:
+                emm_local = np.reshape(P.color[:, self.all_frequencies["J_" + frequency]], P.x1.shape)
+                emm_local = emm_local * self.units.undersampling_factor * self.volume_factor
+                emissivities.append(emm_local)
+
+            if i == 0:
+                particles = pd.DataFrame(np.array([P.x1, P.x2, P.x3] + [P.__dict__[var] for var in vel_strs] + emissivities).T,
+                                            columns=["x1", "x2", "x3"] + vel_strs + ["emm_freq_" + frequency[2:] for frequency in frequencies], dtype=pd.Float32Dtype())
+            else:
+                particles_section = pd.DataFrame(np.array([P.x1, P.x2, P.x3] + [P.__dict__[var] for var in vel_strs] + emissivities).T,
+                                            columns=["x1", "x2", "x3"] + vel_strs + ["emm_freq_" + frequency[2:] for frequency in frequencies], dtype=pd.Float32Dtype())
+                particles = pd.concat([particles, particles_section])  # Append the particles from this file to the existing DataFrame
+
+        # Separate the particles by position into cells and label these cells by their midpoints.
+        particles['x1bin'] = pd.cut(particles.x1, self.xr[1][::sparse_step], labels=midpoints1).astype(float).round(3)
+        particles['x2bin'] = pd.cut(particles.x2, self.xr[2][::sparse_step], labels=midpoints2).astype(float).round(3)
+        particles['x3bin'] = pd.cut(particles.x3, self.xr[3][::sparse_step], labels=midpoints3).astype(float).round(3)
+
+        # Average over the particles in each cell and create dataframe of the results. If a cell has no particles we fill the cell with 0, because we are about to add it to an array of zeros
+        
+        # extract velocity data
+        self.vel_npy_data = {}
+        for vel_str in ["vx1", "vx2", "vx3"]:
+            piv = pd.pivot_table(particles, index='x3bin', columns=['x1bin', 'x2bin'], aggfunc={vel_str : 'mean'}).fillna(0.0)
+            piv.columns = piv.columns.droplevel(0)
+
+            # To get the shape of the numpy array consistent for every frame, we first make an array of zeros of the correct shape and then add the pivot table made in the last step to this
+            X, Y = np.meshgrid(midpoints1, midpoints2)
+            every_XY_pair = [(float(X[i, j]), float(Y[i, j])) for i in range(X.shape[0]) for j in range(X.shape[1])]
+            zeros = pd.DataFrame(0, columns=every_XY_pair, index=midpoints3)
+            piv.columns = piv.columns.to_flat_index()
+            piv_full = zeros.add(piv, fill_value=0.0)
+            if force_gc:
+                del piv
+                gc.collect()
+            piv_full.index.set_names('x3bin', inplace=True)
+            piv_full.columns.set_names('(x1bin,x2bin)', inplace=True)
+
+            vel_data = piv_full.to_numpy(dtype=np.float32)
+            if force_gc:
+                del piv_full
+                gc.collect()
+            dim = np.shape(emm_data)[0]
+            vel_data = vel_data.reshape((dim,dim,dim))
+            vel_data = np.einsum("kji->ijk", vel_data)
+            
+            # apply post-processing
+            if apply_blur:
+                vel_data = self.blur_data(vel_data)
+
+            if apply_mirror:
+                vel_data = self.mirror_data(vel_data)
+
+            self.vel_npy_data[vel_str] = vel_data
+        
+        # extract emissivity data
+        for frequency in frequencies: 
+            piv = pd.pivot_table(particles, index='x3bin', columns=['x1bin', 'x2bin'], aggfunc={"emm_freq_" + frequency[2:]: 'mean'}).fillna(0.0)
+            piv.columns = piv.columns.droplevel(0)
+
+            # To get the shape of the numpy array consistent for every frame, we first make an array of zeros of the correct shape and then add the pivot table made in the last step to this
+            X, Y = np.meshgrid(midpoints1, midpoints2)
+            every_XY_pair = [(float(X[i, j]), float(Y[i, j])) for i in range(X.shape[0]) for j in range(X.shape[1])]
+            zeros = pd.DataFrame(0, columns=every_XY_pair, index=midpoints3)
+            piv.columns = piv.columns.to_flat_index()
+            piv_full = zeros.add(piv, fill_value=0.0)
+            if force_gc:
+                del piv
+                gc.collect()
+            piv_full.index.set_names('x3bin', inplace=True)
+            piv_full.columns.set_names('(x1bin,x2bin)', inplace=True)
+
+            emm_data = piv_full.to_numpy(dtype=np.float32)
+            if force_gc:
+                del piv_full
+                gc.collect()
+            dim = np.shape(emm_data)[0]
+            emm_data = emm_data.reshape((dim,dim,dim))
+            emm_data = np.einsum("kji->ijk", emm_data)
+
+            # post processes
+            if apply_blur:
+                self.blur_data(emm_data)
+
+            if apply_mirror:
+                self.mirror_data(emm_data)
+
+            # stack with. velocity data
+            boosted_data = np.zeros(shape=(dim,dim,dim,4), dtype=np.float32)
+            boosted_data[..., 0] = emm_data
+            boosted_data[..., 1] = self.vel_npy_data["vx1"]
+            boosted_data[..., 2] = self.vel_npy_data["vx2"]
+            boosted_data[..., 3] = self.vel_npy_data["vx3"]
+
+            # save data
+            save_str = os.path.join(save_dir, "emm_" + frequency + ".npy")
+            np.save(save_str, boosted_data)
+            
+
+            
+
+
+
+
+
     def count_particle_files(self, snapshot_num, num_zfill = 4):
 
         file_list = os.listdir(self.load_dir)
         sub_string = "particles." + str(snapshot_num).zfill(num_zfill)
         particle_file_count = sum(1 for file in file_list if sub_string in file)
         return particle_file_count
+
+    def mirror_data(self, input_ar):
+
+        mirrored_shape = input_ar.shape()
+        mirrored_shape[2] *= 2 # dupe along z
+        mirrored_ar = np.zeros(shape=mirrored_shape, dtype=np.float32)
+        mirrored_ar[:,:,dim:] = input
+        mirrored_ar[:,:,:dim] = input[:,:,::-1]
+        return mirrored_ar
+
+    def blur_data(self, input_ar, blur_kwargs = None):
+        
+        if blur_kwargs is None:
+            sigma = 2
+            window = 2
+        else:
+            try:
+                sigma = blur_kwargs["sigma"]
+                window = blur_kwargs["window"]
+            except:
+                raise Exception("blur_kwarg must be a dictionary containing keyed values for 'sigma' and 'window'")
+        truncate = (((window) / 2) - 0.5) / sigma
+        return gaussian_filter(input_ar, sigma = sigma, truncate = truncate)
+
+        
+
+        
+    
