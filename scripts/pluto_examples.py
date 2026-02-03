@@ -143,27 +143,27 @@ def save_alt(axes="x"):
     
     if axes == "x":
         output_shape = np.array([input_shape[2], input_shape[1], input_shape[0], 4])
-        output_data = np.zeros(shape=output_shape)
+        output_data = np.zeros(shape=output_shape, dtype=np.float32)
         output_data[:, :, :, 0] = np.einsum("ijk->kji", input_data[:, :, :, 0])
         output_data[:, :, :, 1] = np.einsum("ijk->kji", input_data[:, :, :, 3])
         output_data[:, :, :, 2] = np.einsum("ijk->kji", input_data[:, :, :, 2])
         output_data[:, :, :, 3] = np.einsum("ijk->kji", input_data[:, :, :, 1])
         save_str = load_str[:-4] + "_x.npy"
-        np.save(save_str, output_data)
+        np.save(save_str, output_data.astype(np.float32))
     else:
         output_shape = np.array([input_shape[0], input_shape[2], input_shape[1], 4])
-        output_data = np.zeros(shape=output_shape)
-        output_data[:, :, :, 0] = np.einsum("ijk->jik", input_data[:, :, :, 0])
-        output_data[:, :, :, 1] = np.einsum("ijk->jik", input_data[:, :, :, 1])
-        output_data[:, :, :, 2] = np.einsum("ijk->jik", input_data[:, :, :, 3])
-        output_data[:, :, :, 3] = np.einsum("ijk->jik", input_data[:, :, :, 2])
+        output_data = np.zeros(shape=output_shape, dtype=np.float32)
+        output_data[:, :, :, 0] = np.einsum("ijk->ikj", input_data[:, :, :, 0])
+        output_data[:, :, :, 1] = np.einsum("ijk->ikj", input_data[:, :, :, 1])
+        output_data[:, :, :, 2] = np.einsum("ijk->ikj", input_data[:, :, :, 3])
+        output_data[:, :, :, 3] = np.einsum("ijk->ikj", input_data[:, :, :, 2])
         save_str = load_str[:-4] + "_y.npy"
-        np.save(save_str, output_data)
+        np.save(save_str, output_data.astype(np.float32))
 
 if __name__ == "__main__":
 
     #extract_pluto_data_example()
-    save_alt("x")
+    #save_alt("x")
     save_alt("y")
     render_pluto_data_example(True)
     
