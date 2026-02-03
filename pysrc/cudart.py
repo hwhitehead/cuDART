@@ -283,9 +283,9 @@ class Scene:
         #tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
         tax.set_xlabel(r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$")
         tax.axhline(y=0, color='k', linestyle="dashed", zorder=-10)
-        tax.set_ylim([-0.4,0.4])
-        tax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
-        tax.set_yticklabels(["-40%", "-20%", "mean", "+20%", "+40%"])
+        #tax.set_ylim([-0.4,0.4])
+        #tax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
+        #tax.set_yticklabels(["-40%", "-20%", "mean", "+20%", "+40%"])
         tax.xaxis.set_label_position("top")
         tax.xaxis.set_ticks([])
 
@@ -337,7 +337,7 @@ class Mesh:
         mb_data = mb_data.astype(np.float32)
         npy_str = os.path.join(self.data_dir, "meshblock" + str(self.num_mb).zfill(self.nzfill) + ".npy")
         np.save(npy_str, mb_data)
-        mb_shape = np.shape(mb_data)
+        mb_shape = np.shape(mb_data)[:3]
         mb_size = np.size(mb_data)
         mb_header = [mb_size,*mb_shape,*xl,*xr]
         self.mb_headers.append(mb_header)

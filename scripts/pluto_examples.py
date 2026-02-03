@@ -92,6 +92,17 @@ def render_pluto_data_example(relativistic=False):
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/img"
 
+    # build mesh
+    # if os.path.isdir(npy_load_str):
+    #     xls = [[-0.25,-0.25,-0.5], [-0.5,-0.25,-0.25], [-0.25,-0.5,-0.25]]
+    #     xrs = [[0.25,0.25,0.5], [0.5,0.25,0.25], [0.25,0.5,0.25]]
+    #     mesh = Mesh(npy_load_str)
+    #     for i, sub_str in enumerate(["", "_x", "_y"]):
+    #         npy_str = os.path.join(npy_load_str, "emm_1000MHz" + sub_str + ".npy")
+    #         mb_data = np.load(npy_str)
+    #         mesh.add_meshblock(mb_data, xls[i], xrs[i])
+    #     mesh.write_header()
+
     # build template camera
     template_camera = Camera()
     template_camera.num_pixels_X = 1024
@@ -124,7 +135,35 @@ def render_pluto_data_example(relativistic=False):
 
     print("unlablled render example finished.")
 
+def save_alt(axes="x"):
+
+    load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    input_data = np.load(load_str)
+    input_shape = np.shape(input_data)
+    
+    if axes == "x":
+        output_shape = np.array([input_shape[2], input_shape[1], input_shape[0], 4])
+        output_data = np.zeros(shape=output_shape, dtype=np.float32)
+        output_data[:, :, :, 0] = np.einsum("ijk->kji", input_data[:, :, :, 0])
+        output_data[:, :, :, 1] = np.einsum("ijk->kji", input_data[:, :, :, 3])
+        output_data[:, :, :, 2] = np.einsum("ijk->kji", input_data[:, :, :, 2])
+        output_data[:, :, :, 3] = np.einsum("ijk->kji", input_data[:, :, :, 1])
+        save_str = load_str[:-4] + "_x.npy"
+        np.save(save_str, output_data.astype(np.float32))
+    else:
+        output_shape = np.array([input_shape[0], input_shape[2], input_shape[1], 4])
+        output_data = np.zeros(shape=output_shape, dtype=np.float32)
+        output_data[:, :, :, 0] = np.einsum("ijk->ikj", input_data[:, :, :, 0])
+        output_data[:, :, :, 1] = np.einsum("ijk->ikj", input_data[:, :, :, 1])
+        output_data[:, :, :, 2] = np.einsum("ijk->ikj", input_data[:, :, :, 3])
+        output_data[:, :, :, 3] = np.einsum("ijk->ikj", input_data[:, :, :, 2])
+        save_str = load_str[:-4] + "_y.npy"
+        np.save(save_str, output_data.astype(np.float32))
+
 if __name__ == "__main__":
 
-    extract_pluto_data_example()
-    render_pluto_data_example(False)
+    #extract_pluto_data_example()
+    #save_alt("x")
+    #save_alt("y")
+    render_pluto_data_example(True)
+    
