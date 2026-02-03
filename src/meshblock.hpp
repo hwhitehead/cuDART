@@ -253,7 +253,7 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic) {
                 vec3 beta_vec(all_data[data_index+1],
                                 all_data[data_index+2],
                                 all_data[data_index+3]);
-                float boot_fac = calc_boost_factor(beta_vec, r.normal);
+                float boost_fac = calc_boost_factor(beta_vec, r.normal);
                 trace += dwell * boost_fac * all_data[data_index];
             } else {
                 trace += dwell * all_data[data_index];
