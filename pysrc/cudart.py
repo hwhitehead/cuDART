@@ -283,9 +283,9 @@ class Scene:
         #tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
         tax.set_xlabel(r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$")
         tax.axhline(y=0, color='k', linestyle="dashed", zorder=-10)
-        tax.set_ylim([-0.4,0.4])
-        tax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
-        tax.set_yticklabels(["-40%", "-20%", "mean", "+20%", "+40%"])
+        #tax.set_ylim([-0.4,0.4])
+        #tax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
+        #tax.set_yticklabels(["-40%", "-20%", "mean", "+20%", "+40%"])
         tax.xaxis.set_label_position("top")
         tax.xaxis.set_ticks([])
 
