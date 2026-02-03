@@ -276,18 +276,25 @@ class Scene:
         num_images = len(self.cameras)
         x_span = np.linspace(0,1,num_images)
         tax.set_xlim([0,1])
-        tax.plot(x_span, np.log10(lum_ar), color='k')
-        tax.set_ylim([22, 24.2])
-        tax.xaxis.set_ticks([])
-        tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
+        delta = (lum_ar - np.mean(lum_ar)) / np.mean(lum_ar)
+        tax.plot(x_span, delta, color='k')
+        #tax.plot(x_span, np.log10(lum_ar), color='k')
+        #tax.set_ylim([22, 24.2])
+        #tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
+        tax.set_xlabel(r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$")
+        tax.axhline(y=0, color='k', linestyle="dashed", zorder=-10)
+        tax.set_ylim([-0.4,0.4])
+        tax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
+        tax.set_yticklabels(["-40%", "-20%", "mean", "+20%", "+40%"])
         tax.xaxis.set_label_position("top")
+        tax.xaxis.set_ticks([])
 
         # plot colorbar
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
         fig.colorbar(sm, cax=cax, orientation="vertical")
         cax.yaxis.tick_right()
         cax.yaxis.set_label_position("right")
-        cax.set_ylabel(r"log$_{10}$ Intensity [arb.]")
+        cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
 
         # plot inserts
         for i in range(num_images):
@@ -311,7 +318,6 @@ class Scene:
                     print("removed data file at " + load_str)
 
         plt.close("all")
-
 
 class Mesh:
 

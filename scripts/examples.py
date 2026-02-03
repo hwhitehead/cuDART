@@ -148,8 +148,8 @@ def render_jet(relativistic=False):
 
     # define targets
     npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot0490_mirror_relativistic_10.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/img"
 
     # build template camera
     template_camera = Camera()

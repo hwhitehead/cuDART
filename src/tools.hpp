@@ -4,7 +4,7 @@
 #define CUDART_ERROR(x) std::cout << x.str(); std::exit(EXIT_FAILURE);
 
 #define checkCudaErrors(val) check_cuda( (val), #val, __FILE__, __LINE__ )
-void check_cuda(cudaError_t result, char const *const func, const char *const file, int const line) {
+__host__ void check_cuda(cudaError_t result, char const *const func, const char *const file, int const line) {
     if (result) {
         std::cerr << "CUDA error = " << static_cast<unsigned int>(result) << " at " <<
         file << ":" << line << " '" << func << "' \n";
@@ -14,7 +14,7 @@ void check_cuda(cudaError_t result, char const *const func, const char *const fi
     }
 }
 
-size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
+__host__ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
     // calculate available vram with user ceil
     
     float vram_limit_f = 1e12;
@@ -49,8 +49,8 @@ __device__ float calc_doppler_fac(vec3 beta_vec, vec3 view_vec) {
     // calculate doppler boosting factor for a given bulk velocity and view
     float beta = beta_vec.vector_mag();
     float gamma = 1.0 / sqrt(1 - beta * beta);
-    float cos_theta = beta_vec.dot_prod(view_vec) / beta; // view_vec assumed unit vec
-    return 1.0 / (gamma * (1 - beta * cos_theta));
+    float beta_cos_theta = beta_vec.dot_prod(view_vec); // view_vec assumed unit vec
+    return 1.0 / (gamma * (1 - beta_cos_theta));
 }
 
 #endif
