@@ -126,5 +126,5 @@ def render_pluto_data_example(relativistic=False):
 
 if __name__ == "__main__":
 
-    extract_pluto_data_example()
+    #extract_pluto_data_example()
     render_pluto_data_example(False)
