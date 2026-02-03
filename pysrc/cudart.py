@@ -338,6 +338,7 @@ class Mesh:
         npy_str = os.path.join(self.data_dir, "meshblock" + str(self.num_mb).zfill(self.nzfill) + ".npy")
         np.save(npy_str, mb_data)
         mb_shape = np.shape(mb_data)[:3]
+        mb_size = np.size(mb_data)
         mb_header = [mb_size,*mb_shape,*xl,*xr]
         self.mb_headers.append(mb_header)
         self.num_mb += 1
