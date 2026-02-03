@@ -88,20 +88,20 @@ def render_pluto_data_example(relativistic=False):
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/img"
 
     # build mesh
-    xls = [[-0.25,-0.25,-0.5], [-0.5,-0.25,-0.25], [-0.25,-0.5,-0.25]]
-    xrs = [[0.25,0.25,0.5], [0.5,0.25,0.25], [0.25,0.5,0.25]]
-    if os.path.isdir(npy_load_str):
-        mesh = Mesh(npy_load_str)
-        for i, sub_str in enumerate(["", "_x", "_y"]):
-            npy_str = os.path.join(npy_load_str, "emm_1000MHz" + sub_str + ".npy")
-            mb_data = np.load(npy_str)
-            mesh.add_meshblock(mb_data, xls[i], xrs[i])
-        mesh.write_header()
+    # if os.path.isdir(npy_load_str):
+    #     xls = [[-0.25,-0.25,-0.5], [-0.5,-0.25,-0.25], [-0.25,-0.5,-0.25]]
+    #     xrs = [[0.25,0.25,0.5], [0.5,0.25,0.25], [0.25,0.5,0.25]]
+    #     mesh = Mesh(npy_load_str)
+    #     for i, sub_str in enumerate(["", "_x", "_y"]):
+    #         npy_str = os.path.join(npy_load_str, "emm_1000MHz" + sub_str + ".npy")
+    #         mb_data = np.load(npy_str)
+    #         mesh.add_meshblock(mb_data, xls[i], xrs[i])
+    #     mesh.write_header()
 
     # build template camera
     template_camera = Camera()
