@@ -149,7 +149,7 @@ def save_alt(axes="x"):
         output_data[:, :, :, 2] = np.einsum("ijk->kji", input_data[:, :, :, 2])
         output_data[:, :, :, 3] = np.einsum("ijk->kji", input_data[:, :, :, 1])
         save_str = load_str[:-4] + "_x.npy"
-        np.save(save_str, outuput_data)
+        np.save(save_str, output_data)
     else:
         output_shape = np.array([input_shape[0], input_shape[2], input_shape[1], 4])
         output_data = np.zeros(shape=output_shape)
@@ -158,7 +158,7 @@ def save_alt(axes="x"):
         output_data[:, :, :, 2] = np.einsum("ijk->jik", input_data[:, :, :, 3])
         output_data[:, :, :, 3] = np.einsum("ijk->jik", input_data[:, :, :, 2])
         save_str = load_str[:-4] + "_y.npy"
-        np.save(save_str, outuput_data)
+        np.save(save_str, output_data)
 
 if __name__ == "__main__":
 
