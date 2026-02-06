@@ -112,7 +112,7 @@ def render_pluto_data_example(relativistic=False):
     template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
-    num_img = 100
+    num_img = 200
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
