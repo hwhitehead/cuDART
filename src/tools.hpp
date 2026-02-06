@@ -47,11 +47,11 @@ __host__ std::string zero_pad_str(int value, size_t num_zero_pad) {
 
 __device__ float calc_boost_factor(vec3 beta_vec, vec3 view_vec) {
     // calculate D, the doppler boosting factor for a given bulk velocity and view
-    // emissivity is boosted as D^3
+    // emissivity is boosted as D^2
     float beta = beta_vec.vector_mag();
-    float gamma= 1.0 / sqrt(1 - beta * beta);
-    float one_minus_beta_cos_theta = 1 - beta_vec.dot_prod(view_vec); // view_vec assumed unit vec
-    return 1.0 / (gamma * gamma * gamma * one_minus_beta_cos_theta * one_minus_beta_cos_theta * one_minus_beta_cos_theta);
+    float gamma_sqr = 1.0 / (1 - beta * beta);
+    float one_plus_beta_cos_theta = 1 + beta_vec.dot_prod(view_vec); // view_vec assumed unit vec
+    return 1.0 / (gamma_sqr * one_plus_beta_cos_theta * one_plus_beta_cos_theta);
 }
 
 #endif
