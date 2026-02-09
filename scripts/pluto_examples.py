@@ -160,10 +160,36 @@ def save_alt(axes="x"):
         save_str = load_str[:-4] + "_y.npy"
         np.save(save_str, output_data.astype(np.float32))
 
+def save_lcs():
+
+    boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/boosted_raws"
+    unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted_raws"
+    num_img = 200
+
+    for loc in [boosted_dir, unboosted_dir]:
+        lum_ar = np.zeros(shape=(num_img))
+        save_str = os.path.join(loc, "lum.npy")
+        for n in range(num_img):
+            raw_str = os.path.join(loc, "raw" + str(n).zfill(3) + ".npy")
+            raw_img = np.load(raw_str)
+            lum_ar[n] = np.sum(raw_img)
+        np.save(save_str, lum_ar)
+
+def comp_plot():
+
+    boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/boosted_raws"
+    unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted_raws"
+    save_dir = "/mnt/kocsis1/cuDART_wdir/emm_img"
+    num_img = 200
+
+
+
+    set_plot_defaults()
+    L = 20.0 / 3
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    fig = plt.figure(figsize=(L, L * h_over_w))
+
 if __name__ == "__main__":
 
-    #extract_pluto_data_example()
-    #save_alt("x")
-    #save_alt("y")
-    render_pluto_data_example(False, False)
+    save_lcs()
     
