@@ -229,7 +229,7 @@ def comp_plot():
     
     for n in range(num_img):
         title_str = r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$"
-        title_str += " $\theta$ = {0:.3f}\pi".format(tax_xspan[i])
+        title_str += " $\theta$ = {0:.3f}\pi".format(tax_span[i])
         tstamp = tax.axvline(x=tax_span[i], color='k', alpha=0.2)
 
         unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(3) + ".npy")
