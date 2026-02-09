@@ -179,7 +179,7 @@ def comp_plot():
 
     vmin = 18
     vmax = 21
-    cmap = "afhmot"
+    cmap = "afmhot"
 
     boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/boosted_raws"
     unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted_raws"
