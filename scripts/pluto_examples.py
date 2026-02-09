@@ -234,7 +234,7 @@ def comp_plot():
     
     for n in range(num_img):
         title_str = r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$"
-        title_str += " $\theta$ = {0:.3f}\pi".format(tax_span[i])
+        title_str += r" $\theta$ =" + "{0:.3f}".format(tax_span[i]) + r"$\pi$"
         tax.set_title(title_str)
         tstamp = tax.axvline(x=tax_span[n], color='k', alpha=0.2)
 
