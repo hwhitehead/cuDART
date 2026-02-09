@@ -195,39 +195,43 @@ def comp_plot():
     img_str = "/mnt/kocsis1/cuDART_wdir/agn.jpeg"
     example_img = mpimg.imread(img_str)
     inset_aspect = np.shape(example_img)[0] / np.shape(example_img)[1]
+    inset_size = 0.33
+    inset_border = 0.05
 
     set_plot_defaults()
     L = 20.0 / 3
     height_ratios = np.array([0.3, 1])
-    width_ratios = np.array([1,1,0.05])
+    width_ratios = np.array([0.05, 1,1])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L, L * h_over_w))
-    gs = fig.add_gridspec(2,3,height_ratios=height_ratios,width_ratios=width_ratios)
-    axl = fig.add_subplot(gs[1,0])
-    axr = fig.add_subplot(gs[1,1])
+    gs = fig.add_gridspec(2, 3, height_ratios = height_ratios,width_ratios = width_ratios)
+    axl = fig.add_subplot(gs[1,1])
+    axr = fig.add_subplot(gs[1,2])
     axs = [axl, axr]
     tax = fig.add_subplot(gs[0,:])
-    cax = fig.add_subplot(gs[1,2])
-    inset_ax = axr.inset_axes([0.75, 0.75, 0.225, 0.225 * inset_aspect])
+    cax = fig.add_subplot(gs[1,0])
+    inset_ax = axr.inset_axes([1 - inset_size - inset_border, 
+                                1 - inset_size * inset_aspect - inset_border, 
+                                inset_size, 
+                                inset_size * inset_aspect])
     plt.subplots_adjust(hspace=0, wspace=0)
 
     inset_ax.imshow(example_img)
-    inset_ax.xaxis.set_visible(False)
-    inset_ax.yaxis.set_visible(False)
+    inset_ax.xaxis.set_ticks([])
+    inset_ax.xaxis.set_ticks([])
     for spine in ["bottom", "top", "right", "left"]:
         inset_ax.spines[spine].set_color='w'
 
     # plot colorbar
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
     fig.colorbar(sm, cax=cax, orientation="vertical")
-    cax.yaxis.tick_right()
-    cax.yaxis.set_label_position("right")
     cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
 
     tax.set_xlim([0,1])
     tax.xaxis.tick_top()
     tax.xaxis.set_label_position("top")
     tax.set_xlabel(r"$\theta$ / $\pi$")
+    tax.set_ylabel(r"$\left(L_\nu - \bar{L}_\nu \right)/ \bar{L}_\nu$")
     axl.plot([],[],color='w', label="Unboosted", linestyle="dashed")
     axr.plot([],[],color='w', label="Unboosted", linestyle="solid")
     axl.legend(loc="upper left", frameon=False, labelcolor="linecolor")
@@ -246,8 +250,7 @@ def comp_plot():
         tax.plot(tax_span, (lum_data - lum_mean) / lum_mean, color='k', linestyle=line_styles[i])
     
     for n in range(num_img):
-        title_str = r"$\left(L_\nu - \bar{L}_\nu \right)/ \bar{L}_\nu$"
-        tax.set_title(title_str)
+
         tstamp = tax.axvline(x=tax_span[n], color='k', alpha=0.2)
 
         unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(3) + ".npy")
