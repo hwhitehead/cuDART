@@ -227,7 +227,7 @@ def comp_plot():
     
     for n in range(num_img):
 
-        tstamp = tax.axvline(x=x_span[i], color='k', alpha=0.2)
+        tstamp = tax.axvline(x=tax_span[i], color='k', alpha=0.2)
 
         unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(3) + ".npy")
         unboosted_img = np.load(unboosted_raw_str)
