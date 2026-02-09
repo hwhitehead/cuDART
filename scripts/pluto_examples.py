@@ -205,6 +205,13 @@ def comp_plot():
     cax = fig.add_subplot(gs[1,2])
     plt.subplots_adjust(hspace=0, wspace=0)
 
+    # plot colorbar
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.yaxis.tick_right()
+    cax.yaxis.set_label_position("right")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
+
     for ax in [axl, axr]:
         ax.set_facecolor("k")
         ax.xaxis.set_visible(False)
@@ -240,5 +247,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    save_lcs()
+    comp_plot()
     
