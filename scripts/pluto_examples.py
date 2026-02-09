@@ -219,7 +219,7 @@ def comp_plot():
     tax.set_xlim([0,1])
 
     line_styles = ["dashed", "solid"]
-    for i, loc in [unboosted_dir, boosted_dir]:
+    for i, loc in enumerate([unboosted_dir, boosted_dir]):
         lum_data = np.load(os.path.join(loc, "lum.npy"))
         if i == 0:
             lum_mean = np.mean(lum_data)
