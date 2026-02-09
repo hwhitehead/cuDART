@@ -208,10 +208,10 @@ def comp_plot():
     axs = [axl, axr]
     tax = fig.add_subplot(gs[0,:])
     cax = fig.add_subplot(gs[1,2])
-    inset = axl.inset_axes([0.75, 0.05, 0.5, 0.5 * inset_aspect])
+    inset_ax = axl.inset_axes([0.75, 0.05, 0.5, 0.5 * inset_aspect])
     plt.subplots_adjust(hspace=0, wspace=0)
 
-    inset_aspect.imshow(example_img)
+    inset_ax.imshow(example_img)
 
     # plot colorbar
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
