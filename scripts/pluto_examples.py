@@ -212,13 +212,18 @@ def comp_plot():
     cax.yaxis.set_label_position("right")
     cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
 
+    tax.set_xlim([0,1])
+    tax.xaxis.set_ticks([])
+    tax.xaxis.set_ticklabels([])
+    axl.plot([],[],color='w', label="Unboosted", linestyle="dashed")
+    axr.plot([],[],color='w', label="Unboosted", linestyle="solid")
+    axl.legend(loc="upper left", frameon=False)
+    axr.legend(loc="upper left", frameon=False)
     for ax in [axl, axr]:
         ax.set_facecolor("k")
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
-    tax.set_xlim([0,1])
-    tax.xaxis.set_ticks([])
-    tax.xaxis.set_ticklabels([])
+    
 
     line_styles = ["dashed", "solid"]
     for i, loc in enumerate([unboosted_dir, boosted_dir]):
@@ -230,7 +235,8 @@ def comp_plot():
     for n in range(num_img):
         title_str = r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$"
         title_str += " $\theta$ = {0:.3f}\pi".format(tax_span[i])
-        tstamp = tax.axvline(x=tax_span[i], color='k', alpha=0.2)
+        tax.set_title(title_str)
+        tstamp = tax.axvline(x=tax_span[n], color='k', alpha=0.2)
 
         unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(3) + ".npy")
         unboosted_img = np.load(unboosted_raw_str)
