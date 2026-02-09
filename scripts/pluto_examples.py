@@ -177,9 +177,9 @@ def save_lcs():
 
 def comp_plot():
 
-    vmin = -13
-    vmax = -10
-    cmap = "Greys"
+    vmin = 18
+    vmax = 21
+    cmap = "afhmot"
 
     boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/boosted_raws"
     unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted_raws"
@@ -217,6 +217,8 @@ def comp_plot():
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
     tax.set_xlim([0,1])
+    tax.xaxis.set_ticks([])
+    tax.xaxis.set_ticklabels([])
 
     line_styles = ["dashed", "solid"]
     for i, loc in enumerate([unboosted_dir, boosted_dir]):
@@ -226,7 +228,8 @@ def comp_plot():
         tax.plot(tax_span, (lum_data - lum_mean) / lum_mean, color='k', linestyle=line_styles[i])
     
     for n in range(num_img):
-
+        title_str = r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$"
+        title_str += " $\theta$ = {0:.3f}\pi".format(tax_xspan[i])
         tstamp = tax.axvline(x=tax_span[i], color='k', alpha=0.2)
 
         unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(3) + ".npy")
