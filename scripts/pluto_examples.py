@@ -194,7 +194,7 @@ def comp_plot():
 
     img_str = "/mnt/kocsis1/cuDART_wdir/agn.jpeg"
     example_img = mpimg.imread(img_str)
-    print(np.shape(example_img))
+    inset_aspect = np.shape(example_img)[0] / np.shape(example_img)[1]
 
     set_plot_defaults()
     L = 20.0 / 3
@@ -208,8 +208,10 @@ def comp_plot():
     axs = [axl, axr]
     tax = fig.add_subplot(gs[0,:])
     cax = fig.add_subplot(gs[1,2])
-    # inset = axl.inset_axes([0.75, 0.05, 0.5, ])
+    inset = axl.inset_axes([0.75, 0.05, 0.5, 0.5 * inset_aspect])
     plt.subplots_adjust(hspace=0, wspace=0)
+
+    inset_aspect.imshow(example_img)
 
     # plot colorbar
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
