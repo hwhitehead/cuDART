@@ -214,18 +214,20 @@ def comp_plot():
                                 1 - inset_size * inset_aspect - inset_border, 
                                 inset_size, 
                                 inset_size * inset_aspect])
-    plt.subplots_adjust(hspace=0, wspace=0)
+    plt.subplots_adjust(hspace=0.1, wspace=0)
 
     inset_ax.imshow(example_img)
     inset_ax.xaxis.set_ticks([])
     inset_ax.xaxis.set_ticks([])
     for spine in ["bottom", "top", "right", "left"]:
-        inset_ax.spines[spine].set_color='w'
+        inset_ax.spines[spine].set_color("w")
 
     # plot colorbar
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
     fig.colorbar(sm, cax=cax, orientation="vertical")
     cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
+    cax.yaxis.tick_left()
+    cax.yaxis.set_label_position("left")
 
     tax.set_xlim([0,1])
     tax.xaxis.tick_top()
