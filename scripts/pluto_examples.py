@@ -208,10 +208,14 @@ def comp_plot():
     axs = [axl, axr]
     tax = fig.add_subplot(gs[0,:])
     cax = fig.add_subplot(gs[1,2])
-    inset_ax = axl.inset_axes([0.75, 0.05, 0.5, 0.5 * inset_aspect])
+    inset_ax = axr.inset_axes([0.75, 0.75, 0.225, 0.225 * inset_aspect])
     plt.subplots_adjust(hspace=0, wspace=0)
 
     inset_ax.imshow(example_img)
+    inset_ax.xaxis.set_visible(False)
+    inset_ax.yaxis.set_visible(False)
+    for spine in ["bottom", "top", "right", "left"]:
+        inset_ax.spines[spine].set_color='w'
 
     # plot colorbar
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
