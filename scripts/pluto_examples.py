@@ -165,5 +165,5 @@ if __name__ == "__main__":
     #extract_pluto_data_example()
     #save_alt("x")
     #save_alt("y")
-    render_pluto_data_example(True, False)
+    render_pluto_data_example(False, False)
     
