@@ -1,7 +1,7 @@
 # cuDART: CUDA + DDA Accelerated Ray Tracing (v0.6)
 
 <p align="center">
-  <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/comp.gif width="600" alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/comp.gif width="800" alt=animated/>
 </p>
 <p align="center"">
   <em> Animation showing multiple views for a jet launched from an Active Galactic Nucleus, showing images rendered with unboosted and boosted data. Top panel shows the variations in luminosity as the orientation of the jet changes. Inset panel depicts real observation of Hercules A. Simulation data featuers in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this paper</a>.</em>
