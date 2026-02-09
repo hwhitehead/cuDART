@@ -217,8 +217,8 @@ def comp_plot():
     tax.xaxis.set_ticklabels([])
     axl.plot([],[],color='w', label="Unboosted", linestyle="dashed")
     axr.plot([],[],color='w', label="Unboosted", linestyle="solid")
-    axl.legend(loc="upper left", frameon=False)
-    axr.legend(loc="upper left", frameon=False)
+    axl.legend(loc="upper left", frameon=False, labelcolor="linecolor")
+    axr.legend(loc="upper left", frameon=False, labelcolor="linecolor")
     for ax in [axl, axr]:
         ax.set_facecolor("k")
         ax.xaxis.set_visible(False)
@@ -233,8 +233,8 @@ def comp_plot():
         tax.plot(tax_span, (lum_data - lum_mean) / lum_mean, color='k', linestyle=line_styles[i])
     
     for n in range(num_img):
-        title_str = r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$"
-        title_str += r" $\theta$ =" + "{0:.3f}".format(tax_span[i]) + r"$\pi$"
+        title_str = r"$\left(L_\nu - L_{\nu,0} \right)/ L_{\nu,0}$,"
+        title_str += r"    $\theta$ = " + "{0:.2f}".format(tax_span[i]) + r"$\pi$"
         tax.set_title(title_str)
         tstamp = tax.axvline(x=tax_span[n], color='k', alpha=0.2)
 
