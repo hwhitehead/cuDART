@@ -83,7 +83,7 @@ def render_pluto_helix(relativistic = False):
 
     print("unlablled render example finished.")
 
-def render_pluto_data_example(relativistic=False):
+def render_pluto_data_example(relativistic=False, remove_raw_images = True):
 
     print("cuDART: starting jet render example...")
 
@@ -130,7 +130,7 @@ def render_pluto_data_example(relativistic=False):
     scene.render(verbose = True, relativistic = relativistic)
     print("finished rendering raw images")
 
-    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = True, vmin=18, vmax=21)
+    scene.plot_wlightcurve(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
@@ -165,5 +165,5 @@ if __name__ == "__main__":
     #extract_pluto_data_example()
     #save_alt("x")
     #save_alt("y")
-    render_pluto_data_example(True)
+    render_pluto_data_example(True, False)
     
