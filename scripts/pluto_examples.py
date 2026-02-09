@@ -177,17 +177,66 @@ def save_lcs():
 
 def comp_plot():
 
+    vmin = -13
+    vmax = -10
+    cmap = "Greys"
+
     boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/boosted_raws"
     unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted_raws"
     save_dir = "/mnt/kocsis1/cuDART_wdir/emm_img"
     num_img = 200
-
-
+    pix_dims = np.array([2048, 2048])
+    X = np.linspace(0,1,pix_dims[0]+1)
+    Y = np.linspace(0,1,pix_dims[1]+1)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    tax_span = np.linspace(0, 1, num_img)
 
     set_plot_defaults()
     L = 20.0 / 3
+    height_ratios = np.array([0.3, 1])
+    width_ratios = np.array([1,1,0.05])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L, L * h_over_w))
+    gs = fig.add_gridspec(2,3,height_ratios=height_ratios,width_ratios=width_ratios)
+    axl = fig.add_subplot(gs[1,0])
+    axr = fig.add_subplot(gs[1,1])
+    axs = [axl, axr]
+    tax = fig.add_subplot(gs[0,:])
+    cax = fig.add_subplot(gs[1,2])
+    plt.subplots_adjust(hspace=0, wspace=0)
+
+    for ax in [axl, axr]:
+        ax.set_facecolor("k")
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
+    tax.set_xlim([0,1])
+
+    line_styles = ["dashed", "solid"]
+    for i, loc in [unboosted_dir, boosted_dir]:
+        lum_data = np.load(os.path.join(loc, "lum.npy"))
+        if i == 0:
+            lum_mean = np.mean(lum_data)
+        tax.plot(tax_span, (lum_data - lum_mean) / lum_mean, color='k', linestyle=line_styles[i])
+    
+    for n in range(num_img):
+
+        tstamp = tax.axvline(x=x_span[i], color='k', alpha=0.2)
+
+        unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(3) + ".npy")
+        unboosted_img = np.load(unboosted_raw_str)
+        pcl = axl.pcolormesh(XX, YY, np.log10(unboosted_img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
+
+        boosted_raw_str = os.path.join(boosted_dir, "raw" + str(n).zfill(3) + ".npy")
+        boosted_img = np.load(boosted_raw_str)
+        pcr = axr.pcolormesh(XX, YY, np.log10(boosted_img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
+
+        save_str = os.path.join(save_dir, "img" + str(n).zfill(3) + ".png")
+        fig.savefig(save_str, dpi=300, bbox_inches="tight")
+        tstamp.remove()
+        pcl.remove()
+        pcr.remove()
+
+    plt.close("all")
 
 if __name__ == "__main__":
 
