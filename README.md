@@ -4,7 +4,7 @@
   <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/comp.gif width="800" alt=animated/>
 </p>
 <p align="center"">
-  <em> Animation showing multiple views for a jet launched from an Active Galactic Nucleus, showing images rendered with unboosted and boosted data. Top panel shows the variations in luminosity as the orientation of the jet changes. Inset panel depicts real observation of Hercules A. Simulation data featuers in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this paper</a>.</em>
+  <em> Animation depicting multiple views for a jet launched from an Active Galactic Nucleus, showing images rendered with unboosted and boosted data. Top panel shows that as the orientation of the jet changes, the unboosted luminosity is fixed but the boosted luminosity varies. Inset panel depicts a real observation of Hercules A. Simulation data featured in <a href="https://ui.adsabs.harvard.edu/abs/2026MNRAS.tmp..127E/abstract">this paper</a>.</em>
 </p>
 
 <p align="center">
