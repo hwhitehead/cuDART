@@ -1,6 +1,7 @@
 # external imports
 import sys, os, gc
 import numpy as np
+import matplotlib.image as mpimg
 
 # local import
 sys.path.append("..")
@@ -191,6 +192,10 @@ def comp_plot():
     XX, YY = np.meshgrid(X, Y, indexing="ij")
     tax_span = np.linspace(0, 1, num_img)
 
+    img_str = "/mnt/kocsis1/cuDART_wdir/agn.jpeg"
+    example_img = mpimg.imread(img_str)
+    print(np.shape(example_img))
+
     set_plot_defaults()
     L = 20.0 / 3
     height_ratios = np.array([0.3, 1])
@@ -203,6 +208,7 @@ def comp_plot():
     axs = [axl, axr]
     tax = fig.add_subplot(gs[0,:])
     cax = fig.add_subplot(gs[1,2])
+    # inset = axl.inset_axes([0.75, 0.05, 0.5, ])
     plt.subplots_adjust(hspace=0, wspace=0)
 
     # plot colorbar
@@ -213,8 +219,9 @@ def comp_plot():
     cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
 
     tax.set_xlim([0,1])
-    tax.xaxis.set_ticks([])
-    tax.xaxis.set_ticklabels([])
+    tax.xaxis.tick_top()
+    tax.xaxis.set_label_position("top")
+    tax.set_xlabel(r"$\theta$ / $\pi$")
     axl.plot([],[],color='w', label="Unboosted", linestyle="dashed")
     axr.plot([],[],color='w', label="Unboosted", linestyle="solid")
     axl.legend(loc="upper left", frameon=False, labelcolor="linecolor")
@@ -233,8 +240,7 @@ def comp_plot():
         tax.plot(tax_span, (lum_data - lum_mean) / lum_mean, color='k', linestyle=line_styles[i])
     
     for n in range(num_img):
-        title_str = r"$\left(L_\nu - L_{\nu,0} \right)/ L_{\nu,0}$,"
-        title_str += r"    $\theta$ = " + "{0:.2f}".format(tax_span[i]) + r"$\pi$"
+        title_str = r"$\left(L_\nu - \bar{L}_\nu \right)/ \bar{L}_\nu$"
         tax.set_title(title_str)
         tstamp = tax.axvline(x=tax_span[n], color='k', alpha=0.2)
 
