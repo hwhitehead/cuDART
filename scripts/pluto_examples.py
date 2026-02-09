@@ -235,7 +235,7 @@ def comp_plot():
     tax.set_xlabel(r"$\theta$ / $\pi$")
     tax.set_ylabel(r"$\left(L_\nu - \bar{L}_\nu \right)/ \bar{L}_\nu$")
     axl.plot([],[],color='w', label="Unboosted", linestyle="dashed")
-    axr.plot([],[],color='w', label="Unboosted", linestyle="solid")
+    axr.plot([],[],color='w', label="Boosted", linestyle="solid")
     axl.legend(loc="upper left", frameon=False, labelcolor="linecolor")
     axr.legend(loc="upper left", frameon=False, labelcolor="linecolor")
     for ax in [axl, axr]:
