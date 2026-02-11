@@ -31,4 +31,4 @@ if __name__ == "__main__":
     path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     path_to_raw_images = "/mnt/kocsis1/cuDART_wdir/emm_img/raw" # .npy auto appended with numeric suffix
     path_to_png_images = "/mnt/kocsis1/cuDART_wdir/emm_img/png"
-    plot_tracer(path_to_tracer_npy, path_to_raw_images)
+    plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images)
