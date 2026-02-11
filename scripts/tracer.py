@@ -3,7 +3,7 @@ import numpy as np
 sys.path.append("..")
 from pysrc import *
 
-def sum_tracer(path_to_tracer_npy, path_to_raw_images):
+def plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images):
 
     # construct a Camera 
     # unlabelled datasets are assumed to span a domain [-0.5, 0.5] in xyz
@@ -19,12 +19,16 @@ def sum_tracer(path_to_tracer_npy, path_to_raw_images):
     # build container for data and cameras
     scene = Scene(path_to_tracer_npy, path_to_saved_png, cameras)
 
-    # render and save images
+    # render images as raw npy files
     scene.render(verbose=True, relativistic = False)
 
-if __name__ = "__main__":
+    # scene has an autoplotter (applies log to data, update these vlims or write own plotter)
+    scene.plot(path_to_png_images, cmap="Greys_r", vmin=18, vmax=21, remove_raw_images = False, verbose = True)
+
+if __name__ == "__main__":
 
     # change these paths
     path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     path_to_raw_images = "/mnt/kocsis1/cuDART_wdir/emm_img/raw" # .npy auto appended with numeric suffix
-    sum_tracer(path_to_tracer_npy, path_to_raw_images)
+    path_to_png_images = "/mnt/kocsis1/cuDART_wdir/emm_img/png"
+    plot_tracer(path_to_tracer_npy, path_to_raw_images)
