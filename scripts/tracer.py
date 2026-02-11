@@ -17,7 +17,7 @@ def plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images):
     cameras = [camera]          # package cameras (to support multicam)
 
     # build container for data and cameras
-    scene = Scene(path_to_tracer_npy, path_to_saved_png, cameras)
+    scene = Scene(path_to_tracer_npy, path_to_raw_images, cameras)
 
     # render images as raw npy files
     scene.render(verbose=True, relativistic = False)
@@ -30,5 +30,5 @@ if __name__ == "__main__":
     # change these paths
     path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     path_to_raw_images = "/mnt/kocsis1/cuDART_wdir/emm_img/raw" # .npy auto appended with numeric suffix
-    path_to_png_images = "/mnt/kocsis1/cuDART_wdir/emm_img/png"
+    path_to_png_images = "/mnt/kocsis1/cuDART_wdir/emm_img/img" # .png auto appended with numeric suffix
     plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images)
