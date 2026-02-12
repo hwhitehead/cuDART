@@ -28,7 +28,14 @@ def plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images):
 if __name__ == "__main__":
 
     # change these paths
-    path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    path_to_raw_images = "/mnt/kocsis1/cuDART_wdir/emm_img/raw" # .npy auto appended with numeric suffix
-    path_to_png_images = "/mnt/kocsis1/cuDART_wdir/emm_img/img" # .png auto appended with numeric suffix
-    plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images)
+    # path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    # path_to_raw_images = "/mnt/kocsis1/cuDART_wdir/emm_img/raw" # .npy auto appended with numeric suffix
+    # path_to_png_images = "/mnt/kocsis1/cuDART_wdir/emm_img/img" # .png auto appended with numeric suffix
+    # plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images)
+
+    data = np.load("/mnt/kocsis1/cuDART_wdir/resampled_tr1_10_coarse.npy")
+    print("type = ")
+    print(data.dtype)
+    print("contains nan = ")
+    print(np.isnan(data).any())
+
