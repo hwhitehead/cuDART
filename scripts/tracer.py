@@ -29,8 +29,8 @@ def plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images):
 if __name__ == "__main__":
 
     # change these paths
-    path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/resampled_tr1_10_coarse.npy"
-
+    path_to_old_npy = "/mnt/kocsis1/cuDART_wdir/resampled_tr1_10_coarse.npy"
+    path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/tr1.npy"
     data = np.load(path_to_tracer_npy)
     data = np.einsum("kji->ijk", data)
     np.save(path_to_tracer_npy, data)
