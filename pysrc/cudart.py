@@ -186,7 +186,7 @@ class Scene:
                 if verbose:
                     print("removed temporary camera file")
 
-    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False):
+    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False, log_c=True):
         
         # TODO: add labelling options, axes?
         
@@ -215,8 +215,8 @@ class Scene:
             save_str = save_location + str(i).zfill(str_zfill) + ".png"
 
             img = np.load(load_str)
-
-            pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
+            if log_c: img = np.log10(img)
+            pc = ax.pcolormesh(XX, YY, img, vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
             pc.remove()
             if (verbose):
