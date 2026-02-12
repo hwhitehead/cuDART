@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 sys.path.append("..")
 from pysrc import *
 
+epsilon = 1e-2
+
 def plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images):
 
     # construct a Camera 
