@@ -30,6 +30,11 @@ if __name__ == "__main__":
 
     # change these paths
     path_to_tracer_npy = "/mnt/kocsis1/cuDART_wdir/resampled_tr1_10_coarse.npy"
+
+    data = np.load(path_to_tracer_npy)
+    data = np.einsum("ijk->kji", data)
+    np.save(path_to_tracer_npy, data)
+
     path_to_raw_images = "/mnt/kocsis1/cuDART_wdir/emm_img/raw" # .npy auto appended with numeric suffix
     path_to_png_images = "/mnt/kocsis1/cuDART_wdir/emm_img/img" # .png auto appended with numeric suffix
     plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images)
