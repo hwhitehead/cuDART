@@ -42,7 +42,7 @@ def plot_tracer(path_to_tracer_npy, path_to_raw_images, path_to_png_images):
     scene.render(verbose=True, relativistic = False)
 
     # scene has an autoplotter (applies log to data, update these vlims or write own plotter)
-    scene.plot(path_to_png_images, cmap="Greys_r", vmin=0, vmax=1, remove_raw_images = False, verbose = True, log_c = False)
+    scene.plot(path_to_png_images, cmap="Greys_r", vmin=-2, vmax=0, remove_raw_images = False, verbose = True, log_c = True)
 
 if __name__ == "__main__":
 
