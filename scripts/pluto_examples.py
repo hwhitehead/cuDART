@@ -386,7 +386,7 @@ def plot_profiler_results():
 def read_profile():
 
     load_str = "/mnt/kocsis1/cuDART_wdir/prof_data/profiles/profile_N512D512bFalse.txt"
-    df = pd.read_csv(load_str)
+    df = pd.read_csv(load_str, skiprows=3)
     print(df.to_string())
 
 
