@@ -342,7 +342,7 @@ if __name__ == "__main__":
         shape = (N, N, N, 4)
         data = np.ones(shape=shape, dtype=np.float32)
         save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
-        np.save(save_str, data.astype(np.float32)))
+        np.save(save_str, data.astype(np.float32))
     
     run_profiler()
     
