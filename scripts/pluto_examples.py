@@ -300,8 +300,7 @@ def run_profiler():
                 scene = Scene(npy_load_str, npy_save_str, cameras)
                 scene.render(verbose = True, relativistic = relativistic, profile = False)
 
-                print("relativistic = " + str(relativistic))
-                print("finished image dim" + str(image_dim))
+                print("finished D = " + str(image_dim) + ", N = " + str(data_dim) + " relativistic = " + str(relativistic))
                 print("\n\n\n\n\n")
 
 def plot_old_profiler_results():
