@@ -331,6 +331,6 @@ def plot_profiler_results():
 
 if __name__ == "__main__":
 
-    plot_profiler_results()
+    run_profiler()
 
     
