@@ -331,6 +331,7 @@ def plot_profiler_results():
 
 if __name__ == "__main__":
 
-    run_profiler()
+    data = np.zeros(shape=(1024, 1024, 1024))
+    np.save("/mnt/kocsis1/cuDART_wdir/emm_data/unboosted_1024.npy", data)
 
     
