@@ -287,10 +287,11 @@ def run_profiler():
     template_camera.set_sph_pos(r = 2.0, theta = 0.449 * np.pi, phi = epsilon, target_origin = True)
 
     for i, image_dim in enumerate(image_dims):
-        for relativistic in [false, true]:
+        for relativistic in [False, True]:
             camera = copy.deepcopt(template_camera)
             camera.num_pixels_X = image_dim
             camera.num_pixels_Y = image_dim
+            cameras = [camera]
 
             scene = Scene(npy_load_str, npy_save_str, cameras)
             scene.render(verbose = True, relativistic = relativistic, profile = False)
