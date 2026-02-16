@@ -168,7 +168,7 @@ class Scene:
         # call executable        
         command = [path_to_executable, "-i", self.npy_load_str, "-s", self.npy_save_str,"-c",self.temp_camera_file]
         if save_profile is not None: 
-            command = ["nvprof", "--log-file", save_profile]+ command
+            command = ["nvprof", "--csv", "--log-file", save_profile]+ command
         if verbose:
             command = command + ["-v"]
         if max_mem is not None:
