@@ -298,7 +298,7 @@ def run_profiler():
                 cameras = [camera] * 10
 
                 scene = Scene(npy_load_str, npy_save_str, cameras)
-                save_profile = os.path.join(data_dir, "profiles/profile_N{0}D{1}b{2}.txt")
+                save_profile = os.path.join(data_dir, "profiles/profile_N{0}D{1}b{2}.txt".format(image_dim, data_dim, relativistic))
                 scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile)
 
                 print("finished N = " + str(image_dim) + ", D = " + str(data_dim) + " relativistic = " + str(relativistic))
