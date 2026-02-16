@@ -271,8 +271,35 @@ def comp_plot():
 
     plt.close("all")
 
+def run_profiler():
+
+    image_dims = [128, 256, 1024, 2048]
+
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
+
+    template_camera = Camera()
+    template_camera.num_pixels_X = 2048
+    template_camera.num_pixels_Y = 2048
+    template_camera.tilt = (60.0 / 180) * np.pi
+    template_camera.length_X = 0.25 # defval 0.66
+    template_camera.length_Y = 0.25
+    template_camera.set_sph_pos(r = 2.0, theta = 0.449 * np.pi, phi = epsilon, target_origin = True)
+
+    for i, image_dim in enumerate(image_dims):
+        for relativistic in [false, true]:
+            camera = copy.deepcopt(template_camera)
+            camera.num_pixels_X = image_dim
+            camera.num_pixels_Y = image_dim
+
+            scene = Scene(npy_load_str, npy_save_str, cameras)
+            scene.render(verbose = True, relativistic = relativistic, profile = False)
+
+            print("relativistic = " + str(relativistic))
+            print("finished image dim" + image_dim)
+
 if __name__ == "__main__":
 
-    render_pluto_data_example(profile=True)
+    run_profiler()
 
     
