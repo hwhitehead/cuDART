@@ -128,10 +128,10 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, prof
     print("built scene")
 
     # render and save images
-    scene.render(verbose = True, relativistic = relativistic)
+    scene.render(verbose = True, relativistic = relativistic, profile = profile)
     print("finished rendering raw images")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, profile = profile, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
     print("unlablled render example finished.")
