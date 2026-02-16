@@ -273,7 +273,7 @@ def comp_plot():
 
 def run_profiler():
 
-    image_dims = [128, 256, 1024, 2048]
+    image_dims = [64, 128, 256, 512, 1024, 2048, 10]
 
     npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
