@@ -274,8 +274,8 @@ def comp_plot():
 
 def run_profiler():
 
-    image_dims = [512]
-    data_dims = [512]
+    image_dims = [64, 128, 256, 512]
+    data_dims = [64, 128, 256, 512]
 
     data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
@@ -296,7 +296,7 @@ def run_profiler():
                 camera = copy.deepcopy(template_camera)
                 camera.num_pixels_X = image_dim
                 camera.num_pixels_Y = image_dim
-                cameras = [camera] * 10
+                cameras = [camera] * 100
 
                 scene = Scene(npy_load_str, npy_save_str, cameras)
                 save_profile = os.path.join(data_dir, "profiles/profile_N{0}D{1}b{2}.txt".format(image_dim, data_dim, relativistic))
@@ -405,5 +405,5 @@ if __name__ == "__main__":
     #     save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
     #     np.save(save_str, data.astype(np.float32))
     
-    read_profile()
+    run_profiler()
     
