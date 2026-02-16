@@ -2,6 +2,7 @@
 import sys, os, gc
 import numpy as np
 import matplotlib.image as mpimg
+import pandas as pd
 
 # local import
 sys.path.append("..")
@@ -299,7 +300,7 @@ def run_profiler():
 
                 scene = Scene(npy_load_str, npy_save_str, cameras)
                 save_profile = os.path.join(data_dir, "profiles/profile_N{0}D{1}b{2}.txt".format(image_dim, data_dim, relativistic))
-                scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile)
+                scene.render(verbose = False, relativistic = relativistic, save_profile = save_profile)
 
                 print("finished N = " + str(image_dim) + ", D = " + str(data_dim) + " relativistic = " + str(relativistic))
                 print("\n\n\n\n\n")
@@ -382,7 +383,11 @@ def plot_profiler_results():
 
     fig.savefig("/scratch/github/cuDART_wdir/profile.png", dpi=300, bbox_inches="tight")
 
+def read_profile():
 
+    load_str = "/mnt/kocsis1/cuDART_wdir/prof_data/profiles/profile_N512D512bFalse.txt"
+    df = pd.read_csv(load_str)
+    print(df.to_string())
 
 
 
@@ -400,5 +405,5 @@ if __name__ == "__main__":
     #     save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
     #     np.save(save_str, data.astype(np.float32))
     
-    run_profiler()
+    read_profile()
     
