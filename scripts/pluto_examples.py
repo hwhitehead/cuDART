@@ -288,7 +288,7 @@ def run_profiler():
 
     for i, image_dim in enumerate(image_dims):
         for relativistic in [False, True]:
-            camera = copy.deepcopt(template_camera)
+            camera = copy.deepcopy(template_camera)
             camera.num_pixels_X = image_dim
             camera.num_pixels_Y = image_dim
             cameras = [camera]
