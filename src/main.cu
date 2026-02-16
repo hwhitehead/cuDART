@@ -78,9 +78,9 @@ int main(int argc, char *argv[]) {
                     std::cout << "cuDART " << cudart_version << std::endl;
                     std::cout << "Usage: " << argv[0] << " [options]\n";
                     std::cout << "Options:\n";
-                    std::cout << " -i <file>    specify input file [.npy]\n";
-                    std::cout << " -s <file>    specify render save file [.ppm]\n";
-                    std::cout << " -c <file>    specify camera data file [.txt]\n";
+                    std::cout << " -i <file>    specify input target\n";
+                    std::cout << " -s <file>    specify save target\n";
+                    std::cout << " -c <file>    specify camera data file\n";
                     std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
                     std::cout << " -v           verbosity flag\n";
