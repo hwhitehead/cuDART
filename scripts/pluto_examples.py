@@ -332,12 +332,12 @@ def plot_profiler_results():
 if __name__ == "__main__":
 
     data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
-    for dim in [64, 128, 256, 512]:
-        shape = (dim, dim, dim)
+    for N in [64, 128, 256, 512]:
+        shape = (N, N, N)
         data = np.ones(shape=shape)
-        save_str = os.path.join(data_dir, "unboosted_" + str(dim) + ".npy", data)
+        save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy", data)
     
-        shape = (dim, dim, dim, 4)
+        shape = (N, N, N, 4)
         data = np.ones(shape=shape)
-        save_str = os.path.join(data_dir, "boosted_" + str(dim) + ".npy", data)
+        save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy", data)
     
