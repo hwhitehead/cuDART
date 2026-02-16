@@ -297,7 +297,7 @@ def run_profiler():
             scene.render(verbose = True, relativistic = relativistic, profile = False)
 
             print("relativistic = " + str(relativistic))
-            print("finished image dim" + image_dim)
+            print("finished image dim" + str(image_dim))
 
 if __name__ == "__main__":
 
