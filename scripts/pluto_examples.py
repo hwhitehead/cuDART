@@ -273,37 +273,38 @@ def comp_plot():
 
 def run_profiler():
 
-    image_dims = [128, 256, 512, 1024, 2048, 4096, 8192]
+    image_dims = [64, 128, 256, 512]
+    data_dims = [64, 128, 256, 512]
 
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
-
-    data = np.load(npy_load_str)
-    print(np.shape(data))
-    return
 
     template_camera = Camera()
     template_camera.num_pixels_X = 2048
     template_camera.num_pixels_Y = 2048
-    template_camera.tilt = (60.0 / 180) * np.pi
-    template_camera.length_X = 1.0 # defval 0.66
+    template_camera.tilt = 0.0
+    template_camera.length_X = 1.0
     template_camera.length_Y = 1.0
-    template_camera.set_sph_pos(r = 2.0, theta = 0.449 * np.pi, phi = epsilon, target_origin = True)
+    template_camera.set_sph_pos(r = 2.0, theta = (1 - epsilon) * np.pi, phi = epsilon, target_origin = True)
 
     for i, image_dim in enumerate(image_dims):
-        for relativistic in [False]:
-            camera = copy.deepcopy(template_camera)
-            camera.num_pixels_X = image_dim
-            camera.num_pixels_Y = image_dim
-            cameras = [camera]
+        for j, data_dim in enumerate(data_dims):
+            for label, relativistic in zip(["unbooted_", "boosted_"], [False, True]):
+                npy_load_str = os.path.join(data_dir, label + str(data_dim) + ".npy")
 
-            scene = Scene(npy_load_str, npy_save_str, cameras)
-            scene.render(verbose = True, relativistic = relativistic, profile = False)
+                camera = copy.deepcopy(template_camera)
+                camera.num_pixels_X = image_dim
+                camera.num_pixels_Y = image_dim
+                cameras = [camera]
 
-            print("relativistic = " + str(relativistic))
-            print("finished image dim" + str(image_dim))
+                scene = Scene(npy_load_str, npy_save_str, cameras)
+                scene.render(verbose = True, relativistic = relativistic, profile = False)
 
-def plot_profiler_results():
+                print("relativistic = " + str(relativistic))
+                print("finished image dim" + str(image_dim))
+                print("\n\n\n\n\n")
+
+def plot_old_profiler_results():
 
     set_plot_defaults()
     fig = plt.figure(figsize=(10.0 / 3, 10.0 / 3))
@@ -331,16 +332,17 @@ def plot_profiler_results():
 
 if __name__ == "__main__":
 
-    data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
-    for N in [64, 128, 256, 512]:
-        shape = (N, N, N)
-        data = np.ones(shape=shape)
-        save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy")
-        np.save(save_str, data)
+    # data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
+    # for N in [64, 128, 256, 512]:
+    #     shape = (N, N, N)
+    #     data = np.ones(shape=shape)
+    #     save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy")
+    #     np.save(save_str, data)
     
-        shape = (N, N, N, 4)
-        data = np.ones(shape=shape)
-        save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
-        np.save(save_str, data)
+    #     shape = (N, N, N, 4)
+    #     data = np.ones(shape=shape)
+    #     save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
+    #     np.save(save_str, data)
     
+    run_profiler()
     
