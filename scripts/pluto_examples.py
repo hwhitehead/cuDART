@@ -335,9 +335,12 @@ if __name__ == "__main__":
     for N in [64, 128, 256, 512]:
         shape = (N, N, N)
         data = np.ones(shape=shape)
-        save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy", data)
+        save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy")
+        np.save(save_str, data)
     
         shape = (N, N, N, 4)
         data = np.ones(shape=shape)
-        save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy", data)
+        save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
+        np.save(save_str, data)
+    
     
