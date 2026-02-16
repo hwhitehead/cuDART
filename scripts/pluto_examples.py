@@ -278,6 +278,10 @@ def run_profiler():
     npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
 
+    data = np.load(npy_load_str)
+    print(np.shape(data))
+    return
+
     template_camera = Camera()
     template_camera.num_pixels_X = 2048
     template_camera.num_pixels_Y = 2048
@@ -306,24 +310,27 @@ def plot_profiler_results():
     ax = fig.add_subplot()
     axr = ax.twinx()
 
-    image_dims = np.array([64, 128, 256, 512, 1024, 2048])
+    image_dims = np.array([64, 128, 256, 512, 1024, 2048, 4096, 8192])
     log10_image_dims = np.log10(image_dims)
-    unboosted_ms = np.array([0.890, 1.24, 4.53, 8.31, 13.5, 28.7])
-    boosted_ms = np.array([2.26, 2.28, 6.14, 9.02, 35.8, 137])
+    unboosted_ms = np.array([0.890, 1.24, 4.53, 8.31, 13.5, 28.7, 111, 277])
+    boosted_ms = np.array([2.26, 2.28, 6.14, 9.02, 35.8, 137, 408, 1460])
 
-    unboosted_pp_ms = image_dims ** 2 / unboosted_ms
-    boosted_pp_ms = image_dims ** 2 / boosted_ms
+    unboosted_mp_ps = 1e-6 * image_dims ** 2 / (1e-3 * unboosted_ms)
+    boosted_mp_ps = 1e-6 * image_dims ** 2 / (1e-3 * boosted_ms)
 
+    ax.set_xlabel(r"$\log_{10}(N)$")
+    ax.set_ylabel(r"$\log_{10}(\tau \left[\mathrm{ms}\right])$")
     ax.plot(log10_image_dims, np.log10(unboosted_ms), color='k')
     ax.plot(log10_image_dims, np.log10(boosted_ms), color='r')
 
-    axr.plot(log10_image_dims, np.log10(unboosted_pp_ms), color='k', linestyle="dashed")
-    axr.plot(log10_image_dims, np.log10(boosted_pp_ms), color='r', linestyle="dashed")
+    axr.set_ylabel(r"$\log_{10}(\frac{N^2}{\tau} \left[\mathrm{MPs}^{-1}\right])$")
+    axr.plot(log10_image_dims, np.log10(unboosted_mp_ps), color='k', linestyle="dashed")
+    axr.plot(log10_image_dims, np.log10(boosted_mp_ps), color='r', linestyle="dashed")
 
     fig.savefig("profile.png", dpi=300, bbox_inches="tight")
 
 if __name__ == "__main__":
 
-    run_profiler()
+    plot_profiler_results()
 
     
