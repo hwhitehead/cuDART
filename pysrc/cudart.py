@@ -137,7 +137,7 @@ class Scene:
     def make(self):
         subprocess.run(["make"], check = True)
 
-    def render(self, profile = False, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False):
+    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False):
 
         # prepare camera space
         self.build_camera_file()
@@ -167,8 +167,8 @@ class Scene:
 
         # call executable        
         command = [path_to_executable, "-i", self.npy_load_str, "-s", self.npy_save_str,"-c",self.temp_camera_file]
-        if profile: 
-            command = ["nvprof"] + command
+        if save_profile is not None: 
+            command = ["nvprof", "--logfile", save_profile]+ command
         if verbose:
             command = command + ["-v"]
         if max_mem is not None:
