@@ -289,7 +289,7 @@ def run_profiler():
 
     for i, image_dim in enumerate(image_dims):
         for j, data_dim in enumerate(data_dims):
-            for label, relativistic in zip(["unbooted_", "boosted_"], [False, True]):
+            for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
                 npy_load_str = os.path.join(data_dir, label + str(data_dim) + ".npy")
 
                 camera = copy.deepcopy(template_camera)
@@ -332,17 +332,17 @@ def plot_old_profiler_results():
 
 if __name__ == "__main__":
 
-    data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
-    for N in [64, 128, 256, 512]:
-        shape = (N, N, N)
-        data = np.ones(shape=shape, dtype=np.float32)
-        save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy")
-        np.save(save_str, data.astype(np.float32))
+    # data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
+    # for N in [64, 128, 256, 512]:
+    #     shape = (N, N, N)
+    #     data = np.ones(shape=shape, dtype=np.float32)
+    #     save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy")
+    #     np.save(save_str, data.astype(np.float32))
     
-        shape = (N, N, N, 4)
-        data = np.ones(shape=shape, dtype=np.float32)
-        save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
-        np.save(save_str, data.astype(np.float32))
+    #     shape = (N, N, N, 4)
+    #     data = np.ones(shape=shape, dtype=np.float32)
+    #     save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
+    #     np.save(save_str, data.astype(np.float32))
     
     run_profiler()
     
