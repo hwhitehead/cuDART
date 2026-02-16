@@ -273,8 +273,8 @@ def comp_plot():
 
 def run_profiler():
 
-    image_dims = [64, 128, 256, 512]
-    data_dims = [64, 128, 256, 512]
+    image_dims = [512]
+    data_dims = [512]
 
     data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
@@ -295,10 +295,10 @@ def run_profiler():
                 camera = copy.deepcopy(template_camera)
                 camera.num_pixels_X = image_dim
                 camera.num_pixels_Y = image_dim
-                cameras = [camera]
+                cameras = [camera] * 10
 
                 scene = Scene(npy_load_str, npy_save_str, cameras)
-                scene.render(verbose = True, relativistic = relativistic, profile = False)
+                scene.render(verbose = True, relativistic = relativistic, profile = True)
 
                 print("finished N = " + str(image_dim) + ", D = " + str(data_dim) + " relativistic = " + str(relativistic))
                 print("\n\n\n\n\n")
@@ -328,6 +328,62 @@ def plot_old_profiler_results():
     axr.plot(log10_image_dims, np.log10(boosted_mp_ps), color='r', linestyle="dashed")
 
     fig.savefig("profile.png", dpi=300, bbox_inches="tight")
+
+def plot_profiler_results():
+
+    data_dims = np.array([64, 128, 245, 512])
+    image_dims = np.array([64, 128, 245, 512])
+    log_data_dims = np.log10(data_dims)
+    log_image_dims = np.log10(image_dims)
+    n64_ub = [0.195, 0.327, 0.579, 1.08]
+    n64_b = [0.53, 1.01, 1.91, 3.46]
+    n128_ub = [0.122, 0.311, 0.597, 1.13]
+    n128_b = [0.536, 1.01, 1.90, 3.47]
+    n256_ub = [0.148, 0.305, 6.44, 13.9]
+    n256_b = [0.541, 1.02, 9.49, 21.5]
+    n512_ub = [0.431, 0.868, 2.02, 52.5]
+    n512_b = [1.96, 3.81, 7.41, 78.3]
+
+    all_timings = np.zeros(shape=(4,4,2)) # N, D, ub/b
+    all_timings[0, :, 0] = n64_ub
+    all_timings[0, :, 1] = n64_b
+    all_timings[1, :, 0] = n128_ub
+    all_timings[1, :, 1] = n128_b
+    all_timings[2, :, 0] = n256_ub
+    all_timings[2, :, 1] = n256_b
+    all_timings[3, :, 0] = n512_ub
+    all_timings[3, :, 1] = n512_b
+
+    ub_timings = [n64_ub, n128_ub, n256_ub, n512_ub]
+    b_timings = [n64_b, n128_b, n256_b, n512_b]
+
+    set_plot_defaults()
+    height_ratios = np.array([1.0, 1.0])
+    width_ratios = np.array([2.0])
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    L = 20.0 / 3
+    fig = plt.figure(figsize=(L, L * h_over_w))
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+    ax0 = fig.add_subplot(gs[0,0])
+    ax1 = fig.add_subplot(gs[1,0])
+
+    ax0.set_xlabel(r"$\log_{10}(D)$")
+    ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
+    for N_index in range(4):
+        ax0.plot(log_data_dims, np.log10(all_timings[N_index, :, 0]), linestyle="solid")
+        ax0.plot(log_data_dims, np.log10(all_timings[N_index, :, 1]), linestyle="dashed")
+
+    ax1.set_xlabel(r"$\log_{10}(N)$")
+    ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
+    for D_index in range(4):
+        ax1.plot(log_image_dims, np.log10(all_timings[:, D_index, 0]), linestyle="solid")
+        ax1.plot(log_image_dims, np.log10(all_timings[:, D_index, 1]), linestyle="dashed")
+
+    fig.savefig("/scratch/github/cuDART_wdir/profile.png", dpi=300, bbox_inches="tight")
+
+
+
+
 
 if __name__ == "__main__":
 
