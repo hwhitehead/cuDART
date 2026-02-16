@@ -273,6 +273,6 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    comp_plot()
+    render_pluto_data_example()
 
     

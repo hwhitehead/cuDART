@@ -4,8 +4,6 @@
 #include "vec3.hpp"
 #include "meshblock.hpp"
 
-// THIS CODE IS WIP AND NOT ACTIVE IN MAIN
-
 class Mesh {
     // data container to support heterogenous domain resolutions
     public:

@@ -157,9 +157,15 @@ int main(int argc, char *argv[]) {
     }
     int num_meshblocks = all_mb_info.size();
 
-    // determine VRAM limitations
+    // determine VRAM limitations and handle excess
     float tolerance = 0.95; // use this fraction of available vram
     size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
+    if (h_bytes > d_bytes) {
+        std::stringstream err_msg;
+        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "Requested memory in excess of space on device\n";
+        CUDART_ERROR(err_msg);
+    }
 
     // allocate space on device
     clock_t d_data_alloc_start = clock();
@@ -189,6 +195,10 @@ int main(int argc, char *argv[]) {
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
                                 std::ceil((float)standard_camera.num_pixels_Y / ty));
+
+    // declare output container
+    npy::npy_data_ptr<float> npy_img;
+    npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
 
     // iterate over cameras
     int img_count = 0;
@@ -228,9 +238,7 @@ int main(int argc, char *argv[]) {
         // save data
         clock_t npy_write_start = clock();
         std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
-        npy::npy_data_ptr<float> npy_img;
         npy_img.data_ptr = img;
-        npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
         npy::write_npy(save_str, npy_img);
         if (verbose) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
