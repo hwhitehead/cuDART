@@ -63,13 +63,13 @@ class Profiler:
         for D in D_span:
             shape = (D, D, D)
             data = np.ones(shape=shape, dtype=np.float32)
-            save_str = os.path.join(data_dir, "unboosted_" + str(D) + ".npy")
+            save_str = os.path.join(self.data_dir, "unboosted_" + str(D) + ".npy")
             np.save(save_str, data.astype(np.float32))
 
             if save_boosted:
                 shape = (D, D, D, 4)
                 data = np.ones(shape=shape, dtype=np.float32)
-                save_str = os.path.join(data_dir, "boosted_" + str(D) + ".npy")
+                save_str = os.path.join(self.data_dir, "boosted_" + str(D) + ".npy")
                 np.save(save_str, data.astype(np.float32))
 
     def run(self, N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = 10, rand_view = True):
