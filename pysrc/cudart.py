@@ -150,6 +150,47 @@ class Profiler:
 
         np.save(save_str, avg_times)
 
+    def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
+
+        avg_times = np.load(save_str) * 1e-3 # to ms
+
+        set_plot_defaults()
+        height_ratios = np.array([1.0, 1.0])
+        width_ratios = np.array([2.0])
+        h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+        L = 20.0 / 3
+        fig = plt.figure(figsize=(L, L * h_over_w))
+        gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+        ax0 = fig.add_subplot(gs[0,0])
+        ax1 = fig.add_subplot(gs[1,0])
+
+        colors = ["r", "g", "b", "k"]
+        ax0.set_title(r"Render Image $N^2$ from domain $D^3$")
+
+        ax0.set_xlabel(r"$\log_{10}(N)$")
+        ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
+        
+        labels = ["D = {0}".format(D) for D in D_span]
+        for i, label in enumerate(labels):
+            ax0.plot([],[],label=label, color=colors[i])
+        ax0.legend(loc="upper left", frameon=False)
+        for j, D in enumerate(D_span):
+            ax0.plot(log_image_dims, np.log10(avg_times[:, j, 0]), linestyle="solid", color=colors[j])
+            ax0.plot(log_image_dims, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=colors[j])
+
+        ax1.set_xlabel(r"$\log_{10}(D)$")
+        ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
+        colors = ["r", "g", "b", "k"]
+        labels = ["N = {0}".format(N) for N in N_span]
+        for i, label in enumerate(labels):
+            ax1.plot([],[],label=label, color=colors[i])
+        ax1.legend(loc="upper left", frameon=False)
+        for i, N in enumerate(N_span):
+            ax1.plot(log_data_dims, np.log10(avg_times[i, :, 0]), linestyle="solid", color=colors[i])
+            ax1.plot(log_data_dims, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=colors[i])
+
+        
+
 class Camera:
     """
     The Camera class is a basic struct to wrap the image viewing orientation and dimensions
