@@ -50,6 +50,105 @@ def set_plot_defaults(use_tex = True):
     plt.rcParams['ytick.major.size']=3
     plt.rcParams['ytick.minor.size']=9/4
 
+class Profiler:
+
+    def __init__(data_dir, prof_dir):
+        self.data_dir = data_dir
+        self.prof_dir = prof_dir
+
+    def build(D_span = [64,128,256,512], save_boosted = True):
+
+        self.D_span = D_span
+
+        for D in D_span:
+            shape = (D, D, D)
+            data = np.ones(shape=shape, dtype=np.float32)
+            save_str = os.path.join(data_dir, "unboosted_" + str(D) + ".npy")
+            np.save(save_str, data.astype(np.float32))
+
+            if save_boosted:
+                shape = (D, D, D, 4)
+                data = np.ones(shape=shape, dtype=np.float32)
+                save_str = os.path.join(data_dir, "boosted_" + str(D) + ".npy")
+                np.save(save_str, data.astype(np.float32))
+
+    def run(N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = 10, rand_view = True):
+
+        epsilon = 1e-4
+
+        template_camera = Camera()
+        template_camera.tilt = 0.0
+        template_camera.length_X = 0.5
+        template_camera.length_Y = 0.5
+        
+        if rand_view:
+            phi = np.random.uniform(epsilon, 2 * np.pi - epsilon, num_iter)
+            cos_theta = np.random.uniform(-1.0 + epsilon ,1.0 - epsilon, num_iter)
+            theta = np.arccos(cos_theta)
+            cameras = []
+            for i in range(num_iter):
+                camera = copy.deepcopy(template_camera)
+                camera.set_sph_pos(r = 2.0, theta = theta, phi = epsilon, target_origin = True)
+            cameras.append(camera)
+        else:
+            template_camera.set_sph_pos(r = 2.0, theta = 0.5 * np.pi - epsilon, phi = epsilon, target_origin = True)
+            cameras = [template_camera] * 100
+
+        for i, N in enumerate(N_span):
+            for j, D in enumerate(D_span):
+                for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
+                    npy_load_str = os.path.join(self.data_dir, label + str(D) + ".npy")
+                    npy_save_str = os.path.join(self.data_dir, "scratch.npy") # overwrite output, TODO: add off switch to write
+                    scene = Scene(npy_load_str, npy_save_str, cameras)
+                    save_profile = os.path.join(self.data_dir, "profiles/profile_N{0}D{1}b{2}.txt".format(N, D, relativistic))
+                    scene.render(verbose = False, relativistic = relativistic, save_profile = save_profile)
+
+                    print("finished N = " + str(image_dim) + ", D = " + str(data_dim) + " relativistic = " + str(relativistic))
+                    print("\n\n\n\n\n")
+
+    def time_from_prof(load_str):
+
+        df = pd.read_csv(load_str, skiprows=3)
+        df = df.fillna(0)
+
+        # find time unit
+        Avg = df["Avg"]
+        time_type = Avg.iloc[0]
+
+        # find average time
+        task_names = df["Name"]
+        row = np.where(task_names == "render_from_mesh(Camera, float*, Mesh**, bool)")[0][0]
+        avg_time = float(df["Avg"].iloc[row])
+
+        if (time_type == "ms"):
+            return 1e-3 * avg_time
+        elif (time_type == "us"):
+            return 1e-6 * avg_time
+        elif (time_type == "s"):
+            return avg_time
+        else:
+            raise Exception("unable to parse time type in " + load_str)
+
+    def save_timings(save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
+
+        dd, ii = np.meshgrid(D_span, N_span, indexing="ij")
+        log_data_dims = np.log10(D_span)
+        log_image_dims = np.log10(N_span)
+
+        avg_times = np.zeros(shape=(4, 4, 2))
+
+        for i, N in enumerate(N_span):
+            for j, D in enumerate(D_span):
+                for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
+                    load_str = os.path.join(profile_dir, "profile_N" + str(N) + "D" + str(D) + "b" + str(relativistic) + ".txt")
+                    render_time = self.time_from_prof(load_str)
+                    if relativistic:
+                        avg_times[i,j,1] = render_time
+                    else:
+                        avg_times[i,j,0] = render_time
+
+        np.save(save_str, avg_times)
+
 class Camera:
     """
     The Camera class is a basic struct to wrap the image viewing orientation and dimensions

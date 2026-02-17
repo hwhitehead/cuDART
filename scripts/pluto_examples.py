@@ -383,27 +383,99 @@ def plot_profiler_results():
 
     fig.savefig("/scratch/github/cuDART_wdir/profile.png", dpi=300, bbox_inches="tight")
 
-def read_profile():
+def extract_profiler_times():
 
-    load_str = "/mnt/kocsis1/cuDART_wdir/prof_data/profiles/profile_N512D512bFalse.txt"
-    df = pd.read_csv(load_str, skiprows=3)
-    print(df.to_string())
+    profile_dir = "/scratch/github/cuDART_wdir/profiles"
+    
+    data_dims = np.array([64, 128, 256, 512])
+    image_dims = np.array([64, 128, 256, 512])
+    dd, ii = np.meshgrid(data_dims, image_dims, indexing="ij")
+    log_data_dims = np.log10(data_dims)
+    log_image_dims = np.log10(image_dims)
+
+    avg_times = np.zeros(shape=(4, 4, 2))
+
+    for i, image_dim in enumerate(image_dims):
+        for j, data_dim in enumerate(data_dims):
+            for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
+                load_str = os.path.join(profile_dir, "profile_N" + str(image_dim) + "D" + str(data_dim) + "b" + str(relativistic) + ".txt")
+                render_time = time_from_prof(load_str)
+                if relativistic:
+                    avg_times[i,j,1] = render_time
+                else:
+                    avg_times[i,j,0] = render_time
+
+    ub_mp_ps = 1e-6 * ii ** 2 / avg_times[:,:,0]
+    b_mp_ps = 1e-6 * ii ** 2 / avg_times[:,:,1]
+
+    avg_times *= 1e3
+
+    set_plot_defaults()
+    height_ratios = np.array([1.0, 1.0])
+    width_ratios = np.array([2.0])
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    L = 20.0 / 3
+    fig = plt.figure(figsize=(L, L * h_over_w))
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+    ax0 = fig.add_subplot(gs[0,0])
+    ax1 = fig.add_subplot(gs[1,0])
+
+    ax0.set_title(r"Render Image $N^2$ from domain $D^3$ with $N$, $D \in \{64,128,256,512\}$")
+
+    ax1.set_xlabel(r"$\log_{10}(D)$")
+    ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
+    colors = ["r", "g", "b", "k"]
+    labels = ["N = {0}".format(x) for x in image_dims]
+    for i, label in enumerate(labels):
+        ax1.plot([],[],label=label, color=colors[i])
+    ax1.legend(loc="upper left", frameon=False)
+    for N_index in range(4):
+        ax1.plot(log_data_dims, np.log10(avg_times[N_index, :, 0]), linestyle="solid", color=colors[N_index])
+        ax1.plot(log_data_dims, np.log10(avg_times[N_index, :, 1]), linestyle="dashed", color=colors[N_index])
+
+    ax0.set_xlabel(r"$\log_{10}(N)$")
+    ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
+    colors = ["r", "g", "b", "k"]
+    labels = ["D = {0}".format(x) for x in data_dims]
+    for i, label in enumerate(labels):
+        ax0.plot([],[],label=label, color=colors[i])
+    ax0.legend(loc="upper left", frameon=False)
+    for D_index in range(4):
+        ax0.plot(log_image_dims, np.log10(avg_times[:, D_index, 0]), linestyle="solid", color=colors[D_index])
+        ax0.plot(log_image_dims, np.log10(avg_times[:, D_index, 1]), linestyle="dashed", color=colors[D_index])
+
+    # ax0.set_xlabel(r"$C \equiv \log_{10}(N^2D)$")
+    # ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
+    # ax0.scatter([],[], marker="o", edgecolors="k", facecolors="none", label="Unboosted")
+    # ax0.scatter([],[], marker="o", edgecolors="r", facecolors="none", label="Boosted")
+    # ax0.legend(loc="upper left", frameon=False)
+    # for D_index in range(4):
+    #     ax0.scatter(np.log10(image_dims ** 2), np.log10(avg_times[D_index, :, 0]), marker="o", edgecolors="k", facecolors="none")
+    #     ax0.scatter(np.log10(image_dims ** 2), np.log10(avg_times[D_index, :, 1]), marker="o", edgecolors="r", facecolors="none")
+    #     ax0.scatter(np.log10(image_dims ** 2), np.log10(avg_times[D_index, :, 0]), marker="o", edgecolors="k", facecolors="none")
+        # ax0.scatter(np.log10(image_dims ** 2), np.log10(avg_times[D_index, :, 1]), marker="o", edgecolors="r", facecolors="none")
+
+    # ax1.set_xlabel(r"$C \equiv \log_{10}(N^2D)$")
+    # ax1.set_ylabel(r"$\log_{10}(\mathrm{MP}/\mathrm{s})$")
+    # for N_index in range(4):
+    #     ax1.scatter(np.log10(image_dims ** 2), np.log10(ub_mp_ps[N_index, :]), marker="o", edgecolors="k", facecolors="none")
+    #     ax1.scatter(np.log10(image_dims ** 2), np.log10(b_mp_ps[N_index, :]), marker="o", edgecolors="r", facecolors="none")
+
+    fig.savefig("/scratch/github/cuDART_wdir/profile.png", dpi=300, bbox_inches="tight")
+
 
 
 
 if __name__ == "__main__":
 
-    # data_dir = "/mnt/kocsis1/cuDART_wdir/prof_data"
-    # for N in [64, 128, 256, 512]:
-    #     shape = (N, N, N)
-    #     data = np.ones(shape=shape, dtype=np.float32)
-    #     save_str = os.path.join(data_dir, "unboosted_" + str(N) + ".npy")
-    #     np.save(save_str, data.astype(np.float32))
-    
-    #     shape = (N, N, N, 4)
-    #     data = np.ones(shape=shape, dtype=np.float32)
-    #     save_str = os.path.join(data_dir, "boosted_" + str(N) + ".npy")
-    #     np.save(save_str, data.astype(np.float32))
-    
-    run_profiler()
+    data_dir = "/mnt/kocsis1/cuDART_wdir/profiling/data"
+    prof_dir = "/mnt/kocsis1/cuDART_wdir/profiling/profiles
+    save_str = "/mnt/kocsis1/cuDART_wdir/profiling/timings.npy"
+    D_span = [64,128,256]
+    N_span = [64,128,256]
+    profiler = Profiler()
+    profiler.build(D_span = D_span, save_boosted = True)
+    profiler.run(N_span = N_span, D_span = D_span, num_iter=10)
+    profiler.save_timings(save_str = save_str, N_span = N_span, D_span = D_span)
+
     
