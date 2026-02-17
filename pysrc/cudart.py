@@ -88,11 +88,11 @@ class Profiler:
             cameras = []
             for i in range(num_iter):
                 camera = copy.deepcopy(template_camera)
-                camera.set_sph_pos(r = 2.0, theta = theta, phi = epsilon, target_origin = True)
+                camera.set_sph_pos(r = 2.0, theta = theta[i], phi = phi[i], target_origin = True)
             cameras.append(camera)
         else:
             template_camera.set_sph_pos(r = 2.0, theta = 0.5 * np.pi - epsilon, phi = epsilon, target_origin = True)
-            cameras = [template_camera] * 100
+            cameras = [template_camera] * num_iter
 
         for i, N in enumerate(N_span):
             for j, D in enumerate(D_span):
