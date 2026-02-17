@@ -152,7 +152,7 @@ class Profiler:
 
     def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
 
-        avg_times = np.load(save_str) * 1e-3 # to ms
+        avg_times = np.load(load_str) * 1e-3 # to ms
 
         set_plot_defaults()
         height_ratios = np.array([1.0, 1.0])
@@ -189,7 +189,8 @@ class Profiler:
             ax1.plot(log_data_dims, np.log10(avg_times[i, :, 0]), linestyle="solid", color=colors[i])
             ax1.plot(log_data_dims, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=colors[i])
 
-        
+        fig.savefig(save_str, dpi=300, bbox_inches="tight")
+        plt.close("all")
 
 class Camera:
     """
