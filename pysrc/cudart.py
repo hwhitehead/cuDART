@@ -52,11 +52,11 @@ def set_plot_defaults(use_tex = True):
 
 class Profiler:
 
-    def __init__(data_dir, prof_dir):
+    def __init__(self, data_dir, prof_dir):
         self.data_dir = data_dir
         self.prof_dir = prof_dir
 
-    def build(D_span = [64,128,256,512], save_boosted = True):
+    def build(self, D_span = [64,128,256,512], save_boosted = True):
 
         self.D_span = D_span
 
@@ -72,7 +72,7 @@ class Profiler:
                 save_str = os.path.join(data_dir, "boosted_" + str(D) + ".npy")
                 np.save(save_str, data.astype(np.float32))
 
-    def run(N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = 10, rand_view = True):
+    def run(self, N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = 10, rand_view = True):
 
         epsilon = 1e-4
 
@@ -106,7 +106,7 @@ class Profiler:
                     print("finished N = " + str(image_dim) + ", D = " + str(data_dim) + " relativistic = " + str(relativistic))
                     print("\n\n\n\n\n")
 
-    def time_from_prof(load_str):
+    def time_from_prof(self, load_str):
 
         df = pd.read_csv(load_str, skiprows=3)
         df = df.fillna(0)
@@ -129,7 +129,7 @@ class Profiler:
         else:
             raise Exception("unable to parse time type in " + load_str)
 
-    def save_timings(save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
+    def save_timings(self, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
 
         dd, ii = np.meshgrid(D_span, N_span, indexing="ij")
         log_data_dims = np.log10(D_span)
