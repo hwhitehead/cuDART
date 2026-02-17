@@ -469,7 +469,7 @@ def extract_profiler_times():
 if __name__ == "__main__":
 
     data_dir = "/mnt/kocsis1/cuDART_wdir/profiling/data"
-    prof_dir = "/mnt/kocsis1/cuDART_wdir/profiling/profiles
+    prof_dir = "/mnt/kocsis1/cuDART_wdir/profiling/profiles"
     save_str = "/mnt/kocsis1/cuDART_wdir/profiling/timings.npy"
     D_span = [64,128,256]
     N_span = [64,128,256]
