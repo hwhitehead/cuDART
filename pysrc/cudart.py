@@ -153,6 +153,9 @@ class Profiler:
     def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
 
         avg_times = np.load(load_str) * 1e-3 # to ms
+
+        print(avg_times)
+
         log_N = np.log10(N_span)
         log_D = np.log10(D_span)
 
