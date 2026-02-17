@@ -100,10 +100,10 @@ class Profiler:
                     npy_load_str = os.path.join(self.data_dir, label + str(D) + ".npy")
                     npy_save_str = os.path.join(self.data_dir, "scratch.npy") # overwrite output, TODO: add off switch to write
                     scene = Scene(npy_load_str, npy_save_str, cameras)
-                    save_profile = os.path.join(self.data_dir, "profiles/profile_N{0}D{1}b{2}.txt".format(N, D, relativistic))
+                    save_profile = os.path.join(self.prof_dir, "profile_N{0}D{1}b{2}.txt".format(N, D, relativistic))
                     scene.render(verbose = False, relativistic = relativistic, save_profile = save_profile)
 
-                    print("finished N = " + str(image_dim) + ", D = " + str(data_dim) + " relativistic = " + str(relativistic))
+                    print("finished N = " + str(N) + ", D = " + str(D) + " relativistic = " + str(relativistic))
                     print("\n\n\n\n\n")
 
     def time_from_prof(self, load_str):
