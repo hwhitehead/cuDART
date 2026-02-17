@@ -99,7 +99,7 @@ class Profiler:
             for j, D in enumerate(D_span):
                 for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
                     npy_load_str = os.path.join(self.data_dir, label + str(D) + ".npy")
-                    npy_save_str = os.path.join(self.data_dir, "scratch.npy") # overwrite output, TODO: add off switch to write
+                    npy_save_str = os.path.join(self.data_dir, "scratch") # overwrite output, TODO: add off switch to write
                     scene = Scene(npy_load_str, npy_save_str, cameras)
                     save_profile = os.path.join(self.prof_dir, "profile_N{0}D{1}b{2}.txt".format(N, D, relativistic))
                     scene.render(verbose = False, relativistic = relativistic, save_profile = save_profile)
@@ -136,7 +136,7 @@ class Profiler:
         log_data_dims = np.log10(D_span)
         log_image_dims = np.log10(N_span)
 
-        avg_times = np.zeros(shape=(4, 4, 2))
+        avg_times = np.zeros(shape=(np.size(D_span), np.size(N_span), 2))
 
         for i, N in enumerate(N_span):
             for j, D in enumerate(D_span):

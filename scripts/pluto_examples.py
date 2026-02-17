@@ -475,7 +475,7 @@ if __name__ == "__main__":
     N_span = [64,128,256]
     profiler = Profiler(data_dir = data_dir, prof_dir = prof_dir)
     # profiler.build(D_span = D_span, save_boosted = True)
-    # profiler.run(N_span = N_span, D_span = D_span, num_iter=10)
+    profiler.run(N_span = N_span, D_span = D_span, num_iter=10)
     profiler.save_timings(save_str = save_str, N_span = N_span, D_span = D_span)
 
     timing_data = np.load(save_str)
