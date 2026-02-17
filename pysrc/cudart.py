@@ -153,6 +153,8 @@ class Profiler:
     def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
 
         avg_times = np.load(load_str) * 1e-3 # to ms
+        log_N = np.log10(N_span)
+        log_D = np.log10(D_span)
 
         set_plot_defaults()
         height_ratios = np.array([1.0, 1.0])
@@ -175,8 +177,8 @@ class Profiler:
             ax0.plot([],[],label=label, color=colors[i])
         ax0.legend(loc="upper left", frameon=False)
         for j, D in enumerate(D_span):
-            ax0.plot(log_image_dims, np.log10(avg_times[:, j, 0]), linestyle="solid", color=colors[j])
-            ax0.plot(log_image_dims, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=colors[j])
+            ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=colors[j])
+            ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=colors[j])
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
@@ -186,8 +188,8 @@ class Profiler:
             ax1.plot([],[],label=label, color=colors[i])
         ax1.legend(loc="upper left", frameon=False)
         for i, N in enumerate(N_span):
-            ax1.plot(log_data_dims, np.log10(avg_times[i, :, 0]), linestyle="solid", color=colors[i])
-            ax1.plot(log_data_dims, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=colors[i])
+            ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=colors[i])
+            ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=colors[i])
 
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         plt.close("all")
