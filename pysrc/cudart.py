@@ -140,7 +140,7 @@ class Profiler:
         for i, N in enumerate(N_span):
             for j, D in enumerate(D_span):
                 for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
-                    load_str = os.path.join(profile_dir, "profile_N" + str(N) + "D" + str(D) + "b" + str(relativistic) + ".txt")
+                    load_str = os.path.join(self.prof_dir, "profile_N" + str(N) + "D" + str(D) + "b" + str(relativistic) + ".txt")
                     render_time = self.time_from_prof(load_str)
                     if relativistic:
                         avg_times[i,j,1] = render_time
