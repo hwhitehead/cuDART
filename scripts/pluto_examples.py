@@ -478,5 +478,5 @@ if __name__ == "__main__":
     # profiler.build(D_span = D_span, save_boosted = True)
     #profiler.run(N_span = N_span, D_span = D_span, num_iter=10)
     #profiler.save_timings(save_str = timing_str, N_span = N_span, D_span = D_span)
-    profiler.plot_timings(load_str = timing_str, save_str = timing_png)
+    profiler.plot_timings(load_str = timing_str, save_str = timing_png, N_span = N_span, D_span = D_span)
     
