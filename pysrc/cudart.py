@@ -160,7 +160,7 @@ class Profiler:
 
         np.save(save_str, avg_times)
 
-    def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
+    def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = None):
 
         avg_times = np.load(load_str) * 1e3 # to ms
 
@@ -183,10 +183,12 @@ class Profiler:
 
         plasma = plt.get_cmap("plasma")
         viridis = plt.get_cmap("viridis")
-        N_colors = [plasma(x) for x in np.linspace(0, 0.999, np.size(N_span))]
-        D_colors = [viridis(x) for x in np.linspace(0, 0.999, np.size(D_span))]
-        ax0.set_title(r"Render Image $N^2$ from domain $D^3$")
-
+        N_colors = [viridis(x) for x in np.linspace(0, 0.999, np.size(N_span))]
+        D_colors = [plasma(x) for x in np.linspace(0, 0.999, np.size(D_span))]
+        title_str = r"Render Image $N^2$ from domain $D^3$"
+        if num_iter is not None:
+            title_str += " (av. over {0} calls)".format(num_iter)
+        ax0.set_title(title_str)
         ax0.set_xlabel(r"$\log_{10}(N)$")
         ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
         
@@ -198,6 +200,7 @@ class Profiler:
             ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
             ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
         ax0.set_xticks(log_N, labels=N_labels)
+        ax1.set_xlim([log_N[0], log_N[-1]])
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
@@ -209,15 +212,16 @@ class Profiler:
             ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
             ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
         ax1.set_xticks(log_D, labels=D_labels)
+        ax1.set_xlim([log_D[0], log_D[-1]])
 
         sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=log_D[0], vmax=log_D[-1]))
         fig.colorbar(sm, cax=cax0, orientation="vertical")
         cax0.set_ylabel(r"Domain Size $D$")
-        cax0.set_xticks(log_D, labels=D_labels)
+        cax0.set_yticks(log_D, labels=D_labels)
 
         sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=log_N[0], vmax=log_N[-1]))
         fig.colorbar(sm, cax=cax1, orientation="vertical")
-        cax0.set_ylabel(r"Domain Size $N$")
+        cax1.set_ylabel(r"Image Size $N$")
         cax1.set_yticks(log_N, labels=N_labels)
 
         plt.subplots_adjust(wspace=0)
