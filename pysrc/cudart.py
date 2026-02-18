@@ -169,7 +169,9 @@ class Profiler:
         ax0 = fig.add_subplot(gs[0,0])
         ax1 = fig.add_subplot(gs[1,0])
 
-        colors = ["r", "g", "b", "k"]
+        cmap = plt.get_cmap("plasma")
+        N_colors = [cmap(x) for x in np.linspace(0, 0.999, np.size(N_span))]
+        D_colors = [cmap(x) for x in np.linspace(0, 0.999, np.size(D_span))]
         ax0.set_title(r"Render Image $N^2$ from domain $D^3$")
 
         ax0.set_xlabel(r"$\log_{10}(N)$")
@@ -180,8 +182,8 @@ class Profiler:
             ax0.plot([],[],label=label, color=colors[i])
         ax0.legend(loc="upper left", frameon=False)
         for j, D in enumerate(D_span):
-            ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=colors[j])
-            ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=colors[j])
+            ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
+            ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
@@ -191,8 +193,8 @@ class Profiler:
             ax1.plot([],[],label=label, color=colors[i])
         ax1.legend(loc="upper left", frameon=False)
         for i, N in enumerate(N_span):
-            ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=colors[i])
-            ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=colors[i])
+            ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
+            ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
 
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         plt.close("all")
