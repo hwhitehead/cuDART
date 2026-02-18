@@ -136,7 +136,7 @@ class Profiler:
         log_data_dims = np.log10(D_span)
         log_image_dims = np.log10(N_span)
 
-        avg_times = np.zeros(shape=(np.size(D_span), np.size(N_span), 2))
+        avg_times = np.zeros(shape=(np.size(N_span), np.size(D_span), 2)) # N, D, ub/b
 
         for i, N in enumerate(N_span):
             for j, D in enumerate(D_span):
