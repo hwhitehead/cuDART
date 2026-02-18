@@ -226,8 +226,8 @@ class Profiler:
         m_D = 1
         y_int_N = -3
         y_int_D = 2.0
-        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log N} = 2")
-        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log D} = 1")
+        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log N} = 2$")
+        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log D} = 1$")
         ax0.legend(loc="upper left", frameon=False)
         ax1.legend(loc="upper left", frameon=False)
 
