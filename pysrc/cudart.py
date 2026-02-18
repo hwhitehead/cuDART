@@ -207,7 +207,7 @@ class Profiler:
             ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
         ax1.set_xticks(log_D, labels=D_labels)
         ax1.set_xlim([log_D[0], log_D[-1]])
-        ax1.set_ylim([-1, 3])
+        ax1.set_ylim([-1, 2.5])
 
         sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=log_D[0], vmax=log_D[-1]))
         fig.colorbar(sm, cax=cax0, orientation="vertical")
@@ -224,7 +224,7 @@ class Profiler:
         fine_D_span = np.linspace(log_D[0], log_D[-1], 100)
         m_N = 2
         m_D = 1
-        y_int_N = -3
+        y_int_N = -2.0
         y_int_D = 2.0
         ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log N} = 2$")
         ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log D} = 1$")
