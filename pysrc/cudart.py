@@ -117,6 +117,8 @@ class Profiler:
 
     def time_from_prof(self, load_str):
 
+        # read average duration for render_from_mesh kernel in seconds
+
         df = pd.read_csv(load_str, skiprows=3)
         df = df.fillna(0)
 
@@ -160,7 +162,7 @@ class Profiler:
 
     def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
 
-        avg_times = np.load(load_str) * 1e-3 # to ms
+        avg_times = np.load(load_str) * 1e3 # to ms
 
         print(avg_times)
 
