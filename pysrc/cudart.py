@@ -63,13 +63,13 @@ class Profiler:
 
         for D in D_span:
             shape = (D, D, D)
-            data = np.ones(shape=shape, dtype=np.float32)
+            data = np.full(shape=shape, fill_value=0.5, dtype=np.float32)
             save_str = os.path.join(self.data_dir, "unboosted_" + str(D) + ".npy")
             np.save(save_str, data.astype(np.float32))
 
             if save_boosted:
                 shape = (D, D, D, 4)
-                data = np.ones(shape=shape, dtype=np.float32)
+                data = np.full(shape=shape, fill_value=0.5, dtype=np.float32)
                 save_str = os.path.join(self.data_dir, "boosted_" + str(D) + ".npy")
                 np.save(save_str, data.astype(np.float32))
 
