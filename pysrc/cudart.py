@@ -185,34 +185,29 @@ class Profiler:
         viridis = plt.get_cmap("viridis")
         N_colors = [viridis(x) for x in np.linspace(0, 0.999, np.size(N_span))]
         D_colors = [plasma(x) for x in np.linspace(0, 0.999, np.size(D_span))]
+        
         title_str = r"Render Image $N^2$ from domain $D^3$"
         if num_iter is not None:
             title_str += " (av. over {0} calls)".format(num_iter)
+        
         ax0.set_title(title_str)
         ax0.set_xlabel(r"$\log_{10}(N)$")
         ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
-        
-        labels = ["D = {0}".format(D) for D in D_span]
-        # for i, label in enumerate(labels):
-        #     ax0.plot([],[],label=label, color=D_colors[i])
-        # ax0.legend(loc="upper left", frameon=False)
         for j, D in enumerate(D_span):
             ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
             ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
         ax0.set_xticks(log_N, labels=N_labels)
-        ax1.set_xlim([log_N[0], log_N[-1]])
+        ax0.set_xlim([log_N[0], log_N[-1]])
+        ax0.set_ylim([-1, 3])
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
-        labels = ["N = {0}".format(N) for N in N_span]
-        # for i, label in enumerate(labels):
-        #     ax1.plot([],[],label=label, color=N_colors[i])
-        # ax1.legend(loc="upper left", frameon=False)
         for i, N in enumerate(N_span):
             ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
             ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
         ax1.set_xticks(log_D, labels=D_labels)
         ax1.set_xlim([log_D[0], log_D[-1]])
+        ax1.set_ylim([-1, 3])
 
         sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=log_D[0], vmax=log_D[-1]))
         fig.colorbar(sm, cax=cax0, orientation="vertical")
@@ -224,6 +219,16 @@ class Profiler:
         cax1.set_ylabel(r"Image Size $N$")
         cax1.set_yticks(log_N, labels=N_labels)
 
+        # add trendlines
+        fine_N_span = np.linspace(log_N[0], log_N[-1], 100)
+        fine_D_span = np.linspace(log_D[0], log_D[-1], 100)
+        m_N = 2
+        m_D = 1
+        y_int_N = 0
+        y_int_D = 0
+        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', zorder=-10, alpha=0.5)
+        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', zorder=-10, alpha=0.5)
+        
         plt.subplots_adjust(wspace=0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         plt.close("all")
