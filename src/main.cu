@@ -191,7 +191,7 @@ int main(int argc, char *argv[]) {
     build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
 
     // define render shape    
-    int tx = 32, ty = 32; // must not exceed 1024 (max thread per block)
+    int tx = 16, ty = 16; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
                                 std::ceil((float)standard_camera.num_pixels_Y / ty));
