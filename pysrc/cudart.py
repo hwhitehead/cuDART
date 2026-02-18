@@ -95,11 +95,19 @@ class Profiler:
             template_camera.set_sph_pos(r = 2.0, theta = 0.5 * np.pi - epsilon, phi = epsilon, target_origin = True)
             cameras = [template_camera] * num_iter
 
-        for i, N in enumerate(N_span):
+        
+        for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
             for j, D in enumerate(D_span):
-                for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
+                for i, N in enumerate(N_span):
+                    # target data
                     npy_load_str = os.path.join(self.data_dir, label + str(D) + ".npy")
                     npy_save_str = os.path.join(self.data_dir, "scratch") # overwrite output, TODO: add off switch to write
+                    
+                    # update camera
+                    for camera in cameras:
+                        camera.num_pixels_X = int(N)
+                        camera.num_pixels_Y = int(N)
+                    
                     scene = Scene(npy_load_str, npy_save_str, cameras)
                     save_profile = os.path.join(self.prof_dir, "profile_N{0}D{1}b{2}.txt".format(N, D, relativistic))
                     scene.render(verbose = False, relativistic = relativistic, save_profile = save_profile)
