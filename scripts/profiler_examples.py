@@ -17,7 +17,7 @@ if __name__ == "__main__":
     D_span = [64,128,256,512]
     N_span = [64,128,256,512,1024,2048]
     num_iter = 10
-    profiler = Profiler(data_dir = None, prof_dir = None)
+    profiler = Profiler(data_dir = data_dir, prof_dir = prof_dir)
     #profiler.build(D_span = D_span, save_boosted = True)
     profiler.run(N_span = N_span, D_span = D_span, num_iter=num_iter)
     profiler.save_timings(save_str = timing_str, N_span = N_span, D_span = D_span)
