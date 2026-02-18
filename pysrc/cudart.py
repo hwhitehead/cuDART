@@ -164,20 +164,20 @@ class Profiler:
 
         avg_times = np.load(load_str) * 1e3 # to ms
 
-        print(avg_times)
-
         log_N = np.log10(N_span)
         log_D = np.log10(D_span)
 
         set_plot_defaults()
         height_ratios = np.array([1.0, 1.0])
-        width_ratios = np.array([2.0])
+        width_ratios = np.array([2.0, 0.05])
         h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
         L = 20.0 / 3
         fig = plt.figure(figsize=(L, L * h_over_w))
         gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
         ax0 = fig.add_subplot(gs[0,0])
         ax1 = fig.add_subplot(gs[1,0])
+        cax0 = fig.add_subplot(gs[0,1])
+        cax1 = fig.add_subplot(gs[1,1])
 
         cmap = plt.get_cmap("plasma")
         N_colors = [cmap(x) for x in np.linspace(0, 0.999, np.size(N_span))]
@@ -194,6 +194,8 @@ class Profiler:
         for j, D in enumerate(D_span):
             ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
             ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
+        ax0.set_xticks(log_N)
+        ax0.set_xticklabels([str(N) for N in N_span])
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
@@ -204,7 +206,10 @@ class Profiler:
         for i, N in enumerate(N_span):
             ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
             ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
+        ax1.set_xticks(log_D)
+        ax1.set_xticklabels([str(D) for D in D_span])
 
+        plt.subplots_adjust(wspace=0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         plt.close("all")
 
