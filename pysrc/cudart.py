@@ -179,7 +179,7 @@ class Profiler:
         
         labels = ["D = {0}".format(D) for D in D_span]
         for i, label in enumerate(labels):
-            ax0.plot([],[],label=label, color=colors[i])
+            ax0.plot([],[],label=label, color=D_colors[i])
         ax0.legend(loc="upper left", frameon=False)
         for j, D in enumerate(D_span):
             ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
@@ -187,10 +187,9 @@ class Profiler:
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
-        colors = ["r", "g", "b", "k"]
         labels = ["N = {0}".format(N) for N in N_span]
         for i, label in enumerate(labels):
-            ax1.plot([],[],label=label, color=colors[i])
+            ax1.plot([],[],label=label, color=N_colors[i])
         ax1.legend(loc="upper left", frameon=False)
         for i, N in enumerate(N_span):
             ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
