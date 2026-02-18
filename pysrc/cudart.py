@@ -187,7 +187,7 @@ class Profiler:
         D_colors = [plasma(x) for x in np.linspace(0, 0.999, np.size(D_span))]
         
         title_str = r"Render Image $N^2$ from domain $D^3$"
-        if num_iter is not None:
+        if num_iter is not None and num_iter > 1:
             title_str += " (av. over {0} calls)".format(num_iter)
         
         ax0.set_title(title_str)
@@ -224,11 +224,13 @@ class Profiler:
         fine_D_span = np.linspace(log_D[0], log_D[-1], 100)
         m_N = 2
         m_D = 1
-        y_int_N = 0
-        y_int_D = 0
-        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', zorder=-10, alpha=0.5)
-        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', zorder=-10, alpha=0.5)
-        
+        y_int_N = -3
+        y_int_D = 2.0
+        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log N} = 2")
+        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log D} = 1")
+        ax0.legend(loc="upper left", frameon=False)
+        ax1.legend(loc="upper left", frameon=False)
+
         plt.subplots_adjust(wspace=0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         plt.close("all")
