@@ -162,6 +162,7 @@ class Profiler:
 
     def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = None):
 
+
         avg_times = np.load(load_str) * 1e3 # to ms
 
         log_N = np.log10(N_span)
@@ -170,7 +171,7 @@ class Profiler:
         D_labels = [str(D) for D in D_span]
 
         set_plot_defaults()
-        height_ratios = np.array([1.0, 1.0])
+        height_ratios = np.array([1.0, 1.0, 1.0])
         width_ratios = np.array([2.0, 0.05])
         h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
         L = 20.0 / 3
@@ -178,8 +179,10 @@ class Profiler:
         gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
         ax0 = fig.add_subplot(gs[0,0])
         ax1 = fig.add_subplot(gs[1,0])
+        ax2 = fig.add_subplot(gs[2,0])
         cax0 = fig.add_subplot(gs[0,1])
         cax1 = fig.add_subplot(gs[1,1])
+        cax2 = fig.add_subplot(gs[2,1])
 
         plasma = plt.get_cmap("plasma")
         viridis = plt.get_cmap("viridis")
@@ -188,8 +191,14 @@ class Profiler:
         
         title_str = r"Render Image $N^2$ from domain $D^3$"
         if num_iter is not None and num_iter > 1:
-            title_str += " (av. over {0} calls)".format(num_iter)
-        
+            title_str += " (averaged over {0} calls)".format(num_iter)
+
+        axr = ax0.twinx()
+        axr.yaxis.set_visible(False)
+        axr.plot([],[],color=plasma(0), linestyle="solid", label="Unboosted")
+        axr.plot([],[],color=plasma(0), linestyle="dashed", label="Boosted")
+        axr.legend(loc="upper left", frameon=False)
+
         ax0.set_title(title_str)
         ax0.set_xlabel(r"$\log_{10}(N)$")
         ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
@@ -198,7 +207,7 @@ class Profiler:
             ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
         ax0.set_xticks(log_N, labels=N_labels)
         ax0.set_xlim([log_N[0], log_N[-1]])
-        ax0.set_ylim([-1, 3])
+        ax0.set_ylim([-1, 2.5])
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
@@ -208,6 +217,15 @@ class Profiler:
         ax1.set_xticks(log_D, labels=D_labels)
         ax1.set_xlim([log_D[0], log_D[-1]])
         ax1.set_ylim([-1, 2.5])
+
+        ax2.set_xlabel(r"$\log_{10}(D)$")
+        ax2.set_ylabel(r"$\log_{10}(\mathrm{MP}/\mathrm{s})$")
+        for i, N in enumerate(N_span):
+            MP_ps = 1e-6 * N ** 2 / (1e-3 * avg_times[i, :, :])
+            ax2.plot(log_D, np.log10(MP_ps[:, 0]), linestyle="solid", color=N_colors[i])
+            ax2.plot(log_D, np.log10(MP_ps[:, 1]), linestyle="dashed", color=N_colors[i])
+        ax2.set_xticks(log_D, labels=D_labels)
+        ax2.set_xlim([log_D[0], log_D[-1]])
 
         sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=log_D[0], vmax=log_D[-1]))
         fig.colorbar(sm, cax=cax0, orientation="vertical")
@@ -219,17 +237,22 @@ class Profiler:
         cax1.set_ylabel(r"Image Size $N$")
         cax1.set_yticks(log_N, labels=N_labels)
 
+        sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=log_N[0], vmax=log_N[-1]))
+        fig.colorbar(sm, cax=cax2, orientation="vertical")
+        cax2.set_ylabel(r"Image Size $N$")
+        cax2.set_yticks(log_N, labels=N_labels)
+
         # add trendlines
         fine_N_span = np.linspace(log_N[0], log_N[-1], 100)
         fine_D_span = np.linspace(log_D[0], log_D[-1], 100)
         m_N = 2
         m_D = 1
-        y_int_N = -2.0
-        y_int_D = 2.0
-        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log N} = 2$")
-        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log D} = 1$")
-        ax0.legend(loc="upper left", frameon=False)
-        ax1.legend(loc="upper left", frameon=False)
+        y_int_N = -2.25
+        y_int_D = -1.125
+        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', linestyle="dotted", zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log N} = 2$")
+        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', linestyle="dotted", zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log D} = 1$")
+        ax0.legend(loc="lower right", frameon=False)
+        ax1.legend(loc="lower right", frameon=False)
 
         plt.subplots_adjust(wspace=0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
