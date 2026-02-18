@@ -166,6 +166,8 @@ class Profiler:
 
         log_N = np.log10(N_span)
         log_D = np.log10(D_span)
+        N_labels = [str(N) for N in N_span]
+        D_labels = [str(D) for D in D_span]
 
         set_plot_defaults()
         height_ratios = np.array([1.0, 1.0])
@@ -194,8 +196,7 @@ class Profiler:
         for j, D in enumerate(D_span):
             ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
             ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
-        ax0.set_xticks(log_N)
-        ax0.set_xticklabels([str(N) for N in N_span])
+        ax0.set_xticks(log_N, labels=N_labels)
 
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
@@ -206,8 +207,7 @@ class Profiler:
         for i, N in enumerate(N_span):
             ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
             ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
-        ax1.set_xticks(log_D)
-        ax1.set_xticklabels([str(D) for D in D_span])
+        ax1.set_xticks(log_D, labels=D_labels)
 
         plt.subplots_adjust(wspace=0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
