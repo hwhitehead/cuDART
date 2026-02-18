@@ -181,18 +181,19 @@ class Profiler:
         cax0 = fig.add_subplot(gs[0,1])
         cax1 = fig.add_subplot(gs[1,1])
 
-        cmap = plt.get_cmap("plasma")
-        N_colors = [cmap(x) for x in np.linspace(0, 0.999, np.size(N_span))]
-        D_colors = [cmap(x) for x in np.linspace(0, 0.999, np.size(D_span))]
+        plasma = plt.get_cmap("plasma")
+        viridis = plt.get_cmap("viridis")
+        N_colors = [plasma(x) for x in np.linspace(0, 0.999, np.size(N_span))]
+        D_colors = [viridis(x) for x in np.linspace(0, 0.999, np.size(D_span))]
         ax0.set_title(r"Render Image $N^2$ from domain $D^3$")
 
         ax0.set_xlabel(r"$\log_{10}(N)$")
         ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
         
         labels = ["D = {0}".format(D) for D in D_span]
-        for i, label in enumerate(labels):
-            ax0.plot([],[],label=label, color=D_colors[i])
-        ax0.legend(loc="upper left", frameon=False)
+        # for i, label in enumerate(labels):
+        #     ax0.plot([],[],label=label, color=D_colors[i])
+        # ax0.legend(loc="upper left", frameon=False)
         for j, D in enumerate(D_span):
             ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
             ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
@@ -201,13 +202,23 @@ class Profiler:
         ax1.set_xlabel(r"$\log_{10}(D)$")
         ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
         labels = ["N = {0}".format(N) for N in N_span]
-        for i, label in enumerate(labels):
-            ax1.plot([],[],label=label, color=N_colors[i])
-        ax1.legend(loc="upper left", frameon=False)
+        # for i, label in enumerate(labels):
+        #     ax1.plot([],[],label=label, color=N_colors[i])
+        # ax1.legend(loc="upper left", frameon=False)
         for i, N in enumerate(N_span):
             ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
             ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
         ax1.set_xticks(log_D, labels=D_labels)
+
+        sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=log_D[0], vmax=log_D[-1]))
+        fig.colorbar(sm, cax=cax0, orientation="vertical")
+        cax0.set_ylabel(r"Domain Size $D$")
+        cax0.set_xticks(log_D, labels=D_labels)
+
+        sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=log_N[0], vmax=log_N[-1]))
+        fig.colorbar(sm, cax=cax1, orientation="vertical")
+        cax0.set_ylabel(r"Domain Size $N$")
+        cax1.set_yticks(log_N, labels=N_labels)
 
         plt.subplots_adjust(wspace=0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
