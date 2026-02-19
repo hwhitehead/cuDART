@@ -16,7 +16,7 @@ def build_orbital_arrays(data_dir, D = 256, half_len = 20):
 if __name__ == "__main__":
 
     data_dir = "/mnt/kocsis1/cuDART_wdir/orbitals/orbital_data"
-    build_orbital_arrays(data_dir, D = 256, half_len = 20)
+    #build_orbital_arrays(data_dir, D = 256, half_len = 20)
 
     save_dir = "/mnt/kocsis1/cuDART_wdir/orbitals/orbital_plots/n3l2m1"
     orbital = Orbital(n = 3, l = 2, m = 1, data_dir = data_dir)

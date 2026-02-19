@@ -155,7 +155,7 @@ class Orbital:
         fig.savefig(save_str, dpi=600, bbox_inches="tight")
         plt.close("all")
 
-    def render(self, save_dir, num_img = 100, N = 256, npy_load_str = None, half_len = None, D = None):
+    def render(self, save_dir, num_img = 100, N = 256, npy_load_str = None, half_len = None, D = None, remove_raw_images = True):
 
         if half_len is None:
             if self.half_len is None:
