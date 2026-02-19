@@ -49,7 +49,7 @@ class Orbital:
         rr = np.sqrt(xx ** 2 + yy ** 2 + zz ** 2)
         cos_theta = zz / rr
         PP = self.eval_pdf(rr, cos_theta)
-        np.save(self.npy_str, PP)
+        np.save(self.npy_str, PP.astype(np.float32))
 
     def select_legendre(self):
 
