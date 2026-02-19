@@ -30,15 +30,7 @@ class Orbital:
         self.l = l
         self.m = m
         self.a0 = 1
-
-        self.update_funcs()
         self.npy_str = None
-
-    def update_funcs(self):
-
-        self.laguerre = genlaguerre(n = self.n - self.l - 1, alpha = 2 * self.l + 1)
-        self.build_radial_prefacs()
-        self.build_angular_prefacs()
 
     def save_mesh(self, D = 256, half_len = 5):
 
@@ -52,28 +44,26 @@ class Orbital:
         PP = self.eval_pdf(rr, cos_theta)
         np.save(self.npy_str, PP.astype(np.float32))
 
-    def build_radial_prefacs(self):
-
-        self.r_fac = 2 / (self.n * self.a0)
-        radial_prefac = factorial(self.n - self.l - 1) / (2 * self.n * factorial(self.n + self.l))
-        radial_prefac *= np.power(self.r_fac, 5)
-        self.radial_prefac = radial_prefac
-
-    def build_angular_prefacs(self):
-
-        self.angular_prefac = (2 * self.l + 1) / (2 * np.pi)
-        self.angular_prefac *= factorial(self.l - self.m)
-        self.angular_prefac /= factorial(self.l + self.m)
-
-    def eval_R_sqr(self, r):
-
-        return self.radial_prefac * np.exp(-self.r_fac * r) * np.power(r, 2 * self.l) * self.laguerre(self.r_fac * r) ** 2
-
-    def eval_Y_sqr(self, cos_theta):
-        return self.angular_prefac * lpmv(self.m, self.l, cos_theta) ** 2
-
     def eval_pdf(self, r, cos_theta):
-        return self.eval_R_sqr(r) * self.eval_Y_sqr(cos_theta)
+
+        # build angular prefactors
+        r_fac = 2 / (self.n * self.a0)
+        radial_prefac = factorial(self.n - self.l - 1) / (2 * self.n * factorial(self.n + self.l))
+        radial_prefac *= np.power(r_fac, 5)
+
+        # calculate radial component
+        laguerre = genlaguerre(n=self.n - self.l - 1, alpha=2 * self.l + 1)
+        R_sqr = radial_prefac * np.exp(-r_fac * r) * np.power(r, 2 * self.l) * laguerre(r_fac * r) ** 2
+
+        # build angular prefactor
+        angular_prefac = (2 * self.l + 1) / (2 * np.pi)
+        angular_prefac *= factorial(self.l - self.m)
+        angular_prefac /= factorial(self.l + self.m)
+
+        # calculate angular component
+        Y_sqr = angular_prefac * lpmv(self.m, self.l, cos_theta) ** 2
+
+        return R_sqr * Y_sqr
 
     def plot_slice(self, save_str, axis = 2, axis_pos = 0, npy_str = None, half_len = None, D = None):
 
