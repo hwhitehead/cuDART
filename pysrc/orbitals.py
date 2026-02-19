@@ -155,7 +155,7 @@ class Orbital:
         fig.savefig(save_str, dpi=600, bbox_inches="tight")
         plt.close("all")
 
-    def render(self, save_dir, num_img = 100, N = 256, npy_load_str = None, half_len = None, D = None, remove_raw_images = True):
+    def render(self, save_dir, num_img = 100, N = 256, npy_load_str = None, half_len = None, D = None, remove_raw_images = True, vmin = None, vmax = None):
 
         if half_len is None:
             if self.half_len is None:
@@ -204,7 +204,7 @@ class Orbital:
         scene.render(verbose=True)
         print("finished rendering raw images")
 
-        scene.plot(png_save_str, cmap="afmhot", verbose=True, remove_raw_images=remove_raw_images, vmin=None, vmax=None)
+        scene.plot(png_save_str, cmap="afmhot", verbose=True, remove_raw_images=remove_raw_images, vmin=vmin, vmax=vmax)
         print("finished rendering rasterised images")
 
         print("unlablled render example finished.")
