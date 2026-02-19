@@ -16,12 +16,8 @@ def build_orbital_arrays(data_dir, D = 256, half_len = 20):
 if __name__ == "__main__":
 
     data_dir = "/mnt/kocsis1/cuDART_wdir/orbitals/orbital_data"
-    build_orbital_arrays(data_dir, D = 256, half_len = 20)
+    #build_orbital_arrays(data_dir, D = 256, half_len = 20)
 
-    # save_dir = "/mnt/kocsis1/cuDART_wdir/orbitals/orbital_plots/n3l2m0"
-    # orbital = Orbital(n = 3, l = 2, m = 0, data_dir = data_dir)
-    # orbital.render(save_dir, num_img=200, N=256, half_len=20, D=256, vmin=-4.5, vmax=-2.5)
-
-    # data = np.load("/scratch/github/cuDART_wdir/orbitals/n3l2m2D256L20.npy")
-    # print(np.max(data))
-    # print(np.min(data))
+    save_dir = "/mnt/kocsis1/cuDART_wdir/orbitals/orbital_plots/n4l3m0"
+    orbital = Orbital(n = 4, l = 3, m = 0, data_dir = data_dir)
+    orbital.render(save_dir, num_img=200, N=256, half_len=20, D=256, vmin=-4.5, vmax=-2.5)
