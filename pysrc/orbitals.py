@@ -1,6 +1,8 @@
 import numpy as np
 import os, sys
-from scipy.special import factorial
+
+import scipy.special
+from scipy.special import factorial, genlaguerre, lpmv
 
 sys.path.append("..")
 from pysrc import *
@@ -34,8 +36,7 @@ class Orbital:
 
     def update_funcs(self):
 
-        self.select_laguerre()
-        self.select_legendre()
+        self.laguerre = genlaguerre(n = self.n - self.l - 1, alpha = 2 * self.l + 1)
         self.build_radial_prefacs()
         self.build_angular_prefacs()
 
@@ -50,40 +51,6 @@ class Orbital:
         cos_theta = zz / rr
         PP = self.eval_pdf(rr, cos_theta)
         np.save(self.npy_str, PP.astype(np.float32))
-
-    def select_legendre(self):
-
-        if self.l == 0:
-            self.eval_legendre = lambda x : 1
-        elif self.l == 1:
-            if self.m == 0:
-                self.eval_legendre = lambda x : x
-            else:
-                self.eval_legendre = lambda x : -np.sqrt(1 - x ** 2)
-        elif self.l == 2:
-            if self.m == 0:
-                self.eval_legendre = lambda x : 0.5 * (3 * x ** 2 - 1)
-            elif np.abs(self.m) == 1:
-                self.eval_legendre = lambda x : - 3 * x * np.sqrt(1 - x ** 2)
-            else:
-                self.eval_legendre = lambda x : 3 * (1 - x ** 2)
-        # l > 2 currently unsupported as n_max = 3
-
-    def select_laguerre(self):
-
-        n = self.n - self.l - 1
-        a = 2 * self.l + 1
-
-        if n == 0:
-            self.eval_laguerre = lambda x : 1
-        elif n == 1:
-            self.eval_laguerre = lambda x : - x + a + 1
-        elif n == 2:
-            self.eval_laguerre = lambda x : 0.5 * (x**2 - 2 * (a + 2) * x + (a + 1) * (a+2))
-        elif n == 3:
-            self.eval_laguerre = lambda x :(-x ** 3 + 3 * (a + 3) * x ** 2 - 3 * (a + 2) * (a + 3) * x + (a + 1) * (a + 2) * (a + 3)) / 6
-        else:
-            raise Exception("n > 3 currently unsupported for generalised Laguerre polynomials")
 
     def build_radial_prefacs(self):
 
@@ -100,10 +67,10 @@ class Orbital:
 
     def eval_R_sqr(self, r):
 
-        return self.radial_prefac * np.exp(-self.r_fac * r) * np.power(r, 2 * self.l) * self.eval_laguerre(self.r_fac * r) ** 2
+        return self.radial_prefac * np.exp(-self.r_fac * r) * np.power(r, 2 * self.l) * self.laguerre(self.r_fac * r) ** 2
 
     def eval_Y_sqr(self, cos_theta):
-        return self.angular_prefac * self.eval_legendre(cos_theta) ** 2
+        return self.angular_prefac * lpmv(self.m, self.l, cos_theta) ** 2
 
     def eval_pdf(self, r, cos_theta):
         return self.eval_R_sqr(r) * self.eval_Y_sqr(cos_theta)
