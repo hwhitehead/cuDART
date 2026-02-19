@@ -201,7 +201,7 @@ class Orbital:
         print("built scene")
 
         # render and save images
-        scene.render(verbose=True, relativistic=False, profile=False)
+        scene.render(verbose=True, relativistic=False, save_profile=False)
         print("finished rendering raw images")
 
         scene.plot(png_save_str, cmap="afmhot", verbose=True, remove_raw_images=remove_raw_images, vmin=None, vmax=None)
