@@ -6,6 +6,7 @@ import pandas as pd
 
 host_dir = "/mnt/users/hww27/cuDART"
 str_zfill = 3
+epsilon = 1e-6
 
 def set_plot_defaults(use_tex = True):
     """
