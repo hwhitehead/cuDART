@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     save_dir = "/mnt/kocsis1/cuDART_wdir/orbitals/orbital_plots/n3l2m1"
     orbital = Orbital(n = 3, l = 2, m = 1, data_dir = data_dir)
-    orbital.render(save_dir, num_img=100, N=256, half_len=20, D=256, vmin=-4.5, vmax=-2.5)
+    orbital.render(save_dir, num_img=200, N=256, half_len=20, D=256, vmin=-4.5, vmax=-2)
 
     # data = np.load("/scratch/github/cuDART_wdir/orbitals/n3l2m2D256L20.npy")
     # print(np.max(data))
