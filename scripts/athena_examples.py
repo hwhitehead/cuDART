@@ -45,8 +45,8 @@ def render_athena_example():
     scene.render()
     scene.plot(png_save_str, remove_raw_images = False)
 
-    if __name__ == "__main__":
+if __name__ == "__main__":
 
-        build_inhomo_athena_example()
+    build_inhomo_athena_example()
 
-        render_athena_example()
+    render_athena_example()
