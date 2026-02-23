@@ -390,8 +390,8 @@ class AthenaData:
         mesh.write_header()
         return mesh
 
-    def in_bounds(self, xl_data, xr_data, bounds):
-        for dim in range(np.size(xl_data)):
+    def in_bounds(self, xl, xr, bounds):
+        for dim in range(np.size(xl)):
             if xl[dim] > bounds[dim][1]:
                 return False
             elif xr[dim] < bounds[dim][0]:
