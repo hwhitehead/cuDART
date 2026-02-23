@@ -8,7 +8,7 @@ from pysrc import *
 def build_athena_example(homogenize=False, verbose=False):
 
     h_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
 
     bh = BlackHole(0, bh_npy_str)
@@ -28,38 +28,6 @@ def render_athena_example():
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/rho_output/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/rho_output/img"
-
-    bh = BlackHole(0, bh_npy_str)
-    rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
-    l = 3
-
-    template_camera = Camera()
-    template_camera.num_pixels_X = 1024
-    template_camera.num_pixels_Y = 1024
-    template_camera.tilt = 0.0
-    template_camera.length_X = 4 * rh
-    template_camera.length_Y = 4 * rh
-
-    num_img = 300
-    phi = epsilon
-    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
-    cameras = []
-    for theta in theta_ar:
-        camera = copy.deepcopy(template_camera)
-        camera.set_sph_pos(r = 5 * l * rh, theta = theta, phi = phi, target_origin = True)
-        cameras.append(camera)
-
-    scene = Scene(data_dir, npy_save_str, cameras)
-    scene.render(verbose=True)
-    # scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
-
-def render_athena_example_alt():
-
-    load_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/vz_mesh"
-    bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/vz_output/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/vz_output/img"
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
@@ -112,7 +80,7 @@ def composite_plot(rho_str, vz_str, save_str):
     # vz_RGBA[...,3][vz_RGBA[...,3] < 0.05] = 0.0
 
     set_plot_defaults(use_tex=True)
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10.0/3, 10.0/3))
     ax = fig.add_subplot()
     ax.set_facecolor("k")
     ax.imshow(rho_RGBA)
@@ -124,8 +92,8 @@ def composite_plot(rho_str, vz_str, save_str):
 
 def loop_composites(num_img=100):
 
-    rho_dir = "/scratch/thesis/jets/cudart_renders/rho"
-    vz_dir = "/scratch/thesis/jets/cudart_renders/vz"
+    rho_dir = "/scratch/thesis/jets/cudart_renders/rho_hr"
+    vz_dir = "/scratch/thesis/jets/cudart_renders/vz_hr"
     save_dir = "/scratch/thesis/jets/cudart_renders/comp"
 
     for n in range(num_img):
@@ -136,9 +104,6 @@ def loop_composites(num_img=100):
 
 if __name__ == "__main__":
 
-    # build_athena_example()
-
+    build_athena_example(homogenize=True)
     render_athena_example()
-    render_athena_example_alt()
-
-    # loop_composites()
+    #loop_composites()
