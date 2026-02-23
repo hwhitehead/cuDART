@@ -12,11 +12,11 @@ def build_athena_example(homogenize=False, verbose=False):
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
-    l = 1
+    l = 2
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="P", level=5, nzfill=5, verbose=verbose)
+    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="T", level=4, nzfill=5, verbose=verbose)
 
     return
 
@@ -36,8 +36,8 @@ def render_athena_example():
     template_camera.num_pixels_X = 512
     template_camera.num_pixels_Y = 512
     template_camera.tilt = 0.0
-    template_camera.length_X = 2 * rh
-    template_camera.length_Y = 2 * rh
+    template_camera.length_X = 4 * rh
+    template_camera.length_Y = 4 * rh
 
     num_img = 100
     phi = epsilon
@@ -50,7 +50,7 @@ def render_athena_example():
 
     scene = Scene(data_dir, npy_save_str, cameras)
     scene.render(verbose=True)
-    scene.plot(png_save_str, remove_raw_images = False, vmin=-7, vmax=-5)
+    scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
 
 if __name__ == "__main__":
 
