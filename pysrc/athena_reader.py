@@ -359,7 +359,7 @@ class AthenaData:
     def build_mesh(self, data_dir, nzfill = None, homogenize = False, origin = np.array([0.0, 0.0, 0.0]), bounds = None, tracer_type="P", level=3):
 
         if nzfill is None:
-            nzfill = np.ceil(np.log10(self.NumMeshBlocks))
+            nzfill = int(np.ceil(np.log10(self.NumMeshBlocks)))
         mesh = Mesh(data_dir, nzfill = nzfill)
 
         # determine bounds
