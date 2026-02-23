@@ -42,16 +42,11 @@ def render_athena_example():
     cameras = [template_camera]
 
     scene = Scene(data_dir, npy_save_str, cameras)
-    scene.render(verbose=True)
-    scene.plot(png_save_str, remove_raw_images = False)
+    scene.render(verbose=True, vmin=, vmax=None)
+    scene.plot(png_save_str, remove_raw_images = Fals, vmin=-7, vmax=-5)
 
 if __name__ == "__main__":
 
     # build_athena_example(homogenize=True, verbose=True)
 
-    # render_athena_example()
-
-    data = np.load("/mnt/kocsis1/cuDART_wdir/athena/output/raw00000.npy")
-    log_data = np.log10(data)
-    print(np.max(log_data))
-    print(np.min(log_data))
+    render_athena_example()
