@@ -16,7 +16,7 @@ def build_athena_example(homogenize=False, verbose=False):
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="P", level=2, nzfill=5, verbose=verbose)
+    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="P", level=5, nzfill=5, verbose=verbose)
 
     return
 
@@ -38,8 +38,15 @@ def render_athena_example():
     template_camera.tilt = 0.0
     template_camera.length_X = 2 * rh
     template_camera.length_Y = 2 * rh
-    template_camera.set_sph_pos(r=5 * l * rh, phi = 0.0001, theta = 0.4999 * np.pi)
-    cameras = [template_camera]
+
+    num_img = 100
+    phi = epsilon
+    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
+    cameras = []
+    for theta in theta_ar:
+        camera = copy.deepcopy(template_camera)
+        camera.set_sph_pos(r = 5 * l * rh, theta = theta, phi = phi, target_origin = True)
+        cameras.append(camera)
 
     scene = Scene(data_dir, npy_save_str, cameras)
     scene.render(verbose=True)
@@ -47,6 +54,6 @@ def render_athena_example():
 
 if __name__ == "__main__":
 
-    # build_athena_example(homogenize=True, verbose=True)
+    build_athena_example(homogenize=True, verbose=True)
 
     render_athena_example()
