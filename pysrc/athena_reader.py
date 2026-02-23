@@ -392,10 +392,12 @@ class AthenaData:
                 if not self.in_bounds(xl, xr, bounds): continue
 
                 if tracer_type in self.variable_dict.values():
-                    mb_data = np.einsum("kji->ijk", getattr(self, tracer_type)[n, ...])
+                    #mb_data = np.einsum("kji->ijk", getattr(self, tracer_type)[n, ...])
+                    mb_data = getattr(self, tracer_type)[n, ...]
                     mesh.add_meshblock(mb_data, xl, xr)
                 elif tracer_type == "vel_z":
-                    mb_data = np.abs(np.einsum("kji->ijk", getattr(self, "vz")[n, ...]))
+                    # mb_data = np.abs(np.einsum("kji->ijk", getattr(self, "vz")[n, ...]))
+                    mb_data = getattr(self, "vz")[n, ...])
                     mesh.add_meshblock(mb_data, xl, xr)
                 else:
                     raise Exception("did not recognise pass to tracer_type")
