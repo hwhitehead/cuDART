@@ -372,8 +372,14 @@ class AthenaData:
 
         # import data
         if homogenize:
-            homo_data = self.homogenize(level = level, homo_vars=[tracer_type], bounds=bounds, verbose = verbose)
-            mb_data = np.einsum("kji->ijk", homo_data[tracer_type])
+            if tracer_type in self.variable_dict.values():
+                homo_data = self.homogenize(level = level, homo_vars=[tracer_type], bounds=bounds, verbose = verbose)
+                mb_data = np.einsum("kji->ijk", homo_data[tracer_type])
+            elif tracer_type == "vel_z":
+                homo_data = self.homogenize(level = level, homo_vars=["vz"], bounds=bounds, verbose = verbose)
+                mb_data = np.abs(np.einsum("kji->ijk", homo_data[tracer_type]))
+            else:
+                raise Exception("did not recognise pass to tracer_type")
             xl = np.array([np.min(homo_data["x"]), np.min(homo_data["y"]), np.min(homo_data["z"])])
             xr = np.array([np.max(homo_data["x"]), np.max(homo_data["y"]), np.max(homo_data["z"])])
             mesh.add_meshblock(mb_data, xl, xr)
