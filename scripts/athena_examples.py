@@ -4,10 +4,10 @@ import numpy as np
 sys.path.append("..")
 from pysrc import *
 
-def build_inhomo_athena_example():
+def build_athena_example(homogenize=False):
 
     h_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
 
     bh = BlackHole(0, bh_npy_str)
@@ -16,14 +16,14 @@ def build_inhomo_athena_example():
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=False, bounds=bounds, tracer_type="P", level=2, nzfill=5)
+    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="P", level=2, nzfill=5)
 
     return
 
 def render_athena_example():
 
     load_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/output/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/output/img"
@@ -47,6 +47,6 @@ def render_athena_example():
 
 if __name__ == "__main__":
 
-    build_inhomo_athena_example()
+    build_homo_athena_example(homogenize=True)
 
-    render_athena_example()
+    render_homo_athena_example()
