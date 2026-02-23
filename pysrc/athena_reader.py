@@ -374,10 +374,12 @@ class AthenaData:
         if homogenize:
             if tracer_type in self.variable_dict.values():
                 homo_data = self.homogenize(level = level, homo_vars=[tracer_type], bounds=bounds, verbose = verbose)
-                mb_data = np.einsum("kji->ijk", homo_data[tracer_type])
+                # mb_data = np.einsum("kji->ijk", homo_data[tracer_type])
+                mb_data = homo_data[tracer_type]
             elif tracer_type == "vel_z":
                 homo_data = self.homogenize(level = level, homo_vars=["vz"], bounds=bounds, verbose = verbose)
-                mb_data = np.abs(np.einsum("kji->ijk", homo_data["vz"]))
+                # mb_data = np.abs(np.einsum("kji->ijk", homo_data["vz"]))
+                mb_data = np.abs(homo_data["vz"])
             else:
                 raise Exception("did not recognise pass to tracer_type")
             xl = np.array([np.min(homo_data["x"]), np.min(homo_data["y"]), np.min(homo_data["z"])])

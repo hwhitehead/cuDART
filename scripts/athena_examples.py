@@ -8,7 +8,7 @@ from pysrc import *
 def build_athena_example(homogenize=False, verbose=False, level=4):
 
     h_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/rho_mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
 
     bh = BlackHole(0, bh_npy_str)
@@ -24,18 +24,18 @@ def build_athena_example(homogenize=False, verbose=False, level=4):
 def render_athena_example():
 
     load_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/rho_mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/rho_output/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/rho_output/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/img"
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
     l = 3
 
     template_camera = Camera()
-    template_camera.num_pixels_X = 1024
-    template_camera.num_pixels_Y = 1024
+    template_camera.num_pixels_X = 512
+    template_camera.num_pixels_Y = 512
     template_camera.tilt = 0.0
     template_camera.length_X = 4 * rh
     template_camera.length_Y = 4 * rh
@@ -51,7 +51,7 @@ def render_athena_example():
 
     scene = Scene(data_dir, npy_save_str, cameras)
     scene.render(verbose=True)
-    # scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
+    scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
 
 def remap(input, inp_min, inp_max):
 
@@ -90,13 +90,13 @@ def composite_plot(rho_str, vz_str, save_str):
     fig.savefig(save_str, dpi=300, bbox_inches="tight")
     plt.close("all")
 
-def loop_composites(num_img=100):
+def loop_composites(num_img=300):
 
     rho_dir = "/scratch/thesis/jets/cudart_renders/rho_hr"
     vz_dir = "/scratch/thesis/jets/cudart_renders/vz_hr"
     save_dir = "/scratch/thesis/jets/cudart_renders/comp"
 
-    for n in range(num_img):
+    for n in range(100,num_img):
         rho_str = os.path.join(rho_dir, "raw" + str(n).zfill(5) + ".npy")
         vz_str = os.path.join(vz_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, str(n).zfill(5) + ".png")
@@ -104,6 +104,6 @@ def loop_composites(num_img=100):
 
 if __name__ == "__main__":
 
-    build_athena_example(homogenize=True)
+    build_athena_example(homogenize=False)
     render_athena_example()
     #loop_composites()
