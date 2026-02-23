@@ -156,7 +156,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     // load mb data into host memory
     clock_t npy_read_start = clock();
     int mem_offset = 0;
-    size_t num_zero_pad = 3;
+    size_t num_zero_pad = 5;
     for (int n = 0; n < all_mb_info.size(); n++) {
         // load meshblock data as (nx,ny,nz,p) where p = 1 or 4
         std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy";
