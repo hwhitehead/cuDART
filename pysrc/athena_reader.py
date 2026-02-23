@@ -356,7 +356,7 @@ class AthenaData:
 
         return data
 
-    def build_mesh(self, data_dir, nzfill = None, homogenize = False, origin = np.array([0.0, 0.0, 0.0]), bounds = None, tracer_type="prs", level=3):
+    def build_mesh(self, data_dir, nzfill = None, homogenize = False, origin = np.array([0.0, 0.0, 0.0]), bounds = None, tracer_type="P", level=3):
 
         if nzfill is None:
             nzfill = np.ceil(np.log10(self.NumMeshBlocks))
@@ -381,7 +381,7 @@ class AthenaData:
                 xr = np.array([self.x1f[n,-1], self.x2f[n,-1], self.x3f[n,-1]])
                 if not self.in_bounds(xl, xr, bounds): continue
 
-                if tracer_type in self.variable_dict:
+                if tracer_type in self.variable_dict.values():
                     mb_data = np.einsum("kji->ijk", getattr(self, tracer_type)[n, ...])
                     mesh.add_meshblock(mb_data, xl, xr)
                 else:
