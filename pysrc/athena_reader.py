@@ -379,7 +379,7 @@ class AthenaData:
             for n in range(0, self.NumMeshBlocks):
                 xl = np.array([self.x1f[n,0], self.x2f[n,0], self.x3f[n,0]])
                 xr = np.array([self.x1f[n,-1], self.x2f[n,-1], self.x3f[n,-1]])
-                if not in_bounds(xl, xr, bounds): continue
+                if not self.in_bounds(xl, xr, bounds): continue
 
                 if tracer_type in self.variable_dict:
                     mb_data = np.einsum("kji->ijk", getattr(self, tracer_type)[n, ...])
