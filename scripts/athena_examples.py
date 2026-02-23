@@ -43,7 +43,7 @@ def render_athena_example():
 
     scene = Scene(data_dir, npy_save_str, cameras)
     scene.render(verbose=True)
-    scene.plot(png_save_str, remove_raw_images = Fals, vmin=-7, vmax=-5)
+    scene.plot(png_save_str, remove_raw_images = False, vmin=-7, vmax=-5)
 
 if __name__ == "__main__":
 
