@@ -47,6 +47,11 @@ def render_athena_example():
 
 if __name__ == "__main__":
 
-    build_athena_example(homogenize=True, verbose=True)
+    # build_athena_example(homogenize=True, verbose=True)
 
-    render_athena_example()
+    # render_athena_example()
+
+    data = np.load("/mnt/kocsis1/cuDART_wdir/athena/output/raw00000.npy")
+    log_data = np.log10(data)
+    print(np.max(log_data))
+    print(np.min(log_data))
