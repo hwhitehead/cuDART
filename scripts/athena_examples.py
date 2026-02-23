@@ -24,23 +24,23 @@ def build_athena_example(homogenize=False, verbose=False):
 def render_athena_example():
 
     load_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/rho_output/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/rho_output/img"
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
     l = 3
 
     template_camera = Camera()
-    template_camera.num_pixels_X = 512
-    template_camera.num_pixels_Y = 512
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
     template_camera.tilt = 0.0
     template_camera.length_X = 4 * rh
     template_camera.length_Y = 4 * rh
 
-    num_img = 100
+    num_img = 300
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
@@ -51,7 +51,39 @@ def render_athena_example():
 
     scene = Scene(data_dir, npy_save_str, cameras)
     scene.render(verbose=True)
-    scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
+    # scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
+
+def render_athena_example_alt():
+
+    load_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/vz_mesh"
+    bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/vz_output/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/vz_output/img"
+
+    bh = BlackHole(0, bh_npy_str)
+    rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
+    l = 3
+
+    template_camera = Camera()
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
+    template_camera.tilt = 0.0
+    template_camera.length_X = 4 * rh
+    template_camera.length_Y = 4 * rh
+
+    num_img = 300
+    phi = epsilon
+    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
+    cameras = []
+    for theta in theta_ar:
+        camera = copy.deepcopy(template_camera)
+        camera.set_sph_pos(r = 5 * l * rh, theta = theta, phi = phi, target_origin = True)
+        cameras.append(camera)
+
+    scene = Scene(data_dir, npy_save_str, cameras)
+    scene.render(verbose=True)
+    # scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
 
 def remap(input, inp_min, inp_max):
 
@@ -104,6 +136,9 @@ def loop_composites(num_img=100):
 
 if __name__ == "__main__":
 
-    build_athena_example()
+    # build_athena_example()
 
     render_athena_example()
+    render_athena_example_alt()
+
+    # loop_composites()
