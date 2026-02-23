@@ -47,6 +47,6 @@ def render_athena_example():
 
 if __name__ == "__main__":
 
-    build_homo_athena_example(homogenize=True)
+    build_athena_example(homogenize=True)
 
-    render_homo_athena_example()
+    render_athena_example()
