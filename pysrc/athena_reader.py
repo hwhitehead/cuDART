@@ -365,6 +365,8 @@ class AthenaData:
         # determine bounds
         if bounds is None:
             bounds = np.array([[-np.inf, np.inf], [-np.inf, np.inf], [-np.inf, np.inf]])
+        else:
+            bounds = np.array(bounds)
         for dim in range(3):
             bounds[dim][:] += origin[dim]
 
