@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
     // iterate over cameras
     int img_count = 0;
     int total_images = cameras.size();
-    size_t num_zero_pad = 3;
+    size_t num_zero_pad = 5;
     if (verbose) {
         std::cout << "=============================================================\n";
         if (total_images == 1) {

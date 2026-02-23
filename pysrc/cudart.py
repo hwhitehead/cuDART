@@ -530,7 +530,7 @@ class Scene:
 
 class Mesh:
 
-    def __init__(self, data_dir, nzfill=3):
+    def __init__(self, data_dir, nzfill=5):
 
         self.data_dir = data_dir
         if not os.path.isdir(self.data_dir):
