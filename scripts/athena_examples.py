@@ -16,7 +16,7 @@ def build_inhomo_athena_example():
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=False, bounds=bounds, tracer_type="P", level=2)
+    mesh = ath_data.build_mesh(data_dir, homogenize=False, bounds=bounds, tracer_type="P", level=2, nzfill=5)
 
     return
 
