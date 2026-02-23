@@ -44,3 +44,9 @@ def render_athena_example():
     scene = Scene(data_dir, npy_save_str, cameras)
     scene.render()
     scene.plot(png_save_str, remove_raw_images = False)
+
+    if __name__ == "__main__":
+
+        build_inhomo_athena_example()
+
+        render_athena_example()
