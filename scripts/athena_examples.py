@@ -5,7 +5,7 @@ from matplotlib import cm
 sys.path.append("..")
 from pysrc import *
 
-def build_athena_example(homogenize=False, verbose=False):
+def build_athena_example(homogenize=False, verbose=False, level=4):
 
     h_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
     data_dir = "/mnt/kocsis1/cuDART_wdir/athena/rho_mesh"
@@ -17,7 +17,7 @@ def build_athena_example(homogenize=False, verbose=False):
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=False, bounds=bounds, tracer_type="rho", level=None, nzfill=5, verbose=verbose)
+    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="rho", level=level, nzfill=5, verbose=verbose)
 
     return
 
