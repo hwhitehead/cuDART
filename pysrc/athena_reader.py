@@ -356,7 +356,7 @@ class AthenaData:
 
         return data
 
-    def build_mesh(self, data_dir, nzfill = None, homogenize = False, origin = np.array([0.0, 0.0, 0.0]), bounds = None, tracer_type="P", level=3):
+    def build_mesh(self, data_dir, verbose = False, nzfill = None, homogenize = False, origin = np.array([0.0, 0.0, 0.0]), bounds = None, tracer_type="P", level=3):
 
         if nzfill is None:
             nzfill = int(np.ceil(np.log10(self.NumMeshBlocks)))
@@ -370,7 +370,7 @@ class AthenaData:
 
         # import data
         if homogenize:
-            homo_data = self.homogenize(level = level, homo_vars=[tracer_type], bounds=bounds)
+            homo_data = self.homogenize(level = level, homo_vars=[tracer_type], bounds=bounds, verbose = verbose)
             mb_data = np.einsum("kji->ijk", homo_data[tracer_type])
             xl = np.array([np.min(homo_data["x"]), np.min(homo_data["y"]), np.min(homo_data["z"])])
             xr = np.array([np.max(homo_data["x"]), np.max(homo_data["y"]), np.max(homo_data["z"])])
