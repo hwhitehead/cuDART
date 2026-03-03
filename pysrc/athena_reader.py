@@ -398,7 +398,7 @@ class AthenaData:
                 else:
                     raise Exception("did not recognise pass to tracer_type")
                 # important: transpose data with label intact
-                mb_data = np.array(np.transpose(var_data), order="C")
+                mb_data = np.array(np.transpose(mb_data), order="C")
                 mesh.add_meshblock(mb_data, xl, xr)
 
         mesh.write_header()
