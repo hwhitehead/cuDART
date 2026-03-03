@@ -5,10 +5,10 @@ from matplotlib import cm
 sys.path.append("..")
 from pysrc import *
 
-def build_athena_example(homogenize=False, verbose=False, level=4):
+def build_athena_example(homogenize=True, verbose=False, level=4):
 
     h_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
 
     bh = BlackHole(0, bh_npy_str)
@@ -24,10 +24,10 @@ def build_athena_example(homogenize=False, verbose=False, level=4):
 def render_athena_example():
 
     load_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_output/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_output/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/img"
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
@@ -104,6 +104,6 @@ def loop_composites(num_img=300):
 
 if __name__ == "__main__":
 
-    build_athena_example(homogenize=False)
+    build_athena_example(homogenize=True)
     render_athena_example()
     #loop_composites()
