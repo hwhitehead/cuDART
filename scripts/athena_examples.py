@@ -17,7 +17,7 @@ def build_athena_example(homogenize=True, verbose=False, level=4):
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="rho", level=level, nzfill=5, verbose=verbose, trans_data=True)
+    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="rho", homo_level=level, nzfill=5, verbose=verbose)
 
     return
 

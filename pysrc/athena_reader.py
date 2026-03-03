@@ -356,7 +356,7 @@ class AthenaData:
 
         return data
 
-    def build_mesh(self, data_dir, verbose = False, nzfill = None, homogenize = False, origin = np.array([0.0, 0.0, 0.0]), bounds = None, tracer_type="P", level=3, trans_data=False):
+    def build_mesh(self, data_dir, verbose = False, nzfill = None, homogenize = False, origin = np.array([0.0, 0.0, 0.0]), bounds = None, tracer_type="P", homo_level=3):
 
         if nzfill is None:
             nzfill = int(np.ceil(np.log10(self.NumMeshBlocks)))
@@ -373,16 +373,15 @@ class AthenaData:
         # import data
         if homogenize:
             if tracer_type in self.variable_dict.values():
-                homo_data = self.homogenize(level = level, homo_vars=[tracer_type], bounds=bounds, verbose = verbose)
-                if trans_data:
-                    mb_data =  np.array(np.transpose(homo_data[tracer_type]), order="C")
-                else:
-                    mb_data = homo_data[tracer_type]
+                homo_data = self.homogenize(level = homo_level, homo_vars=[tracer_type], bounds=bounds, verbose = verbose)
+                mb_data = homo_data[tracer_type]
             elif tracer_type == "vel_z":
-                homo_data = self.homogenize(level = level, homo_vars=["vz"], bounds=bounds, verbose = verbose)
+                homo_data = self.homogenize(level = homo_level, homo_vars=["vz"], bounds=bounds, verbose = verbose)
                 mb_data = np.abs(homo_data["vz"])
             else:
                 raise Exception("did not recognise pass to tracer_type")
+            # important: transpose data with label intact
+            mb_data = np.array(np.transpose(mb_data), order="C")
             xl = np.array([np.min(homo_data["x"]), np.min(homo_data["y"]), np.min(homo_data["z"])])
             xr = np.array([np.max(homo_data["x"]), np.max(homo_data["y"]), np.max(homo_data["z"])])
             mesh.add_meshblock(mb_data, xl, xr)
@@ -393,15 +392,14 @@ class AthenaData:
                 if not self.in_bounds(xl, xr, bounds): continue
 
                 if tracer_type in self.variable_dict.values():
-                    var_data = getattr(self, tracer_type)[n, ...]
-                    mb_data = np.array(np.transpose(var_data), order="C")
-                    mesh.add_meshblock(mb_data, xl, xr)
+                    mb_data = getattr(self, tracer_type)[n, ...]
                 elif tracer_type == "vel_z":
-                    # mb_data = np.abs(np.einsum("kji->ijk", getattr(self, "vz")[n, ...]))
-                    mb_data = np.transpose(getattr(self, "vz")[n, ...], (1, 2, 0))
-                    mesh.add_meshblock(mb_data, xl, xr)
+                    mb_data = np.abs(getattr(self, "vz")[n, ...])
                 else:
                     raise Exception("did not recognise pass to tracer_type")
+                # important: transpose data with label intact
+                mb_data = np.array(np.transpose(var_data), order="C")
+                mesh.add_meshblock(mb_data, xl, xr)
 
         mesh.write_header()
         return mesh
