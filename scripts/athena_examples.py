@@ -101,50 +101,11 @@ def loop_composites(num_img=300):
         save_str = os.path.join(save_dir, str(n).zfill(5) + ".png")
         composite_plot(rho_str, vz_str, save_str)
 
-def comp_transposed_data():
-
-    # bh_npy_str = "/scratch/thesis/jets/npy/aligned_10edd.npy"
-    # bh = BlackHole(0, bh_npy_str)
-    # rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
-    # l = 2
-    # bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
-    #
-    # load_str = "/scratch/thesis/jets/trial_data/aligned_10edd.athdf"
-    # ath_data = AthenaData(load_str)
-    # ath_data.build_mesh("/scratch/thesis/jets/cudart_renders/def_dir", homogenize=True, bounds=bounds, tracer_type="rho", level=3, nzfill=5, verbose=True)
-    # ath_data.build_mesh("/scratch/thesis/jets/cudart_renders/trans_dir", homogenize=True, bounds=bounds,
-    #                     tracer_type="rho", level=3, nzfill=5, verbose=True, trans_data=True)
-
-    # def_data = np.load("/scratch/thesis/jets/cudart_renders/def_dir/meshblock00000.npy")
-    trans_data = np.load("/scratch/thesis/jets/cudart_renders/trans_dir/meshblock00000.npy")
-
-    fig = plt.figure()
-    gs = fig.add_gridspec(1,3)
-    ax0 = fig.add_subplot(gs[:,0])
-    ax1 = fig.add_subplot(gs[:,1])
-    ax2 = fig.add_subplot(gs[:, 2])
-    X_span = np.linspace(0,1,np.shape(trans_data)[0])
-    Y_span = np.linspace(0,1,np.shape(trans_data)[1])
-    XX, YY = np.meshgrid(X_span, Y_span, indexing="ij")
-    x_view = np.sum(trans_data, axis=0)
-    y_view = np.sum(trans_data, axis=1)
-    z_view = np.sum(trans_data, axis=2)
-    ax0.pcolormesh(XX, YY, np.log10(x_view))
-    ax1.pcolormesh(XX, YY, np.log10(y_view))
-    ax2.pcolormesh(XX, YY, np.log10(z_view))
-    for ax in [ax0, ax1, ax2]:
-        ax.set_aspect("equal")
-    fig.savefig("/scratch/thesis/jets/cudart_renders/comp.png", dpi=300, bbox_inches="tight")
-    plt.close("all")
-
-
 if __name__ == "__main__":
 
     build_athena_example(homogenize=False)
     render_athena_example()
-    # #loop_composites()
 
-    #comp_transposed_data()
 
 
 
