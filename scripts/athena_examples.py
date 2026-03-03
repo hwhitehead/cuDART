@@ -40,7 +40,7 @@ def render_athena_example():
     template_camera.length_X = 4 * rh
     template_camera.length_Y = 4 * rh
 
-    num_img = 300
+    num_img = 10
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
