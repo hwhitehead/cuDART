@@ -374,7 +374,7 @@ class AthenaData:
         if homogenize:
             if tracer_type in self.variable_dict.values():
                 homo_data = self.homogenize(level = level, homo_vars=[tracer_type], bounds=bounds, verbose = verbose)
-                mb_data = np.transpose(homo_data[tracer_type])
+                mb_data = homo_data[tracer_type]
             elif tracer_type == "vel_z":
                 homo_data = self.homogenize(level = level, homo_vars=["vz"], bounds=bounds, verbose = verbose)
                 mb_data = np.abs(homo_data["vz"])
