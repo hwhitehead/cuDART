@@ -17,16 +17,16 @@ def build_athena_example(homogenize=True, verbose=False, level=4):
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="rho", level=level, nzfill=5, verbose=verbose)
+    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="rho", level=level, nzfill=5, verbose=verbose, trans_data=True)
 
     return
 
 def render_athena_example():
 
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/trans_data"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/trans_data_output/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/trans_data_output/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/img"
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
@@ -115,26 +115,36 @@ def comp_transposed_data():
     # ath_data.build_mesh("/scratch/thesis/jets/cudart_renders/trans_dir", homogenize=True, bounds=bounds,
     #                     tracer_type="rho", level=3, nzfill=5, verbose=True, trans_data=True)
 
-    def_data = np.load("/scratch/thesis/jets/cudart_renders/def_dir/meshblock00000.npy")
+    # def_data = np.load("/scratch/thesis/jets/cudart_renders/def_dir/meshblock00000.npy")
     trans_data = np.load("/scratch/thesis/jets/cudart_renders/trans_dir/meshblock00000.npy")
 
     fig = plt.figure()
-    gs = fig.add_gridspec(1,2)
-    axl = fig.add_subplot(gs[:,0])
-    axr = fig.add_subplot(gs[:,1])
-    axl.imshow(np.sum(def_data, axis=0))
-    axr.imshow(np.sum(trans_data, axis=0))
+    gs = fig.add_gridspec(1,3)
+    ax0 = fig.add_subplot(gs[:,0])
+    ax1 = fig.add_subplot(gs[:,1])
+    ax2 = fig.add_subplot(gs[:, 2])
+    X_span = np.linspace(0,1,np.shape(trans_data)[0])
+    Y_span = np.linspace(0,1,np.shape(trans_data)[1])
+    XX, YY = np.meshgrid(X_span, Y_span, indexing="ij")
+    x_view = np.sum(trans_data, axis=0)
+    y_view = np.sum(trans_data, axis=1)
+    z_view = np.sum(trans_data, axis=2)
+    ax0.pcolormesh(XX, YY, np.log10(x_view))
+    ax1.pcolormesh(XX, YY, np.log10(y_view))
+    ax2.pcolormesh(XX, YY, np.log10(z_view))
+    for ax in [ax0, ax1, ax2]:
+        ax.set_aspect("equal")
     fig.savefig("/scratch/thesis/jets/cudart_renders/comp.png", dpi=300, bbox_inches="tight")
     plt.close("all")
 
 
 if __name__ == "__main__":
 
-    # build_athena_example(homogenize=True)
+    build_athena_example(homogenize=True)
     render_athena_example()
     # #loop_composites()
 
-    # comp_transposed_data()
+    #comp_transposed_data()
 
 
 
