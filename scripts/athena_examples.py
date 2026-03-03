@@ -23,11 +23,10 @@ def build_athena_example(homogenize=True, verbose=False, level=4):
 
 def render_athena_example():
 
-    load_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
+    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/trans_data"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_output/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/trans_data_output/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/trans_data_output/img"
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
@@ -102,8 +101,40 @@ def loop_composites(num_img=300):
         save_str = os.path.join(save_dir, str(n).zfill(5) + ".png")
         composite_plot(rho_str, vz_str, save_str)
 
+def comp_transposed_data():
+
+    # bh_npy_str = "/scratch/thesis/jets/npy/aligned_10edd.npy"
+    # bh = BlackHole(0, bh_npy_str)
+    # rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
+    # l = 2
+    # bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
+    #
+    # load_str = "/scratch/thesis/jets/trial_data/aligned_10edd.athdf"
+    # ath_data = AthenaData(load_str)
+    # ath_data.build_mesh("/scratch/thesis/jets/cudart_renders/def_dir", homogenize=True, bounds=bounds, tracer_type="rho", level=3, nzfill=5, verbose=True)
+    # ath_data.build_mesh("/scratch/thesis/jets/cudart_renders/trans_dir", homogenize=True, bounds=bounds,
+    #                     tracer_type="rho", level=3, nzfill=5, verbose=True, trans_data=True)
+
+    def_data = np.load("/scratch/thesis/jets/cudart_renders/def_dir/meshblock00000.npy")
+    trans_data = np.load("/scratch/thesis/jets/cudart_renders/trans_dir/meshblock00000.npy")
+
+    fig = plt.figure()
+    gs = fig.add_gridspec(1,2)
+    axl = fig.add_subplot(gs[:,0])
+    axr = fig.add_subplot(gs[:,1])
+    axl.imshow(np.sum(def_data, axis=0))
+    axr.imshow(np.sum(trans_data, axis=0))
+    fig.savefig("/scratch/thesis/jets/cudart_renders/comp.png", dpi=300, bbox_inches="tight")
+    plt.close("all")
+
+
 if __name__ == "__main__":
 
-    build_athena_example(homogenize=True)
+    # build_athena_example(homogenize=True)
     render_athena_example()
-    #loop_composites()
+    # #loop_composites()
+
+    # comp_transposed_data()
+
+
+
