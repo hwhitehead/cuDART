@@ -393,7 +393,7 @@ class AthenaData:
 
                 if tracer_type in self.variable_dict.values():
                     var_data = getattr(self, tracer_type)[n, ...]
-                    mb_data = np.transpose(var_data, axes=[0,2,1])
+                    mb_data = np.transpose(var_data, axes=[1,0,2])
                     mesh.add_meshblock(mb_data, xl, xr)
                 elif tracer_type == "vel_z":
                     # mb_data = np.abs(np.einsum("kji->ijk", getattr(self, "vz")[n, ...]))
