@@ -440,7 +440,7 @@ class Scene:
 
         plt.close("all")
 
-    def calc_lightcurve(self, save_location):
+    def calc_lightcurve(self, save_location = None):
 
         save_location = save_location.removesuffix(".png") # strip as needed
 
@@ -452,6 +452,9 @@ class Scene:
             raw_img = np.load(raw_str)
             lum = np.sum(raw_img)
             lum_ar[i] = lum
+
+        if save_location is not None:
+            np.save(save_location, lum_ar)
 
         return lum_ar
 
