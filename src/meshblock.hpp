@@ -197,7 +197,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     return all_mb_info;
 }
 
-__device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic) {
+__device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic, float doppler_index) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;
     bool hit = calc_mb_intercept(r, tl, tr);
@@ -253,7 +253,7 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic) {
                 vec3 beta_vec(all_data[data_index+1],
                                 all_data[data_index+2],
                                 all_data[data_index+3]);
-                float boost_fac = calc_boost_factor(beta_vec, r.normal);
+                float boost_fac = calc_boost_factor(beta_vec, r.normal, doppler_index);
                 trace += dwell * boost_fac * all_data[data_index];
             } else {
                 trace += dwell * all_data[data_index];

@@ -85,7 +85,7 @@ def render_pluto_helix(relativistic = False):
 
     print("unlablled render example finished.")
 
-def render_pluto_data_example(relativistic=False, remove_raw_images = True, profile = False):
+def render_pluto_data_example(relativistic=False, remove_raw_images = True, profile = False, doppler_index = 3.6):
 
     print("cuDART: starting jet render example...")
 
@@ -259,5 +259,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    render_pluto_data_example()
+    render_pluto_data_example(relativistic=True, doppler_index=2)
     

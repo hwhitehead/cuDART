@@ -19,7 +19,7 @@ class Mesh {
         int num_meshblocks;
 };
 
-__global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, bool relativistic) {
+__global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, bool relativistic, float doppler_index) {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -31,7 +31,7 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, bool re
     Ray pixel_ray(pixel_origin, camera.normal);
     
     // calculate pixel value from MeshBlock data
-    img[pixel_index] += (*mesh)->calc_trace(pixel_ray, relativistic);
+    img[pixel_index] += (*mesh)->calc_trace(pixel_ray, relativistic, doppler_index);
     return;
 }
 
@@ -53,12 +53,12 @@ __global__ void free_mesh(Mesh **mesh, int num_meshblocks) {
     delete *mesh;
 }
 
-__device__ float Mesh::calc_trace(const Ray &r, bool relativistic) {
+__device__ float Mesh::calc_trace(const Ray &r, bool relativistic, float doppler_index) {
     // calculate weighted path of a given ray through the Mesh and linked MeshBlocks
 
     float total_trace = 0;
     for (int n = 0; n < num_meshblocks; n++) {
-        float local_trace = mb_list[n]->calc_trace(r, relativistic); // ERR: returns zero
+        float local_trace = mb_list[n]->calc_trace(r, relativistic, doppler_index); // ERR: returns zero
         total_trace += local_trace;
     }
     return total_trace;

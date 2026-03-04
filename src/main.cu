@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
     // define space for user settings
     std::string cudart_version = "version 0.7 - January 2026";
-    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
+    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr, *doppler_char = nullptr;
     bool verbose = false, relativistic = false;
 
     // process command line arguments
@@ -64,6 +64,9 @@ int main(int argc, char *argv[]) {
                 case 'm':
                     mem_char = argv[++i];
                     break;
+                case 'm':
+                    doppler_char = argv[++i];
+                    break;
                 case 'v':
                     verbose = true;
                     break;
@@ -81,6 +84,7 @@ int main(int argc, char *argv[]) {
                     std::cout << " -i <file>    specify input target\n";
                     std::cout << " -s <file>    specify save target\n";
                     std::cout << " -c <file>    specify camera data file\n";
+                    std::cout << " -d <value>   Doppler index for boosting\n";
                     std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
                     std::cout << " -v           verbosity flag\n";
@@ -98,6 +102,11 @@ int main(int argc, char *argv[]) {
         CUDART_ERROR(err_msg);
     }
     std::string save_str_header(save_char);
+
+    float doppler_index = 3.6; // default value
+    if (doppler_char != nullptr) {
+        doppler_index = static_cast<float>(std::atof(doppler_char));
+    }
 
     // determine run mode type (labelled or unlabelled)
     bool labelled_data = false;
@@ -219,7 +228,7 @@ int main(int argc, char *argv[]) {
 
         // call render
         clock_t render_start = clock();
-        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, relativistic);
+        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, relativistic, doppler_index);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
         if (verbose) {
