@@ -234,15 +234,15 @@ def comp_plot():
 
         tstamp = tax.axvline(x=tax_span[n], color='k', alpha=0.2)
 
-        unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(3) + ".npy")
+        unboosted_raw_str = os.path.join(unboosted_dir, "raw" + str(n).zfill(5) + ".npy")
         unboosted_img = np.load(unboosted_raw_str)
         pcl = axl.pcolormesh(XX, YY, np.log10(unboosted_img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
 
-        boosted_raw_str = os.path.join(boosted_dir, "raw" + str(n).zfill(3) + ".npy")
+        boosted_raw_str = os.path.join(boosted_dir, "raw" + str(n).zfill(5) + ".npy")
         boosted_img = np.load(boosted_raw_str)
         pcr = axr.pcolormesh(XX, YY, np.log10(boosted_img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
 
-        save_str = os.path.join(save_dir, "img" + str(n).zfill(3) + ".png")
+        save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         tstamp.remove()
         pcl.remove()
