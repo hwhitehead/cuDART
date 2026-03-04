@@ -1,0 +1,50 @@
+CXX := nvcc
+CPPFLAGS := 
+CXXFLAGS := -O3
+LDFLAGS := 
+LDLIBS :=
+GCOV_CMD := gcov
+
+EXE_DIR := bin/
+EXECUTABLE := $(EXE_DIR)cudart
+GENCODE_FLAGS := @GENCODE_FLAGS@
+SRC_FILES := $(wildcard src/main.cu)
+OBJ_DIR := obj/
+OBJ_FILES := $(addprefix $(OBJ_DIR),$(notdir $(SRC_FILES:.cu=.o)))
+SRC_PREFIX := src/
+SRC_DIRS := $(dir $(SRC_FILES))
+VPATH := $(SRC_DIRS)
+
+.PHONY : all dirs clean
+
+all : dirs $(EXECUTABLE)
+
+objs : dirs $(OBJ_FILES)
+
+dirs : $(EXE_DIR) $(OBJ_DIR)
+
+# For debugging variables in Makefile, e.g. by "make print-GCOV_FILES"
+
+print-%  : ; @echo $* = $($*)
+
+$(EXE_DIR):
+	mkdir -p $(EXE_DIR)
+
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+# Link objects into executable
+
+$(EXECUTABLE) : $(OBJ_FILES)
+	$(CXX) $(CPPFLAGS) $(GENCODE_FLAGS) $(CXXFLAGS) -o $@ $(OBJ_FILES) $(LDFLAGS) $(LDLIBS)
+
+# Create objects from source files
+
+$(OBJ_DIR)%.o : %.cu
+	$(CXX) $(CPPFLAGS) $(GENCODE_FLAGS) $(CXXFLAGS) -c $< -o $@
+
+# Cleanup
+
+clean :
+	rm -rf $(OBJ_DIR)*
+	rm -rf $(EXECUTABLE)

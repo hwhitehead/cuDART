@@ -1,4 +1,5 @@
 # Object and binary directories
+Makefile
 obj/
 bin/
 /pysrc/__pycache__/
