@@ -38,7 +38,7 @@ def render_athena_example(header, prof_file = None):
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
-    l = 3
+    l = 2
 
     template_camera = Camera()
     template_camera.num_pixels_X = 1024
@@ -112,9 +112,9 @@ def loop_composites(num_img=300):
 if __name__ == "__main__":
 
     build_athena_example(header="homo_rho", homogenize=True)
-    # build_athena_example(header="inhomo_rho", homogenize=False)
+    build_athena_example(header="inhomo_rho", homogenize=False)
     render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
-    # render_athena_example(header="inhomo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_prof.txt")
+    render_athena_example(header="inhomo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_prof.txt")
 
 
 

@@ -1,4 +1,4 @@
-# cuDART: CUDA + DDA Accelerated Ray Tracing (v0.6)
+# cuDART: CUDA + DDA Accelerated Ray Tracing (v0.7)
 
 <p align="center">
   <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/comp.gif width="800" alt=animated/>
@@ -42,10 +42,17 @@ Upon execution:
 7. The program frees all associated memory registers (device and host) and terminates 
 
 ## Data Formats
-`cuDART` accepts data in the form of `.npy` files, which *must* contain an array of `float32` entries. If not flagged for relativisitic beaming, the array should be of shape `(nx,ny,nz)`, with each entry populated by data to be traced at each spatial position. If relativistic beaming is included, an extra rank is required to pass data to trace, and velocity data in units of the the speed of light in each cardinal direction e.g. as $\beta_x = v_x / c$. The resulting array will have shape `(nx,ny,nz,4)` where the fourth index covers `(tracer,beta_x,beta_y,beta_z)` for each spatial position. 
+`cuDART` accepts data in the form of `.npy` files, which *must* contain an array of `float32` entries. If not flagged for relativisitic beaming, the array should be of shape `(nx,ny,nz)`, with each entry populated by data to be traced at each spatial position. If relativistic beaming is included, an extra rank is required to pass data to trace, and velocity data in units of the the speed of light in each cardinal direction e.g. as $\beta_x = v_x / c$. The resulting array will have shape `(nx,ny,nz,4)` where the fourth index covers `(tracer,beta_x,beta_y,beta_z)` for each spatial position. In unlabelled mode, `cuDART` will read a single homogenous `.npy` file, assuming equal spacing in all directions. In labelled mode, `cuDART` accepts an arbitrary number of `.npy` files with different mesh resolutions. Labelled mode requires a header file to specific spatial locations of subgrids (see [examples.py](https://github.com/hwhitehead/cuDART/blob/main/scripts/examples.py)).
 
 ## Performance
-`cuDART` is bottlenecked primarily by I/O; the actual tracing of meshes and image writes are performed exceptionally quickly. The main overhead occurs at executable intialisation, due to the cost of launching a GPU context and reading the `.npy` file into host memory, usually taking O(1)s. CUDA-type operations are MUCH faster, copying the data into device memory and generating an image from this data takes only O(100)ms. For sensible image dimsions, the data transfer to device is more expensive than the trace operation itself (see profiling [here](https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.txt)). As such, peak efficiency with `cuDART` is achieved when many images are taken using the same data set e.g. many lines-of-sight. Comparing a 100 image render to a single image, `cuDART` transitions from 16% of the runtime attributed to the render kernel up to 95%. Users acting as admin may wish to look into [persistence daemons](https://docs.nvidia.com/deploy/driver-persistence/overview.html) for the NVIDIA kernel; especially for short/simple renders the majority of the runtime can be occupied by the application start latency which can be bypassed by ensuring a kernel persists between executions.  
+`cuDART` is bottlenecked primarily by I/O; the actual tracing of meshes and image writes are performed exceptionally quickly. The main overhead occurs at executable intialisation, due to the cost of launching a GPU context and reading the `.npy` file(s) into host memory, usually taking O(1)s. CUDA-type operations are MUCH faster, copying the data into device memory and generating an image from this data takes only O(100)ms. For sensible image dimsions, the data transfer to device is more expensive than the trace operation itself (see profiling [here](https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.txt)). As such, peak efficiency with `cuDART` is achieved when many images are taken using the same data set e.g. many lines-of-sight. Comparing a 100 image render to a single image, `cuDART` transitions from 16% of the runtime attributed to the render kernel up to 95%. Users acting as admin may wish to look into [persistence daemons](https://docs.nvidia.com/deploy/driver-persistence/overview.html) for the NVIDIA kernel; especially for short/simple renders the majority of the runtime can be occupied by the application start latency which can be bypassed by ensuring a kernel persists between executions.  
+
+<p align="center">
+  <img src=https://github.com/hwhitehead/cuDART/blob/main/docs/profiling.png width = "600" alt=animated/>
+</p>
+<p align="center"">
+  <em> Scaling tests varying the size of both the domain and image, for a single homogenous meshblock. For reasonable sized domains, render runtime (per frame) scales linearly with both the side length of the domain, and number of pixels in the image. Adding boosting to the calculation increases runtime by 0.5dex.</a></em>
+</p>
 
 ### Comparison to DART
 
