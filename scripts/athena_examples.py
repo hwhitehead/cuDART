@@ -56,8 +56,8 @@ def render_athena_example(header, prof_file = None):
         camera.set_sph_pos(r = 5 * l * rh, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
 
-    scene = Scene(data_dir, npy_save_str, cameras, prof_file = prof_file)
-    scene.render(verbose=True)
+    scene = Scene(data_dir, npy_save_str, cameras)
+    scene.render(verbose=True, prof_file = prof_file)
     scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
 
 def remap(input, inp_min, inp_max):
