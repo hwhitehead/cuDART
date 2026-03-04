@@ -91,13 +91,13 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
 
     # define targets
     npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/index2/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/index2/img"
 
     # build template camera
     template_camera = Camera()
-    template_camera.num_pixels_X = 1024
-    template_camera.num_pixels_Y = 1024
+    template_camera.num_pixels_X = 2048
+    template_camera.num_pixels_Y = 2048
     template_camera.tilt = (60.0 / 180) * np.pi
     template_camera.length_X = 0.66 # defval 0.66
     template_camera.length_Y = 0.66
@@ -248,5 +248,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    render_pluto_data_example(relativistic=True, doppler_index=3.6)
+    render_pluto_data_example(relativistic=True, doppler_index=2, remove_raw_images = False)
     
