@@ -114,7 +114,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, prof
     template_camera.length_Y = 0.25
 
     # build camera array, inherit from template
-    num_img = 100
+    num_img = 300
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
@@ -129,7 +129,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, prof
     print("built scene")
 
     # render and save images
-    scene.render(verbose = True, relativistic = relativistic, profile = profile)
+    scene.render(verbose = True, relativistic = relativistic, save_profile = profile)
     print("finished rendering raw images")
 
     scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
