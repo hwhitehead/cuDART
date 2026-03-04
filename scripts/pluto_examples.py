@@ -118,7 +118,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("built scene")
 
     # render and save images
-    scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, doppler_index = doppler_index)
+    #scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, doppler_index = doppler_index)
     print("finished rendering raw images")
 
     if save_lc is not None:
