@@ -24,7 +24,7 @@ def build_athena_example(header, homogenize=True, verbose=False, level=4):
 
     return
 
-def render_athena_example(header):
+def render_athena_example(header, prof_file = None):
 
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
 
@@ -56,7 +56,7 @@ def render_athena_example(header):
         camera.set_sph_pos(r = 5 * l * rh, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
 
-    scene = Scene(data_dir, npy_save_str, cameras)
+    scene = Scene(data_dir, npy_save_str, cameras, prof_file = prof_file)
     scene.render(verbose=True)
     scene.plot(png_save_str, remove_raw_images = False, vmin=None, vmax=None)
 
@@ -111,10 +111,10 @@ def loop_composites(num_img=300):
 
 if __name__ == "__main__":
 
-    build_athena_example(header="homo_rho", homogenize=True)
-    build_athena_example(header="inhomo_rho", homogenize=False)
-    render_athena_example(header="homo_rho")
-    render_athena_example(header="inhomo_rho")
+    # build_athena_example(header="homo_rho", homogenize=True)
+    # build_athena_example(header="inhomo_rho", homogenize=False)
+    render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
+    render_athena_example(header="inhomo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_prof.txt")
 
 
 
