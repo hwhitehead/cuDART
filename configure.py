@@ -33,7 +33,7 @@ if __name__ == "__main__":
         gpu = str(args["gpu"]).lower()
         if gpu not in gpu_options and gpu != "none":
             raise Exception("specified GPU not recognised")
-        makefile_options["GENCODE_FLAGS"] += " -gencode arch={0},code={1} -Xptxas".format(arch_dict[gpu], gpcode_dict[gpu])
+        makefile_options["GENCODE_FLAGS"] += " -gencode arch={0},code={1} -Xptxas".format(arch_dict[gpu], code_dict[gpu])
 
     # load template 
     with open(makefile_input, "r") as current_file:
