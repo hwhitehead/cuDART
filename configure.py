@@ -27,15 +27,13 @@ if __name__ == "__main__":
 
     # collect makefile options
     makefile_options = {}
-    makefile_options = {"GENCODE_FLAGS": "-O3 -use_fast_math -Xcompiler -O3"}
+    makefile_options = {"GENCODE_FLAGS": "-O3 -use_fast_math -Xcompiler -O3 -Wno-deprecated-gpu-targets"}
 
     if args["gpu"]:
         gpu = str(args["gpu"]).lower()
-        if gpu not in gpu_options:
+        if gpu not in gpu_options and gpu != "none":
             raise Exception("specified GPU not recognised")
-        gpu_architecture = arch_dict[gpu]
-        gpu_code = code_dict[gpu]
-        makefile_options["GENCODE_FLAGS"] += "--gpu-architecture={0} --gpu-code={1} -Xptxas".format(gpu_architecture, gpu_code)
+        makefile_options["GENCODE_FLAGS"] += " -gencode arch={0},code={1} -Xptxas".format(arch_dict[gpu], gpcode_dict[gpu])
 
     # load template 
     with open(makefile_input, "r") as current_file:
