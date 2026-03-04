@@ -5,7 +5,7 @@ from matplotlib import cm
 sys.path.append("..")
 from pysrc import *
 
-def build_athena_example(header, homogenize=True, verbose=False, level=4):
+def build_athena_example(header, homogenize=True, verbose=False, level=5):
 
     h_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
@@ -111,10 +111,10 @@ def loop_composites(num_img=300):
 
 if __name__ == "__main__":
 
-    # build_athena_example(header="homo_rho", homogenize=True)
+    build_athena_example(header="homo_rho", homogenize=True)
     # build_athena_example(header="inhomo_rho", homogenize=False)
     render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
-    render_athena_example(header="inhomo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_prof.txt")
+    # render_athena_example(header="inhomo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_prof.txt")
 
 
 
