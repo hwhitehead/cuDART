@@ -3,7 +3,7 @@ import argparse, re
 makefile_input = "Makefile.in"
 makefile_output = "Makefile"
 
-gpu_choices = []
+gpu_options = ["turing", "ampere", "ada", "hopper", "blackwell"]
 
 arch_dict = {"turing": "compute_75",
             "ampere": "compute_80",
@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     # parse command line arguments from config
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gpu", default=None, choices=gpu_choices, help="select gpu for gencode")
+    parser.add_argument("--gpu", default=None, help="select gpu for gencode")
 
     args = vars(parser.parse_args())
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     if args["gpu"]:
         gpu = str(args["gpu"]).lower()
-        if gpu not in arch_dict.keys():
+        if gpu not in gpu_options:
             raise Exception("specified GPU not recognised")
         gpu_architecture = arch_dict[gpu]
         gpu_code = code_dict[gpu]
