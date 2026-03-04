@@ -85,14 +85,14 @@ def render_pluto_helix(relativistic = False):
 
     print("unlablled render example finished.")
 
-def render_pluto_data_example(relativistic=False, remove_raw_images = True, save_profile = None, doppler_index = 3.6):
+def render_pluto_data_example(relativistic=False, remove_raw_images = True, save_profile = None, doppler_index = 3.6, save_lc = None):
 
     print("cuDART: starting jet render example...")
 
     # define targets
     npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/index3.6/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/index3.6/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/img"
 
     # build template camera
     template_camera = Camera()
@@ -118,9 +118,12 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("built scene")
 
     # render and save images
-    scene.calc_lightcurve("/mnt/kocsis1/cuDART_wdir/emm_img/index3.6/lum.npy")
-    #scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, doppler_index = doppler_index)
+    scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, doppler_index = doppler_index)
     print("finished rendering raw images")
+
+    if save_lc is not None:
+        scene.calc_lightcurve(save_lc)
+        print("saved lightcurve")
 
     #scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
     print("finished rendering rasterised images")
@@ -159,7 +162,7 @@ def comp_plot():
     cmap = "afmhot"
 
     boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/index3.6"
-    unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted_raws"
+    unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted"
     save_dir = "/mnt/kocsis1/cuDART_wdir/emm_img"
     num_img = 200
     pix_dims = np.array([2048, 2048])
@@ -249,5 +252,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    render_pluto_data_example(relativistic=True, doppler_index=3.6, remove_raw_images = False)
+    render_pluto_data_example(relativistic=False, doppler_index=3.6, remove_raw_images = False)
     comp_plot()
