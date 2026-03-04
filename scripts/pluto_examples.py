@@ -94,27 +94,16 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/img"
 
-    # build mesh
-    # if os.path.isdir(npy_load_str):
-    #     xls = [[-0.25,-0.25,-0.5], [-0.5,-0.25,-0.25], [-0.25,-0.5,-0.25]]
-    #     xrs = [[0.25,0.25,0.5], [0.5,0.25,0.25], [0.25,0.5,0.25]]
-    #     mesh = Mesh(npy_load_str)
-    #     for i, sub_str in enumerate(["", "_x", "_y"]):
-    #         npy_str = os.path.join(npy_load_str, "emm_1000MHz" + sub_str + ".npy")
-    #         mb_data = np.load(npy_str)
-    #         mesh.add_meshblock(mb_data, xls[i], xrs[i])
-    #     mesh.write_header()
-
     # build template camera
     template_camera = Camera()
-    template_camera.num_pixels_X = 2048
-    template_camera.num_pixels_Y = 2048
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
     template_camera.tilt = (60.0 / 180) * np.pi
-    template_camera.length_X = 0.25 # defval 0.66
-    template_camera.length_Y = 0.25
+    template_camera.length_X = 0.66 # defval 0.66
+    template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
-    num_img = 300
+    num_img = 100
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
@@ -259,5 +248,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    render_pluto_data_example(relativistic=True, doppler_index=2)
+    render_pluto_data_example(relativistic=True, doppler_index=3.6)
     
