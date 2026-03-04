@@ -85,7 +85,7 @@ def render_pluto_helix(relativistic = False):
 
     print("unlablled render example finished.")
 
-def render_pluto_data_example(relativistic=False, remove_raw_images = True, profile = False, doppler_index = 3.6):
+def render_pluto_data_example(relativistic=False, remove_raw_images = True, save_profile = None, doppler_index = 3.6):
 
     print("cuDART: starting jet render example...")
 
@@ -129,7 +129,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, prof
     print("built scene")
 
     # render and save images
-    scene.render(verbose = True, relativistic = relativistic, save_profile = profile)
+    scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, doppler_index = doppler_index)
     print("finished rendering raw images")
 
     scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
