@@ -27,7 +27,7 @@ class MeshBlock {
         __device__ int int_clamp(float f, float l, float r);
         __device__ vec3 get_edge(bool sign) {return (sign) ? xr : xl;}
         __device__ void print_data();
-        __device__ float calc_trace(const Ray &r, bool relativistic);
+        __device__ float calc_trace(const Ray &r, bool relativistic, float doppler_index);
 
         // public properties
         const int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};

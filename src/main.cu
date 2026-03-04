@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
                 case 'm':
                     mem_char = argv[++i];
                     break;
-                case 'm':
+                case 'd':
                     doppler_char = argv[++i];
                     break;
                 case 'v':
