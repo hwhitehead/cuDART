@@ -164,7 +164,7 @@ def comp_plot():
     boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/index3.6"
     unboosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted"
     save_dir = "/mnt/kocsis1/cuDART_wdir/emm_img"
-    num_img = 200
+    num_img = 100
     pix_dims = np.array([2048, 2048])
     X = np.linspace(0,1,pix_dims[0]+1)
     Y = np.linspace(0,1,pix_dims[1]+1)
@@ -252,5 +252,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    render_pluto_data_example(relativistic=False, doppler_index=3.6, remove_raw_images = False, save_lc = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/lum.npy")
+    #render_pluto_data_example(relativistic=False, doppler_index=3.6, remove_raw_images = False, save_lc = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/lum.npy")
     comp_plot()
