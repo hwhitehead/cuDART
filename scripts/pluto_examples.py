@@ -158,7 +158,7 @@ def cardinal_rotate(axes="x"):
 def comp_plot():
 
     vmin = 18
-    vmax = 23
+    vmax = 22
     cmap = "afmhot"
 
     boosted_dir = "/mnt/kocsis1/cuDART_wdir/emm_img/index3.6"
@@ -230,7 +230,7 @@ def comp_plot():
             lum_mean = np.mean(lum_data)
         tax.plot(tax_span, (lum_data - lum_mean) / lum_mean, color='k', linestyle=line_styles[i])
     
-    for n in range(0, num_img, 10):
+    for n in range(num_img):
 
         tstamp = tax.axvline(x=tax_span[n], color='k', alpha=0.2)
 
