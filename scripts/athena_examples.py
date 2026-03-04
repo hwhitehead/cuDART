@@ -5,12 +5,15 @@ from matplotlib import cm
 sys.path.append("..")
 from pysrc import *
 
-def build_athena_example(homogenize=True, verbose=False, level=4):
+def build_athena_example(header, homogenize=True, verbose=False, level=4):
 
     h_str = "/mnt/kocsis1/cuDART_wdir/athena/raw_data/nshear.out1.00060.athdf"
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
 
+    data_dir = os.path.join("/mnt/kocsis1/cuDART_wdir/athena", header + "_mesh")
+    if not os.path.isdir(data_dir):
+        os.mkdir(data_dir)
+    
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
     l = 2
@@ -21,20 +24,25 @@ def build_athena_example(homogenize=True, verbose=False, level=4):
 
     return
 
-def render_athena_example():
+def render_athena_example(header):
 
-    data_dir = "/mnt/kocsis1/cuDART_wdir/athena/homo_rho_mesh"
     bh_npy_str = "/mnt/kocsis1/cuDART_wdir/athena/bh_data.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_output/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_output/img"
+
+    data_dir = os.path.join("/mnt/kocsis1/cuDART_wdir/athena", header + "_mesh")
+    out_dir = os.path.join("/mnt/kocsis1/cuDART_wdir/athena", header + "_output")
+    npy_save_str = os.path.join(out_dir, "raw")
+    png_save_str = os.path.join(out_dir, "img")
+
+    if not os.path.isdir(out_dir):
+        os.mkdir(out_dir)
 
     bh = BlackHole(0, bh_npy_str)
     rh = np.cbrt(bh.m[0] / (3 * bh.Omega0 ** 2))
     l = 3
 
     template_camera = Camera()
-    template_camera.num_pixels_X = 512
-    template_camera.num_pixels_Y = 512
+    template_camera.num_pixels_X = 1024
+    template_camera.num_pixels_Y = 1024
     template_camera.tilt = 0.0
     template_camera.length_X = 4 * rh
     template_camera.length_Y = 4 * rh
@@ -103,8 +111,10 @@ def loop_composites(num_img=300):
 
 if __name__ == "__main__":
 
-    build_athena_example(homogenize=False)
-    render_athena_example()
+    build_athena_example(header="homo_rho", homogenize=True)
+    build_athena_example(header="inhomo_rho", homogenize=False)
+    render_athena_example(header="homo_rho")
+    render_athena_example(header="inhomo_rho")
 
 
 
