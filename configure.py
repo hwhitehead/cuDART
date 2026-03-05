@@ -121,7 +121,7 @@ if __name__ == "__main__":
             raise Exception("specified GPU architecture not recognised")
         makefile_options["GENCODE_FLAGS"] += " -gencode arch={0},code={1} -Xptxas".format(arch_dict[arch], code_dict[arch])
     elif args["gpu"]:
-        gpu = str(args["gpu"]).lower()
+        gpu = str(args["gpu"])
         if gpu not in gpu_options.keys():
             raise Exception("specified GPU not listed, select from {0}".format(gpu_options.keys()))
         arch = gpu_options[gpu]
