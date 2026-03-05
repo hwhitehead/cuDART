@@ -107,6 +107,7 @@ if __name__ == "__main__":
     # parse command line arguments from config
     parser = argparse.ArgumentParser()
     parser.add_argument("--arch", default=None, choices = arch_options, help="select gpu architecture for gencode", type=str.lower)
+    parser.add_argument("--gpu", default=None, choices = gpu_options, help="select gpu model for gencode", type=str)
 
     args = vars(parser.parse_args())
 
