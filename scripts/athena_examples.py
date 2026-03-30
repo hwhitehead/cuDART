@@ -101,7 +101,6 @@ def composite_plot(rho_str, vz_str, save_str):
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
 
-
     rho_sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=-3, vmax=-1.5))
     vz_sm = plt.cm.ScalarMappable(cmap="Blues", norm=plt.Normalize(vmin=-4.5, vmax=-2))
     fig.colorbar(rho_sm, cax=caxl, orientation="vertical")
@@ -116,8 +115,8 @@ def composite_plot(rho_str, vz_str, save_str):
 
 def loop_composites(num_img=300):
 
-    rho_dir = "/scratch/thesis/jets/cudart_renders/rho_hr"
-    vz_dir = "/scratch/thesis/jets/cudart_renders/vz_hr"
+    rho_dir = "/scratch/thesis/jets/cudart_renders/inhomo_rho_output"
+    vz_dir = "/scratch/thesis/jets/cudart_renders/inhomo_vz_output"
     save_dir = "/scratch/thesis/jets/cudart_renders/comp_label"
 
     for n in range(0,num_img):
@@ -131,7 +130,7 @@ if __name__ == "__main__":
     # build_athena_example(header="homo_rho", homogenize=True)
     #build_athena_example(header="inhomo_vz", homogenize=False)
     # render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
-    render_athena_example(header="inhomo_vz", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_vz_prof.txt")
+    render_athena_example(header="inhomo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_rho_prof.txt")
     #loop_composites()
 
 
