@@ -20,7 +20,7 @@ def build_athena_example(header, homogenize=True, verbose=False, level=5):
     bounds = [[-l * rh, l * rh], [-l * rh, l * rh], [-l * rh, l * rh]]
 
     ath_data = AthenaData(h_str)
-    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="rho", homo_level=level, nzfill=5, verbose=verbose)
+    mesh = ath_data.build_mesh(data_dir, homogenize=homogenize, bounds=bounds, tracer_type="vz", homo_level=level, nzfill=5, verbose=verbose)
 
     return
 
@@ -74,7 +74,7 @@ def composite_plot(rho_str, vz_str, save_str):
     vz_data = np.load(vz_str).T
     
     rho_grey = remap(np.log10(rho_data), -3, -1.5)
-    vz_grey = remap(np.log10(vz_data), -4.4, -2)
+    vz_grey = remap(np.log10(vz_data), -4.5, -2)
     # vz_grey[vz_grey > 0.5] = 0.5
     # vz_grey[vz_grey < 0.2] = 0.0
 
@@ -88,12 +88,29 @@ def composite_plot(rho_str, vz_str, save_str):
 
     set_plot_defaults(use_tex=True)
     fig = plt.figure(figsize=(10.0/3, 10.0/3))
-    ax = fig.add_subplot()
+    width_ratios = np.array([0.05, 1, 0.05])
+    height_ratios = np.array([1])
+    gs = fig.add_subplot(np.size(height_ratios), np.size(width_ratios), width_ratios=width_ratios, height_ratios=height_ratios)
+    caxl = fig.add_subplot(gs[0, 0])
+    ax = fig.add_subplot(gs[0,1])
+    caxr = fig.add_suboplot(gs[0,2])
+
     ax.set_facecolor("k")
     ax.imshow(rho_RGBA)
     ax.imshow(vz_RGBA)
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
+
+
+    rho_sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=-3, vmax=-1.5))
+    vz_sm = plt.cm.ScalarMappable(cmap="Blues", norm=plt.Normalize(vmin=-4.5, vmax=-2))
+    fig.colorbar(rho_sm, cax=caxl, orientation="vertical")
+    fig.colorbar(vz_sm, cax=caxr, orientation="vertical")
+    caxr.yaxis.tick_right()
+    caxr.yaxis.set_label_position("right")
+    caxl.set_ylabel(r"$\int \rho ds$")
+    caxr.set_ylabel(r"$\int v_z ds$")
+
     fig.savefig(save_str, dpi=300, bbox_inches="tight")
     plt.close("all")
 
@@ -101,7 +118,7 @@ def loop_composites(num_img=300):
 
     rho_dir = "/scratch/thesis/jets/cudart_renders/rho_hr"
     vz_dir = "/scratch/thesis/jets/cudart_renders/vz_hr"
-    save_dir = "/scratch/thesis/jets/cudart_renders/comp"
+    save_dir = "/scratch/thesis/jets/cudart_renders/comp_label"
 
     for n in range(100,num_img):
         rho_str = os.path.join(rho_dir, "raw" + str(n).zfill(5) + ".npy")
@@ -111,11 +128,11 @@ def loop_composites(num_img=300):
 
 if __name__ == "__main__":
 
-    build_athena_example(header="homo_rho", homogenize=True)
-    build_athena_example(header="inhomo_rho", homogenize=False)
-    render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
-    render_athena_example(header="inhomo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_prof.txt")
-
+    # build_athena_example(header="homo_rho", homogenize=True)
+    build_athena_example(header="inhomo_vz", homogenize=False)
+    # render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
+    render_athena_example(header="inhomo_vz", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_vz_prof.txt")
+    #loop_composites()
 
 
 
