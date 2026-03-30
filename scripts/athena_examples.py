@@ -75,8 +75,6 @@ def composite_plot(rho_str, vz_str, save_str):
     
     rho_grey = remap(np.log10(rho_data), -3, -1.5)
     vz_grey = remap(np.log10(vz_data), -4.5, -2)
-    # vz_grey[vz_grey > 0.5] = 0.5
-    # vz_grey[vz_grey < 0.2] = 0.0
 
     rho_cmap = plt.get_cmap("afmhot")
     vz_cmap = plt.get_cmap("Blues")
@@ -84,19 +82,19 @@ def composite_plot(rho_str, vz_str, save_str):
     vz_RGBA = vz_cmap(vz_grey)
     rho_RGBA[...,3] = 0.6
     vz_RGBA[...,3] = 0.5 * vz_grey ** 2
-    # vz_RGBA[...,3][vz_RGBA[...,3] < 0.05] = 0.0
 
     set_plot_defaults(use_tex=True)
     width_ratios = np.array([0.05, 1, 0.05])
     height_ratios = np.array([1])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
-    fig = plt.figure(figsize=(h_over_w * 10.0 / 3, 10.0 / 3))
+    fig = plt.figure(figsize=(10.0 / 3, h_over_w * 10.0 / 3))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), width_ratios=width_ratios, height_ratios=height_ratios)
     caxl = fig.add_subplot(gs[0, 0])
     ax = fig.add_subplot(gs[0,1])
     caxr = fig.add_subplot(gs[0,2])
 
     ax.set_facecolor("k")
+    ax.set_aspect("equal")
     ax.imshow(rho_RGBA)
     ax.imshow(vz_RGBA)
     ax.xaxis.set_visible(False)
@@ -108,8 +106,8 @@ def composite_plot(rho_str, vz_str, save_str):
     fig.colorbar(vz_sm, cax=caxr, orientation="vertical")
     caxl.yaxis.tick_left()
     caxl.yaxis.set_label_position("left")
-    caxl.set_ylabel(r"$\int \rho ds$")
-    caxr.set_ylabel(r"$\int v_z ds$")
+    caxl.set_ylabel(r"$\int \rho ds$ [arb.]")
+    caxr.set_ylabel(r"$\int \left|v_z\right| ds$ [arb.]")
 
     plt.subplots_adjust(hspace=0, wspace=0)
     fig.savefig(save_str, dpi=300, bbox_inches="tight")
@@ -121,7 +119,7 @@ def loop_composites(num_img=300):
     vz_dir = "/scratch/thesis/jets/cudart_renders/inhomo_vz_output"
     save_dir = "/scratch/thesis/jets/cudart_renders/comp_label"
 
-    for n in range(0,num_img, 10):
+    for n in range(0,num_img, 1):
         rho_str = os.path.join(rho_dir, "raw" + str(n).zfill(5) + ".npy")
         vz_str = os.path.join(vz_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, str(n).zfill(5) + ".png")
@@ -130,10 +128,10 @@ def loop_composites(num_img=300):
 if __name__ == "__main__":
 
     # build_athena_example(header="homo_rho", homogenize=True)
-    build_athena_example(header="inhomo_vz", homogenize=False, tracer_type="vel_z")
+    #build_athena_example(header="inhomo_vz", homogenize=False, tracer_type="vel_z")
     # render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
-    render_athena_example(header="inhomo_vz", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_vz_prof.txt")
-    #loop_composites()
+    #render_athena_example(header="inhomo_vz", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_vz_prof.txt")
+    loop_composites()
 
 
 
