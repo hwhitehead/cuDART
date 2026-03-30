@@ -47,7 +47,7 @@ def render_athena_example(header, prof_file = None):
     template_camera.length_X = 4 * rh
     template_camera.length_Y = 4 * rh
 
-    num_img = 10
+    num_img = 300
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
@@ -120,7 +120,7 @@ def loop_composites(num_img=300):
     vz_dir = "/scratch/thesis/jets/cudart_renders/vz_hr"
     save_dir = "/scratch/thesis/jets/cudart_renders/comp_label"
 
-    for n in range(100,num_img):
+    for n in range(0,num_img):
         rho_str = os.path.join(rho_dir, "raw" + str(n).zfill(5) + ".npy")
         vz_str = os.path.join(vz_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, str(n).zfill(5) + ".png")
@@ -129,7 +129,7 @@ def loop_composites(num_img=300):
 if __name__ == "__main__":
 
     # build_athena_example(header="homo_rho", homogenize=True)
-    build_athena_example(header="inhomo_vz", homogenize=False)
+    #build_athena_example(header="inhomo_vz", homogenize=False)
     # render_athena_example(header="homo_rho", prof_file="/mnt/kocsis1/cuDART_wdir/athena/homo_prof.txt")
     render_athena_example(header="inhomo_vz", prof_file="/mnt/kocsis1/cuDART_wdir/athena/inhomo_vz_prof.txt")
     #loop_composites()
