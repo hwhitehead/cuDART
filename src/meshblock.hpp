@@ -41,6 +41,8 @@ class MeshBlock {
 __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
     // load single homgenous meshblock info, allocate host memory and load data
 
+    std::cout << "starting unlabelled mb load" << std::cout;
+
     clock_t npy_read_start = clock();
     std::vector<MeshBlockInfo> all_mb_info = {};
     bool file_exists = std::filesystem::exists(input_str);
