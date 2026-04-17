@@ -2,10 +2,6 @@ import numpy as np
 import sys, os
 import h5py
 
-
-sys.path.append("..")
-from pysrc import *
-
 class BlackHole:
     """
     this class loads BH data for a single BH into memory from a txt or npy file, labelling and retaining header info

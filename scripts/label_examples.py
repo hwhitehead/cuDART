@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import subprocess, os, sys, copy
 
 # local import
-sys.path.append("..")
-from pysrc import *
+pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
+sys.path.append(pysrc)
+from cudart import *
 
 epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
 

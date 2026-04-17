@@ -13,6 +13,8 @@ epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
 
 def extract_pluto_data_example():
 
+    from pluto_reader import *
+
     config_file = "/mnt/kocsis1/cuDART_wdir/jet_analyst/config.ini"
     load_dir = "/mnt/kocsis1/cuDART_wdir/jet_data/"
     emm_dir = "/mnt/kocsis1/cuDART_wdir/emm_data/"

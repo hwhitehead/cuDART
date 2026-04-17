@@ -2,8 +2,10 @@ import sys, os, gc
 import numpy as np
 from matplotlib import cm
 
-sys.path.append("..")
-from pysrc import *
+pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
+sys.path.append(pysrc)
+from cudart import *
+from athena_reader import *
 
 def build_athena_example(header, homogenize=True, verbose=False, level=5, tracer_type="rho"):
 
