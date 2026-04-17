@@ -96,9 +96,6 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
     npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
     png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
-    # npy_load_str = "/scratch/data_to_render.npy"
-    # npy_save_str = "/scratch/output/raw"
-    # png_save_str = "/scratch/output/img"
 
     # build template camera
     template_camera = Camera()
