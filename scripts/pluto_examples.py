@@ -90,9 +90,16 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/img"
+    # npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    # npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/raw"
+    # png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/img"
+    # npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
+    # npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
+    # png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
+    npy_load_str = "/scratch/data_to_render.npy""
+    npy_save_str = "/scratch/output/raw"
+    png_save_str = "/scratch/output/img"
+
 
     # build template camera
     template_camera = Camera()
@@ -114,7 +121,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("initialised cameras")
 
     # generate scene
-    scene = Scene(npy_load_str, npy_save_str, cameras)
+    scene = Scene(npy_load_str, npy_save_str, cameras, camera_file_name="/scratch/camera_file.txt")
     print("built scene")
 
     # render and save images
@@ -252,4 +259,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    render_pluto_data_example(relativistic=False, doppler_index=3.6, remove_raw_images = False, save_lc = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/lum.npy")
+
+    render_pluto_data_example(relativistic=False, doppler_index=3.6, remove_raw_images = False)
