@@ -4,7 +4,7 @@ import os, sys, subprocess, copy
 import glob
 import pandas as pd
 
-host_dir = "/scratch" # TODO: accept as kwarg
+host_dir = "/data/phys-dynamic-disc/wadh6663/cuDART" # TODO: accept as kwarg
 str_zfill = 5
 epsilon = 1e-6
 
