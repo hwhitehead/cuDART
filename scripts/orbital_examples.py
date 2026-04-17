@@ -2,8 +2,10 @@ import numpy as np
 import sys, os
 import matplotlib.pyplot as plt
 
-sys.path.append("..")
-from pysrc import *
+pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
+sys.path.append(pysrc)
+from cudart import *
+from orbitals import *
 
 def build_orbital_arrays(data_dir, D = 256, half_len = 40):
 

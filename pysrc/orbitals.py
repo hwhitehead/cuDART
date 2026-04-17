@@ -4,8 +4,10 @@ import os, sys
 import scipy.special
 from scipy.special import factorial, genlaguerre, lpmv
 
-sys.path.append("..")
-from pysrc import *
+# local import
+pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
+sys.path.append(pysrc)
+from cudart import *
 
 class Orbital:
 

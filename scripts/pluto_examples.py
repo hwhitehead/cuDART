@@ -5,12 +5,15 @@ import matplotlib.image as mpimg
 import pandas as pd
 
 # local import
-sys.path.append("..")
-from pysrc import *
+pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
+sys.path.append(pysrc)
+from cudart import *
 
 epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
 
 def extract_pluto_data_example():
+
+    from pluto_reader import PlutoParticleReader, VTKLoader, Frequencies, Units
 
     config_file = "/mnt/kocsis1/cuDART_wdir/jet_analyst/config.ini"
     load_dir = "/mnt/kocsis1/cuDART_wdir/jet_data/"
@@ -90,9 +93,12 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/img"
+    # npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    # npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/raw"
+    # png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/img"
+    npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
+    npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
+    png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
 
     # build template camera
     template_camera = Camera()
@@ -252,4 +258,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-    render_pluto_data_example(relativistic=False, doppler_index=3.6, remove_raw_images = False, save_lc = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/lum.npy")
+
+    render_pluto_data_example(relativistic=True, doppler_index=3.6, remove_raw_images = True)

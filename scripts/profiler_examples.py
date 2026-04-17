@@ -2,9 +2,9 @@
 import sys, os, gc
 import numpy as np
 
-# local import
-sys.path.append("..")
-from pysrc import *
+pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
+sys.path.append(pysrc)
+from cudart import *
 
 if __name__ == "__main__":
 

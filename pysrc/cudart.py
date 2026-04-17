@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import os, sys, subprocess, copy
+import os, sys, subprocess, copy, pathlib
 import glob
 import pandas as pd
 
-host_dir = "/mnt/users/hww27/cuDART"
 str_zfill = 5
 epsilon = 1e-6
 
@@ -359,7 +358,8 @@ class Scene:
             os.mkdir(save_dir)
 
         # check executable exists, or build
-        path_to_executable = os.path.join(host_dir, "bin/cudart")
+        pysrc_dir = pathlib.Path(__file__).parent.resolve()
+        path_to_executable = os.path.join(pysrc_dir, "..", "bin","cudart")
         if not os.path.isfile(path_to_executable):
             if (verbose):
                 print("unable to located executable, forcing remake.")
@@ -393,7 +393,7 @@ class Scene:
         # destroy temp camera file if called
         if not self.temp_camera_file == self.camera_file_name:
             if os.path.exists(self.temp_camera_file):
-                #os.remove(self.temp_camera_file) # TEMP
+                os.remove(self.temp_camera_file)
                 if verbose:
                     print("removed temporary camera file")
 
