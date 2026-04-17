@@ -5,8 +5,10 @@ import matplotlib.image as mpimg
 import pandas as pd
 
 # local import
-sys.path.append("..")
-from pysrc import *
+# sys.path.append("..")
+# from pysrc import *
+
+from cuDART.pysrc import *
 
 epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
 
