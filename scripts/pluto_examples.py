@@ -6,7 +6,8 @@ import pandas as pd
 
 # local import
 pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
-from pysrc import *
+sys.path.append(pysrc)
+from cudart import *
 
 epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
 
