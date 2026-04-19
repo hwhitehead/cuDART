@@ -254,6 +254,21 @@ int main(int argc, char *argv[]) {
         std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
         if (append_mode) {
             // attempt to add values to existing file (if it exists)
+            bool file_exists = std::filesystem::is_regular_file(save_str);
+            if (file_exists) { 
+                npy::npy_data existing_npy_data = npy::read_npy<float>(npy_str);
+                std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
+                if (existing_npy_shape != npy_img.shape) {
+                    std::stringstream err_msg;
+                    err_msg << "### FATAL ERROR in main\n";
+                    err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
+                    CUDART_ERROR(err_msg);
+                }
+                // given matching shape, add new data to existing 
+                
+            } else { // no existing file, direct write
+                npy_img.data_ptr = img;
+            }
         } else {
             // generate new data
             npy_img.data_ptr = img;
