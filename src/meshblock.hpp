@@ -43,7 +43,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
 
     clock_t npy_read_start = clock();
     std::vector<MeshBlockInfo> all_mb_info = {};
-    bool file_exists = std::filesystem::exists(input_str);
+    bool file_exists = std::filesystem::is_regular_file(input_str);
     if (!file_exists) {
         std::stringstream err_msg;
         err_msg << "### FATAL ERROR in main\n";
@@ -160,7 +160,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     for (int n = 0; n < all_mb_info.size(); n++) {
         // load meshblock data as (nx,ny,nz,p) where p = 1 or 4
         std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy";
-        bool file_exists = std::filesystem::exists(input_str);
+        bool file_exists = std::filesystem::is_regular_file(npy_str);
         if (!file_exists) {
             std::stringstream err_msg;
             err_msg << "### FATAL ERROR in main\n";

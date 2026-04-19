@@ -29,9 +29,9 @@ int main(int argc, char *argv[]) {
     clock_t main_start = clock();
 
     // define space for user settings
-    std::string cudart_version = "version 0.7 - January 2026";
+    std::string cudart_version = "version 0.8 - April 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr, *doppler_char = nullptr;
-    bool verbose = false, relativistic = false;
+    bool verbose = false, relativistic = false, append_mode = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -46,11 +46,13 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'r':
                     break;
+                case 'a':
+                    break;
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) {
                         std::stringstream err_msg;
                         err_msg << "### FATAL ERROR in main ###\n";
-                        err_msg << "-" << opt_letter << "must be follower by a valid argument\n";
+                        err_msg << "-" << opt_letter << "must be followed by a valid argument\n";
                         CUDART_ERROR(err_msg);
                     }
             } // end cases
@@ -73,6 +75,8 @@ int main(int argc, char *argv[]) {
                 case 'r':
                     relativistic = true;
                     break;
+                case 'a':
+                    append_mode = true;
                 case 'c':
                     camera_char = argv[++i];
                     break;
@@ -85,8 +89,9 @@ int main(int argc, char *argv[]) {
                     std::cout << " -s <file>    specify save target\n";
                     std::cout << " -c <file>    specify camera data file\n";
                     std::cout << " -d <value>   Doppler index for boosting\n";
-                    std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
+                    std::cout << " -a           summation append flag\n";
+                    std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -v           verbosity flag\n";
                     std::cout << " -h           this help message\n"; 
                     return 0; 
@@ -247,7 +252,12 @@ int main(int argc, char *argv[]) {
         // save data
         clock_t npy_write_start = clock();
         std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
-        npy_img.data_ptr = img;
+        if (append_mode) {
+            // attempt to add values to existing file (if it exists)
+        } else {
+            // generate new data
+            npy_img.data_ptr = img;
+        }
         npy::write_npy(save_str, npy_img);
         if (verbose) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
