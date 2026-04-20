@@ -120,7 +120,8 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("initialised cameras")
 
     # generate scene
-    scene = Scene(npy_load_str, npy_save_str, cameras)
+    camera_file_name = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/cameras.txt"
+    scene = Scene(npy_load_str, npy_save_str, cameras, camera_file_name=camera_file_name)
     print("built scene")
 
     # render and save images
@@ -134,7 +135,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
-    print("unlablled render example finished.")
+    print("unlabelled render example finished.")
 
 def cardinal_rotate(axes="x"):
 
