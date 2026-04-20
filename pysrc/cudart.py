@@ -389,6 +389,8 @@ class Scene:
         if append:
             command = command + ["-a"]
         print("calling render executable")
+        if (verbose):
+            print(command)
         subprocess.run(command, check = True)
         print("executable finished.")
 
