@@ -349,7 +349,13 @@ class Scene:
 
         i = 0
         while i < np.size(command): 
-            if command[i].startswith("-"):
+            # handle end case
+            if i = np.size(command) - 1:
+                print(i)
+                i += 1
+
+            # test for double
+            if command[i].startswith("-") and not command[i].startswith("-"):
                 print("{0} {1}".format(command[i],command[i+1]))
                 i += 2
             else:
