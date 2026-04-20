@@ -350,7 +350,7 @@ class Scene:
         i = 0
         while i < np.size(command): 
             # handle end case
-            if i = np.size(command) - 1:
+            if i == np.size(command) - 1:
                 print(i)
                 i += 1
 
