@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
             // attempt to add values to existing file (if it exists)
             bool file_exists = std::filesystem::is_regular_file(save_str);
             if (file_exists) { 
-                npy::npy_data existing_npy_data = npy::read_npy<float>(npy_str);
+                npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
                 std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
                 if (existing_npy_shape != npy_img.shape) {
                     std::stringstream err_msg;
@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
                 std::vector<float> new_img_vec;
                 new_img_vec.assign(img, img + standard_camera.num_pixels); 
                 std::vector<float> combined_img = old_img_vec + new_img_vec;
-                npy_img.data_ptr = combined_img.data()
+                npy_img.data_ptr = combined_img.data();
             } else { // no existing file, direct write
                 npy_img.data_ptr = img;
             }
