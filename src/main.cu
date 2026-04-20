@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'a':
                     append_mode = true;
+                    break;
                 case 'c':
                     camera_char = argv[++i];
                     break;
