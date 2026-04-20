@@ -354,11 +354,12 @@ class Scene:
                 print(i)
                 i += 1
             elif command[i].startswith("-") and not command[i+1].startswith("-"):
-                print("{0} {1}".format(command[i],command[i+1]))
+                print("\n{0} {1}".format(command[i],command[i+1]))
                 i += 2
             else:
-                print(command[i], end='')
+                print("{0} ".format(command[i]), end='')
                 i += 1
+        print("\n")
 
     def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False, doppler_index = None, append = False):
 
