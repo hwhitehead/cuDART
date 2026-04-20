@@ -267,9 +267,9 @@ int main(int argc, char *argv[]) {
                 }
                 // given matching shape, add new data to existing 
                 std::vector<float> img_vec = existing_npy_data.data;
-                // std::vector<float> new_img_vec;
-                // new_img_vec.assign(img, img + standard_camera.num_pixels); 
-                std::transform(img_vec.begin(), img_vec.end(), img, img_vec.begin(), std::plus<float>());
+                std::vector<float> new_img_vec;
+                new_img_vec.assign(img, img + standard_camera.num_pixels); 
+                std::transform(img_vec.begin(), img_vec.end(), new_img_vec.begin(), img_vec.begin(), std::plus<float>());
                 npy_img.data_ptr = img_vec.data();
             } else { // no existing file, direct write
                 npy_img.data_ptr = img;

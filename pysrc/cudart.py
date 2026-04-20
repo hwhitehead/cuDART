@@ -345,6 +345,17 @@ class Scene:
     def make(self):
         subprocess.run(["make"], check = True)
 
+    def print_command(self, command):
+
+        i = 0
+        while i < np.size(command): 
+            if command[i].startswith("-"):
+                print("{0} {1}".format(command[i],command[i+1]))
+                i += 2
+            else:
+                print(command[i], end='')
+                i += 1
+
     def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False, doppler_index = None, append = False):
 
         # prepare camera space
@@ -389,8 +400,7 @@ class Scene:
         if append:
             command = command + ["-a"]
         print("calling render executable")
-        if (verbose):
-            print(command)
+        if (verbose): self.print_command(command)
         subprocess.run(command, check = True)
         print("executable finished.")
 
