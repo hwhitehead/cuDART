@@ -258,5 +258,4 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-
-    render_pluto_data_example(relativistic=True, doppler_index=3.6, remove_raw_images = True)
+    render_pluto_data_example(relativistic=True, doppler_index=3.6, remove_raw_images = False)
