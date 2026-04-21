@@ -351,7 +351,7 @@ class Scene:
         while i < np.size(command): 
             # handle end case
             if i == np.size(command) - 1:
-                print(i)
+                print(command[i])
                 i += 1
             elif command[i].startswith("-") and not command[i+1].startswith("-"):
                 print("\n{0} {1}".format(command[i],command[i+1]))
