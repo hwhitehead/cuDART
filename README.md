@@ -11,7 +11,7 @@
   <img src=https://github.com/hwhitehead/cuDART/blob/append/docs/magnetised_jets.png width = "600"/>
 </p>
 <p align="center"">
-  <em> Static iamges of a highly magnetised, variable power jet launched from an Active Galactic Nucleus, viewed from three different orientations. Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. Simulation data produced as part of paper currently in prep.</em>
+  <em> Static images of a highly magnetised, variable power jet launched from an Active Galactic Nucleus, viewed from three different orientations. Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. Simulation data produced as part of paper currently in prep.</em>
 </p>
 
 
