@@ -280,6 +280,7 @@ int main(int argc, char *argv[]) {
                     img_vec[i] += img[i];
                 }
                 npy_img.data_ptr = img_vec.data();
+                npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
                 // // given matching shape, add new data to existing TODO: shape information appears corrupted, chase
                 // std::vector<float> img_vec = existing_npy_data.data();
                 // std::vector<float> new_img_vec;
