@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
                     err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
                     CUDART_ERROR(err_msg);
                 }
-                std::vector<float> img_vec = existing_npy_data.data();
+                std::vector<float> img_vec = existing_npy_data.data;
                 for (int i = 0; i++; i < standard_camera.num_pixels) {
                     img_vec[i] += img[i];
                 }
