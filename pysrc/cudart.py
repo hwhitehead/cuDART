@@ -361,7 +361,7 @@ class Scene:
                 i += 1
         print("\n")
 
-    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False, doppler_index = None, append = False):
+    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False):
 
         # prepare camera space
         self.build_camera_file()
@@ -400,7 +400,9 @@ class Scene:
             command = command + ["-m", str(max_mem)]
         if relativistic:
             command = command + ["-r"]
-        if doppler_index is not None:
+        if power_law_index is not None:
+            command = command + ["-p", str(power_law_index)]
+        else if doppler_index is not None: # power_law has priority over doppler
             command = command + ["-d", str(doppler_index)]
         if append:
             command = command + ["-a"]

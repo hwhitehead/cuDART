@@ -30,7 +30,8 @@ int main(int argc, char *argv[]) {
 
     // define space for user settings
     std::string cudart_version = "version 0.8 - April 2026";
-    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr, *doppler_char = nullptr;
+    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
+    char *doppler_char = nullptr, *power_law_char = nullptr;
     bool verbose = false, relativistic = false, append_mode = false;
 
     // process command line arguments
@@ -69,6 +70,9 @@ int main(int argc, char *argv[]) {
                 case 'd':
                     doppler_char = argv[++i];
                     break;
+                case 'p':
+                    power_law_char = argv[++i];
+                    break;
                 case 'v':
                     verbose = true;
                     break;
@@ -89,7 +93,8 @@ int main(int argc, char *argv[]) {
                     std::cout << " -i <file>    specify input target\n";
                     std::cout << " -s <file>    specify save target\n";
                     std::cout << " -c <file>    specify camera data file\n";
-                    std::cout << " -d <value>   Doppler index for boosting\n";
+                    std::cout << " -p <value>   power-law for rest-frame emission (default -0.6)\n";
+                    std::cout << " -d <value>   Doppler index for boosting (deprecated for power-law)\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
                     std::cout << " -a           summation append flag\n";
                     std::cout << " -r           relativisitic boosting flag\n";
@@ -109,11 +114,16 @@ int main(int argc, char *argv[]) {
     }
     std::string save_str_header(save_char);
 
-    float doppler_index = 3.6; // default value
+    float power_law_index = -0.6; // default value for synchrotron emission
+    float doppler_index = 2.0 - power_law_index;
     if (doppler_char != nullptr) {
         doppler_index = static_cast<float>(std::atof(doppler_char));
     }
-
+    if (power_law_char != nullptr) { // priority over doppler specification
+        power_law_index = static_cast<float>(std::atof(power_law_char));
+        doppler_index = 2.0 - power_law_index;
+    }
+    
     // determine run mode type (labelled or unlabelled)
     bool labelled_data = false;
     const std::string input_str(input_char);
