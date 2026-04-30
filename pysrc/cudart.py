@@ -402,7 +402,7 @@ class Scene:
             command = command + ["-r"]
         if power_law_index is not None:
             command = command + ["-p", str(power_law_index)]
-        else if doppler_index is not None: # power_law has priority over doppler
+        elif doppler_index is not None: # power_law has priority over doppler
             command = command + ["-d", str(doppler_index)]
         if append:
             command = command + ["-a"]
