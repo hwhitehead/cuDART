@@ -269,6 +269,7 @@ int main(int argc, char *argv[]) {
             if (file_exists) { 
                 npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
                 std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
+                std::cout << "{nx,ny} = {" << existing_npy_shape[0] << "," << existing_npy_shape[1] << "}"<< std::endl;
                 if (existing_npy_shape != npy_img.shape) {
                     std::stringstream err_msg;
                     err_msg << "### FATAL ERROR in main\n";
@@ -277,10 +278,10 @@ int main(int argc, char *argv[]) {
                 }
                 std::vector<float> img_vec = existing_npy_data.data;
                 for (int i = 0; i < standard_camera.num_pixels; i++) {
-                    img_vec[i] += img[i];
+                    img[i] += img_vec[i];
                 }
-                npy_img.data_ptr = img_vec.data();
-                npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
+                // npy_img.data_ptr = img_vec.data();
+                // npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
                 // // given matching shape, add new data to existing TODO: shape information appears corrupted, chase
                 // std::vector<float> img_vec = existing_npy_data.data();
                 // std::vector<float> new_img_vec;
@@ -289,9 +290,11 @@ int main(int argc, char *argv[]) {
                 // //new_img_vec.assign(img, img + standard_camera.num_pixels); 
                 // std::transform(img_vec.begin(), img_vec.end(), new_img_vec.begin(), img_vec.begin(), std::plus<float>());
                 // npy_img.data_ptr = img_vec.data();
-            } else { // no existing file, direct write
-                npy_img.data_ptr = img;
+            // } else { // no existing file, direct write
+            //     npy_img.data_ptr = img;
+            // }
             }
+            npy_img.data_ptr = img;
         } else {
             // generate new data
             npy_img.data_ptr = img;
