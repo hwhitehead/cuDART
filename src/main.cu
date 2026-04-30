@@ -29,9 +29,10 @@ int main(int argc, char *argv[]) {
     clock_t main_start = clock();
 
     // define space for user settings
-    std::string cudart_version = "version 0.7 - January 2026";
-    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr, *doppler_char = nullptr;
-    bool verbose = false, relativistic = false;
+    std::string cudart_version = "version 0.8 - April 2026";
+    char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
+    char *doppler_char = nullptr, *power_law_char = nullptr;
+    bool verbose = false, relativistic = false, append_mode = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -46,11 +47,13 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'r':
                     break;
+                case 'a':
+                    break;
                 default:
                     if ((i+1 >= argc) || (*argv[i+1] == '-')) {
                         std::stringstream err_msg;
                         err_msg << "### FATAL ERROR in main ###\n";
-                        err_msg << "-" << opt_letter << "must be follower by a valid argument\n";
+                        err_msg << "-" << opt_letter << "must be followed by a valid argument\n";
                         CUDART_ERROR(err_msg);
                     }
             } // end cases
@@ -67,11 +70,17 @@ int main(int argc, char *argv[]) {
                 case 'd':
                     doppler_char = argv[++i];
                     break;
+                case 'p':
+                    power_law_char = argv[++i];
+                    break;
                 case 'v':
                     verbose = true;
                     break;
                 case 'r':
                     relativistic = true;
+                    break;
+                case 'a':
+                    append_mode = true;
                     break;
                 case 'c':
                     camera_char = argv[++i];
@@ -84,9 +93,11 @@ int main(int argc, char *argv[]) {
                     std::cout << " -i <file>    specify input target\n";
                     std::cout << " -s <file>    specify save target\n";
                     std::cout << " -c <file>    specify camera data file\n";
-                    std::cout << " -d <value>   Doppler index for boosting\n";
-                    std::cout << " -r           relativisitic boosting flag\n";
+                    std::cout << " -p <value>   power-law for rest-frame emission (default -0.6)\n";
+                    std::cout << " -d <value>   Doppler index for boosting (deprecated for power-law)\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
+                    std::cout << " -a           summation append flag\n";
+                    std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -v           verbosity flag\n";
                     std::cout << " -h           this help message\n"; 
                     return 0; 
@@ -103,11 +114,16 @@ int main(int argc, char *argv[]) {
     }
     std::string save_str_header(save_char);
 
-    float doppler_index = 3.6; // default value
+    float power_law_index = -0.6; // default value for synchrotron emission
+    float doppler_index = 2.0 - power_law_index;
     if (doppler_char != nullptr) {
         doppler_index = static_cast<float>(std::atof(doppler_char));
     }
-
+    if (power_law_char != nullptr) { // priority over doppler specification
+        power_law_index = static_cast<float>(std::atof(power_law_char));
+        doppler_index = 2.0 - power_law_index;
+    }
+    
     // determine run mode type (labelled or unlabelled)
     bool labelled_data = false;
     const std::string input_str(input_char);
@@ -247,6 +263,25 @@ int main(int argc, char *argv[]) {
         // save data
         clock_t npy_write_start = clock();
         std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
+        if (append_mode) {
+            // attempt to add values to existing file (if it exists)
+            bool file_exists = std::filesystem::is_regular_file(save_str);
+            if (file_exists) { 
+                npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
+                std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
+                std::cout << "{nx,ny} = {" << existing_npy_shape[0] << "," << existing_npy_shape[1] << "}"<< std::endl;
+                if (existing_npy_shape != npy_img.shape) {
+                    std::stringstream err_msg;
+                    err_msg << "### FATAL ERROR in main\n";
+                    err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
+                    CUDART_ERROR(err_msg);
+                }
+                std::vector<float> img_vec = existing_npy_data.data;
+                for (int i = 0; i < standard_camera.num_pixels; i++) {
+                    img[i] += img_vec[i];
+                }
+            }
+        }
         npy_img.data_ptr = img;
         npy::write_npy(save_str, npy_img);
         if (verbose) {

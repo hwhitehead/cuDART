@@ -88,17 +88,19 @@ def render_pluto_helix(relativistic = False):
 
     print("unlablled render example finished.")
 
-def render_pluto_data_example(relativistic=False, remove_raw_images = True, save_profile = None, doppler_index = 3.6, save_lc = None):
+def render_pluto_data_example(relativistic=False, remove_raw_images = True, save_profile = None, save_lc = None, append = False):
 
     print("cuDART: starting jet render example...")
 
     # define targets
-    # npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    # npy_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/raw"
-    # png_save_str = "/mnt/kocsis1/cuDART_wdir/emm_img/unboosted/img"
-    npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
-    npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
-    png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/img"
+    camera_file_name = "/mnt/kocsis1/cuDART_wdir/append_test/cameras.txt"
+    # npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
+    # npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
+    # png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
+    # camera_file_name = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/cameras.txt"
 
     # build template camera
     template_camera = Camera()
@@ -109,7 +111,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     template_camera.length_Y = 0.66
 
     # build camera array, inherit from template
-    num_img = 100
+    num_img = 10
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
@@ -120,11 +122,12 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("initialised cameras")
 
     # generate scene
-    scene = Scene(npy_load_str, npy_save_str, cameras)
+    
+    scene = Scene(npy_load_str, npy_save_str, cameras, camera_file_name=camera_file_name)
     print("built scene")
 
     # render and save images
-    scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, doppler_index = doppler_index)
+    scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, append = append)
     print("finished rendering raw images")
 
     if save_lc is not None:
@@ -134,7 +137,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
     print("finished rendering rasterised images")
 
-    print("unlablled render example finished.")
+    print("unlabelled render example finished.")
 
 def cardinal_rotate(axes="x"):
 
@@ -258,5 +261,5 @@ def comp_plot():
 
 if __name__ == "__main__":
 
-
-    render_pluto_data_example(relativistic=True, doppler_index=3.6, remove_raw_images = True)
+    render_pluto_data_example(relativistic=True, remove_raw_images = False, append=False)
+    render_pluto_data_example(relativistic=True, remove_raw_images = False, append=True)
