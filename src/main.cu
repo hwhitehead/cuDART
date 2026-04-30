@@ -275,14 +275,19 @@ int main(int argc, char *argv[]) {
                     err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
                     CUDART_ERROR(err_msg);
                 }
-                // given matching shape, add new data to existing TODO: shape information appears corrupted, chase
-                std::vector<float> img_vec = existing_npy_data.data;
-                std::vector<float> new_img_vec;
-                new_img_vec.insert(new_img_vec.end(), img, img + standard_camera.num_pixels );
-                // std::vector<float> new_img_vec(img, img + sizeof(img) / sizeof(float));
-                //new_img_vec.assign(img, img + standard_camera.num_pixels); 
-                std::transform(img_vec.begin(), img_vec.end(), new_img_vec.begin(), img_vec.begin(), std::plus<float>());
+                std::vector<float> img_vec = existing_npy_data;
+                for (int i = 0; i++; i < standard_camera.num_pixels) {
+                    img_vec[i] += img[i];
+                }
                 npy_img.data_ptr = img_vec.data();
+                // // given matching shape, add new data to existing TODO: shape information appears corrupted, chase
+                // std::vector<float> img_vec = existing_npy_data.data;
+                // std::vector<float> new_img_vec;
+                // new_img_vec.insert(new_img_vec.end(), img, img + standard_camera.num_pixels);
+                // // std::vector<float> new_img_vec(img, img + sizeof(img) / sizeof(float));
+                // //new_img_vec.assign(img, img + standard_camera.num_pixels); 
+                // std::transform(img_vec.begin(), img_vec.end(), new_img_vec.begin(), img_vec.begin(), std::plus<float>());
+                // npy_img.data_ptr = img_vec.data();
             } else { // no existing file, direct write
                 npy_img.data_ptr = img;
             }
