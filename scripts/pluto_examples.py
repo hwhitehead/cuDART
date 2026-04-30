@@ -96,9 +96,11 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
     npy_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/raw"
     png_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/img"
+    camera_file_name = "/mnt/kocsis1/cuDART_wdir/append_test/cameras.txt"
     # npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
     # npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
     # png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
+    # camera_file_name = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/cameras.txt"
 
     # build template camera
     template_camera = Camera()
@@ -120,7 +122,7 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("initialised cameras")
 
     # generate scene
-    camera_file_name = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/cameras.txt"
+    
     scene = Scene(npy_load_str, npy_save_str, cameras, camera_file_name=camera_file_name)
     print("built scene")
 
