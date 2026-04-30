@@ -269,7 +269,6 @@ int main(int argc, char *argv[]) {
             if (file_exists) { 
                 npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
                 std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
-                std::cout << "{nx,ny} = {" << existing_npy_shape[0] << "," << existing_npy_shape[1] << "}"<< std::endl;
                 if (existing_npy_shape != npy_img.shape) {
                     std::stringstream err_msg;
                     err_msg << "### FATAL ERROR in main\n";
