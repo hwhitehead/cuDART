@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
                     CUDART_ERROR(err_msg);
                 }
                 std::vector<float> img_vec = existing_npy_data.data;
-                for (int i = 0; i++; i < standard_camera.num_pixels) {
+                for (int i = 0; i < standard_camera.num_pixels; i++; ) {
                     img_vec[i] += img[i];
                 }
                 npy_img.data_ptr = img_vec.data();
