@@ -354,7 +354,7 @@ class Scene:
                 print(command[i])
                 i += 1
             elif command[i].startswith("-") and not command[i+1].startswith("-"):
-                print("\n{0} {1}".format(command[i],command[i+1]))
+                print("\n{0} {1}".format(command[i],command[i+1]), end='')
                 i += 2
             else:
                 print("{0} ".format(command[i]), end='')
