@@ -280,25 +280,9 @@ int main(int argc, char *argv[]) {
                 for (int i = 0; i < standard_camera.num_pixels; i++) {
                     img[i] += img_vec[i];
                 }
-                // npy_img.data_ptr = img_vec.data();
-                // npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
-                // // given matching shape, add new data to existing TODO: shape information appears corrupted, chase
-                // std::vector<float> img_vec = existing_npy_data.data();
-                // std::vector<float> new_img_vec;
-                // new_img_vec.insert(new_img_vec.end(), img, img + standard_camera.num_pixels);
-                // // std::vector<float> new_img_vec(img, img + sizeof(img) / sizeof(float));
-                // //new_img_vec.assign(img, img + standard_camera.num_pixels); 
-                // std::transform(img_vec.begin(), img_vec.end(), new_img_vec.begin(), img_vec.begin(), std::plus<float>());
-                // npy_img.data_ptr = img_vec.data();
-            // } else { // no existing file, direct write
-            //     npy_img.data_ptr = img;
-            // }
             }
-            npy_img.data_ptr = img;
-        } else {
-            // generate new data
-            npy_img.data_ptr = img;
         }
+        npy_img.data_ptr = img;
         npy::write_npy(save_str, npy_img);
         if (verbose) {
             float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
