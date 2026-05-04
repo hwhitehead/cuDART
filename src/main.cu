@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     std::string cudart_version = "version 0.8 - April 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     char *doppler_char = nullptr, *power_law_char = nullptr;
-    bool verbose = false, relativistic = false, append_mode = false;
+    bool verbose = false, relativistic = false, append_mode = false, lookback_mode = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -82,6 +82,9 @@ int main(int argc, char *argv[]) {
                 case 'a':
                     append_mode = true;
                     break;
+                 case 'l':
+                    lookback_mode = true;
+                    break;
                 case 'c':
                     camera_char = argv[++i];
                     break;
@@ -96,6 +99,7 @@ int main(int argc, char *argv[]) {
                     std::cout << " -p <value>   power-law for rest-frame emission (default -0.6)\n";
                     std::cout << " -d <value>   Doppler index for boosting (deprecated for power-law)\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
+                    std::cout << " -l           lookback routine flag\n";
                     std::cout << " -a           summation append flag\n";
                     std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -v           verbosity flag\n";
