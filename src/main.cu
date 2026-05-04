@@ -128,10 +128,18 @@ int main(int argc, char *argv[]) {
         doppler_index = 2.0 - power_law_index;
     }
     
-    // determine run mode type (labelled or unlabelled)
-    bool labelled_data = false;
+    // determine run mode (lookback)
     const std::string input_str(input_char);
     const std::filesystem::path input_path(input_char);
+    if (lookback_mode && !std::filesystem::is_directory(input_path)) {
+        std::stringstream err_msg;
+        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "Lookback mode requires directory of data to function\n";
+        CUDART_ERROR(err_msg);
+    }
+
+    // determine input mode (labelled/unlabelled)
+    bool labelled_data = false;    
     if (std::filesystem::is_directory(input_path)) {
         labelled_data = true;
     } else {
