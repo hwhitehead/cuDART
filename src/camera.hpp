@@ -65,7 +65,7 @@ __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
         while (std::getline(camera_file, line)) {
             float inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9, inp10, inp11, inp12;
             std::istringstream iss(line);
-            if (!(iss >> inp0 >> inp1 >> inp2 >> inp3 >> inp4 >> inp5 >> inp6 >> inp7 >> inp8 >> inp9 >> inp10 >> inp11 >> in12)) {
+            if (!(iss >> inp0 >> inp1 >> inp2 >> inp3 >> inp4 >> inp5 >> inp6 >> inp7 >> inp8 >> inp9 >> inp10 >> inp11 >> inp12)) {
                 std::stringstream err_msg;
                 err_msg << "### FATAL ERROR in main ###\n";
                 err_msg << "Unable to parse line " << line_count << "of camera file at " << camera_str << std::endl;
