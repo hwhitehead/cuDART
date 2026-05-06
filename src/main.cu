@@ -195,138 +195,194 @@ int main(int argc, char *argv[]) {
         printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur);
     }
 
-    // import npy data to host
-    std::vector<MeshBlockInfo> all_mb_info;
-    float *h_all_data = nullptr;
-    size_t h_bytes = 0;
-    if (labelled_data) {
-        all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, relativistic, verbose);
-    } else {
-        all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, relativistic, verbose);
-    }
-    int num_meshblocks = all_mb_info.size();
+    // MAJOR CASE BREAK: w or w/o lookback
+    if (lookback) {
+        // run with lookback
+        // 1. allocate space on device for data
+        // 2. loop over snapshots, load data to host, copy to device
+        // 3. loop over cameras, append to disc within loop
 
-    // determine VRAM limitations and handle excess
-    float tolerance = 0.95; // use this fraction of available vram
-    size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
-    if (h_bytes > d_bytes) {
-        std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main\n";
-        err_msg << "Requested memory in excess of space on device\n";
-        CUDART_ERROR(err_msg);
-    }
-
-    // allocate space on device
-    clock_t d_data_alloc_start = clock();
-    float *d_data = nullptr;
-    checkCudaErrors(cudaMalloc(&d_data, d_bytes));
-    if (verbose) {
-        float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
-    }
-
-    // copy ALL data from host into device
-    clock_t data_copy_start = clock();
-    checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
-    checkCudaErrors(cudaPeekAtLastError());
-    if (verbose) {
-        float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-        printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
-    }
-
-    // initialise MeshBlock list on device
-    MeshBlock **mb_list;
-    Mesh **mesh;
-    build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
-
-    // define render shape    
-    int tx = 16, ty = 16; // must not exceed 1024 (max thread per block)
-    const dim3 threads_per_block(tx,ty); 
-    const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
-                                std::ceil((float)standard_camera.num_pixels_Y / ty));
-
-    // declare output container
-    npy::npy_data_ptr<float> npy_img;
-    npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
-
-    // iterate over cameras
-    int img_count = 0;
-    int total_images = cameras.size();
-    size_t num_zero_pad = 5;
-    if (verbose) {
-        std::cout << "=============================================================\n";
-        if (total_images == 1) {
-            std::cout << "Starting render for single image...\n";
-        } else {
-            std::cout << "Starting render cycle for " << total_images << " images...\n";
-        }
-        std::cout << "-------------------------------------------------------------\n";
-    }
-    for (auto &camera : cameras) {
-        
-        clock_t this_img_start = clock();
-
-        // call render
-        clock_t render_start = clock();
-        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, trace_args);
-        checkCudaErrors(cudaPeekAtLastError());
-        checkCudaErrors(cudaDeviceSynchronize());
-        if (verbose) {
-            float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-            printf("render kernel             (device)            %.6fs\n",render_dur);
-        }
-
-        // copy image data to host
-        clock_t img_copy_start = clock();
-        checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
-        if (verbose) {
-            float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-            printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
-        }
-
-        // save data
-        clock_t npy_write_start = clock();
-        std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
-        if (append_mode) {
-            // attempt to add values to existing file (if it exists)
-            bool file_exists = std::filesystem::is_regular_file(save_str);
-            if (file_exists) { 
-                npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
-                std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
-                if (existing_npy_shape != npy_img.shape) {
+        // determine number of snapshots in target dir, and maximum data size
+        std::string header_str = input_str + "/header.txt"
+        std::ifstream header_file(header_str);
+        if (header_file.is_open()) {
+            std::string line;
+            int line_count = 0;
+            int num_snapshots, snapshot_size;
+            while (std::getline(header_file, line)) {
+                std::istringstream iss(line);
+                if (!(iss >> num_snapshots >> max_snapshot_size)) {
                     std::stringstream err_msg;
-                    err_msg << "### FATAL ERROR in main\n";
-                    err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
+                    err_msg << "### FATAL ERROR in main ###\n";
+                    err_msg << "Unable to parse line " << line_count << " of snapshot header file at " << header_str << std::endl;
                     CUDART_ERROR(err_msg);
-                }
-                std::vector<float> img_vec = existing_npy_data.data;
-                for (int i = 0; i < standard_camera.num_pixels; i++) {
-                    img[i] += img_vec[i];
-                }
+                } 
+                line_count++;
             }
         }
-        npy_img.data_ptr = img;
-        npy::write_npy(save_str, npy_img);
-        if (verbose) {
-            float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-            printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur);
-            float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
-            printf("img total                 (host/device)       %.6fs\n",this_img_dur);
-            if (img_count == total_images - 1) {
-                std::cout << "=============================================================\n";
-            } else {
-                std::cout << "-------------------------------------------------------------\n";
-            }
+        h_bytes = max_snapshot_size * sizeof(float);
+
+        // allocate data on host
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
         }
 
-        // prepare for next image
-        if (total_images != 1) { // skip wipe if single image output
-            wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
+        // determine VRAM limitations and handle excess
+        float tolerance = 0.95; // use this fraction of available vram
+        size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
+        if (h_bytes > d_bytes) {
+            std::stringstream err_msg;
+            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "Requested memory in excess of space on device\n";
+            CUDART_ERROR(err_msg);
+        }
+        
+
+    } else {
+        // run without lookback
+        // 1. load data to host, allocate space on device, copy to device
+        // 2. build containers on device
+        // 3. loop over cameras, save to disc within loop
+
+        // import npy data to host
+        std::vector<MeshBlockInfo> all_mb_info;
+        float *h_all_data = nullptr;
+        size_t h_bytes = 0;
+        bool host_malloc = true;
+        if (labelled_data) {
+            all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+        } else {
+            all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+        }
+        int num_meshblocks = all_mb_info.size();
+
+        // determine VRAM limitations and handle excess
+        float tolerance = 0.95; // use this fraction of available vram
+        size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
+        if (h_bytes > d_bytes) {
+            std::stringstream err_msg;
+            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "Requested memory in excess of space on device\n";
+            CUDART_ERROR(err_msg);
+        }
+
+        // allocate space on device
+        clock_t d_data_alloc_start = clock();
+        float *d_data = nullptr;
+        checkCudaErrors(cudaMalloc(&d_data, d_bytes));
+        if (verbose) {
+            float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
+        }
+
+        // copy ALL data from host into device
+        clock_t data_copy_start = clock();
+        checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
+        checkCudaErrors(cudaPeekAtLastError());
+        if (verbose) {
+            float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
+            printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
+        }
+
+        // initialise MeshBlock list on device
+        MeshBlock **mb_list;
+        Mesh **mesh;
+        build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
+
+        // define render shape    
+        int tx = 16, ty = 16; // must not exceed 1024 (max thread per block)
+        const dim3 threads_per_block(tx,ty); 
+        const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
+                                    std::ceil((float)standard_camera.num_pixels_Y / ty));
+
+        // declare output container
+        npy::npy_data_ptr<float> npy_img;
+        npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
+
+        // iterate over cameras
+        int img_count = 0;
+        int total_images = cameras.size();
+        size_t num_zero_pad = 5;
+        if (verbose) {
+            std::cout << "=============================================================\n";
+            if (total_images == 1) {
+                std::cout << "Starting render for single image...\n";
+            } else {
+                std::cout << "Starting render cycle for " << total_images << " images...\n";
+            }
+            std::cout << "-------------------------------------------------------------\n";
+        }
+        for (auto &camera : cameras) {
+            
+            clock_t this_img_start = clock();
+
+            // call render
+            clock_t render_start = clock();
+            render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, trace_args);
             checkCudaErrors(cudaPeekAtLastError());
             checkCudaErrors(cudaDeviceSynchronize());
-            img_count++;
-        } 
-    } // end camera loop
+            if (verbose) {
+                float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
+                printf("render kernel             (device)            %.6fs\n",render_dur);
+            }
+
+            // copy image data to host
+            clock_t img_copy_start = clock();
+            checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
+            if (verbose) {
+                float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
+                printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
+            }
+
+            // save data
+            clock_t npy_write_start = clock();
+            std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
+            if (append_mode) {
+                // attempt to add values to existing file (if it exists)
+                bool file_exists = std::filesystem::is_regular_file(save_str);
+                if (file_exists) { 
+                    npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
+                    std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
+                    if (existing_npy_shape != npy_img.shape) {
+                        std::stringstream err_msg;
+                        err_msg << "### FATAL ERROR in main\n";
+                        err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
+                        CUDART_ERROR(err_msg);
+                    }
+                    std::vector<float> img_vec = existing_npy_data.data;
+                    for (int i = 0; i < standard_camera.num_pixels; i++) {
+                        img[i] += img_vec[i];
+                    }
+                }
+            }
+            npy_img.data_ptr = img;
+            npy::write_npy(save_str, npy_img);
+            if (verbose) {
+                float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
+                printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur);
+                float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
+                printf("img total                 (host/device)       %.6fs\n",this_img_dur);
+                if (img_count == total_images - 1) {
+                    std::cout << "=============================================================\n";
+                } else {
+                    std::cout << "-------------------------------------------------------------\n";
+                }
+            }
+
+            // prepare for next image
+            if (total_images != 1) { // skip wipe if single image output
+                wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
+                checkCudaErrors(cudaPeekAtLastError());
+                checkCudaErrors(cudaDeviceSynchronize());
+                img_count++;
+            } 
+        } // end camera loop
+
+
+    } // end if lookback
 
     // perform cleanup of device/host data
     clock_t free_start = clock();

@@ -37,7 +37,7 @@ class MeshBlock {
         bool beta_in_data;
 };
 
-__host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose, bool host_malloc) {
     // load single homgenous meshblock info, allocate host memory and load data
 
     clock_t npy_read_start = clock();
@@ -80,17 +80,19 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
-    h_bytes = data_size * sizeof(float);
-    clock_t h_alloc_start = clock();
-    h_all_data = (float*) malloc(h_bytes);
-    if (verbose) { 
-        float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
-    }
-
+    if (host_malloc) {
+        h_bytes = data_size * sizeof(float);
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        } // end verbose
+    } // end host_malloc
+    
     // load mb data into host memory
     clock_t memcpy_start = clock();
-    std::memcpy(h_all_data, npy_vector.data(), h_bytes);
+    std::memcpy(h_all_data, npy_vector.data(), data_size * sizeof(float));
     if (verbose) { 
         float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
         printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
@@ -99,7 +101,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     return all_mb_info;
 }
 
-__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose, bool host_malloc) {
     // load heterogeneous meshblock info, allocate host memory and load data
 
     // read header data
@@ -131,7 +133,6 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             }
             line_count++;
         }
-        h_bytes = npy_floats * sizeof(float);
     } else {
         std::stringstream err_msg;
         err_msg << "### FATAL ERROR in main ####\n";
@@ -145,13 +146,16 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     }
 
     // allocate space on host
-    clock_t h_alloc_start = clock();
-    h_all_data = (float*) malloc(h_bytes);
-    if (verbose) { 
-        float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+    if (host_malloc) {
+        h_bytes = npy_floats * sizeof(float);
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        }
     }
-
+    
     // load mb data into host memory
     clock_t npy_read_start = clock();
     int mem_offset = 0;
