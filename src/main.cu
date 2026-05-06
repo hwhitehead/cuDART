@@ -154,15 +154,16 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // package trace info
+    // package trace info (TEMP, consider importing within lookback header)
     TraceArgs trace_args;
     trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
-    trace_args.t_obs = 0; // TEMP, package in camera?
-    trace_args.inv_snapshot_dt = 0; // TEMP, load when?
-    trace_args.inv_c = 0; // TEMP, load when?
-    trace_args.snapshot_index = 0; // TEMP, load when?
+    trace_args.snapshot_dt = 0.1; 
+    trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
+    trace_args.c = 1.0;
+    trace_args.inv_c = 1.0 / trace_args.c; 
+    trace_args.snapshot_index = 0; // overwritten in lookback loop 
 
     // print timing header
     if (verbose) {
@@ -173,8 +174,10 @@ int main(int argc, char *argv[]) {
 
     // load camera data and store in vector
     std::vector<Camera> cameras = load_cameras(camera_char, verbose);
-    
-    // load image dimensions from the first camera
+    int total_images = cameras.size();
+    size_t num_zero_pad = 5;
+
+    // inherit image dimensions from the first camera
     Camera standard_camera = cameras[0];
     const size_t bytes_in_img = standard_camera.num_pixels * sizeof(float);
 
@@ -194,6 +197,16 @@ int main(int argc, char *argv[]) {
         float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
         printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur);
     }
+
+    // define render shape    
+    int tx = 16, ty = 16; // must not exceed 1024 (max thread per block)
+    const dim3 threads_per_block(tx,ty); 
+    const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
+                                std::ceil((float)standard_camera.num_pixels_Y / ty));
+
+    // declare output container
+    npy::npy_data_ptr<float> npy_img;
+    npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
 
     // MAJOR CASE BREAK: w or w/o lookback
     if (lookback) {
@@ -248,7 +261,113 @@ int main(int argc, char *argv[]) {
             CUDART_ERROR(err_msg);
         }
 
+        // allocate space on device
+        clock_t d_data_alloc_start = clock();
+        float *d_data = nullptr;
+        checkCudaErrors(cudaMalloc(&d_data, d_bytes));
+        if (verbose) {
+            float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
+        }
 
+        // loop over snapshots
+        for (int m = 0; m < num_snapshots; m++) {
+
+            // update trace_args
+            trace_args.snapshot_index = m;
+
+            // import npy data to host
+            std::vector<MeshBlockInfo> all_mb_info;
+            bool host_malloc = false;
+            if (labelled_data) {
+                all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+            } else {
+                all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+            }
+            int num_meshblocks = all_mb_info.size();
+        
+            // copy all data from host into device
+            clock_t data_copy_start = clock();
+            checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
+            checkCudaErrors(cudaPeekAtLastError());
+            if (verbose) {
+                float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
+                printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
+            }
+
+            // initialise MeshBlock list on device
+            MeshBlock **mb_list;
+            Mesh **mesh;
+            build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
+
+            // loop over cameras (TODO: consider alternatives to expensive multi-write to disk)
+            int img_count = 0;
+            for (auto &camera : cameras) {
+                
+                // ignore cameras that are too early to sample snapshot
+                if (camera.t_obs < m * trace_args.snapshot_dt) continue;
+
+                clock_t this_img_start = clock();
+
+                // call render
+                clock_t render_start = clock();
+                render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, trace_args);
+                checkCudaErrors(cudaPeekAtLastError());
+                checkCudaErrors(cudaDeviceSynchronize());
+                if (verbose) {
+                    float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
+                    printf("render kernel             (device)            %.6fs\n",render_dur);
+                }
+
+                // copy image data to host
+                clock_t img_copy_start = clock();
+                checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
+                if (verbose) {
+                    float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
+                    printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
+                }
+
+                // save data, enforce apppend (TODO: consider alt)
+                clock_t npy_write_start = clock();
+                std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
+                if (m == 0) {
+                    // first snapshot may append to existing, or create new image
+                    if (append_mode) {
+                        // attempt to add values to existing file (if it exists)
+                        bool file_exists = std::filesystem::is_regular_file(save_str);
+                        if (file_exists) { 
+                            npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
+                            std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
+                            if (existing_npy_shape != npy_img.shape) {
+                                std::stringstream err_msg;
+                                err_msg << "### FATAL ERROR in main\n";
+                                err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
+                                CUDART_ERROR(err_msg);
+                            }
+                            std::vector<float> img_vec = existing_npy_data.data;
+                            for (int i = 0; i < standard_camera.num_pixels; i++) {
+                                img[i] += img_vec[i];
+                            } // end summation over image
+                        } // end if file_exist 
+                    } // end if append_mode 
+                    npy_img.data_ptr = img;
+                    npy::write_npy(save_str, npy_img);
+                } else {
+                    // later snapshots ALWAYS append to file from earlier snapshots
+                    npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
+                    std::vector<float> img_vec = existing_npy_data.data;
+                    for (int i = 0; i < standard_camera.num_pixels; i++) {
+                        img[i] += img_vec[i];
+                    } // end summation over image
+                } // end if m
+
+                // prepare for next snapshot
+                wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
+                checkCudaErrors(cudaPeekAtLastError());
+                checkCudaErrors(cudaDeviceSynchronize());
+                img_count++;
+            } // end camera loop
+        } // end snapshot loop
     } else {
         // run without lookback
         // 1. load data to host, allocate space on device, copy to device
@@ -300,20 +419,8 @@ int main(int argc, char *argv[]) {
         Mesh **mesh;
         build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
 
-        // define render shape    
-        int tx = 16, ty = 16; // must not exceed 1024 (max thread per block)
-        const dim3 threads_per_block(tx,ty); 
-        const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
-                                    std::ceil((float)standard_camera.num_pixels_Y / ty));
-
-        // declare output container
-        npy::npy_data_ptr<float> npy_img;
-        npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
-
         // iterate over cameras
         int img_count = 0;
-        int total_images = cameras.size();
-        size_t num_zero_pad = 5;
         if (verbose) {
             std::cout << "=============================================================\n";
             if (total_images == 1) {

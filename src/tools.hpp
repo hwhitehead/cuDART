@@ -20,7 +20,8 @@ struct TraceArgs {
     float doppler_index;
     // lookback settings 
     bool lookback;
-    float t_obs, inv_snapshot_dt, inv_c;
+    float t_obs, snapshot_dt, c; 
+    float inv_snapshot_dt, inv_c;
     int snapshot_index;
 };
 
