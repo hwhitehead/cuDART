@@ -270,6 +270,11 @@ int main(int argc, char *argv[]) {
             printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
         }
 
+        // prep empty containers
+        MeshBlock **mb_list;
+        Mesh **mesh;
+        int num_meshblocks = 0;
+
         // loop over snapshots
         for (int m = 0; m < num_snapshots; m++) {
 
@@ -284,7 +289,7 @@ int main(int argc, char *argv[]) {
             } else {
                 all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
             }
-            int num_meshblocks = all_mb_info.size();
+            num_meshblocks = all_mb_info.size();
         
             // copy all data from host into device
             clock_t data_copy_start = clock();
@@ -296,8 +301,6 @@ int main(int argc, char *argv[]) {
             }
 
             // initialise MeshBlock list on device
-            MeshBlock **mb_list;
-            Mesh **mesh;
             build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
 
             // loop over cameras (TODO: consider alternatives to expensive multi-write to disk)
