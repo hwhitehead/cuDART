@@ -277,7 +277,7 @@ class Camera:
         self.t_obs = t_obs
 
     def header_str(self):
-        return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y, self.t_obs)
+        return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}, {12}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y, self.t_obs)
     
     def set_sph_pos(self, r, theta, phi, target_origin=False):
         sin_theta = np.sin(theta)
