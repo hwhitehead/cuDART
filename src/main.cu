@@ -158,7 +158,8 @@ int main(int argc, char *argv[]) {
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
     trace_args.t_obs = 0; // TEMP, package in camera?
-    trace_args.snapshot_dt = 0; // TEMP, load when?
+    trace_args.inv_snapshot_dt = 0; // TEMP, load when?
+    trace_args.inv_c = 0; // TEMP, load when?
     trace_args.snapshot_index = 0; // TEMP, load when?
 
     // print timing header

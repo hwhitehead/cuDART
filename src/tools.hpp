@@ -17,10 +17,10 @@ __host__ void check_cuda(cudaError_t result, char const *const func, const char 
 struct TraceArgs {
     // relativistic settings
     bool relativistic; 
-    float doppler_index
+    float doppler_index;
     // lookback settings 
     bool lookback;
-    float t_obs, snapshot_dt;
+    float t_obs, inv_snapshot_dt, inv_c;
     int snapshot_index;
 };
 
@@ -68,13 +68,13 @@ __device__ float calc_boost_factor(vec3 beta_vec, vec3 view_vec, float doppler_i
 __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     // caculate the lerp weighting factor between temporal states
     float t_bar = trace_args.t_obs - s * trace_args.inv_c; // lookback time at distance s along line-of-sight
-    int m_bar = floor(t_bar * trace_args.inv_delta_t);
+    int m_bar = floor(t_bar * trace_args.inv_snapshot_dt);
     if (trace_args.snapshot_index < m_bar) {
         return 0;
     } else if (trace_args.snapshot_index > t_bar + 1) {
         return 0;
     } 
-    float lerp_factor = (t_bar - trace_args.snapshot_index / trace_args.inv_delta_t) * trace_args.inv_delta_t;
+    float lerp_factor = (t_bar - trace_args.snapshot_index / trace_args.inv_snapshot_dt) * trace_args.inv_snapshot_dt;
     return 1 - lerp_factor;
 }
 
