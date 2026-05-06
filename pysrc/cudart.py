@@ -363,7 +363,7 @@ class Scene:
         print("\n")
 
     def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, 
-                max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False
+                max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
                 lookback = False):
 
         # prepare camera space
