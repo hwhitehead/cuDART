@@ -71,7 +71,7 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     int m_bar = floor(t_bar * trace_args.inv_delta_t);
     if (trace_args.snapshot_index < m_bar) {
         return 0;
-    } else if (trace_args.snapshot_index > b_bar + 1) {
+    } else if (trace_args.snapshot_index > t_bar + 1) {
         return 0;
     } 
     float lerp_factor = (t_bar - trace_args.snapshot_index / trace_args.inv_delta_t) * trace_args.inv_delta_t;

@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
 
     // package trace info
     TraceArgs trace_args;
-    trace_args.relativisitic = relativisitic;
+    trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
     trace_args.t_obs = 0; // TEMP, package in camera?
