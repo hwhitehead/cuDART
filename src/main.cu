@@ -205,10 +205,10 @@ int main(int argc, char *argv[]) {
         // determine number of snapshots in target dir, and maximum data size
         std::string header_str = input_str + "/header.txt";
         std::ifstream header_file(header_str);
+        int num_snapshots = 0, max_snapshot_size = 0;
         if (header_file.is_open()) {
             std::string line;
             int line_count = 0;
-            int num_snapshots, max_snapshot_size;
             while (std::getline(header_file, line)) {
                 std::istringstream iss(line);
                 if (!(iss >> num_snapshots >> max_snapshot_size)) {
@@ -221,6 +221,14 @@ int main(int argc, char *argv[]) {
             }
         }
         
+        // handle read failure
+        if (num_snapshots == 0 || max_snapshot_size == 0) {
+            std::stringstream err_msg;
+            err_msg << "### FATAL ERROR in main ###\n";
+            err_msg << "Read failure in lookback, num_snapshots or max_snapshot_size == 0" << std::endl;
+            CUDART_ERROR(err_msg);
+        }
+
         // allocate data on host
         clock_t h_alloc_start = clock();
         size_t h_bytes = max_snapshot_size * sizeof(float);
