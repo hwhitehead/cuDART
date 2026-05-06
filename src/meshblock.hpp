@@ -13,6 +13,16 @@ struct MeshBlockInfo {
     vec3 mb_dims, xl, xr;
 };
 
+struct TraceArgs {
+    // relativistic settings
+    bool relativistic; 
+    float doppler_index
+    // lookback settings 
+    bool lookback;
+    float t_obs, snapshot_dt;
+    int snapshot_index;
+};
+
 class MeshBlock {
     // a MeshBlock provides a wrapper for data that allows for tracing by rays
     // MesHBlocks are purely device objects, including a pointer to traceable data device-allocated externally 
@@ -21,13 +31,12 @@ class MeshBlock {
         __device__ MeshBlock() {}
         __device__ MeshBlock(MeshBlockInfo mb_info, float *all_data);
 
-
         // routines
         __device__ bool calc_mb_intercept(const Ray &r, float &tl, float &tr);
         __device__ int int_clamp(float f, float l, float r);
         __device__ vec3 get_edge(bool sign) {return (sign) ? xr : xl;}
         __device__ void print_data();
-        __device__ float calc_trace(const Ray &r, bool relativistic, float doppler_index);
+        __device__ float calc_trace(const Ray &r, TraceArgs trace_args);
 
         // public properties
         const int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
@@ -197,7 +206,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     return all_mb_info;
 }
 
-__device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic, float doppler_index) {
+__device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
     // calculate the weighted path of a given ray through the MeshBlock
     float tl, tr, trace = 0;
     bool hit = calc_mb_intercept(r, tl, tr);
@@ -249,15 +258,17 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic, float do
                 data_index += cell_index;
             }
             
-            if (relativistic) {
+            float trace_weight = 1.0;
+            if (trace_args.relativistic) {
                 vec3 beta_vec(all_data[data_index+1],
                                 all_data[data_index+2],
                                 all_data[data_index+3]);
-                float boost_fac = calc_boost_factor(beta_vec, r.normal, doppler_index);
-                trace += dwell * boost_fac * all_data[data_index];
-            } else {
-                trace += dwell * all_data[data_index];
-            }            
+                trace_weight *= calc_boost_factor(beta_vec, r.normal, trace_args.doppler_index);
+            }
+            if (trace_args.lookback) {
+                trace_weight *= calc_lookback_factor(t_current, trace_args);
+            }
+            trace += trace_weight * all_data[data_index];    
             
             // update position of ray head
             t_current = next_t_cross[axis]; // += dwell

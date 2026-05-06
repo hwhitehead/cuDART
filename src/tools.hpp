@@ -55,4 +55,17 @@ __device__ float calc_boost_factor(vec3 beta_vec, vec3 view_vec, float doppler_i
     return pow(doppler_fac, doppler_index);
 }
 
+__device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
+    // caculate the lerp weighting factor between temporal states
+    float t_bar = trace_args.t_obs - s * trace_args.inv_c; // lookback time at distance s along line-of-sight
+    int m_bar = floor(t_bar * trace_args.inv_delta_t);
+    if (trace_args.snapshot_index < m_bar) {
+        return 0;
+    } else if (trace_args.snapshot_index > b_bar + 1) {
+        return 0;
+    } 
+    float lerp_factor = (t_bar - trace_args.snapshot_index / trace_args.inv_delta_t) * trace_args.inv_delta_t;
+    return 1 - lerp_factor;
+}
+
 #endif

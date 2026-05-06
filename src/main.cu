@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     std::string cudart_version = "version 0.8 - April 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     char *doppler_char = nullptr, *power_law_char = nullptr;
-    bool verbose = false, relativistic = false, append_mode = false, lookback_mode = false;
+    bool verbose = false, relativistic = false, append_mode = false, lookback = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
                     append_mode = true;
                     break;
                  case 'l':
-                    lookback_mode = true;
+                    lookback = true;
                     break;
                 case 'c':
                     camera_char = argv[++i];
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     // determine run mode (lookback)
     const std::string input_str(input_char);
     const std::filesystem::path input_path(input_char);
-    if (lookback_mode && !std::filesystem::is_directory(input_path)) {
+    if (lookback && !std::filesystem::is_directory(input_path)) {
         std::stringstream err_msg;
         err_msg << "### FATAL ERROR in main\n";
         err_msg << "Lookback mode requires directory of data to function\n";
@@ -151,6 +151,15 @@ int main(int argc, char *argv[]) {
             CUDART_ERROR(err_msg);
         }
     }
+
+    // package trace info
+    TraceArgs trace_args;
+    trace_args.relativisitic = relativisitic;
+    trace_args.doppler_index = doppler_index;
+    trace_args.lookback = lookback;
+    trace_args.t_obs = 0; // TEMP, package in camera?
+    trace_args.snapshot_dt = 0; // TEMP, load when?
+    trace_args.snapshot_index = 0; // TEMP, load when?
 
     // print timing header
     if (verbose) {
@@ -256,7 +265,7 @@ int main(int argc, char *argv[]) {
 
         // call render
         clock_t render_start = clock();
-        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, relativistic, doppler_index);
+        render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, trace_args);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
         if (verbose) {
