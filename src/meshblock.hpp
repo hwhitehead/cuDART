@@ -248,7 +248,7 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
                 data_index += cell_index;
             }
             
-            float trace_weight = 1.0;
+            float trace_weight = dwell;
             if (trace_args.relativistic) {
                 vec3 beta_vec(all_data[data_index+1],
                                 all_data[data_index+2],
