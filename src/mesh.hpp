@@ -31,6 +31,9 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceAr
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);
     Ray pixel_ray(pixel_origin, camera.normal);
     
+    // copy camera observer time into trace_args
+    trace_args.t_obs = camera.t_obs;
+
     // calculate pixel value from MeshBlock data
     img[pixel_index] += (*mesh)->calc_trace(pixel_ray, trace_args);
     return;

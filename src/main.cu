@@ -47,6 +47,8 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'r':
                     break;
+                case 'l':
+                    break;
                 case 'a':
                     break;
                 default:
@@ -156,7 +158,7 @@ int main(int argc, char *argv[]) {
     TraceArgs trace_args;
     trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
-    trace_args.lookback = 0;
+    trace_args.lookback = lookback;
     trace_args.t_obs = 0; // TEMP, package in camera?
     trace_args.inv_snapshot_dt = 0; // TEMP, load when?
     trace_args.inv_c = 0; // TEMP, load when?

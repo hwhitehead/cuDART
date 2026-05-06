@@ -263,7 +263,7 @@ class Camera:
     The Camera class is a basic struct to wrap the image viewing orientation and dimensions
     """
     def __init__(self, origin = np.array([1.0,0.0,0.0]), normal = np.array([-1.0,0.0,0.0]), bias = np.array([0.0,0.0,1.0]),
-                    num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0):
+                    num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0, t_obs = 0.0):
         self.origin = origin
         self.normal = normal
         self.bias = bias
@@ -274,9 +274,10 @@ class Camera:
         self.bias = bias
         self.tilt = tilt
         self.num_pixels = num_pixels_X * num_pixels_Y
+        self.t_obs = t_obs
 
     def header_str(self):
-        return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y)
+        return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y, self.t_obs)
     
     def set_sph_pos(self, r, theta, phi, target_origin=False):
         sin_theta = np.sin(theta)
@@ -334,7 +335,7 @@ class Scene:
 
         with open(self.temp_camera_file, "w") as f:
             # add header with const image dimensions (zero packed for istringstream read)
-            f.write("{0} {1} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y))
+            f.write("{0} {1} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y))
             # add line for each camera to run render with
             for camera in self.cameras:
                 f.write(camera.header_str())
