@@ -162,6 +162,9 @@ int main(int argc, char *argv[]) {
     trace_args.inv_c = 0; // TEMP, load when?
     trace_args.snapshot_index = 0; // TEMP, load when?
 
+    std::cout << "trace_args.relativistic = " << trace_args.relativisitic << std::endl;
+
+
     // print timing header
     if (verbose) {
         std::cout << "=============================================================\n";

@@ -198,6 +198,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
 
 __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
     // calculate the weighted path of a given ray through the MeshBlock
+    std::cout << "trace_args.relativistic = " << trace_args.relativistic << std::endl;
     float tl, tr, trace = 0;
     bool hit = calc_mb_intercept(r, tl, tr);
     if (hit) { // valid intercept found
