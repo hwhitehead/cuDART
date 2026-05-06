@@ -286,7 +286,60 @@ def build_lookback_data(num_snapshots = 10):
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
+def render_lookback_example(relativistic=False, remove_raw_images = True, save_profile = None, save_lc = None, append = False):
+
+    print("cuDART: starting jet render example...")
+
+    # define targets
+    load_str = "/mnt/kocsis1/cuDART_wdir/lookback_data"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/lookback_data/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/lookback_data/img"
+    camera_file_name = "/mnt/kocsis1/cuDART_wdir/lookback_data/cameras.txt"
+    # npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
+    # npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
+    # png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
+    # camera_file_name = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/cameras.txt"
+
+    # build template camera
+    template_camera = Camera()
+    template_camera.num_pixels_X = 2048
+    template_camera.num_pixels_Y = 2048
+    template_camera.tilt = (60.0 / 180) * np.pi
+    template_camera.length_X = 0.66 # defval 0.66
+    template_camera.length_Y = 0.66
+
+    # build camera array, inherit from template
+    num_img = 10
+    phi = epsilon
+    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
+    cameras = []
+    for theta in theta_ar:
+        camera = copy.deepcopy(template_camera)
+        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+        cameras.append(camera)
+    print("initialised cameras")
+
+    # generate scene
+    
+    scene = Scene(load_str, npy_save_str, cameras, camera_file_name=camera_file_name)
+    print("built scene")
+
+    # render and save images
+    scene.render(verbose = True, relativistic = relativistic, save_profile = save_profile, append = append, lookback=True)
+    print("finished rendering raw images")
+
+    if save_lc is not None:
+        scene.calc_lightcurve(save_lc)
+        print("saved lightcurve")
+
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
+    print("finished rendering rasterised images")
+
+    print("unlabelled render example finished.")
+
+
 if __name__ == "__main__":
 
     # render_pluto_data_example(relativistic=True, remove_raw_images = False, append=False)
-    build_lookback_data()
+    #build_lookback_data()
+    render_lookback_example(relativistic=False)

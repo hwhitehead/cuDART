@@ -308,7 +308,7 @@ class Scene:
     def __init__(self, npy_load_str, npy_save_str, cameras = None, camera_file_name = None): 
 
         # parse load/save strings        
-        self.npy_load_str = npy_load_str
+        self.npy_load_str = npy_load_str # TODO: rename, is not .npy string if labelled data
         self.npy_save_str = npy_save_str.removesuffix(".png")
 
         if cameras is None:
@@ -362,7 +362,9 @@ class Scene:
                 i += 1
         print("\n")
 
-    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False):
+    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, 
+                max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False
+                lookback = False):
 
         # prepare camera space
         self.build_camera_file()
@@ -401,6 +403,8 @@ class Scene:
             command = command + ["-m", str(max_mem)]
         if relativistic:
             command = command + ["-r"]
+        if lookback:
+            command = command + ["-l"] # TODO: add check for input type (must be dir)
         if power_law_index is not None:
             command = command + ["-p", str(power_law_index)]
         elif doppler_index is not None: # power_law has priority over doppler
