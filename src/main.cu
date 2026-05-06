@@ -203,12 +203,12 @@ int main(int argc, char *argv[]) {
         // 3. loop over cameras, append to disc within loop
 
         // determine number of snapshots in target dir, and maximum data size
-        std::string header_str = input_str + "/header.txt"
+        std::string header_str = input_str + "/header.txt";
         std::ifstream header_file(header_str);
         if (header_file.is_open()) {
             std::string line;
             int line_count = 0;
-            int num_snapshots, snapshot_size;
+            int num_snapshots, max_snapshot_size;
             while (std::getline(header_file, line)) {
                 std::istringstream iss(line);
                 if (!(iss >> num_snapshots >> max_snapshot_size)) {
@@ -220,11 +220,11 @@ int main(int argc, char *argv[]) {
                 line_count++;
             }
         }
-        h_bytes = max_snapshot_size * sizeof(float);
-
+        
         // allocate data on host
         clock_t h_alloc_start = clock();
-        h_all_data = (float*) malloc(h_bytes);
+        size_t h_bytes = max_snapshot_size * sizeof(float);
+        float *h_all_data = (float*) malloc(h_bytes);
         if (verbose) { 
             float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
             printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
             err_msg << "Requested memory in excess of space on device\n";
             CUDART_ERROR(err_msg);
         }
-        
+
 
     } else {
         // run without lookback
@@ -381,25 +381,26 @@ int main(int argc, char *argv[]) {
             } 
         } // end camera loop
 
+        // perform cleanup of device/host data
+        clock_t free_start = clock();
+        free_mesh<<<1,1>>>(mesh, num_meshblocks);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+        checkCudaErrors(cudaFree(d_img));
+        checkCudaErrors(cudaFree(mesh));
+        checkCudaErrors(cudaFree(d_data));
+        checkCudaErrors(cudaFree(mb_list));
+        free(h_all_data);
+        free(img);
+        cudaDeviceReset();
+        if (verbose) {
+            float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
+            printf("free all                  (device/host)       %.6fs\n",free_dur);
+        }
 
     } // end if lookback
 
-    // perform cleanup of device/host data
-    clock_t free_start = clock();
-    free_mesh<<<1,1>>>(mesh, num_meshblocks);
-    checkCudaErrors(cudaPeekAtLastError());
-    checkCudaErrors(cudaDeviceSynchronize());
-    checkCudaErrors(cudaFree(d_img));
-    checkCudaErrors(cudaFree(mesh));
-    checkCudaErrors(cudaFree(d_data));
-    checkCudaErrors(cudaFree(mb_list));
-    free(h_all_data);
-    free(img);
-    cudaDeviceReset();
-    if (verbose) {
-        float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
-        printf("free all                  (device/host)       %.6fs\n",free_dur);
-    }
+    
 
     // terminate
     if (verbose) {
