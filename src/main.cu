@@ -231,8 +231,8 @@ int main(int argc, char *argv[]) {
                     CUDART_ERROR(err_msg);
                 } 
                 line_count++;
-            }
-        }
+            } // end while line
+        } // end file open
         
         // handle read failure
         if (num_snapshots == 0 || max_snapshot_size == 0) {
@@ -368,6 +368,23 @@ int main(int argc, char *argv[]) {
                 img_count++;
             } // end camera loop
         } // end snapshot loop
+
+        // perform cleanup of device/host data
+        clock_t free_start = clock();
+        free_mesh<<<1,1>>>(mesh, num_meshblocks);
+        checkCudaErrors(cudaPeekAtLastError());
+        checkCudaErrors(cudaDeviceSynchronize());
+        checkCudaErrors(cudaFree(d_img));
+        checkCudaErrors(cudaFree(mesh));
+        checkCudaErrors(cudaFree(d_data));
+        checkCudaErrors(cudaFree(mb_list));
+        free(h_all_data);
+        free(img);
+        cudaDeviceReset();
+        if (verbose) {
+            float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
+            printf("free all                  (device/host)       %.6fs\n",free_dur);
+        }
     } else {
         // run without lookback
         // 1. load data to host, allocate space on device, copy to device
@@ -512,10 +529,7 @@ int main(int argc, char *argv[]) {
             float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
             printf("free all                  (device/host)       %.6fs\n",free_dur);
         }
-
     } // end if lookback
-
-    
 
     // terminate
     if (verbose) {
