@@ -259,6 +259,16 @@ def comp_plot():
 
     plt.close("all")
 
+def build_lookback_data():
+
+    template_data = np.load("/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy")
+    max_emm = np.max(template_data)
+
+    
+
+    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
+
 if __name__ == "__main__":
 
-    render_pluto_data_example(relativistic=True, remove_raw_images = False, append=False)
+    # render_pluto_data_example(relativistic=True, remove_raw_images = False, append=False)
+    build_lookback_data()

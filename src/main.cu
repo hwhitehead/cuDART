@@ -159,11 +159,12 @@ int main(int argc, char *argv[]) {
     trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
-    trace_args.snapshot_dt = 0.1; 
+    // the following are dummy values, overwritten in lookback routine
+    trace_args.snapshot_dt = 1.0; 
     trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
     trace_args.c = 1.0;
     trace_args.inv_c = 1.0 / trace_args.c; 
-    trace_args.snapshot_index = 0; // overwritten in lookback loop 
+    trace_args.snapshot_index = 0; 
 
     // print timing header
     if (verbose) {
@@ -215,16 +216,21 @@ int main(int argc, char *argv[]) {
         // 2. loop over snapshots, load data to host, copy to device
         // 3. loop over cameras, append to disc within loop
 
-        // determine number of snapshots in target dir, and maximum data size
+        // load header data from load dir
+        // expect single line in form:
+        // num_snapshots max_snapshot_size snapshot_dt L_domain
         std::string header_str = input_str + "/header.txt";
         std::ifstream header_file(header_str);
         int num_snapshots = 0, max_snapshot_size = 0;
+        float snapshot_dt; // in units of Myr
+        float L_domain; // if unlabelled data: length of longest side of domain in kpc
+                        // if labelled data: length of unity in mb_info
         if (header_file.is_open()) {
             std::string line;
             int line_count = 0;
             while (std::getline(header_file, line)) {
                 std::istringstream iss(line);
-                if (!(iss >> num_snapshots >> max_snapshot_size)) {
+                if (!(iss >> num_snapshots >> max_snapshot_size >> snapshot_dt >> L_domain)) {
                     std::stringstream err_msg;
                     err_msg << "### FATAL ERROR in main ###\n";
                     err_msg << "Unable to parse line " << line_count << " of snapshot header file at " << header_str << std::endl;
@@ -241,6 +247,15 @@ int main(int argc, char *argv[]) {
             err_msg << "Read failure in lookback, num_snapshots or max_snapshot_size == 0" << std::endl;
             CUDART_ERROR(err_msg);
         }
+
+        // set trace args
+        trace_args.snapshot_dt = snapshot_dt;
+        trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
+        float kpc_per_Myr = 9.78564e3 // in m/s
+        float velocity_code_units = L_domain * kpc_per_Myr;
+        float c_in_code_units = 3e8 / velocity_code_units;
+        trace_args.c = c_in_code_units;
+        trace_args.inv_c = 1.0 / trace_args.c; 
 
         // allocate data on host
         clock_t h_alloc_start = clock();
