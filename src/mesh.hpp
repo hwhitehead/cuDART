@@ -3,6 +3,7 @@
 
 #include "vec3.hpp"
 #include "meshblock.hpp"
+#include "tools.hpp"
 
 class Mesh {
     // data container to support heterogenous domain resolutions

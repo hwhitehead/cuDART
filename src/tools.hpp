@@ -14,6 +14,16 @@ __host__ void check_cuda(cudaError_t result, char const *const func, const char 
     }
 }
 
+struct TraceArgs {
+    // relativistic settings
+    bool relativistic; 
+    float doppler_index
+    // lookback settings 
+    bool lookback;
+    float t_obs, snapshot_dt;
+    int snapshot_index;
+};
+
 __host__ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
     // calculate available vram with user ceil
     

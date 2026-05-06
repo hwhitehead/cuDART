@@ -13,16 +13,6 @@ struct MeshBlockInfo {
     vec3 mb_dims, xl, xr;
 };
 
-struct TraceArgs {
-    // relativistic settings
-    bool relativistic; 
-    float doppler_index
-    // lookback settings 
-    bool lookback;
-    float t_obs, snapshot_dt;
-    int snapshot_index;
-};
-
 class MeshBlock {
     // a MeshBlock provides a wrapper for data that allows for tracing by rays
     // MesHBlocks are purely device objects, including a pointer to traceable data device-allocated externally 
