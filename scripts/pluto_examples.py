@@ -259,14 +259,30 @@ def comp_plot():
 
     plt.close("all")
 
-def build_lookback_data():
+def build_lookback_data(num_snapshots = 10):
 
     template_data = np.load("/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy")
-    max_emm = np.max(template_data)
-
-    
-
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
+    max_emm = np.max(template_data)
+    
+    xspan = np.linspace(0,1,100)
+    yspan = np.linspace(0,1,100)
+    zspan = np.linspace(-1,1,200)
+    xx, yy, zz = np.meshgrid(xspan, yspan, zspan, indexing="ij")
+    r_sqr = xx ** 2 + yy ** 2
+    r_jet = 0.1
+    in_jet_column = (r_sqr < r_jet ** 2)
+
+    v_adv = 1.0 / num_snapshots
+    v_jet = 0.9 # in units of c
+    for n in range(0, num_snapshots):
+        save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        save_data = np.zeros(shape=(100,100,200))
+        L_jet = v_adv * n
+        in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
+        in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
+        save_data[in_lead || in_tail] = max_emm
+        np.save(save_str, save_data, dtype=np.float32)
 
 if __name__ == "__main__":
 
