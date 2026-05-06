@@ -283,7 +283,8 @@ def build_lookback_data(num_snapshots = 10):
         in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
         save_data[in_lead] = max_emm
         save_data[in_tail] = max_emm
-        np.save(save_str, save_data, dtype=np.float32)
+        save_data = save_data.astype(np.float32)
+        np.save(save_str, save_data)
 
 if __name__ == "__main__":
 
