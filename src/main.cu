@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
         // num_snapshots max_snapshot_size snapshot_dt L_domain
         std::string header_str = input_str + "/header.txt";
         std::ifstream header_file(header_str);
-        int num_snapshots = 0, max_snapshot_size = 0;
+        int num_snapshots, max_snapshot_size;
         float snapshot_dt; // in units of Myr
         float L_domain; // if unlabelled data: length of longest side of domain in kpc
                         // if labelled data: length of unity in mb_info
@@ -235,19 +235,11 @@ int main(int argc, char *argv[]) {
                     err_msg << "### FATAL ERROR in main ###\n";
                     err_msg << "Unable to parse line " << line_count << " of snapshot header file at " << header_str << std::endl;
                     CUDART_ERROR(err_msg);
-                } 
+                }
                 break; // read only first line
             } // end while line
         } // end file open
         
-        // handle read failure
-        if (num_snapshots == 0 || max_snapshot_size == 0) {
-            std::stringstream err_msg;
-            err_msg << "### FATAL ERROR in main ###\n";
-            err_msg << "Read failure in lookback, num_snapshots or max_snapshot_size == 0" << std::endl;
-            CUDART_ERROR(err_msg);
-        }
-
         // set trace args
         trace_args.snapshot_dt = snapshot_dt;
         trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
