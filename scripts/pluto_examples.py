@@ -343,4 +343,4 @@ if __name__ == "__main__":
 
     # render_pluto_data_example(relativistic=True, remove_raw_images = False, append=False)
     #build_lookback_data()
-    render_lookback_example(relativistic=False)
+    render_lookback_example(relativistic=False, remove_raw_images = False)
