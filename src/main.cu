@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     if (!lookback) {
         if (std::filesystem::is_directory(input_path)) {
             labelled_data = true;
-        } else if {
+        } else {
             std::string npy_suffix = ".npy";
             if (input_path.extension() != npy_suffix) {
                 std::stringstream err_msg;
@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
                 err_msg << "Input path must be .npy file (unlabelled data) or directory (labelled data)\n";
                 CUDART_ERROR(err_msg);
             }
-        }
-    }
+        } // end if input not dir
+    } // end if !lookback
 
     // package trace info (TEMP, consider importing within lookback header)
     TraceArgs trace_args;
