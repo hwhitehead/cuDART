@@ -316,8 +316,11 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     theta = np.pi / 4
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
-    for t in np.linspace(0, 1, 10):
+    num_img = 10
+    cameras = []
+    for t in np.linspace(0, 1, num_img):
         camera = copy.deepcopy(template_camera)
+        camera.t_obs = t
         cameras.append(camera)
     print("initialised cameras")
 
