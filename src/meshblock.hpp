@@ -260,7 +260,9 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
                 trace_weight *= calc_boost_factor(beta_vec, r.normal, trace_args.doppler_index);
             }
             if (trace_args.lookback) {
-                trace_weight *= calc_lookback_factor(t_current, trace_args);
+                float look_fac = calc_lookback_factor(t_current, trace_args);
+                printf("%.3f\n", look_fac);
+                trace_weight *=look_fac;
             }
             if (trace_weight != 0) { // ALWAYS ZERO
                 printf("%.3f\n", trace_weight);

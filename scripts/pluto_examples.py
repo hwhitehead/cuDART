@@ -310,7 +310,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.t_obs = 10 # in units of Myr
 
     # build camera array, inherit from template
-    num_img = 10
+    num_img = 1
     phi = epsilon
     theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
     cameras = []
