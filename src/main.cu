@@ -401,7 +401,7 @@ int main(int argc, char *argv[]) {
                     printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur);
                 }
 
-                // prepare for next snapshot
+                // prepare for next image
                 wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
@@ -414,13 +414,15 @@ int main(int argc, char *argv[]) {
                 printf("snapshot total            (host/device)       %.6fs\n",snapshot_dur);
                 std::cout << "=============================================================\n";
             }
+
+            // prepare for next snapshot
+            free_mesh<<<1,1>>>(mesh, num_meshblocks);
+            checkCudaErrors(cudaPeekAtLastError());
+            checkCudaErrors(cudaDeviceSynchronize());
         } // end snapshot loop
 
         // perform cleanup of device/host data
         clock_t free_start = clock();
-        free_mesh<<<1,1>>>(mesh, num_meshblocks);
-        checkCudaErrors(cudaPeekAtLastError());
-        checkCudaErrors(cudaDeviceSynchronize());
         checkCudaErrors(cudaFree(d_img));
         checkCudaErrors(cudaFree(mesh));
         checkCudaErrors(cudaFree(d_data));
