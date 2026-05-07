@@ -274,7 +274,7 @@ def build_lookback_data(num_snapshots = 10):
     yspan = np.linspace(0,1,100)
     zspan = np.linspace(-1,1,200)
     xx, yy, zz = np.meshgrid(xspan, yspan, zspan, indexing="ij")
-    r_sqr = xx ** 2 + yy ** 2
+    r_sqr = (xx-0.5) ** 2 + (yy-0.5) ** 2
     r_jet = 0.1
     in_jet_column = (r_sqr < r_jet ** 2)
 
@@ -346,6 +346,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_lookback_data()
+    build_lookback_data()
     render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     #render_lookback_example(relativistic=False, remove_raw_images = False)
