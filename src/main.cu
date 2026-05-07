@@ -141,16 +141,18 @@ int main(int argc, char *argv[]) {
     }
 
     // determine input mode (labelled/unlabelled)
-    bool labelled_data = false;    
-    if (std::filesystem::is_directory(input_path) && !lookback) {
-        labelled_data = true;
-    } else {
-        std::string npy_suffix = ".npy";
-        if (input_path.extension() != npy_suffix) {
-            std::stringstream err_msg;
-            err_msg << "### FATAL ERROR in main\n";
-            err_msg << "Input path must be .npy file (unlabelled data) or directory (labelled data)\n";
-            CUDART_ERROR(err_msg);
+    bool labelled_data = false;   
+    if (!lookback) {
+        if (std::filesystem::is_directory(input_path)) {
+            labelled_data = true;
+        } else if {
+            std::string npy_suffix = ".npy";
+            if (input_path.extension() != npy_suffix) {
+                std::stringstream err_msg;
+                err_msg << "### FATAL ERROR in main\n";
+                err_msg << "Input path must be .npy file (unlabelled data) or directory (labelled data)\n";
+                CUDART_ERROR(err_msg);
+            }
         }
     }
 
