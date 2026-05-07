@@ -329,11 +329,12 @@ int main(int argc, char *argv[]) {
 
             // loop over cameras (TODO: consider alternatives to expensive multi-write to disk)
             int img_count = 0;
-            if (verbose) {
-                std::cout << ".............................................................\n";
-            }
             for (auto &camera : cameras) {
                 
+                if (verbose) {
+                    std::cout << ".............................................................\n";
+                }
+
                 // ignore cameras that are too early to sample snapshot
                 if (camera.t_obs < m * trace_args.snapshot_dt) continue;
 
@@ -401,21 +402,13 @@ int main(int argc, char *argv[]) {
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
                 img_count++;
-
-                if (verbose && (img_count < total_images - 1)) {
-                    std::cout << ".............................................................\n";
-                }
-
             } // end camera loop
 
             if (verbose) {
                 float snapshot_dur = (float)(clock() - snapshot_start)/CLOCKS_PER_SEC;
+                std::cout << ".............................................................\n";
                 printf("snapshot total            (host/device)       %.6fs\n",snapshot_dur);
-                if (m == num_snapshots - 1) {
-                    std::cout << "=============================================================\n";
-                } else {
-                    std::cout << "-------------------------------------------------------------\n";
-                }
+                std::cout << "=============================================================\n";
             }
         } // end snapshot loop
 
