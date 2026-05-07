@@ -282,10 +282,7 @@ int main(int argc, char *argv[]) {
             printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
         }
 
-        // prep empty containers
-        MeshBlock **mb_list;
-        Mesh **mesh;
-        int num_meshblocks = 0;
+        
 
         // loop over snapshots
         if (verbose) {
@@ -308,6 +305,11 @@ int main(int argc, char *argv[]) {
             std::vector<MeshBlockInfo> all_mb_info;
             bool host_malloc = false;
             
+            // prep empty containers
+            MeshBlock **mb_list;
+            Mesh **mesh;
+            int num_meshblocks = 0;
+
             if (labelled_data) { // TODO: add suppoort for labelled lookback
                 std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
                 all_mb_info = load_labelled_meshblocks(snapshot_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
@@ -419,14 +421,14 @@ int main(int argc, char *argv[]) {
             free_mesh<<<1,1>>>(mesh, num_meshblocks);
             checkCudaErrors(cudaPeekAtLastError());
             checkCudaErrors(cudaDeviceSynchronize());
+            checkCudaErrors(cudaFree(mesh));
+            checkCudaErrors(cudaFree(mb_list));
         } // end snapshot loop
 
         // perform cleanup of device/host data
         clock_t free_start = clock();
         checkCudaErrors(cudaFree(d_img));
-        checkCudaErrors(cudaFree(mesh));
         checkCudaErrors(cudaFree(d_data));
-        checkCudaErrors(cudaFree(mb_list));
         free(h_all_data);
         free(img);
         cudaDeviceReset();
