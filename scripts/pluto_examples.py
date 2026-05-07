@@ -312,17 +312,25 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.length_X = 0.66 # defval 0.66
     template_camera.length_Y = 0.66
     template_camera.t_obs = 0.5 # in units of Myr
-
-    # build camera array, inherit from template
-    num_img = 10
     phi = epsilon
-    theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
-    cameras = []
-    for theta in theta_ar:
+    theta = np.pi / 4
+    template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+    
+    for t in np.linspace(0, 1, 10):
         camera = copy.deepcopy(template_camera)
-        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)
     print("initialised cameras")
+
+    # # build camera array, inherit from template
+    # num_img = 10
+    # phi = epsilon
+    # theta_ar = np.linspace(epsilon,np.pi - epsilon,num_img, endpoint=False)
+    # cameras = []
+    # for theta in theta_ar:
+    #     camera = copy.deepcopy(template_camera)
+    #     camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+    #     cameras.append(camera)
+    
 
     # generate scene
     
@@ -345,6 +353,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    build_lookback_data()
+    #build_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=False, remove_raw_images = False)
