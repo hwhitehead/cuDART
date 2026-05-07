@@ -339,9 +339,6 @@ int main(int argc, char *argv[]) {
                     std::cout << ".............................................................\n";
                 }
 
-                // ignore cameras that are too early to sample snapshot
-                if (camera.t_obs < m * trace_args.snapshot_dt) continue;
-
                 clock_t this_img_start = clock();
 
                 // call render
