@@ -311,7 +311,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.tilt = (60.0 / 180) * np.pi
     template_camera.length_X = 0.66 # defval 0.66
     template_camera.length_Y = 0.66
-    template_camera.t_obs = 10 # in units of Myr
+    template_camera.t_obs = 0.5 # in units of Myr
 
     # build camera array, inherit from template
     num_img = 10
@@ -345,6 +345,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    build_lookback_data()
+    #build_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=False, remove_raw_images = False)
