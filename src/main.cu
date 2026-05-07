@@ -329,6 +329,9 @@ int main(int argc, char *argv[]) {
 
             // loop over cameras (TODO: consider alternatives to expensive multi-write to disk)
             int img_count = 0;
+            if (verbose) {
+                std::cout << ".............................................................\n";
+            }
             for (auto &camera : cameras) {
                 
                 // ignore cameras that are too early to sample snapshot
@@ -388,11 +391,21 @@ int main(int argc, char *argv[]) {
                     } // end summation over image
                 } // end if m
 
+                if (verbose) {
+                    float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
+                    printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur);
+                }
+
                 // prepare for next snapshot
                 wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
                 img_count++;
+
+                if (verbose && (img_count < total_cameras - 1)) {
+                    std::cout << ".............................................................\n";
+                }
+
             } // end camera loop
 
             if (verbose) {
