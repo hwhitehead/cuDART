@@ -235,8 +235,10 @@ int main(int argc, char *argv[]) {
                     err_msg << "### FATAL ERROR in main ###\n";
                     err_msg << "Unable to parse line " << line_count << " of snapshot header file at " << header_str << std::endl;
                     CUDART_ERROR(err_msg);
+                } else{
+                    std::cout << num_snapshots << max_snapshot_size << snapshot_dt << L_domain << std::endl;
+                    break; // read only first line
                 }
-                break; // read only first line
             } // end while line
         } // end file open
         
