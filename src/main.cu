@@ -167,6 +167,7 @@ int main(int argc, char *argv[]) {
     trace_args.c = 1.0;
     trace_args.inv_c = 1.0 / trace_args.c; 
     trace_args.snapshot_index = 0; 
+    trace_args.num_snapshots = 0;
 
     // print timing header
     if (verbose) {
@@ -251,6 +252,7 @@ int main(int argc, char *argv[]) {
         float c_in_code_units = 3e8 / velocity_code_units;
         trace_args.c = c_in_code_units;
         trace_args.inv_c = 1.0 / trace_args.c; 
+        trace_args.num_snapshots = num_snapshots;
 
         // allocate data on host
         clock_t h_alloc_start = clock();

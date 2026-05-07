@@ -22,7 +22,7 @@ struct TraceArgs {
     bool lookback;
     float t_obs, snapshot_dt, c; 
     float inv_snapshot_dt, inv_c;
-    int snapshot_index;
+    int snapshot_index, num_snapshots;
 };
 
 __host__ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
@@ -70,12 +70,16 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     // caculate the lerp weighting factor between temporal states
     float t_bar = trace_args.t_obs - s * trace_args.inv_c; // lookback time at distance s along line-of-sight
     int m_bar = floor(t_bar * trace_args.inv_snapshot_dt);
-    if (trace_args.snapshot_index < m_bar) {
+    if (m_bar > trace_args.num_snapshots ) { // temporal overshoot
+        if (trace_args.snapshot_index != trace_args.num_snapshots - 1) { // only last snap contributes
+            return 0; 
+        }
+    } else if (trace_args.snapshot_index < m_bar) {
         return 0;
     } else if (trace_args.snapshot_index > t_bar + 1) {
         return 0;
     } 
-    float lerp_factor = (t_bar - trace_args.snapshot_index / trace_args.inv_snapshot_dt) * trace_args.inv_snapshot_dt;
+    float lerp_factor = abs(t_bar - trace_args.snapshot_index / trace_args.inv_snapshot_dt) * trace_args.inv_snapshot_dt;
     return 1 - lerp_factor;
 }
 
