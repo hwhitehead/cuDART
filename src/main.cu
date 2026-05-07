@@ -297,10 +297,10 @@ int main(int argc, char *argv[]) {
             
             if (labelled_data) { // TODO: add suppoort for labelled lookback
                 std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
-                all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+                all_mb_info = load_labelled_meshblocks(snapshot_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
             } else {
                 std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad) + ".npy";
-                all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+                all_mb_info = load_unlabelled_meshblock(snapshot_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
             }
             num_meshblocks = all_mb_info.size();
         
