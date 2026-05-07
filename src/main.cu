@@ -402,7 +402,7 @@ int main(int argc, char *argv[]) {
                 checkCudaErrors(cudaDeviceSynchronize());
                 img_count++;
 
-                if (verbose && (img_count < total_cameras - 1)) {
+                if (verbose && (img_count < total_images - 1)) {
                     std::cout << ".............................................................\n";
                 }
 
