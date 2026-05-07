@@ -392,6 +392,8 @@ int main(int argc, char *argv[]) {
                     for (int i = 0; i < standard_camera.num_pixels; i++) {
                         img[i] += img_vec[i];
                     } // end summation over image
+                    npy_img.data_ptr = img;
+                    npy::write_npy(save_str, npy_img);
                 } // end if m
 
                 if (verbose) {
