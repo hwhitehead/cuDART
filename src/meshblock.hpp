@@ -262,6 +262,9 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
             if (trace_args.lookback) {
                 trace_weight *= calc_lookback_factor(t_current, trace_args);
             }
+            if (trace_weight != 0) {
+                printf("%.3f\n", trace_weight);
+            }
             trace += trace_weight * all_data[data_index];    
             
             // update position of ray head
