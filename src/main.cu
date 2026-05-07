@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
 
             if (verbose) {
                 float snapshot_dur = (float)(clock() - snapshot_start)/CLOCKS_PER_SEC;
-                printf("snapshot total            (host/device)       %.6fs\n",this_img_dur);
+                printf("snapshot total            (host/device)       %.6fs\n",snapshot_dur);
                 if (m == num_snapshots - 1) {
                     std::cout << "=============================================================\n";
                 } else {
