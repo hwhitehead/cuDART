@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
 
     // determine input mode (labelled/unlabelled)
     bool labelled_data = false;    
-    if (std::filesystem::is_directory(input_path)) {
+    if (std::filesystem::is_directory(input_path) && !lookback) {
         labelled_data = true;
     } else {
         std::string npy_suffix = ".npy";
@@ -236,7 +236,6 @@ int main(int argc, char *argv[]) {
                     err_msg << "Unable to parse line " << line_count << " of snapshot header file at " << header_str << std::endl;
                     CUDART_ERROR(err_msg);
                 } else{
-                    std::cout << num_snapshots << max_snapshot_size << snapshot_dt << L_domain << std::endl;
                     break; // read only first line
                 }
             } // end while line
@@ -294,7 +293,7 @@ int main(int argc, char *argv[]) {
             std::vector<MeshBlockInfo> all_mb_info;
             bool host_malloc = false;
             
-            if (labelled_data) {
+            if (labelled_data) { // TODO: add suppoort for labelled lookback
                 std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
                 all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
             } else {
