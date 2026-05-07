@@ -93,10 +93,14 @@ def render_pluto_data_example(relativistic=False, remove_raw_images = True, save
     print("cuDART: starting jet render example...")
 
     # define targets
-    npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/img"
-    camera_file_name = "/mnt/kocsis1/cuDART_wdir/append_test/cameras.txt"
+    # npy_load_str = "/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy"
+    # npy_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/raw"
+    # png_save_str = "/mnt/kocsis1/cuDART_wdir/append_test/img"
+    # camera_file_name = "/mnt/kocsis1/cuDART_wdir/append_test/cameras.txt"
+    npy_load_str = "/mnt/kocsis1/cuDART_wdir/snapshot_data/snapshot00009.npy"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/snapshot_data/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/snapshot_data/img"
+    camera_file_name = "/mnt/kocsis1/cuDART_wdir/snapshot_data/cameras.txt"
     # npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
     # npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
     # png_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/img"
@@ -341,6 +345,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    # render_pluto_data_example(relativistic=True, remove_raw_images = False, append=False)
+    render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     #build_lookback_data()
-    render_lookback_example(relativistic=False, remove_raw_images = False)
+    #render_lookback_example(relativistic=False, remove_raw_images = False)
