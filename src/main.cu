@@ -286,7 +286,18 @@ int main(int argc, char *argv[]) {
         int num_meshblocks = 0;
 
         // loop over snapshots
+        if (verbose) {
+            std::cout << "=============================================================\n";
+            if (num_snapshots == 1) {
+                std::cout << "Starting render for single snapshot...\n";
+            } else {
+                std::cout << "Starting render cycle for " << num_snapshots << " snapshots...\n";
+            }
+            std::cout << "-------------------------------------------------------------\n";
+        }
         for (int m = 0; m < num_snapshots; m++) {
+
+            clock_t snapshot_start = clock();
 
             // update trace_args
             trace_args.snapshot_index = m;
@@ -383,6 +394,16 @@ int main(int argc, char *argv[]) {
                 checkCudaErrors(cudaDeviceSynchronize());
                 img_count++;
             } // end camera loop
+
+            if (verbose) {
+                float snapshot_dur = (float)(clock() - snapshot_start)/CLOCKS_PER_SEC;
+                printf("snapshot total            (host/device)       %.6fs\n",this_img_dur);
+                if (m == num_snapshots - 1) {
+                    std::cout << "=============================================================\n";
+                } else {
+                    std::cout << "-------------------------------------------------------------\n";
+                }
+            }
         } // end snapshot loop
 
         // perform cleanup of device/host data
