@@ -315,7 +315,10 @@ def build_boosted_lookback_data(num_snapshots = 10):
     for n in range(0, num_snapshots):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros(shape=(100,100,200,4))
-        L_jet_kpc = v_adv * c_light / kpc_to_m # in kpc
+        t_in_Myr = t_span[n]
+        t_in_s = t_in_Myr * Myr_to_s
+        L_jet_in_m = v_adv * c_light * t_in_s
+        L_jet_kpc = L_jet_in_m / kpc_to_m # in kpc
         L_jet = L_jet_kpc / L_in_kpc # in code length
         in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
         in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
