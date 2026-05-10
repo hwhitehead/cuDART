@@ -288,6 +288,34 @@ def build_lookback_data(num_snapshots = 10):
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
+def build_boosted_lookback_data(num_snapshots = 10):
+
+    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
+    max_emm = 1.0
+    xspan = np.linspace(0,1,100)
+    yspan = np.linspace(0,1,100)
+    zspan = np.linspace(-1,1,200)
+    tspan = np.array([0,1,2,3])
+    xx, yy, zz, tt = np.meshgrid(xspan, yspan, zspan, indexing="ij")
+    r_sqr = (xx-0.5) ** 2 + (yy-0.5) ** 2
+    r_jet = 0.1
+    in_jet_column = (r_sqr < r_jet ** 2)
+
+    v_adv = 1.0 / num_snapshots
+    v_jet = 0.99 # in units of c
+    for n in range(0, num_snapshots):
+        save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        save_data = np.zeros(shape=(100,100,200))
+        L_jet = v_adv * n
+        in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
+        in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
+        save_data[in_lead & (tt == 0)] = max_emm
+        save_data[in_tail & (tt == 0)] = max_emm
+        save_data[in_lead & (tt == 3)] = v_jet
+        save_data[in_tail & (tt == 3)] = -v_jet
+        save_data = save_data.astype(np.float32)
+        np.save(save_str, save_data)
+
 def render_lookback_example(relativistic=False, remove_raw_images = True, save_profile = None, save_lc = None, append = False):
 
     print("cuDART: starting jet render example...")
@@ -354,6 +382,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    build_lookback_data()
+    build_boosted_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=False, remove_raw_images = False)
