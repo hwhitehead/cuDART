@@ -306,7 +306,7 @@ def build_boosted_lookback_data(num_snapshots = 10):
     in_jet_column = (r_sqr < r_jet ** 2)
 
     v_adv = 0.05 # in units of c
-    L_in_kpc = 100 
+    L_in_kpc = 200 # domain extent (full)
     T_in_Myr = 4
     v_code_units = L_in_kpc * kpc_to_m / (T_in_Myr * Myr_to_s)
     v_adv_code = v_adv * c_light / v_code_units
@@ -315,7 +315,8 @@ def build_boosted_lookback_data(num_snapshots = 10):
     for n in range(0, num_snapshots):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros(shape=(100,100,200,4))
-        L_jet = v_adv_code * t_span[n] / L_in_kpc
+        L_jet_kpc = v_adv * c_light / kpc_to_m # in kpc
+        L_jet = L_jet_kpc / L_in_kpc # in code length
         in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
         in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
         emm_mask = (in_lead | in_tail) & (ii == 0) 
