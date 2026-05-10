@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
         }
         if (verbose) {
             float buffer_alloc_dur = (float)(clock() - buffer_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc/init image buffer (host)              %.6fs\n",buffer_alloc_dur);
+            printf("malloc/init image buffer  (host)              %.6fs\n",buffer_alloc_dur);
         }
 
         // allocate scratch space for image sum on host
