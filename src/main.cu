@@ -261,9 +261,11 @@ int main(int argc, char *argv[]) {
         // set trace args
         trace_args.snapshot_dt = snapshot_dt;
         trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
-        float kpc_per_Myr = 9.78564e3; // in m/s
-        float velocity_code_units = L_domain * kpc_per_Myr;
-        float c_in_code_units = 3e8 / velocity_code_units;
+        float kpc_to_m = 3.086e+19; // in m
+        float Myr_to_s = 1e6 * 365 * 24 * 60 * 60; // in s
+        float c_light = 3e8; // in m/s
+        float velocity_code_units = L_domain * kpc_to_m / Myr_to_s; // unit length crossed in 1Myr
+        float c_in_code_units = c_light / velocity_code_units;
         trace_args.c = c_in_code_units;
         trace_args.inv_c = 1.0 / trace_args.c; 
         trace_args.num_snapshots = num_snapshots;

@@ -315,7 +315,7 @@ def build_boosted_lookback_data(num_snapshots = 10):
     for n in range(0, num_snapshots):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros(shape=(100,100,200,4))
-        L_jet = v_adv * t_span[n]
+        L_jet = v_adv_code * t_span[n] / L_in_kpc
         in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
         in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
         emm_mask = (in_lead | in_tail) & (ii == 0) 
@@ -350,7 +350,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.length_Y = 0.66
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 8
+    theta = np.pi / 4
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
     num_img = 10
