@@ -27,9 +27,10 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceAr
     if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
   	int pixel_index = i * camera.num_pixels_Y + j; 
 
-
-    printf("snapshot_index = %d", trace_args.snapshot_index);
-
+    if (i == 0 && j == 0) {
+        printf("snapshot_index = %d", trace_args.snapshot_index);
+    }
+    
     // initialise ray
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);
     Ray pixel_ray(pixel_origin, camera.normal);
