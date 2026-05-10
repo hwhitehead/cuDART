@@ -359,7 +359,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     T_in_Myr = 4
     dist_to_camera_in_kpc = 2 * L_in_kpc
     t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
-    for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr, num_img):
+    for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + 3 * T_in_Myr, num_img):
         camera = copy.deepcopy(template_camera)
         camera.t_obs = t
         cameras.append(camera)
@@ -397,6 +397,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_boosted_lookback_data()
+    build_boosted_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=True, remove_raw_images = False)
