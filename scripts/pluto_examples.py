@@ -11,6 +11,10 @@ from cudart import *
 
 epsilon = 1e-2 # small number to avoid casts with exact cooordinate alignment
 
+kpc_to_m = 1e3 * 3.086e+16
+Myr_to_s = 1e6 * 365 * 24 * 60 * 60
+c_light = 3e8
+
 def extract_pluto_data_example():
 
     from pluto_reader import PlutoParticleReader, VTKLoader, Frequencies, Units
@@ -304,8 +308,8 @@ def build_boosted_lookback_data(num_snapshots = 10):
     v_adv = 0.05 # in units of c
     L_in_kpc = 100 
     T_in_Myr = 4
-    v_code_units = L_in_kpc / T_in_Myr 
-    v_adv_code = v_adv / v_code_units
+    v_code_units = L_in_kpc * kpc_to_m / (T_in_Myr * Myr_to_s)
+    v_adv_code = v_adv * c_light / v_code_units
     v_jet = 0.99 # in units of c
     t_span = np.linspace(0, T_in_Myr, num_snapshots) # evenly space over duration
     for n in range(0, num_snapshots):
@@ -351,7 +355,11 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     
     num_img = 10
     cameras = []
-    for t in np.linspace(0, 1, num_img):
+    L_in_kpc = 100 
+    T_in_Myr = 4
+    dist_to_camera_in_kpc = 2 * L_in_kpc
+    t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
+    for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr, num_img):
         camera = copy.deepcopy(template_camera)
         camera.t_obs = t
         cameras.append(camera)
@@ -389,6 +397,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    build_boosted_lookback_data()
+    #build_boosted_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=True, remove_raw_images = False)
