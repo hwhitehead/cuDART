@@ -265,10 +265,8 @@ def comp_plot():
 
 def build_lookback_data(num_snapshots = 10):
 
-    template_data = np.load("/mnt/kocsis1/cuDART_wdir/emm_data/emm_1000MHz.npy")
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
-    max_emm = np.max(template_data)
-    
+    max_emm = 1.0
     xspan = np.linspace(0,1,100)
     yspan = np.linspace(0,1,100)
     zspan = np.linspace(-1,1,200)
@@ -348,7 +346,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
         scene.calc_lightcurve(save_lc)
         print("saved lightcurve")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=18, vmax=21)
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=-3, vmax=0)
     print("finished rendering rasterised images")
 
     print("unlabelled render example finished.")
@@ -356,6 +354,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_lookback_data()
+    build_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=False, remove_raw_images = False)
