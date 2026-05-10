@@ -357,13 +357,13 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     theta = np.pi / 4
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
-    num_img = 10
+    num_img = 100
     cameras = []
     L_in_kpc = 100 
     T_in_Myr = 4
     dist_to_camera_in_kpc = 2 * L_in_kpc
     t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
-    for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + 3 * T_in_Myr, num_img):
+    for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + 1.5 * T_in_Myr, num_img):
         camera = copy.deepcopy(template_camera)
         camera.t_obs = t
         cameras.append(camera)
