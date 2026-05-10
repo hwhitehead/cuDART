@@ -341,7 +341,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.length_Y = 0.66
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 4
+    theta = np.pi / 8
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
     num_img = 10
