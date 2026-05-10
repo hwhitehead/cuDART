@@ -309,10 +309,10 @@ def build_boosted_lookback_data(num_snapshots = 10):
         L_jet = v_adv * n
         in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
         in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
-        save_data[in_lead & (ii == 0)] = max_emm
-        save_data[in_tail & (ii == 0)] = max_emm
-        save_data[in_lead & (ii == 3)] = v_jet
-        save_data[in_tail & (ii == 3)] = -v_jet
+        save_data[in_lead][...,0] = max_emm
+        save_data[in_tail][...,0] = max_emm
+        save_data[in_lead][...,3] = v_jet
+        save_data[in_tail][...,3] = -v_jet
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
