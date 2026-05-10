@@ -301,7 +301,7 @@ def build_boosted_lookback_data(num_snapshots = 10):
     r_jet = 0.1
     in_jet_column = (r_sqr < r_jet ** 2)
 
-    v_adv = 1.0 / num_snapshots
+    v_adv = 0.25
     v_jet = 0.99 # in units of c
     for n in range(0, num_snapshots):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
@@ -384,6 +384,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_boosted_lookback_data()
+    build_boosted_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=True, remove_raw_images = False)
