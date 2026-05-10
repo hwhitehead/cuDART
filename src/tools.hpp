@@ -70,6 +70,8 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     // caculate the lerp weighting factor between temporal states
     float t_bar = trace_args.t_obs - s * trace_args.inv_c; // lookback time at distance s along line-of-sight
     
+    return 0.1;
+
     // handle edges
     if (t_bar < 0) { // handle early observer (lookback time preceedes simulation data)
         if (trace_args.snapshot_index == 0) {
