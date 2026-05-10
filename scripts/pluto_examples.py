@@ -295,8 +295,8 @@ def build_boosted_lookback_data(num_snapshots = 10):
     xspan = np.linspace(0,1,100)
     yspan = np.linspace(0,1,100)
     zspan = np.linspace(-1,1,200)
-    tspan = np.array([0,1,2,3])
-    xx, yy, zz, tt = np.meshgrid(xspan, yspan, zspan, indexing="ij")
+    ispan = np.array([0,1,2,3])
+    xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
     r_sqr = (xx-0.5) ** 2 + (yy-0.5) ** 2
     r_jet = 0.1
     in_jet_column = (r_sqr < r_jet ** 2)
@@ -309,10 +309,10 @@ def build_boosted_lookback_data(num_snapshots = 10):
         L_jet = v_adv * n
         in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
         in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
-        save_data[in_lead & (tt == 0)] = max_emm
-        save_data[in_tail & (tt == 0)] = max_emm
-        save_data[in_lead & (tt == 3)] = v_jet
-        save_data[in_tail & (tt == 3)] = -v_jet
+        save_data[in_lead & (ii == 0)] = max_emm
+        save_data[in_tail & (ii == 0)] = max_emm
+        save_data[in_lead & (ii == 3)] = v_jet
+        save_data[in_tail & (ii == 3)] = -v_jet
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
