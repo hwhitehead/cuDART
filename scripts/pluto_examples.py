@@ -298,7 +298,7 @@ def build_boosted_lookback_data(num_snapshots = 10):
     ispan = np.array([0,1,2,3])
     xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
     r_sqr = (xx-0.5) ** 2 + (yy-0.5) ** 2
-    r_jet = 0.1
+    r_jet = 0.05
     in_jet_column = (r_sqr < r_jet ** 2)
 
     v_adv = 0.25
