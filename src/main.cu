@@ -367,7 +367,7 @@ int main(int argc, char *argv[]) {
                 clock_t img_copy_start = clock();
                 checkCudaErrors(cudaMemcpy(img_scratch, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
                 for (int i = 0; i < num_pixels; i++) {
-                    img_buffer[i + img_count * num_pixels] = img_scratch[i];
+                    img_buffer[i + img_count * num_pixels] += img_scratch[i];
                 }
                 if (verbose) {
                     float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;

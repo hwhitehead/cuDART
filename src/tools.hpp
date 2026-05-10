@@ -69,8 +69,6 @@ __device__ float calc_boost_factor(vec3 beta_vec, vec3 view_vec, float doppler_i
 __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     // caculate the lerp weighting factor between temporal states
     float t_bar = trace_args.t_obs - s * trace_args.inv_c; // lookback time at distance s along line-of-sight
-    
-    return 1;
 
     // handle edges
     if (t_bar < 0) { // handle early observer (lookback time preceedes simulation data)
