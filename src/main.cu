@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
         }
         if (verbose) {
             float buffer_alloc_dur = (float)(clock() - buffer_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc/init image buffer (host)              %.6fs\n",img_alloc_dur);
+            printf("malloc/init image buffer (host)              %.6fs\n",buffer_alloc_dur);
         }
 
         // allocate scratch space for image sum on host
@@ -363,61 +363,18 @@ int main(int argc, char *argv[]) {
                     printf("render kernel             (device)            %.6fs\n",render_dur);
                 }
 
-                // copy image data to scratch space
+                // copy image data to scratch space, and sum into main buffer
                 clock_t img_copy_start = clock();
                 checkCudaErrors(cudaMemcpy(img_scratch, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
-                if (verbose) {
-                    float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-                    printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
-                }
-
-                // sum scratch into main image buffer
-                for (int i = 0;  i < num_pixels) {
+                for (int i = 0; i < num_pixels; i++) {
                     img_buffer[i + img_count * num_pixels] = img_scratch[i];
                 }
-
-                // save data, enforce apppend (TODO: consider alt)
-                clock_t npy_write_start = clock();
-                std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
-                if (m == 0) {
-                    // first snapshot may append to existing, or create new image
-                    if (append_mode) {
-                        // attempt to add values to existing file (if it exists)
-                        bool file_exists = std::filesystem::is_regular_file(save_str);
-                        if (file_exists) { 
-                            npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
-                            std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
-                            if (existing_npy_shape != npy_img.shape) {
-                                std::stringstream err_msg;
-                                err_msg << "### FATAL ERROR in main\n";
-                                err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
-                                CUDART_ERROR(err_msg);
-                            }
-                            std::vector<float> img_vec = existing_npy_data.data;
-                            for (int i = 0; i < standard_camera.num_pixels; i++) {
-                                img[i] += img_vec[i];
-                            } // end summation over image
-                        } // end if file_exist 
-                    } // end if append_mode 
-                    npy_img.data_ptr = img;
-                    npy::write_npy(save_str, npy_img);
-                } else {
-                    // later snapshots ALWAYS append to file from earlier snapshots
-                    npy::npy_data existing_npy_data = npy::read_npy<float>(save_str);
-                    std::vector<float> img_vec = existing_npy_data.data;
-                    for (int i = 0; i < standard_camera.num_pixels; i++) {
-                        img[i] += img_vec[i];
-                    } // end summation over image
-                    npy_img.data_ptr = img;
-                    npy::write_npy(save_str, npy_img);
-                } // end if m
-
                 if (verbose) {
-                    float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-                    printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur);
+                    float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
+                    printf("memcpy/sum image          (device->host)      %.6fs\n",img_copy_dur);
                 }
 
-                // prepare for next image
+                // clear d_img as prepare for next render call
                 wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
@@ -441,8 +398,8 @@ int main(int argc, char *argv[]) {
 
         // image buffer populated, save render data as npy
         clock_t npy_write_start = clock();
-        for (n = 0; n < num_images; n++) {
-            std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
+        for (int n = 0; n < num_images; n++) {
+            std::string save_str = save_str_header + zero_pad_str(n, num_zero_pad) + ".npy";
             if (append_mode) {
                 // attempt to add values to existing file (if it exists)
                 bool file_exists = std::filesystem::is_regular_file(save_str);
