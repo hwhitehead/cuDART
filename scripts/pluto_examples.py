@@ -301,12 +301,17 @@ def build_boosted_lookback_data(num_snapshots = 10):
     r_jet = 0.05
     in_jet_column = (r_sqr < r_jet ** 2)
 
-    v_adv = 0.25
+    v_adv = 0.05 # in units of c
+    L_in_kpc = 100 
+    T_in_Myr = 4
+    v_code_units = L_in_kpc / T_in_Myr 
+    v_adv_code = v_adv / v_code_units
     v_jet = 0.99 # in units of c
+    t_span = np.linspace(0, T_in_Myr, num_snapshots) # evenly space over duration
     for n in range(0, num_snapshots):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros(shape=(100,100,200,4))
-        L_jet = v_adv * n
+        L_jet = v_adv * t_span[n]
         in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
         in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
         emm_mask = (in_lead | in_tail) & (ii == 0) 
