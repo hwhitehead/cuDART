@@ -306,6 +306,7 @@ def build_boosted_lookback_data(num_snapshots = 10):
     in_jet_column = (r_sqr < r_jet ** 2)
 
     v_adv = 4 # in units kpc per yr
+    v_adv *= 70
     L_in_kpc = 120 # domain extent (full)
     T_in_Myr = L_in_kpc / v_adv
     v_jet = 0.99 # in units of c
@@ -356,7 +357,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     num_img = 50
     cameras = []
     L_in_kpc = 120 
-    T_in_Myr = 4
+    T_in_Myr = 4 / 70
     dist_to_camera_in_kpc = 2 * L_in_kpc
     t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
     for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr, num_img):
