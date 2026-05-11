@@ -316,7 +316,8 @@ def build_blob_data(num_snapshots = 10):
     for n, t_in_Myr in enumerate(t_span):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros(shape=(100,100,200,4))
-        lead_center = t_in_Myr * v_in_kpc_per_Myr
+        lead_center_in_kpc = t_in_Myr * v_in_kpc_per_Myr
+        lead_center = lead_center_in_kpc / L_in_kpc # cast to code units
         tail_center = -lead_center
         lead_ZZ = zz - lead_center
         tail_ZZ = zz - tail_center
