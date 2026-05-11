@@ -328,11 +328,11 @@ def build_blob_data(num_snapshots = 10):
         lead_ZZ = zz - lead_center
         tail_ZZ = zz - tail_center
 
-        rr_lead_sqr = (zz - lead_center) ** 2 + xy_sqr
-        rr_tail_sqr = (zz - tail_center) ** 2 + xy_sqr
+        rr_lead_sqr = ((zz - lead_center) ** 2 + xy_sqr) / r_blob_in_code ** 2
+        rr_tail_sqr = ((zz - tail_center) ** 2 + xy_sqr) / r_blob_in_code ** 2
 
-        in_lead = (rr_lead_sqr < r_blob_in_code ** 2)
-        in_tail = (rr_tail_sqr < r_blob_in_code ** 2)
+        in_lead = (rr_lead_sqr < 1)
+        in_tail = (rr_tail_sqr < 1)
         emm_lead = max_emm * (1.0 - rr_lead_sqr)
         emm_tail = max_emm * (1.0 - rr_tail_sqr)
 
@@ -456,6 +456,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_blob_data(num_snapshots=20)
+    build_blob_data(num_snapshots=20)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=True, remove_raw_images = False)
