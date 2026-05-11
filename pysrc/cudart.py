@@ -423,7 +423,7 @@ class Scene:
                 if verbose:
                     print("removed temporary camera file")
 
-    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False, log_c=True):
+    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False, log_c=True, show_grid=False):
         
         # TODO: add labelling options, axes?
         
@@ -463,6 +463,10 @@ class Scene:
                 os.remove(load_str)
                 if (verbose):
                     print("removed data file at " + load_str)
+
+        if (show_grid):
+            ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
+            ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
         plt.close("all")
 

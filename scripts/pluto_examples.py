@@ -389,7 +389,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
         scene.calc_lightcurve(save_lc)
         print("saved lightcurve")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=-6, vmax=-1)
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=-6, vmax=-1, show_grid=True)
     print("finished rendering rasterised images")
 
     print("unlabelled render example finished.")
@@ -397,6 +397,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_boosted_lookback_data()
+    build_boosted_lookback_data(num_snapshots=20)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    render_lookback_example(relativistic=False, remove_raw_images = False)
+    render_lookback_example(relativistic=True, remove_raw_images = False)
