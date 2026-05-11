@@ -77,7 +77,7 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
         } else {
             return 0; // no contribution 
         }
-    } else if (t_bar > trace_args.last_dt) { // late observer 
+    } else if (t_bar > trace_args.last_time) { // late observer 
         if (trace_args.snapshot_index == trace_args.last_snapshot) {
             return 1;
         } else {
