@@ -296,8 +296,8 @@ def build_blob_data(num_snapshots = 10):
 
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
     max_emm = 1.0
-    xspan = np.linspace(0,0.5,100) # in code units, longest side is length unity
-    yspan = np.linspace(0,0.5,100)
+    xspan = np.linspace(-0.25,0.25,100) # in code units, longest side is length unity
+    yspan = np.linspace(-0.25,0.25,100)
     zspan = np.linspace(-0.5,0.5,200)
     ispan = np.array([0,1,2,3])
     xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
@@ -391,12 +391,12 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera = Camera()
     template_camera.num_pixels_X = 2048
     template_camera.num_pixels_Y = 2048
-    template_camera.tilt = 0.0#(60.0 / 180) * np.pi
-    template_camera.length_X = 1 # defval 0.66
-    template_camera.length_Y = 1
+    template_camera.tilt = (60.0 / 180) * np.pi
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 2 + epsilon
+    theta = np.pi / 4 + epsilon
+    template_camera.length_X = 1.0 * np.sin(theta) # defval 0.66
+    template_camera.length_Y = 1.0 * np.sin(theta)
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
     num_img = 50
@@ -438,7 +438,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
         scene.calc_lightcurve(save_lc)
         print("saved lightcurve")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=-6, vmax=-1, show_grid=True)
+    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=-6, vmax=0, show_grid=True)
     print("finished rendering rasterised images")
 
     print("unlabelled render example finished.")
@@ -448,4 +448,4 @@ if __name__ == "__main__":
 
     build_blob_data(num_snapshots=20)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    render_lookback_example(relativistic=False, remove_raw_images = False)
+    render_lookback_example(relativistic=True, remove_raw_images = False)
