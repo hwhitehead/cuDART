@@ -297,9 +297,11 @@ def build_blob_data(num_snapshots = 10):
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
     header_str = os.path.join(save_dir, "header.txt")
     max_emm = 1.0
-    xspan = np.linspace(-0.25,0.25,100) # in code units, longest side is length unity
-    yspan = np.linspace(-0.25,0.25,100)
-    zspan = np.linspace(-0.5,0.5,200)
+    long_dim = 500
+    short_dim = 250
+    xspan = np.linspace(-0.25,0.25,short_dim) # in code units, longest side is length unity
+    yspan = np.linspace(-0.25,0.25,short_dim)
+    zspan = np.linspace(-0.5,0.5,long_dim)
     ispan = np.array([0,1,2,3])
     xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
     xy_sqr = xx ** 2 + yy ** 2
@@ -309,7 +311,7 @@ def build_blob_data(num_snapshots = 10):
     v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
 
-    r_blob_in_kpc = 5
+    r_blob_in_kpc = 2.5
     L_in_kpc = 120 # full domain length
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
     T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
@@ -331,11 +333,15 @@ def build_blob_data(num_snapshots = 10):
 
         in_lead = (rr_lead_sqr < r_blob_in_code ** 2)
         in_tail = (rr_tail_sqr < r_blob_in_code ** 2)
+        emm_lead = max_emm * (1.0 - rr_lead_sqr)
+        emm_tail = max_emm * (1.0 - rr_tail_sqr)
 
-        emm_mask = (in_lead | in_tail) & (ii == 0) 
+        lead_emm_mask = (in_lead) & (ii == 0)
+        tail_emm_mark = (in_tail) & (ii == 0)
         lead_vel_mask = (in_lead) & (ii == 3)
         tail_vel_mask = (in_tail) & (ii == 3)
-        save_data[emm_mask] = max_emm
+        save_data[lead_emm_mask] = emm_lead[lead_emm_mask]
+        save_data[tail_emm_mask] = emm_tail[tail_emm_mask]
         save_data[lead_vel_mask] = v_in_c
         save_data[tail_vel_mask] = -v_in_c
         save_data = save_data.astype(np.float32)
