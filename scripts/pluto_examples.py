@@ -292,6 +292,50 @@ def build_lookback_data(num_snapshots = 10):
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
+def build_blob_data(num_snapshots = 10):
+
+    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
+    max_emm = 1.0
+    xspan = np.linspace(0,1,100)
+    yspan = np.linspace(0,1,100)
+    zspan = np.linspace(-1,1,200)
+    ispan = np.array([0,1,2,3])
+    xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
+    xy_sqr = xx ** 2 + yy ** 2
+
+    gamma_bulk = 2
+    v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
+
+    r_blob_in_kpc = 5
+    L_in_kpc = 120 # full domain length
+    r_blob_in_code = r_blob_in_kpc / L_in_kpc
+    T_in_Myr = 0.5 * L_in_kps / v_in_kpc_per_Myr # duration to reach domain edge
+    t_span = np.linspace(0, T_in_Myr, num_snapshots) # evenly space over duration
+    print("dt = " + str(t_span[1]))
+    for n, t_in_Myr in enumerate(t_span):
+        save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        save_data = np.zeros(shape=(100,100,200,4))
+        lead_center = t_in_Myr * v_in_kpc_per_Myr
+        tail_center = -lead_center
+        lead_ZZ = zz - lead_center
+        tail_ZZ = zz - tail_center
+
+        rr_lead_sqr = (zz - lead_center) ** 2 + xy_sqr
+        rr_tail_sqr = (zz - tail_center) ** 2 + xy_sqr
+
+        in_lead = (rr_lead_sqr < r_blob_in_code ** 2)
+        in_tail = (rr_tail_sqr < r_blob_in_code ** 2)
+
+        emm_mask = (in_lead | in_tail) & (ii == 0) 
+        lead_vel_mask = (in_lead) & (ii == 3)
+        tail_vel_mask = (in_tail) & (ii == 3)
+        save_data[emm_mask] = max_emm
+        save_data[lead_vel_mask] = v_in_c
+        save_data[tail_vel_mask] = -v_in_c
+        save_data = save_data.astype(np.float32)
+        np.save(save_str, save_data)
+
 def build_boosted_lookback_data(num_snapshots = 10):
 
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
@@ -305,7 +349,7 @@ def build_boosted_lookback_data(num_snapshots = 10):
     r_jet = 0.025
     in_jet_column = (r_sqr < r_jet ** 2)
 
-    v_adv = 4 # in units kpc per yr
+    v_adv = 4 # in units kpc per Myr
     v_adv *= 70
     L_in_kpc = 120 # domain extent (full)
     T_in_Myr = L_in_kpc / v_adv
@@ -351,13 +395,15 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.length_Y = 1
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 6 + epsilon
+    theta = np.pi / 2 + epsilon
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
     num_img = 50
     cameras = []
     L_in_kpc = 120 
-    T_in_Myr = 4 / 70
+    gamma_bulk = 2
+    beta_bulk = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
+    T_in_Myr = 0.5 * L_in_kps / v_in_kpc_per_Myr # duration to reach domain edge
     dist_to_camera_in_kpc = 2 * L_in_kpc
     t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
     for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr, num_img):
@@ -398,6 +444,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    build_boosted_lookback_data(num_snapshots=20)
+    build_blob_data(num_snapshots=20)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    render_lookback_example(relativistic=True, remove_raw_images = False)
+    #render_lookback_example(relativistic=True, remove_raw_images = False)
