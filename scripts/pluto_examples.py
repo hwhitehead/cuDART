@@ -302,26 +302,22 @@ def build_boosted_lookback_data(num_snapshots = 10):
     ispan = np.array([0,1,2,3])
     xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
     r_sqr = (xx-0.5) ** 2 + (yy-0.5) ** 2
-    r_jet = 0.05
+    r_jet = 0.025
     in_jet_column = (r_sqr < r_jet ** 2)
 
-    v_adv = 0.05 # in units of c
-    L_in_kpc = 200 # domain extent (full)
-    T_in_Myr = 4
-    v_code_units = L_in_kpc * kpc_to_m / (T_in_Myr * Myr_to_s)
-    v_adv_code = v_adv * c_light / v_code_units
+    v_adv = 4 # in units kpc per yr
+    L_in_kpc = 120 # domain extent (full)
+    T_in_Myr = L_in_kpc / v_adv
     v_jet = 0.99 # in units of c
     t_span = np.linspace(0, T_in_Myr, num_snapshots) # evenly space over duration
     for n in range(0, num_snapshots):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros(shape=(100,100,200,4))
         t_in_Myr = t_span[n]
-        t_in_s = t_in_Myr * Myr_to_s
-        L_jet_in_m = v_adv * c_light * t_in_s
-        L_jet_kpc = L_jet_in_m / kpc_to_m # in kpc
-        L_jet = L_jet_kpc / L_in_kpc # in code length
-        in_lead = in_jet_column & (zz > 0) & (zz < L_jet) 
-        in_tail = in_jet_column & (zz < 0) & (zz > -L_jet)
+        L_jet_in_kpc = v_adv * t_in_Myr
+        L_jet_code = L_jet_in_kpc / L_in_kpc
+        in_lead = in_jet_column & (zz > 0) & (zz < L_jet_code) 
+        in_tail = in_jet_column & (zz < 0) & (zz > -L_jet_code)
         emm_mask = (in_lead | in_tail) & (ii == 0) 
         lead_vel_mask = (in_lead) & (ii == 3)
         tail_vel_mask = (in_tail) & (ii == 3)
@@ -349,17 +345,17 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera = Camera()
     template_camera.num_pixels_X = 2048
     template_camera.num_pixels_Y = 2048
-    template_camera.tilt = (60.0 / 180) * np.pi
-    template_camera.length_X = 0.25 # defval 0.66
-    template_camera.length_Y = 0.25
+    template_camera.tilt = 0.0 #(60.0 / 180) * np.pi
+    template_camera.length_X = 1 # defval 0.66
+    template_camera.length_Y = 1
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 6
+    theta = np.pi / 2 + epsilon
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
-    num_img = 100
+    num_img = 10
     cameras = []
-    L_in_kpc = 100 
+    L_in_kpc = 120 
     T_in_Myr = 4
     dist_to_camera_in_kpc = 2 * L_in_kpc
     t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
@@ -401,6 +397,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_boosted_lookback_data()
+    build_boosted_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    render_lookback_example(relativistic=True, remove_raw_images = False)
+    render_lookback_example(relativistic=False, remove_raw_images = False)
