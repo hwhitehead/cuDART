@@ -465,8 +465,8 @@ class Scene:
                     print("removed data file at " + load_str)
 
         if (show_grid):
-            ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
-            ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
+            ax.axhline(y=0.5, color='w', alpha=0.2, zorder=20)
+            ax.axvline(x=0.5, color='w', alpha=0.2, zorder=20)
 
         plt.close("all")
 
