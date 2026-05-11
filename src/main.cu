@@ -167,6 +167,8 @@ int main(int argc, char *argv[]) {
     trace_args.c = 1.0;
     trace_args.inv_c = 1.0 / trace_args.c; 
     trace_args.snapshot_index = 0; 
+    trace_args.last_snapshot = 0;
+    trace_args.last_time = 0;
     trace_args.num_snapshots = 0;
 
     // print timing header
@@ -269,6 +271,8 @@ int main(int argc, char *argv[]) {
         trace_args.c = c_in_code_units;
         trace_args.inv_c = 1.0 / trace_args.c; 
         trace_args.num_snapshots = num_snapshots;
+        trace_args.last_snapshot = num_snapshots - 1;
+        trace_args.last_time = trace_args.last_snapshot * trace_args.snapshot_dt;
 
         // allocate data on host
         clock_t h_alloc_start = clock();
