@@ -345,12 +345,12 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera = Camera()
     template_camera.num_pixels_X = 2048
     template_camera.num_pixels_Y = 2048
-    template_camera.tilt = 0.0 #(60.0 / 180) * np.pi
+    template_camera.tilt = (60.0 / 180) * np.pi
     template_camera.length_X = 1 # defval 0.66
     template_camera.length_Y = 1
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 2 + epsilon
+    theta = np.pi / 6 + epsilon
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
     num_img = 10
@@ -397,6 +397,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    build_boosted_lookback_data()
+    #build_boosted_lookback_data()
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=False, remove_raw_images = False)
