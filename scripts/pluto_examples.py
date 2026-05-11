@@ -353,7 +353,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     theta = np.pi / 6 + epsilon
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
-    num_img = 10
+    num_img = 20
     cameras = []
     L_in_kpc = 120 
     T_in_Myr = 4
