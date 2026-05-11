@@ -337,7 +337,7 @@ def build_blob_data(num_snapshots = 10):
         emm_tail = max_emm * (1.0 - rr_tail_sqr)
 
         lead_emm_mask = (in_lead) & (ii == 0)
-        tail_emm_mark = (in_tail) & (ii == 0)
+        tail_emm_mask = (in_tail) & (ii == 0)
         lead_vel_mask = (in_lead) & (ii == 3)
         tail_vel_mask = (in_tail) & (ii == 3)
         save_data[lead_emm_mask] = emm_lead[lead_emm_mask]
