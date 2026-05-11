@@ -409,7 +409,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.length_Y = 1.0 * np.sin(theta)
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
-    num_img = 50
+    num_img = 100
     cameras = []
     L_in_kpc = 120 
     gamma_bulk = 2
@@ -418,8 +418,8 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
     dist_to_camera_in_kpc = 2 * L_in_kpc
     t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
-    t_delay_in_Myr *= 0.9
-    for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr, num_img):
+    t_delay_in_Myr *= 0.95
+    for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_img):
         camera = copy.deepcopy(template_camera)
         camera.t_obs = t
         cameras.append(camera)
@@ -457,6 +457,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    build_blob_data(num_snapshots=50)
+    #build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=True, remove_raw_images = False)

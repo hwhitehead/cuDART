@@ -170,6 +170,7 @@ int main(int argc, char *argv[]) {
     trace_args.last_snapshot = 0;
     trace_args.last_time = 0;
     trace_args.num_snapshots = 0;
+    trace_args.keep_edge = 0; // TODO: add option in header for this
 
     // print timing header
     if (verbose) {

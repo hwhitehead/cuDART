@@ -19,7 +19,7 @@ struct TraceArgs {
     bool relativistic; 
     float doppler_index;
     // lookback settings 
-    bool lookback;
+    bool lookback, keep_edge;
     float t_obs, snapshot_dt, c, last_time; 
     float inv_snapshot_dt, inv_c;
     int snapshot_index, num_snapshots, last_snapshot;
@@ -72,9 +72,9 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
 
     // handle edge cases TODO: add optional flag for this
     if (t_bar < 0) { // lookback time occurs before simulation data
-        return (trace_args.snapshot_index == 0); // use first snapshot
+        return ((trace_args.snapshot_index == 0) && trace_args.keep_edge); // use first snapshot
     } else if (t_bar > trace_args.last_time) { // lookback time occurs after simulation data
-        return (trace_args.snapshot_index == trace_args.last_snapshot); // use last snapshot
+        return ((trace_args.snapshot_index == trace_args.last_snapshot) && trace_args.keep_edge); // use last snapshot
     }
 
     // given membership in simulation duration, identify neighbours
