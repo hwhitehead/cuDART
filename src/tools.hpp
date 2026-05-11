@@ -79,11 +79,10 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
 
     // given membership in simulation duration, identify neighbours
     int m_bar = round(t_bar * trace_args.inv_snapshot_dt); // leading snapshot s.t. t_bar \in [m_bar, m_bar+1]
-    return (m_bar == trace_args.snapshot_index);
-    // if ((trace_args.snapshot_index >= m_bar) && (trace_args.snapshot_index <= m_bar + 1)) {
-    //     float lerp_factor = abs(t_bar - trace_args.snapshot_index * trace_args.snapshot_dt) * trace_args.inv_snapshot_dt;
-    //     return 1 - lerp_factor; // snapshot is adjacent, lerp contribution
-    // } 
+    if ((trace_args.snapshot_index >= m_bar) && (trace_args.snapshot_index <= m_bar + 1)) {
+        float lerp_factor = abs(t_bar - trace_args.snapshot_index * trace_args.snapshot_dt) * trace_args.inv_snapshot_dt;
+        return 1 - lerp_factor; // snapshot is adjacent, lerp contribution
+    } 
 
     return 0; // snapshot is not adjacent, no contribution
 }

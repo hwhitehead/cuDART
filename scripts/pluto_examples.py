@@ -404,7 +404,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.tilt = (60.0 / 180) * np.pi
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 2 + epsilon
+    theta = np.pi / 4 + epsilon
     template_camera.length_X = 1.0 * np.sin(theta) # size window to filt jet alignment
     template_camera.length_Y = 1.0 * np.sin(theta)
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
@@ -457,6 +457,6 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
 if __name__ == "__main__":
 
-    #build_blob_data(num_snapshots=20)
+    build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     render_lookback_example(relativistic=True, remove_raw_images = False)
