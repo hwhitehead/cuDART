@@ -402,7 +402,8 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     cameras = []
     L_in_kpc = 120 
     gamma_bulk = 2
-    beta_bulk = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
+    v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
     T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
     dist_to_camera_in_kpc = 2 * L_in_kpc
     t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
