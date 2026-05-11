@@ -70,19 +70,16 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     // caculate the lerp weighting factor between temporal states
     float t_bar = trace_args.t_obs - s * trace_args.inv_c; // lookback time at distance s along line-of-sight
 
-    // handle edge cases - lookback time before or after simulation data
-    if (t_bar < 0) {
-        return (trace_args.snapshot_index == 0);
-    } else if (t_bar > trace_args.last_time) {
-        return (trace_args.snapshot_index == trace_args.last_snapshot);
-    }
-
-    if (trace_args.snapshot_index == 5) {
-        return 1.0;
+    // handle edge cases TODO: add optional flag for this
+    if (t_bar < 0) { // lookback time occurs before simulation data
+        return (trace_args.snapshot_index == 0); // use first snapshot
+    } else if (t_bar > trace_args.last_time) { // lookback time occurs after simulation data
+        return (trace_args.snapshot_index == trace_args.last_snapshot); // use last snapshot
     }
 
     // given membership in simulation duration, identify neighbours
-    // int m_bar = floor(t_bar * trace_args.inv_snapshot_dt); // leading snapshot s.t. t_bar \in [m_bar, m_bar+1]
+    int m_bar = floor(t_bar * trace_args.inv_snapshot_dt); // leading snapshot s.t. t_bar \in [m_bar, m_bar+1]
+    return (m_bar == trace_arg.snapshot_index);
     // if ((trace_args.snapshot_index >= m_bar) && (trace_args.snapshot_index <= m_bar + 1)) {
     //     float lerp_factor = abs(t_bar - trace_args.snapshot_index * trace_args.snapshot_dt) * trace_args.inv_snapshot_dt;
     //     return 1 - lerp_factor; // snapshot is adjacent, lerp contribution
