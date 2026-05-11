@@ -317,7 +317,7 @@ def build_blob_data(num_snapshots = 10):
     T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
     t_span = np.linspace(0, T_in_Myr, num_snapshots) # evenly space over duration
     with open(header_str, "w") as f:
-        f.write("{0} {1} {2} {3}".format(num_snapshots, t_span[1], snapshot_size, L_in_kpc))
+        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], L_in_kpc))
     
     for n, t_in_Myr in enumerate(t_span):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
