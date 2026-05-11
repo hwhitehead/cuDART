@@ -295,6 +295,7 @@ def build_lookback_data(num_snapshots = 10):
 def build_blob_data(num_snapshots = 10):
 
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
+    header_str = os.path.join(save_dir, "header.txt")
     max_emm = 1.0
     xspan = np.linspace(-0.25,0.25,100) # in code units, longest side is length unity
     yspan = np.linspace(-0.25,0.25,100)
@@ -302,6 +303,7 @@ def build_blob_data(num_snapshots = 10):
     ispan = np.array([0,1,2,3])
     xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
     xy_sqr = xx ** 2 + yy ** 2
+    snapshot_size = np.size(xx)
 
     gamma_bulk = 2
     v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
@@ -312,7 +314,9 @@ def build_blob_data(num_snapshots = 10):
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
     T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
     t_span = np.linspace(0, T_in_Myr, num_snapshots) # evenly space over duration
-    print("dt = " + str(t_span[1]))
+    with open(header_str, "w") as f:
+        f.write("{0} {1} {2} {3}".format(num_snapshots, dt, snapshot_size, L_in_kpc))
+    
     for n, t_in_Myr in enumerate(t_span):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros(shape=(100,100,200,4))
