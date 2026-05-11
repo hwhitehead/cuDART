@@ -380,7 +380,7 @@ int main(int argc, char *argv[]) {
                     printf("memcpy/sum image          (device->host)      %.6fs\n",img_copy_dur);
                 }
 
-                // clear d_img as prepare for next render call
+                // clear d_img as prep for next render call
                 wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
