@@ -310,7 +310,7 @@ def build_blob_data(num_snapshots = 10):
     r_blob_in_kpc = 5
     L_in_kpc = 120 # full domain length
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
-    T_in_Myr = 0.5 * L_in_kps / v_in_kpc_per_Myr # duration to reach domain edge
+    T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
     t_span = np.linspace(0, T_in_Myr, num_snapshots) # evenly space over duration
     print("dt = " + str(t_span[1]))
     for n, t_in_Myr in enumerate(t_span):
