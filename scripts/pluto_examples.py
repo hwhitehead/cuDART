@@ -542,7 +542,7 @@ def plot_superluminal(num_img=100, sparse_step=1):
     thetas = [np.pi / 2, np.pi / 4]
     L_domain = 120 # in kpc
     L_imgs = [L_domain * np.sin(theta) for theta in thetas]
-    titles = [r"Regular Motion $(theta = \pi/2)$", r"Superluminal Motion $(theta = \pi/2)$"]
+    titles = [r"Regular Motion", r"Superluminal Motion"]
 
     v_in_kpc_per_Myr = beta * c_light / (kpc_to_m / Myr_to_s)
     T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr # duration to reach domain edge
@@ -551,26 +551,30 @@ def plot_superluminal(num_img=100, sparse_step=1):
     label_str0 = r"$\Gamma = 2$" + "\n"
     label_str0 += r"$\beta \simeq 0.87$" + "\n"
 
-    label_str1 = r"$\beta_\mathrm{T}^+ = 0.87$" + "\n"
+    label_str1 = r"$\theta = \pi/2$"
+    label_str1 += r"$\beta_\mathrm{T}^+ \simeq 0.87$" + "\n"
     label_str1 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 1$"
 
-    label_str2 = r"$\beta_\mathrm{T}^+ \simeq 1.6$" + "\n"
+    label_str2 = r"$\theta = \pi/4$"
+    label_str2 += r"$\beta_\mathrm{T}^+ \simeq 1.6$" + "\n"
     label_str2 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 4.2$"
 
     label_strs = [label_str1, label_str2]
 
     set_plot_defaults()
-    width_ratios = np.array([1,0.025,1,0.05])
+    width_ratios = np.array([1,0.025,1,0.025,0.05])
     height_ratios = np.array([1])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     L = 20.0 / 3
     fig = plt.figure(figsize=(L, h_over_w * L))
     gs = fig.add_gridspec(np.size(height_ratios),np.size(width_ratios),width_ratios=width_ratios,height_ratios=height_ratios)
     axl = fig.add_subplot(gs[0,0])
-    spacer = fig.add_subplot(gs[0,1])
-    spacer.axis("off")
+    spacerl = fig.add_subplot(gs[0,1])
+    spacerl.axis("off")
     axr = fig.add_subplot(gs[0,2])
-    cax = fig.add_subplot(gs[0,3])
+    spacerr = fig.add_subplots(gs[0,3])
+    spacerr.axis("off")
+    cax = fig.add_subplot(gs[0,4])
     axes = [axl, axr]
     plt.subplots_adjust(hspace=0, wspace=0)
 
