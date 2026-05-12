@@ -474,7 +474,7 @@ def label_lookback(num_img=100):
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
     label_str +=  r"$\theta = \pi / 4$" + "\n"
-    label_str += r"$\mathcal{F} \equiv v_+ / v_- \simeq 14$"
+    label_str += r"$\mathcal{F} \equiv \beta_\mathrm{T}^+ / \beta_\mathrm{T}^- \simeq 14$"
 
     set_plot_defaults()
     width_ratios = np.array([1,0.05])
@@ -519,7 +519,7 @@ def label_lookback(num_img=100):
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
-        time_label = "$\Delta t$={0:.2f}Myr".format(t_span[n])
+        time_label = "$\Delta t$ = {0:.3f}Myr".format(t_span[n])
         label = ax.text(-0.45,0.45,time_label,color='w', va="top", ha="left", zorder=20)
         
         fig.savefig(save_str, dpi=600, bbox_inches="tight")
