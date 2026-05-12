@@ -390,8 +390,8 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
     # define targets
     load_str = "/mnt/kocsis1/cuDART_wdir/lookback_data"
-    npy_save_str = "/mnt/kocsis1/cuDART_wdir/lookback_data/raw"
-    png_save_str = "/mnt/kocsis1/cuDART_wdir/lookback_data/img"
+    npy_save_str = "/mnt/kocsis1/cuDART_wdir/lookback_data/flat/raw"
+    png_save_str = "/mnt/kocsis1/cuDART_wdir/lookback_data/flat/img"
     camera_file_name = "/mnt/kocsis1/cuDART_wdir/lookback_data/cameras.txt"
     # npy_load_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_1000MHz.npy"
     # npy_save_str = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/emm_img/raw"
@@ -405,7 +405,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
     template_camera.tilt = (60.0 / 180) * np.pi
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
-    theta = np.pi / 4 + epsilon
+    theta = np.pi / 2 + epsilon
     template_camera.length_X = 1.0 * np.sin(theta) # size window to filt jet alignment
     template_camera.length_Y = 1.0 * np.sin(theta)
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
@@ -450,19 +450,19 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
         scene.calc_lightcurve(save_lc)
         print("saved lightcurve")
 
-    scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=-6, vmax=0, show_grid=True)
+    #scene.plot(png_save_str, cmap = "afmhot", verbose = True, remove_raw_images = remove_raw_images, vmin=-6, vmax=0, show_grid=True)
     print("finished rendering rasterised images")
 
     print("unlabelled render example finished.")
 
-def label_lookback(num_img=100):
+def label_lookback(num_img=100, sparse_step=1):
 
-    load_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data"
-    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/label"
+    load_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/flat"
+    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/flat/label"
 
     Gamma = 2
     beta = np.sqrt(1 - 1.0 / Gamma ** 2)
-    theta = np.pi / 4
+    theta = np.pi / 2
     F = (1 + beta * np.cos(theta)) / (1 - beta * np.cos(theta))
     L_domain = 120 # in kpc
     L_img = L_domain * np.sin(theta)
@@ -516,7 +516,7 @@ def label_lookback(num_img=100):
                         size_vertical = 0.05 * bar_length, frameon=False, color='w', label_top=True)
     ax.add_artist(sb)
 
-    for n in range(0, num_img):
+    for n in range(0, num_img, sparse_step):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
@@ -534,5 +534,5 @@ if __name__ == "__main__":
 
     #build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    #render_lookback_example(relativistic=True, remove_raw_images = False)
-    label_lookback()
+    render_lookback_example(relativistic=True, remove_raw_images = False)
+    label_lookback(num_img=100, sparse_step=10)

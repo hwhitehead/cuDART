@@ -25,7 +25,7 @@ class Ray {
         // methods
         __device__ vec3 O() const {return origin;}
         __device__ vec3 N() const {return normal;}
-        __device__ vec3 march(float t) const {return origin + t * normal;}
+        __device__ vec3 march(float s) const {return origin + s * normal;}
 
         // internals
         vec3 origin;
