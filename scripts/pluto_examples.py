@@ -474,7 +474,8 @@ def label_lookback(num_img=100):
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
     label_str +=  r"$\theta = \pi / 4$" + "\n"
-    label_str += r"$\mathcal{F} \equiv \beta_\mathrm{T}^+ / \beta_\mathrm{T}^- \simeq 4$"
+    label_str += r"$\beta_\mathrm{T}^+ \simeq 1.6" + "\n"
+    label_str += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- \simeq 4$"
 
     set_plot_defaults()
     width_ratios = np.array([1,0.05])
@@ -492,6 +493,7 @@ def label_lookback(num_img=100):
     ax.text(0.45,0.45,label_str, color='w', va="top", ha="right")
     ax.set_xlim([-0.5,0.5])
     ax.set_ylim([-0.5,0.5])
+    ax.set_title("Superluminal Motion")
 
     X = np.linspace(-0.5,0.5,2048)
     Y = np.linspace(-0.5,0.5,2048)
