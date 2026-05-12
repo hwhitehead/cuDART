@@ -530,9 +530,94 @@ def label_lookback(num_img=100, sparse_step=1):
 
     plt.close("all")
 
+def plot_superluminal(num_img=100, sparse_step=1):
+
+    load_dir1 = "/mnt/kocsis1/cuDART_wdir/lookback_data/flat"
+    load_dir2 = "/mnt/kocsis1/cuDART_wdir/lookback_data"
+    load_dirs = [load_dir1, load_dir2]
+    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/comp"
+
+    Gamma = 2
+    beta = np.sqrt(1 - 1.0 / Gamma ** 2)
+    thetas = [np.pi / 2, np.pi / 4]
+    L_domain = 120 # in kpc
+    L_imgs = [L_domain * np.sin(theta) for theta in thetas]
+    titles = ["$\theta = \pi/2$, Regular Motion", "$\theta = \pi / 4$, Superluminal Motion"]
+
+    v_in_kpc_per_Myr = beta * c_light / (kpc_to_m / Myr_to_s)
+    T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr # duration to reach domain edge
+    t_span = np.linspace(0, T_in_Myr * 2, num_img)
+
+    label_str = r"$\Gamma = 2$" + "\n"
+    label_str += r"$\beta = \sqrt{3}/2$" + "\n"
+    label_str +=  r"$\theta = \pi / 2$" + "\n"
+    label_str += r"$\beta_\mathrm{T}^+ = \beta$" + "\n"
+    label_str += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 1$"
+
+    set_plot_defaults()
+    width_ratios = np.array([1,1,0.05])
+    height_ratios = np.array([1])
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    L = 20.0 / 3
+    fig = plt.figure(figsize=(L, h_over_w * L))
+    gs = fig.add_gridspec(1,2,width_ratios=width_ratios,height_ratios=height_ratios)
+    axl = fig.add_subplot(gs[0,0])
+    axr = fig.add_subplot(gs[0,1])
+    cax = fig.add_subplot(gs[0,2])
+    axes = [axl, axr]
+    plt.subplots_adjust(hspace=0, wspace=0)
+
+    X = np.linspace(-0.5,0.5,2048)
+    Y = np.linspace(-0.5,0.5,2048)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    vmin = -6
+    vmax = 0
+    cmap = "afmhot"
+
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.yaxis.tick_right()
+    cax.yaxis.set_label_position("right")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
+
+    #    ax.text(0.45,0.45,label_str, color='w', va="top", ha="right")
+    for i, ax in enumerate(axes):
+        ax.set_title(titles[i])
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
+        ax.set_facecolor("k")
+        ax.set_xlim([-0.5,0.5])
+        ax.set_ylim([-0.5,0.5])
+        ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
+        ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
+
+        bar_length = 25 / L_imgS[i]
+        sb = AnchoredSizeBar(ax.transData, bar_length, "25kpc", "lower left", pad=1, zorder=10,
+                            size_vertical = 0.05 * bar_length, frameon=False, color='w', label_top=True)
+        ax.add_artist(sb)
+
+    for n in range(0, num_img, sparse_step):
+        
+        pcs = []
+        for i, ax in enumerate(axes):
+            load_str = os.path.join(load_dirs[i], "raw" + str(n).zfill(5) + ".npy")
+            save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
+            img = np.load(load_str)
+            pcs.append(ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax))
+            # time_label = "$\Delta t$ = {0:.3f}Myr".format(t_span[n])
+            # label = ax.text(-0.45,0.45,time_label,color='w', va="top", ha="left", zorder=20)
+        
+        fig.savefig(save_str, dpi=600, bbox_inches="tight")
+        # label.remove()
+        for pc in pcs:
+            pc.remove()
+
+    plt.close("all")
+
+
 if __name__ == "__main__":
 
     #build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     #render_lookback_example(relativistic=True, remove_raw_images = False)
-    label_lookback(num_img=100, sparse_step=1)
+    plot_superluminal(num_img=100, sparse_step=10)
