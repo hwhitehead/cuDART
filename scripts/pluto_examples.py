@@ -474,7 +474,7 @@ def label_lookback(num_img=100):
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
     label_str +=  r"$\theta = \pi / 4$" + "\n"
-    label_str += r"$\beta_\mathrm{T}^+ \simeq 1.6" + "\n"
+    label_str += r"$\beta_\mathrm{T}^+ \simeq 1.6$" + "\n"
     label_str += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- \simeq 4$"
 
     set_plot_defaults()
