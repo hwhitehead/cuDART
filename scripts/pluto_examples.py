@@ -2,6 +2,7 @@
 import sys, os, gc
 import numpy as np
 import matplotlib.image as mpimg
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import pandas as pd
 
 # local import
@@ -454,7 +455,7 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
     print("unlabelled render example finished.")
 
-def label_lookback():
+def label_lookback(num_img=100):
 
     load_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data"
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/label"
@@ -463,6 +464,15 @@ def label_lookback():
     beta = np.sqrt(1 - 1.0 / Gamma ** 2)
     theta = np.pi / 4
     F = (1 + beta * np.cos(theta)) / (1 - beta * np.cos(theta))
+    L_domain = 120 # in kpc
+    L_img = L_domain * np.sin(theta)
+
+    v_in_kpc_per_Myr = beta * c_light / (kpc_to_m / Myr_to_s)
+    T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr # duration to reach domain edge
+    dist_to_camera_in_kpc = 2 * L_domain
+    t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
+    t_delay_in_Myr *= 0.95
+    t_span = np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_img)
 
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
@@ -473,7 +483,8 @@ def label_lookback():
     width_ratios = np.array([1,0.05])
     height_ratios = np.array([1])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
-    fig = plt.figure(figsize=(10.0 / 3, h_over_w * 10.0 / 3))
+    L = 20.0 / 3
+    fig = plt.figure(figsize=(L, h_over_w * L))
     gs = fig.add_gridspec(1,2,width_ratios=width_ratios,height_ratios=height_ratios)
     ax = fig.add_subplot(gs[:,0])
     cax = fig.add_subplot(gs[:,1])
@@ -481,7 +492,7 @@ def label_lookback():
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
     ax.set_facecolor("k")
-    ax.text(-0.45,-0.45,label_str, color='w')
+    ax.text(0.45,0.45,label_str, color='w', va="top", ha="right")
     ax.set_xlim([-0.5,0.5])
     ax.set_ylim([-0.5,0.5])
 
@@ -501,7 +512,12 @@ def label_lookback():
     ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
     ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
-    for n in range(0, 100):
+    bar_length = 100 / L_img
+    sb = AnchoredSizeBar(ax.transData, bar_length, "100kpc", "lower left", pad=1, zorder=10,
+                        size_vertical = 0.05 * bar_length, frameon=False, color='w', label_top=True)
+    ax.add_artist(sb)
+
+    for n in range(0, num_img):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
