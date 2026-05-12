@@ -459,6 +459,7 @@ def label_lookback():
     load_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data"
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/label"
 
+    set_plot_defaults()
     width_ratios = np.array([1,0.05])
     height_ratios = np.array([1])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
@@ -469,6 +470,8 @@ def label_lookback():
     plt.subplots_adjust(hspace=0, wspace=0)
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
+    ax.set_title(r"$\Gamma = 2$, $\theta = \frac{\pi}{4}$")
+    ax.set_facecolor("k")
 
     X = np.linspace(-0.5,0.5,2048)
     Y = np.linspace(-0.5,0.5,2048)
@@ -490,7 +493,7 @@ def label_lookback():
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
-        pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax)
+        pc = ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         pc.remove()
 
