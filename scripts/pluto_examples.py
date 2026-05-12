@@ -488,6 +488,7 @@ def label_lookback():
 
     for n in range(0, 50, 10):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
+        save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
