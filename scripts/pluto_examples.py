@@ -489,7 +489,7 @@ def label_lookback():
     ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
     ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
-    for n in range(0, 50, 10):
+    for n in range(0, 50):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
