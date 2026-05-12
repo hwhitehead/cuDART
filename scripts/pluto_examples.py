@@ -469,7 +469,7 @@ def label_lookback(num_img=100):
 
     v_in_kpc_per_Myr = beta * c_light / (kpc_to_m / Myr_to_s)
     T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr # duration to reach domain edge
-    t_span = np.linspace(t_delay_in_Myr, T_in_Myr * 2, num_img)
+    t_span = np.linspace(0, T_in_Myr * 2, num_img)
 
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
