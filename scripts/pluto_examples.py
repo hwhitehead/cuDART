@@ -512,8 +512,8 @@ def label_lookback(num_img=100):
     ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
     ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
-    bar_length = 50 / L_img
-    sb = AnchoredSizeBar(ax.transData, bar_length, "50kpc", "lower left", pad=1, zorder=10,
+    bar_length = 25 / L_img
+    sb = AnchoredSizeBar(ax.transData, bar_length, "25kpc", "lower left", pad=1, zorder=10,
                         size_vertical = 0.05 * bar_length, frameon=False, color='w', label_top=True)
     ax.add_artist(sb)
 
@@ -522,6 +522,9 @@ def label_lookback(num_img=100):
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
+        time_label = "$t$={0:.2f}Myr".format(t_span[n])
+        label = ax.text(0.05,0.45,time_label,color='w', va="top", ha="left", zorder=20)
+        
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         pc.remove()
 
