@@ -493,7 +493,7 @@ def label_lookback(num_img=100, sparse_step=1):
     ax.text(0.45,0.45,label_str, color='w', va="top", ha="right")
     ax.set_xlim([-0.5,0.5])
     ax.set_ylim([-0.5,0.5])
-    ax.set_title("Superluminal Motion")
+    ax.set_title("Regular Motion")
 
     X = np.linspace(-0.5,0.5,2048)
     Y = np.linspace(-0.5,0.5,2048)
