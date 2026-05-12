@@ -551,11 +551,11 @@ def plot_superluminal(num_img=100, sparse_step=1):
     label_str0 = r"$\Gamma = 2$" + "\n"
     label_str0 += r"$\beta \simeq 0.87$" + "\n"
 
-    label_str1 = r"$\theta = \pi/2$"
+    label_str1 = r"$\theta = \pi/2$" + "\n"
     label_str1 += r"$\beta_\mathrm{T}^+ \simeq 0.87$" + "\n"
     label_str1 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 1$"
 
-    label_str2 = r"$\theta = \pi/4$"
+    label_str2 = r"$\theta = \pi/4$" + "\n"
     label_str2 += r"$\beta_\mathrm{T}^+ \simeq 1.6$" + "\n"
     label_str2 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 4.2$"
 
