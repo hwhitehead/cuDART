@@ -469,10 +469,7 @@ def label_lookback(num_img=100):
 
     v_in_kpc_per_Myr = beta * c_light / (kpc_to_m / Myr_to_s)
     T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr # duration to reach domain edge
-    dist_to_camera_in_kpc = 2 * L_domain
-    t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
-    t_delay_in_Myr *= 0.95
-    t_span = np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_img)
+    t_span = np.linspace(t_delay_in_Myr, T_in_Myr * 2, num_img)
 
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
@@ -522,7 +519,7 @@ def label_lookback(num_img=100):
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
-        time_label = "$t$={0:.2f}Myr".format(t_span[n])
+        time_label = "$\Delta t$={0:.2f}Myr".format(t_span[n])
         label = ax.text(-0.45,0.45,time_label,color='w', va="top", ha="left", zorder=20)
         
         fig.savefig(save_str, dpi=600, bbox_inches="tight")
