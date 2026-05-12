@@ -542,28 +542,35 @@ def plot_superluminal(num_img=100, sparse_step=1):
     thetas = [np.pi / 2, np.pi / 4]
     L_domain = 120 # in kpc
     L_imgs = [L_domain * np.sin(theta) for theta in thetas]
-    titles = ["$\theta = \pi/2$, Regular Motion", "$\theta = \pi / 4$, Superluminal Motion"]
+    titles = [r"Regular Motion $(theta = \pi/2)$", r"Superluminal Motion $(theta = \pi/2)$"]
 
     v_in_kpc_per_Myr = beta * c_light / (kpc_to_m / Myr_to_s)
     T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr # duration to reach domain edge
     t_span = np.linspace(0, T_in_Myr * 2, num_img)
 
-    label_str = r"$\Gamma = 2$" + "\n"
-    label_str += r"$\beta = \sqrt{3}/2$" + "\n"
-    label_str +=  r"$\theta = \pi / 2$" + "\n"
-    label_str += r"$\beta_\mathrm{T}^+ = \beta$" + "\n"
-    label_str += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 1$"
+    label_str0 = r"$\Gamma = 2$" + "\n"
+    label_str0 += r"$\beta \simeq 0.87$" + "\n"
+
+    label_str1 = r"$\beta_\mathrm{T}^+ = 0.87$" + "\n"
+    label_str1 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 1$"
+
+    label_str2 = r"$\beta_\mathrm{T}^+ \simeq 1.6$" + "\n"
+    label_str2 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 4.2$"
+
+    label_strs = [label_str1, label_str2]
 
     set_plot_defaults()
-    width_ratios = np.array([1,1,0.05])
+    width_ratios = np.array([1,0.025,1,0.05])
     height_ratios = np.array([1])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     L = 20.0 / 3
     fig = plt.figure(figsize=(L, h_over_w * L))
     gs = fig.add_gridspec(np.size(height_ratios),np.size(width_ratios),width_ratios=width_ratios,height_ratios=height_ratios)
     axl = fig.add_subplot(gs[0,0])
-    axr = fig.add_subplot(gs[0,1])
-    cax = fig.add_subplot(gs[0,2])
+    spacer = fig.add_subplot(gs[0,1])
+    spacer.axis("off")
+    axr = fig.add_subplot(gs[0,2])
+    cax = fig.add_subplot(gs[0,3])
     axes = [axl, axr]
     plt.subplots_adjust(hspace=0, wspace=0)
 
@@ -580,7 +587,6 @@ def plot_superluminal(num_img=100, sparse_step=1):
     cax.yaxis.set_label_position("right")
     cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
 
-    #    ax.text(0.45,0.45,label_str, color='w', va="top", ha="right")
     for i, ax in enumerate(axes):
         ax.set_title(titles[i])
         ax.xaxis.set_visible(False)
@@ -588,8 +594,9 @@ def plot_superluminal(num_img=100, sparse_step=1):
         ax.set_facecolor("k")
         ax.set_xlim([-0.5,0.5])
         ax.set_ylim([-0.5,0.5])
-        ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
-        ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
+        ax.text(-0.45,0.45,label_str0,va="top", ha="left",color='w')
+        # ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
+        # ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
         bar_length = 25 / L_imgs[i]
         sb = AnchoredSizeBar(ax.transData, bar_length, "25kpc", "lower left", pad=1, zorder=10,
@@ -599,18 +606,20 @@ def plot_superluminal(num_img=100, sparse_step=1):
     for n in range(0, num_img, sparse_step):
         
         pcs = []
+        labels = []
         for i, ax in enumerate(axes):
             load_str = os.path.join(load_dirs[i], "raw" + str(n).zfill(5) + ".npy")
             save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
             img = np.load(load_str)
             pcs.append(ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax))
+            labels.append(ax.text(0.45,0.45,label_str, color='w', va="top", ha="right"))
             # time_label = "$\Delta t$ = {0:.3f}Myr".format(t_span[n])
             # label = ax.text(-0.45,0.45,time_label,color='w', va="top", ha="left", zorder=20)
         
         fig.savefig(save_str, dpi=600, bbox_inches="tight")
-        # label.remove()
-        for pc in pcs:
-            pc.remove()
+        for i in range(2):
+            pcs[i].remove()
+            labels[i].remove()
 
     plt.close("all")
 
