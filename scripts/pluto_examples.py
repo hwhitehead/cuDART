@@ -483,7 +483,7 @@ def label_lookback(num_img=100):
     width_ratios = np.array([1,0.05])
     height_ratios = np.array([1])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
-    L = 20.0 / 3
+    L = 10.0 / 3
     fig = plt.figure(figsize=(L, h_over_w * L))
     gs = fig.add_gridspec(1,2,width_ratios=width_ratios,height_ratios=height_ratios)
     ax = fig.add_subplot(gs[:,0])
@@ -512,8 +512,8 @@ def label_lookback(num_img=100):
     ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
     ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
-    bar_length = 100 / L_img
-    sb = AnchoredSizeBar(ax.transData, bar_length, "100kpc", "lower left", pad=1, zorder=10,
+    bar_length = 50 / L_img
+    sb = AnchoredSizeBar(ax.transData, bar_length, "50kpc", "lower left", pad=1, zorder=10,
                         size_vertical = 0.05 * bar_length, frameon=False, color='w', label_top=True)
     ax.add_artist(sb)
 
