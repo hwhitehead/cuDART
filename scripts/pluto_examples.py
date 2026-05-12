@@ -454,9 +454,49 @@ def render_lookback_example(relativistic=False, remove_raw_images = True, save_p
 
     print("unlabelled render example finished.")
 
+def label_lookback():
+
+    load_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data"
+    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/label"
+
+    width_ratios = np.array([1,0.05])
+    height_ratios = np.array([1])
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    fig = plt.figure(figsize=(10.0 / 3, h_over_w * 10.0 / 3))
+    gs = fig.add_gridspec(1,2,width_ratios=width_ratios,height_ratios=height_ratios)
+    ax = fig.add_subplot(gs[:,0])
+    cax = fig.add_subplot(gs[:,1])
+    plt.subplots_adjust(hspace=0, wspace=0)
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
+
+    X = np.linspace(-0.5,0.5,2048)
+    Y = np.linspace(-0.5,0.5,2048)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    vmin = -6
+    vmax = 0
+
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.yaxis.tick_right()
+    cax.yaxis.set_label_position("right")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
+
+    ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
+    ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
+
+    for n in range(0, 50, 10):
+        load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
+        img = np.load(load_str)
+        pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax)
+        fig.savefig(save_str, dpi=300, bbox_inches="tight")
+        pc.remove()
+
+    plt.close("all")
 
 if __name__ == "__main__":
 
     #build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    render_lookback_example(relativistic=True, remove_raw_images = False)
+    #render_lookback_example(relativistic=True, remove_raw_images = False)
+    label_lookback()

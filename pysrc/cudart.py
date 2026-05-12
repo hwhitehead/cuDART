@@ -454,6 +454,11 @@ class Scene:
             img = np.load(load_str)
             if log_c: img = np.log10(img)
             pc = ax.pcolormesh(XX, YY, img, vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
+            
+            if (show_grid):
+                ax.axhline(y=0.5, color='w', alpha=0.2, zorder=20)
+                ax.axvline(x=0.5, color='w', alpha=0.2, zorder=20)
+            
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
             pc.remove()
             if (verbose):
@@ -464,9 +469,6 @@ class Scene:
                 if (verbose):
                     print("removed data file at " + load_str)
 
-        if (show_grid):
-            ax.axhline(y=0.5, color='w', alpha=0.2, zorder=20)
-            ax.axvline(x=0.5, color='w', alpha=0.2, zorder=20)
 
         plt.close("all")
 
