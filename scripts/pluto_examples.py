@@ -549,15 +549,15 @@ def plot_superluminal(num_img=100, sparse_step=1):
     t_span = np.linspace(0, T_in_Myr * 2, num_img)
 
     label_str0 = r"$\Gamma = 2$" + "\n"
-    label_str0 += r"$\beta \simeq 0.87$" + "\n"
+    label_str0 += r"$\beta \simeq 0.9$" + "\n"
 
     label_str1 = r"$\theta = \pi/2$" + "\n"
-    label_str1 += r"$\beta_\mathrm{T}^+ \simeq 0.87$" + "\n"
+    label_str1 += r"$\beta_\mathrm{T}^+ \simeq 0.9$" + "\n"
     label_str1 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 1$"
 
     label_str2 = r"$\theta = \pi/4$" + "\n"
     label_str2 += r"$\beta_\mathrm{T}^+ \simeq 1.6$" + "\n"
-    label_str2 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 4.2$"
+    label_str2 += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- \simeq 4.2$"
 
     label_strs = [label_str1, label_str2]
 
