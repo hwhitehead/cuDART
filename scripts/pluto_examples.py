@@ -504,7 +504,7 @@ def label_lookback(num_img=100):
     fig.colorbar(sm, cax=cax, orientation="vertical")
     cax.yaxis.tick_right()
     cax.yaxis.set_label_position("right")
-    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
 
     ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
     ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
