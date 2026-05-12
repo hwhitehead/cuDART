@@ -591,7 +591,7 @@ def plot_superluminal(num_img=100, sparse_step=1):
         ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
         ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
-        bar_length = 25 / L_imgS[i]
+        bar_length = 25 / L_imgs[i]
         sb = AnchoredSizeBar(ax.transData, bar_length, "25kpc", "lower left", pad=1, zorder=10,
                             size_vertical = 0.05 * bar_length, frameon=False, color='w', label_top=True)
         ax.add_artist(sb)
