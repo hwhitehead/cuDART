@@ -612,7 +612,7 @@ def plot_superluminal(num_img=100, sparse_step=1):
             save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
             img = np.load(load_str)
             pcs.append(ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax))
-            labels.append(ax.text(0.45,0.45,label_str, color='w', va="top", ha="right"))
+            labels.append(ax.text(0.45,0.45,label_strs[i], color='w', va="top", ha="right"))
             # time_label = "$\Delta t$ = {0:.3f}Myr".format(t_span[n])
             # label = ax.text(-0.45,0.45,time_label,color='w', va="top", ha="left", zorder=20)
         
