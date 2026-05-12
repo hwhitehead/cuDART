@@ -473,9 +473,9 @@ def label_lookback(num_img=100, sparse_step=1):
 
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
-    label_str +=  r"$\theta = \pi / 4$" + "\n"
-    label_str += r"$\beta_\mathrm{T}^+ \simeq 1.6$" + "\n"
-    label_str += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- \simeq 4$"
+    label_str +=  r"$\theta = \pi / 2$" + "\n"
+    label_str += r"$\beta_\mathrm{T}^+ = \beta$" + "\n"
+    label_str += r"$\beta_\mathrm{T}^+ / \beta_\mathrm{T}^- = 1$"
 
     set_plot_defaults()
     width_ratios = np.array([1,0.05])
@@ -534,5 +534,5 @@ if __name__ == "__main__":
 
     #build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    render_lookback_example(relativistic=True, remove_raw_images = False)
-    label_lookback(num_img=100, sparse_step=10)
+    #render_lookback_example(relativistic=True, remove_raw_images = False)
+    label_lookback(num_img=100, sparse_step=1)
