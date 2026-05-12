@@ -523,9 +523,10 @@ def label_lookback(num_img=100):
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
         time_label = "$t$={0:.2f}Myr".format(t_span[n])
-        label = ax.text(0.05,0.45,time_label,color='w', va="top", ha="left", zorder=20)
+        label = ax.text(-0.45,0.45,time_label,color='w', va="top", ha="left", zorder=20)
         
-        fig.savefig(save_str, dpi=300, bbox_inches="tight")
+        fig.savefig(save_str, dpi=600, bbox_inches="tight")
+        label.remove()
         pc.remove()
 
     plt.close("all")
