@@ -572,7 +572,7 @@ def plot_superluminal(num_img=100, sparse_step=1):
     spacerl = fig.add_subplot(gs[0,1])
     spacerl.axis("off")
     axr = fig.add_subplot(gs[0,2])
-    spacerr = fig.add_subplots(gs[0,3])
+    spacerr = fig.add_subplot(gs[0,3])
     spacerr.axis("off")
     cax = fig.add_subplot(gs[0,4])
     axes = [axl, axr]
@@ -633,4 +633,4 @@ if __name__ == "__main__":
     #build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     #render_lookback_example(relativistic=True, remove_raw_images = False)
-    plot_superluminal(num_img=100, sparse_step=10)
+    plot_superluminal(num_img=100, sparse_step=1)
