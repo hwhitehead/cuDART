@@ -459,6 +459,16 @@ def label_lookback():
     load_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data"
     save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/label"
 
+    Gamma = 2
+    beta = np.sqrt(1 - 1.0 / Gamma ** 2)
+    theta = np.pi / 4
+    F = (1 + beta * np.cos(theta)) / (1 - beta * np.cos(theta))
+
+    label_str = r"$\Gamma = 2$" + "\n"
+    label_str += r"$\beta = \sqrt{3}/2$" + "\n"
+    label_str +=  r"$\theta = \pi / 4$" + "\n"
+    label_str += r"$\mathcal{F} \equiv v_+ / v_- = (2+\sqrt{3}) / (2-\sqrt{3}) \simeq 14$"
+
     set_plot_defaults()
     width_ratios = np.array([1,0.05])
     height_ratios = np.array([1])
@@ -472,6 +482,9 @@ def label_lookback():
     ax.yaxis.set_visible(False)
     ax.set_title(r"$\Gamma = 2$, $\theta = \frac{\pi}{4}$")
     ax.set_facecolor("k")
+    ax.text(-0.5,-0.5,label_str, color='w')
+    ax.set_xlim([-0.5,0.5])
+    ax.set_ylim([-0.5,0.5])
 
     X = np.linspace(-0.5,0.5,2048)
     Y = np.linspace(-0.5,0.5,2048)
@@ -489,7 +502,7 @@ def label_lookback():
     ax.axhline(y=0, color='w', alpha=0.2, zorder=20)
     ax.axvline(x=0, color='w', alpha=0.2, zorder=20)
 
-    for n in range(0, 50):
+    for n in range(0, 100):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         img = np.load(load_str)
