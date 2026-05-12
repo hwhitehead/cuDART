@@ -467,7 +467,7 @@ def label_lookback():
     label_str = r"$\Gamma = 2$" + "\n"
     label_str += r"$\beta = \sqrt{3}/2$" + "\n"
     label_str +=  r"$\theta = \pi / 4$" + "\n"
-    label_str += r"$\mathcal{F} \equiv v_+ / v_- = (2+\sqrt{3}) / (2-\sqrt{3}) \simeq 14$"
+    label_str += r"$\mathcal{F} \equiv v_+ / v_- \simeq 14$"
 
     set_plot_defaults()
     width_ratios = np.array([1,0.05])
@@ -480,9 +480,8 @@ def label_lookback():
     plt.subplots_adjust(hspace=0, wspace=0)
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
-    ax.set_title(r"$\Gamma = 2$, $\theta = \frac{\pi}{4}$")
     ax.set_facecolor("k")
-    ax.text(-0.5,-0.5,label_str, color='w')
+    ax.text(-0.45,-0.45,label_str, color='w')
     ax.set_xlim([-0.5,0.5])
     ax.set_ylim([-0.5,0.5])
 
