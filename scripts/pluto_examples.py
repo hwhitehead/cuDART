@@ -475,6 +475,7 @@ def label_lookback():
     XX, YY = np.meshgrid(X, Y, indexing="ij")
     vmin = -6
     vmax = 0
+    cmap = "afmhot"
 
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
     fig.colorbar(sm, cax=cax, orientation="vertical")
