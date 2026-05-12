@@ -560,7 +560,7 @@ def plot_superluminal(num_img=100, sparse_step=1):
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     L = 20.0 / 3
     fig = plt.figure(figsize=(L, h_over_w * L))
-    gs = fig.add_gridspec(1,2,width_ratios=width_ratios,height_ratios=height_ratios)
+    gs = fig.add_gridspec(np.size(height_ratios),np.size(width_ratios),width_ratios=width_ratios,height_ratios=height_ratios)
     axl = fig.add_subplot(gs[0,0])
     axr = fig.add_subplot(gs[0,1])
     cax = fig.add_subplot(gs[0,2])
