@@ -336,8 +336,8 @@ __device__ bool MeshBlock::calc_mb_intercept(const Ray &r, float &s_entry, float
         }
 
         // store last entry, and first exit parameters
-        s_min = (temp_s_min > s_min) ? temp_s_min : s_min
-        s_max = (temp_s_max < s_max) ? temp_s_max : s_max
+        s_min = (temp_s_min > s_min) ? temp_s_min : s_min;
+        s_max = (temp_s_max < s_max) ? temp_s_max : s_max;
     }
     s_entry = s_min;
     s_exit = s_max;
