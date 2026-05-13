@@ -4,7 +4,7 @@
   <img src=https://github.com/hwhitehead/cuDART/blob/lookback/gallery/superluminal.gif width="800" alt=animated/>
 </p>
 <p align="center"">
-  <em> Animation showing synthetic radio observations of relativistic twin ejecta launched at angles of &pi/2 &pi/4 to the line-of-sight (left and right respectively). In both cases, each blob has the same absolute velocity, but appear to move differently. cuDART automatically accounts for relatiivsitc beaming (the ejectum pointed toward the observer is brighter) and superluminal motion (as the approaching ejectum travels towards the observer, its apparent transverse velocity exceeds the speed of light).</em>
+  <em> Animation showing synthetic radio observations of relativistic twin ejecta launched at angles of &pi/2 &pi/4 to the line-of-sight (left and right respectively). In both cases, each blob has the same absolute velocity, but appear to move differently. cuDART automatically accounts for relativistic beaming (the ejectum pointed toward the observer is brighter) and superluminal motion (as the approaching ejectum travels towards the observer, its apparent transverse velocity exceeds the speed of light).</em>
 </p>
 
 <p align="center">
