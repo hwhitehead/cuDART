@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     clock_t main_start = clock();
 
     // define space for user settings
-    std::string cudart_version = "version 0.8 - April 2026";
+    std::string cudart_version = "version 0.9 - April 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     char *doppler_char = nullptr, *power_law_char = nullptr;
     bool verbose = false, relativistic = false, append_mode = false, lookback = false;
