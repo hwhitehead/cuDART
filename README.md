@@ -1,20 +1,20 @@
 # cuDART: CUDA + DDA Accelerated Ray Tracing (v0.9)
 
 <p align="center">
-  <img src=https://github.com/hwhitehead/cuDART/blob/main/gallery/superluminal.gif width="800" alt=animated/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/lookback/gallery/superluminal.gif width="800" alt=animated/>
 </p>
 <p align="center"">
   <em> Animation showing synthetic radio observations of relativistic twin ejecta launched at angles of &pi/2 &pi/4 to the line-of-sight (left and right respectively). In both cases, each blob has the same absolute velocity, but appear to move differently. cuDART automatically accounts for relatiivsitc beaming (the ejectum pointed toward the observer is brighter) and superluminal motion (as the approaching ejectum travels towards the observer, its apparent transverse velocity exceeds the speed of light).</em>
 </p>
 
 <p align="center">
-  <img src=https://github.com/hwhitehead/cuDART/blob/append/docs/magnetised_jets.png width = "600"/>
+  <img src=https://github.com/hwhitehead/cuDART/blob/lookback/gallery/magnetised_jets.png width = "600"/>
 </p>
 <p align="center"">
   <em> Static images of a highly magnetised, variable power jet launched from an Active Galactic Nucleus, viewed from three different orientations. Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. Simulation data produced as part of paper currently in prep.</em>
 </p>
 
-This repository contains a lightweight set of tools for raytracing heterogenous orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. As well as properties independent of line-of-sight, such as density, `cuDART` supports relativistic beaming of emissivity when provided with velocity data. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
+This repository contains a lightweight set of tools for raytracing heterogenous orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission, surface density etc. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. As well as properties independent of line-of-sight, such as density, `cuDART` supports relativistic beaming of emissivity when provided with velocity data. `cuDART` supports using a finite-speed-of-light in intensity calculations, allowing for geometric effects such as superluminal motion to be recovered. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
 
 ## Usage
 
