@@ -263,7 +263,7 @@ class Camera:
     The Camera class is a basic struct to wrap the image viewing orientation and dimensions
     """
     def __init__(self, origin = np.array([1.0,0.0,0.0]), normal = np.array([-1.0,0.0,0.0]), bias = np.array([0.0,0.0,1.0]),
-                    num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0):
+                    num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0, t_obs = 0.0):
         self.origin = origin
         self.normal = normal
         self.bias = bias
@@ -274,9 +274,10 @@ class Camera:
         self.bias = bias
         self.tilt = tilt
         self.num_pixels = num_pixels_X * num_pixels_Y
+        self.t_obs = t_obs
 
     def header_str(self):
-        return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y)
+        return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y, self.t_obs)
     
     def set_sph_pos(self, r, theta, phi, target_origin=False):
         sin_theta = np.sin(theta)
@@ -307,7 +308,7 @@ class Scene:
     def __init__(self, npy_load_str, npy_save_str, cameras = None, camera_file_name = None): 
 
         # parse load/save strings        
-        self.npy_load_str = npy_load_str
+        self.npy_load_str = npy_load_str # TODO: rename, is not .npy string if labelled data
         self.npy_save_str = npy_save_str.removesuffix(".png")
 
         if cameras is None:
@@ -334,7 +335,7 @@ class Scene:
 
         with open(self.temp_camera_file, "w") as f:
             # add header with const image dimensions (zero packed for istringstream read)
-            f.write("{0} {1} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y))
+            f.write("{0} {1} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y))
             # add line for each camera to run render with
             for camera in self.cameras:
                 f.write(camera.header_str())
@@ -361,7 +362,9 @@ class Scene:
                 i += 1
         print("\n")
 
-    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False):
+    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, 
+                max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
+                lookback = False):
 
         # prepare camera space
         self.build_camera_file()
@@ -400,6 +403,8 @@ class Scene:
             command = command + ["-m", str(max_mem)]
         if relativistic:
             command = command + ["-r"]
+        if lookback:
+            command = command + ["-l"] # TODO: add check for input type (must be dir)
         if power_law_index is not None:
             command = command + ["-p", str(power_law_index)]
         elif doppler_index is not None: # power_law has priority over doppler
@@ -418,7 +423,7 @@ class Scene:
                 if verbose:
                     print("removed temporary camera file")
 
-    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False, log_c=True):
+    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False, log_c=True, show_grid=False):
         
         # TODO: add labelling options, axes?
         
@@ -449,6 +454,11 @@ class Scene:
             img = np.load(load_str)
             if log_c: img = np.log10(img)
             pc = ax.pcolormesh(XX, YY, img, vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
+            
+            if (show_grid):
+                ax.axhline(y=0.5, color='w', alpha=0.2, zorder=20)
+                ax.axvline(x=0.5, color='w', alpha=0.2, zorder=20)
+            
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
             pc.remove()
             if (verbose):
@@ -458,6 +468,7 @@ class Scene:
                 os.remove(load_str)
                 if (verbose):
                     print("removed data file at " + load_str)
+
 
         plt.close("all")
 

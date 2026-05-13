@@ -14,6 +14,17 @@ __host__ void check_cuda(cudaError_t result, char const *const func, const char 
     }
 }
 
+struct TraceArgs {
+    // relativistic settings
+    bool relativistic; 
+    float doppler_index;
+    // lookback settings 
+    bool lookback, keep_edge;
+    float t_obs, snapshot_dt, c, last_time; 
+    float inv_snapshot_dt, inv_c;
+    int snapshot_index, num_snapshots, last_snapshot;
+};
+
 __host__ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
     // calculate available vram with user ceil
     
@@ -47,12 +58,33 @@ __host__ std::string zero_pad_str(int value, size_t num_zero_pad) {
 
 __device__ float calc_boost_factor(vec3 beta_vec, vec3 view_vec, float doppler_index) {
     // calculate D, the doppler boosting factor for a given bulk velocity and view
-    // emissivity is boosted as D^2
+    // emissivity is boosted as D^(2-alpha) := D^doppler_index
     float beta = beta_vec.vector_mag();
     float inv_gamma = sqrt(1 - beta * beta);
     float one_plus_beta_cos_theta = 1 + beta_vec.dot_prod(view_vec); // view_vec assumed unit vec
     float doppler_fac = inv_gamma / one_plus_beta_cos_theta;
     return pow(doppler_fac, doppler_index);
+}
+
+__device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
+    // caculate the lerp weighting factor between temporal states
+    float t_bar = trace_args.t_obs - s * trace_args.inv_c; // lookback time at distance s along line-of-sight
+
+    // handle edge cases TODO: add optional flag for this
+    if (t_bar < 0) { // lookback time occurs before simulation data
+        return ((trace_args.snapshot_index == 0) && trace_args.keep_edge); // use first snapshot
+    } else if (t_bar > trace_args.last_time) { // lookback time occurs after simulation data
+        return ((trace_args.snapshot_index == trace_args.last_snapshot) && trace_args.keep_edge); // use last snapshot
+    }
+
+    // given membership in simulation duration, identify neighbours
+    int m_bar = round(t_bar * trace_args.inv_snapshot_dt); // leading snapshot s.t. t_bar \in [m_bar, m_bar+1]
+    if ((trace_args.snapshot_index >= m_bar) && (trace_args.snapshot_index <= m_bar + 1)) {
+        float lerp_factor = abs(t_bar - trace_args.snapshot_index * trace_args.snapshot_dt) * trace_args.inv_snapshot_dt;
+        return 1 - lerp_factor; // snapshot is adjacent, lerp contribution
+    } 
+
+    return 0; // snapshot is not adjacent, no contribution
 }
 
 #endif

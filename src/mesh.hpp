@@ -3,6 +3,7 @@
 
 #include "vec3.hpp"
 #include "meshblock.hpp"
+#include "tools.hpp"
 
 class Mesh {
     // data container to support heterogenous domain resolutions
@@ -12,14 +13,14 @@ class Mesh {
         __device__ Mesh(MeshBlock **l, int num_mb) {mb_list = l, num_meshblocks = num_mb;}
         
         // routines
-        __device__ float calc_trace(const Ray &r, bool relativistic, float doppler_index);
+        __device__ float calc_trace(const Ray &r, TraceArgs trace_args);
 
         // members
         MeshBlock **mb_list;
         int num_meshblocks;
 };
 
-__global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, bool relativistic, float doppler_index) {
+__global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceArgs trace_args) {
     // idenitfy relevant pixel for this thread
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -30,12 +31,15 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, bool re
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);
     Ray pixel_ray(pixel_origin, camera.normal);
     
+    // copy camera observer time into trace_args
+    trace_args.t_obs = camera.t_obs;
+
     // calculate pixel value from MeshBlock data
-    img[pixel_index] += (*mesh)->calc_trace(pixel_ray, relativistic, doppler_index);
+    img[pixel_index] += (*mesh)->calc_trace(pixel_ray, trace_args);
     return;
 }
 
-__global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) { // allow mb to added here?
+__global__ void init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
     if (i == 0 && j == 0) {
@@ -53,12 +57,12 @@ __global__ void free_mesh(Mesh **mesh, int num_meshblocks) {
     delete *mesh;
 }
 
-__device__ float Mesh::calc_trace(const Ray &r, bool relativistic, float doppler_index) {
+__device__ float Mesh::calc_trace(const Ray &r, TraceArgs trace_args) {
     // calculate weighted path of a given ray through the Mesh and linked MeshBlocks
 
     float total_trace = 0;
     for (int n = 0; n < num_meshblocks; n++) {
-        float local_trace = mb_list[n]->calc_trace(r, relativistic, doppler_index); // ERR: returns zero
+        float local_trace = mb_list[n]->calc_trace(r, trace_args);
         total_trace += local_trace;
     }
     return total_trace;

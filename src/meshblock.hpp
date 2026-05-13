@@ -21,13 +21,12 @@ class MeshBlock {
         __device__ MeshBlock() {}
         __device__ MeshBlock(MeshBlockInfo mb_info, float *all_data);
 
-
         // routines
-        __device__ bool calc_mb_intercept(const Ray &r, float &tl, float &tr);
+        __device__ bool calc_mb_intercept(const Ray &r, float &s_entry, float &s_exit);
         __device__ int int_clamp(float f, float l, float r);
         __device__ vec3 get_edge(bool sign) {return (sign) ? xr : xl;}
         __device__ void print_data();
-        __device__ float calc_trace(const Ray &r, bool relativistic, float doppler_index);
+        __device__ float calc_trace(const Ray &r, TraceArgs trace_args);
 
         // public properties
         const int axes_bitmap[8] = {2, 1, 2, 1, 2, 2, 0, 0};
@@ -38,7 +37,7 @@ class MeshBlock {
         bool beta_in_data;
 };
 
-__host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose, bool host_malloc) {
     // load single homgenous meshblock info, allocate host memory and load data
 
     clock_t npy_read_start = clock();
@@ -81,17 +80,19 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
-    h_bytes = data_size * sizeof(float);
-    clock_t h_alloc_start = clock();
-    h_all_data = (float*) malloc(h_bytes);
-    if (verbose) { 
-        float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
-    }
-
+    if (host_malloc) {
+        h_bytes = data_size * sizeof(float);
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        } // end verbose
+    } // end host_malloc
+    
     // load mb data into host memory
     clock_t memcpy_start = clock();
-    std::memcpy(h_all_data, npy_vector.data(), h_bytes);
+    std::memcpy(h_all_data, npy_vector.data(), data_size * sizeof(float));
     if (verbose) { 
         float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
         printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
@@ -100,7 +101,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     return all_mb_info;
 }
 
-__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose) {
+__host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose, bool host_malloc) {
     // load heterogeneous meshblock info, allocate host memory and load data
 
     // read header data
@@ -132,7 +133,6 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             }
             line_count++;
         }
-        h_bytes = npy_floats * sizeof(float);
     } else {
         std::stringstream err_msg;
         err_msg << "### FATAL ERROR in main ####\n";
@@ -146,13 +146,16 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     }
 
     // allocate space on host
-    clock_t h_alloc_start = clock();
-    h_all_data = (float*) malloc(h_bytes);
-    if (verbose) { 
-        float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+    if (host_malloc) {
+        h_bytes = npy_floats * sizeof(float);
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        }
     }
-
+    
     // load mb data into host memory
     clock_t npy_read_start = clock();
     int mem_offset = 0;
@@ -197,18 +200,18 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     return all_mb_info;
 }
 
-__device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic, float doppler_index) {
+__device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
     // calculate the weighted path of a given ray through the MeshBlock
-    float tl, tr, trace = 0;
-    bool hit = calc_mb_intercept(r, tl, tr);
+    float s_entry, s_exit, trace = 0;
+    bool hit = calc_mb_intercept(r, s_entry, s_exit);
     if (hit) { // valid intercept found
         // prep arrays for orientation
         int cell[3] = {0, 0, 0}; // convert to vec3? typesafe?
-        float dt[3] = {0.0, 0.0, 0.0};
-        float next_t_cross[3] = {0.0, 0.0, 0.0};
+        float ds[3] = {0.0, 0.0, 0.0};
+        float s_next_intercept[3] = {0.0, 0.0, 0.0};
         int exit_cond[3] = {0, 0, 0};
         int step_dir[3] = {0, 0, 0};
-        vec3 mb_entrance = r.march(tl);
+        vec3 mb_entrance = r.march(s_entry);
 
         // orientate trace
         for (int i = 0; i <= 2; i++) {
@@ -217,27 +220,27 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic, float do
             if (r.sign[i]) { 
                 step_dir[i] = -1; // traverse backwards
                 exit_cond[i] = -1; // stop walk when leading edge reached
-                dt[i] = - dx[i] * r.inv_normal[i];
-                next_t_cross[i] = tl + (cell[i] * dx[i] - ray_mb_orgin) * r.inv_normal[i];
+                ds[i] = - dx[i] * r.inv_normal[i];
+                s_next_intercept[i] = s_entry + (cell[i] * dx[i] - ray_mb_orgin) * r.inv_normal[i];
             } else {
                 step_dir[i] = 1; // traverse forwards
                 exit_cond[i] = (int)mb_dims[i]; // stop walk when tailing edge reached
-                dt[i] = dx[i] * r.inv_normal[i];
-                next_t_cross[i] = tl + ((cell[i]+1) * dx[i] - ray_mb_orgin) * r.inv_normal[i];
+                ds[i] = dx[i] * r.inv_normal[i];
+                s_next_intercept[i] = s_entry + ((cell[i]+1) * dx[i] - ray_mb_orgin) * r.inv_normal[i];
             } // end if
         } // end for
 
         // perform traversal
-        float t_current = tl;
-        while (t_current < tr) { // terminate on mb exit
+        float s_current = s_entry;
+        while (s_current < s_exit) { // terminate on mb exit
             // identify next step direction
-            int k = (((next_t_cross[0] < next_t_cross[1]) << 2) +
-                    ((next_t_cross[0] < next_t_cross[2]) << 1) +
-                    ((next_t_cross[1] < next_t_cross[2])));
+            int k = (((s_next_intercept[0] < s_next_intercept[1]) << 2) +
+                    ((s_next_intercept[0] < s_next_intercept[2]) << 1) +
+                    ((s_next_intercept[1] < s_next_intercept[2])));
             int axis = axes_bitmap[k];
 
             // determine dwell
-            float dwell = next_t_cross[axis] - t_current; 
+            float dwell = s_next_intercept[axis] - s_current; 
 
             // add local cell to trace 
             int cell_index = cell[0] * (int)mb_dims[1] * (int)mb_dims[2]
@@ -249,20 +252,22 @@ __device__ float MeshBlock::calc_trace(const Ray &r, bool relativistic, float do
                 data_index += cell_index;
             }
             
-            if (relativistic) {
+            float trace_weight = dwell;
+            if (trace_args.relativistic) {
                 vec3 beta_vec(all_data[data_index+1],
                                 all_data[data_index+2],
                                 all_data[data_index+3]);
-                float boost_fac = calc_boost_factor(beta_vec, r.normal, doppler_index);
-                trace += dwell * boost_fac * all_data[data_index];
-            } else {
-                trace += dwell * all_data[data_index];
-            }            
+                trace_weight *= calc_boost_factor(beta_vec, r.normal, trace_args.doppler_index);
+            }
+            if (trace_args.lookback) {
+                trace_weight *= calc_lookback_factor(s_current, trace_args);
+            }
+            trace += trace_weight * all_data[data_index];    
             
             // update position of ray head
-            t_current = next_t_cross[axis]; // += dwell
+            s_current = s_next_intercept[axis]; // += dwell
             cell[axis] += step_dir[axis];
-            next_t_cross[axis] += dt[axis];
+            s_next_intercept[axis] += ds[axis];
 
             // check for termination (necessary?)
             if (cell[axis] == exit_cond[axis]) break;
@@ -311,32 +316,31 @@ __device__ MeshBlock::MeshBlock(MeshBlockInfo mb_info, float *data) {
     beta_in_data = mb_info.beta_in_data;
 }
 
-__device__ bool MeshBlock::calc_mb_intercept(const Ray &r, float &tl, float &tr) {
-    tl = 0.0, tr = 0.0;
-    float tcmin, tcmax, tmin, tmax;
+__device__ bool MeshBlock::calc_mb_intercept(const Ray &r, float &s_entry, float &s_exit) {
+    s_entry = 0.0, s_exit = 0.0;
+    float temp_s_min, temp_s_max, s_min, s_max;
+    // iterate over coordinate axes
     for (int i = 0; i <= 2; i++) {
-        tcmin = (get_edge(r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
-        tcmax = (get_edge(1 - r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
+        // find intercept with front/back faces
+        temp_s_min = (get_edge(r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
+        temp_s_max = (get_edge(1 - r.sign[i])[i] - r.origin[i]) * r.inv_normal[i];
         if (i == 0) {
-            tmin = tcmin;
-            tmax = tcmax;
+            s_min = temp_s_min;
+            s_max = temp_s_max;
             continue;
         }
 
-        if ((tmin > tcmax) or (tcmin > tmax)) {
+        // if intercept after current back face, no collision
+        if ((s_min > temp_s_max) or (temp_s_min > s_max)) {
             return false;
         }
 
-        if (tcmin > tmin) {
-            tmin = tcmin;
-        }
-
-        if (tcmax < tmax) {
-            tmax = tcmax;
-        }
+        // store last entry, and first exit parameters
+        s_min = (temp_s_min > s_min) ? temp_s_min : s_min;
+        s_max = (temp_s_max < s_max) ? temp_s_max : s_max;
     }
-    tl = tmin;
-    tr = tmax;
+    s_entry = s_min;
+    s_exit = s_max;
     return true;
 }
 

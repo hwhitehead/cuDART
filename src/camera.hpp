@@ -15,6 +15,7 @@ class Camera {
                             num_pixels_X = 10;
                             num_pixels_Y = 10;
                             tilt = 0.0;
+                            t_obs = 0.0;
                             build_camera();}
         
         // methods
@@ -26,6 +27,7 @@ class Camera {
         vec3 unit_X, unit_Y, lower_left;            // orientation dependents
         int num_pixels_X, num_pixels_Y, num_pixels; // pixel dimensions 
         float length_X, length_Y, tilt;             // spatial dimensions and tilt
+        float t_obs;                                // observer time
 };
 
 __global__ void wipe_img(Camera camera, float *img) {
@@ -61,12 +63,12 @@ __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
     if (camera_file.is_open()) {
         std::string line;
         while (std::getline(camera_file, line)) {
-            float inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9, inp10, inp11;
+            float inp0, inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8, inp9, inp10, inp11, inp12;
             std::istringstream iss(line);
-            if (!(iss >> inp0 >> inp1 >> inp2 >> inp3 >> inp4 >> inp5 >> inp6 >> inp7 >> inp8 >> inp9 >> inp10 >> inp11)) {
+            if (!(iss >> inp0 >> inp1 >> inp2 >> inp3 >> inp4 >> inp5 >> inp6 >> inp7 >> inp8 >> inp9 >> inp10 >> inp11 >> inp12)) {
                 std::stringstream err_msg;
                 err_msg << "### FATAL ERROR in main ###\n";
-                err_msg << "Unable to parse line " << line_count << "of camera file at " << camera_str << std::endl;
+                err_msg << "Unable to parse line " << line_count << " of camera file at " << camera_str << std::endl;
                 CUDART_ERROR(err_msg);
             } else {
                 // read line by line
@@ -83,6 +85,7 @@ __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
                     this_camera.tilt = inp9;
                     this_camera.length_X = inp10;
                     this_camera.length_Y = inp11;
+                    this_camera.t_obs = inp12;
                     this_camera.build_camera();
                     cameras.push_back(this_camera);
                 }
