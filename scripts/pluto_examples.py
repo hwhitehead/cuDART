@@ -638,7 +638,6 @@ def plot_morphology():
     master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
     save_str = os.path.join(master_dir,"morphology.png")
 
-    num_imgs_per_theta = 10
     spec_snapshot = 2
     gamma_span = [1.15, 2, 4, 8]
     theta_span = [np.pi / 2, np.pi / 4, np.pi / 8]
@@ -676,15 +675,13 @@ def plot_morphology():
     cax.yaxis.set_label_position("right")
     cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
 
-
     for i, gamma in enumerate(gamma_span):
         axes[i][0].yaxis.set_ticks([])
         axes[i][0].set_ylabel("$Gamma$ = {0}".format(gamma))
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
         for j, theta in enumerate(theta_span):
             axes[i][j].set_facecolor("k")
-            n = spec_snapshot + num_imgs_per_theta * j # select 2nd panel from 10
-            load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
+            load_str = os.path.join(load_dir, "raw" + str(j).zfill(5) + ".npy")
             if os.path.exists(load_str):
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
@@ -698,8 +695,6 @@ def plot_morphology():
             if j != 0:
                 axes[i][j].yaxis.set_visible(False)
 
-    
-
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
     plt.close("all")
 
@@ -707,22 +702,28 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
 
     master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
 
+
+    theta_ar = [np.pi / 2, np.pi / 4, np.pi / 8]
+    L_in_kpc = 120 
+    r_blob_in_kpc = 2.5
+    r_blob_in_code = r_blob_in_kpc / L_in_kpc
+
     # build template camera
-    aspect = 0.1
+    img_aspect = 5.0 / 2
+    long_res = 256
+    long_scale = 10 * r_blob_in_code
     template_camera = Camera()
-    template_camera.num_pixels_X = 2048
-    template_camera.num_pixels_Y = int(2048 * aspect)
+    template_camera.num_pixels_X = long_res
+    template_camera.num_pixels_Y = int(long_res * img_aspect)
     template_camera.tilt = np.pi / 2
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
     theta = np.pi / 2 + epsilon
-    template_camera.length_X = 1.0 * np.sin(theta) # size window to fit jet alignment
-    template_camera.length_Y = aspect * np.sin(theta)
+    template_camera.length_X = long_scale
+    template_camera.length_Y = long_scale * img_aspect
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
-    num_imgs_per_theta = 10
-    theta_ar = [np.pi / 2, np.pi / 4, np.pi / 8]
-    L_in_kpc = 120 
+
     for gamma_bulk in gamma_span:
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma_bulk))
         npy_save_str = os.path.join(load_dir, "raw")
@@ -735,16 +736,28 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
         t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
         t_delay_in_Myr *= 0.95
         
-        cameras = []
+        # cycle over orientations
         for theta in theta_ar:
-            for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_imgs_per_theta):
-                camera = copy.deepcopy(template_camera)
-                camera.theta = theta
-                camera.length_X = 1.0 * np.sin(theta) # size window to fit jet alignment
-                camera.length_Y = aspect * np.sin(theta)
-                camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
-                camera.t_obs = t
-                cameras.append(camera)
+            # find proper time
+            L_projected = L_in_kpc * np.sin(theta)
+            target_x_obs = 0.5 * L_in_kpc * np.sin(theta) * kpc_to_m # in SI
+            length_to_target = target_x_obs * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + dist_to_camera_in_kpc * kpc_to_m
+            t_obs = length_to_target / c_light
+            t_obs /= Myr_to_s # cast to Myr
+
+            # find proper camera position (shift in X)
+            camera = copy.deepcopy(template_camera)
+            camera.theta = theta
+            camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
+            unit_normal = camera.normal / np.linalg.norm(camera.normal)
+            unit_Y = camera.bias - np.dot(camera.bias,unit_normal)
+            unit_Y /= np.linalg.norm(unit_Y)
+            unit_X = np.cross(unit_normal, unit_Y)
+            delta_X = -(target_x_obs / kpc_to_m) / L_in_kpc # in code units
+            camera.origin += unit_X * delta_X
+
+            cameras.append(camera)
+
         print("initialised cameras for gamma = {0}".format(gamma_bulk))
 
         scene = Scene(load_dir, npy_save_str, cameras)
