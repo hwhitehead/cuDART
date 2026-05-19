@@ -645,13 +645,13 @@ def plot_morphology():
     num_gamma = np.size(gamma_span)
     num_theta = np.size(theta_span)
     L_in_kpc = 120 
-    sub_aspect = 2.0 / 5
     r_blob_in_kpc = 2.5
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
     long_res = 256
-    long_scale = 10 * r_blob_in_code
-    short_res = int(long_res * sub_aspect)
-    short_scale = sub_aspect * long_scale
+    long_scale = 1.0 # fill domain vertically
+    short_scale = 2.0 * r_blob_in_code
+    img_aspect = short_scale / long_scale
+    short_res = int(long_res * img_aspect)
     X = np.linspace(-0.5 * long_scale, 0.5 * long_scale, long_res)
     Y = np.linspace(-0.5 * short_scale, 0.5 * short_scale, short_res)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
@@ -695,6 +695,7 @@ def plot_morphology():
             if i == 0:
                 axes[i][j].xaxis.set_label_position("top")
                 axes[i][j].set_xlabel(theta_labels[j])
+                axes[i][j].xaxis.set_ticks([])
             else:
                 axes[i][j].xaxis.set_visible(False)
             
@@ -714,9 +715,10 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
 
     # build template camera
-    img_aspect = 2.0 / 5
     long_res = 256
-    long_scale = 10 * r_blob_in_code
+    long_scale = 1.0 # fill domain vertically (ignore projection effects)
+    short_scale = 2.0 * r_blob_in_code
+    img_aspect = short_scale / long_scale
     template_camera = Camera()
     template_camera.num_pixels_X = long_res
     template_camera.num_pixels_Y = int(long_res * img_aspect)
@@ -735,28 +737,31 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
         # build cameras for this gamma value
         v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
         dist_to_camera_in_kpc = 2.0 * L_in_kpc
-        
+        t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
+        T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
+
         # cycle over orientations
         cameras = []
         for theta in theta_ar:
             # find proper time
-            L_projected = L_in_kpc * np.sin(theta)
-            target_x_obs = 0.5 * L_in_kpc * np.sin(theta) * kpc_to_m # in SI
-            length_to_target = target_x_obs * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + dist_to_camera_in_kpc * kpc_to_m
-            t_obs = length_to_target / c_light
-            t_obs /= Myr_to_s # cast to Myr
+            # L_projected = L_in_kpc * np.sin(theta)
+            # target_x_obs = 0.5 * L_in_kpc * np.sin(theta) * kpc_to_m # in SI
+            # length_to_target = target_x_obs * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + dist_to_camera_in_kpc * kpc_to_m
+            # t_obs = length_to_target / c_light
+            # t_obs /= Myr_to_s # cast to Myr
+            t_obs = t_delay_in_Myr + 0.1 * T_in_Myr
 
             # find proper camera position (shift in X)
             camera = copy.deepcopy(template_camera)
             camera.t_obs = t_obs
             camera.theta = theta
             camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
-            unit_normal = camera.normal / np.linalg.norm(camera.normal)
-            unit_Y = camera.bias - np.dot(camera.bias,unit_normal)
-            unit_Y /= np.linalg.norm(unit_Y)
-            unit_X = np.cross(unit_normal, unit_Y)
-            delta_X = -(target_x_obs / kpc_to_m) / L_in_kpc # in code units
-            camera.origin += unit_X * delta_X
+            # unit_normal = camera.normal / np.linalg.norm(camera.normal)
+            # unit_Y = camera.bias - np.dot(camera.bias,unit_normal)
+            # unit_Y /= np.linalg.norm(unit_Y)
+            # unit_X = np.cross(unit_normal, unit_Y)
+            # delta_X = -(target_x_obs / kpc_to_m) / L_in_kpc # in code units
+            # camera.origin += unit_X * delta_X
 
             cameras.append(camera)
 
