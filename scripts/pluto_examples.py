@@ -645,7 +645,7 @@ def plot_morphology():
     num_gamma = np.size(gamma_span)
     num_theta = np.size(theta_span)
     L_in_kpc = 120 
-    sub_aspect = 5.0 / 2
+    sub_aspect = 2.0 / 5
     r_blob_in_kpc = 2.5
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
     long_res = 256
@@ -683,7 +683,7 @@ def plot_morphology():
 
     for i, gamma in enumerate(gamma_span):
         axes[i][0].yaxis.set_ticks([])
-        axes[i][0].set_ylabel("$Gamma$ = {0}".format(gamma))
+        axes[i][0].set_ylabel("$\Gamma$ = {0}".format(gamma))
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
         for j, theta in enumerate(theta_span):
             axes[i][j].set_facecolor("k")
@@ -714,7 +714,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
 
     # build template camera
-    img_aspect = 5.0 / 2
+    img_aspect = 2.0 / 5
     long_res = 256
     long_scale = 10 * r_blob_in_code
     template_camera = Camera()
@@ -734,11 +734,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
 
         # build cameras for this gamma value
         v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
-        v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
-        T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
-        dist_to_camera_in_kpc = 2 * L_in_kpc
-        t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
-        t_delay_in_Myr *= 0.95
+        dist_to_camera_in_kpc = 2.0 * L_in_kpc
         
         # cycle over orientations
         cameras = []
@@ -752,6 +748,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
 
             # find proper camera position (shift in X)
             camera = copy.deepcopy(template_camera)
+            camera.t_obs = t_obs
             camera.theta = theta
             camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
             unit_normal = camera.normal / np.linalg.norm(camera.normal)
@@ -779,5 +776,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    #render_morphology()
+    render_morphology()
     plot_morphology()
