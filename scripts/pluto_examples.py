@@ -683,7 +683,7 @@ def plot_morphology():
         for j, theta in enumerate(theta_span):
             axes[i][j].set_facecolor("k")
             n = spec_snapshot + num_imgs_per_theta * j # select 2nd panel from 10
-            load_str = os.path.join(load_dir, "raw" + str(n).zfilll(5) + ".npy")
+            load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
             if os.path.exists(load_str):
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
