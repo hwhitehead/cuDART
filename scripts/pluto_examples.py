@@ -624,18 +624,18 @@ def plot_superluminal(num_img=100, sparse_step=1):
 
     plt.close("all")
 
-def build_morphology_suite():
+def build_morphology_suite(num_snapshots=50,gamma_span=[2,4,8]):
 
-    master_dir = "mnt/kocsis2/hww27/cuDART_wdir/blob_data"
-    for gamma in [2,4,8]:
+    master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+    for gamma in gamma_span:
         save_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
         if not os.path.isdir(save_dir):
             os.mkdir(save_dir)
-        build_blob_data(num_snapshots=50,save_dir=save_dir,gamma_bulk=gamma)
+        build_blob_data(num_snapshots=num_snapshots,save_dir=save_dir,gamma_bulk=gamma)
 
 def render_morphology():
 
-    master_dir = "mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+    master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
 
     # build template camera
     template_camera = Camera()
