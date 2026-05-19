@@ -724,7 +724,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
     L_in_kpc = 120 
     for gamma_bulk in gamma_span:
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma_bulk))
-        npy_save_str = os.path.join(load_dir, )
+        npy_save_str = os.path.join(load_dir, "raw")
 
         # build cameras for this gamma value
         v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
