@@ -658,7 +658,7 @@ def plot_morphology():
     vmin = -6
     vmax = 0
     cmap = "afmhot"
-    xtrim_fac = 0.2
+    xtrim_fac = 0.35
 
     set_plot_defaults()
     L_fig = 20.0 / 3
