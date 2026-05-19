@@ -646,7 +646,8 @@ def plot_morphology():
     num_gamma = np.size(gamma_span)
     num_theta = np.size(theta_span)
 
-    sub_aspect = 0.25
+    set_plot_defaults()
+    sub_aspect = 0.1
     L_fig = 20.0 / 3
     width_ratios = np.array([1] * num_theta + [0.05])
     height_ratios = np.array([sub_aspect] * num_gamma)
@@ -702,22 +703,21 @@ def plot_morphology():
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
     plt.close("all")
 
-
 def render_morphology(gamma_span=[1.15,2,4,8]):
 
     master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
 
     # build template camera
-    aspect = 0.25
+    aspect = 0.1
     template_camera = Camera()
     template_camera.num_pixels_X = 2048
     template_camera.num_pixels_Y = int(2048 * aspect)
-    template_camera.tilt = 0.0
+    template_camera.tilt = np.pi / 2
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
     theta = np.pi / 2 + epsilon
     template_camera.length_X = 1.0 * np.sin(theta) # size window to fit jet alignment
-    template_camera.length_Y = 0.25 * np.sin(theta)
+    template_camera.length_Y = aspect * np.sin(theta)
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     
     num_imgs_per_theta = 10
@@ -740,6 +740,8 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
             for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_imgs_per_theta):
                 camera = copy.deepcopy(template_camera)
                 camera.theta = theta
+                camera.length_X = 1.0 * np.sin(theta) # size window to fit jet alignment
+                camera.length_Y = aspect * np.sin(theta)
                 camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
                 camera.t_obs = t
                 cameras.append(camera)
@@ -759,5 +761,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    #render_morphology()
+    render_morphology()
     plot_morphology()
