@@ -641,7 +641,7 @@ def plot_morphology():
     spec_snapshot = 2
     gamma_span = [1.15, 2, 4, 8]
     theta_span = [np.pi / 2, np.pi / 4, np.pi / 8]
-    theta_labels = [r"$\pi / 2$", r"$\pi / 4$", r"$\pi / 8$"]
+    theta_labels = [r"$\theta = \pi / 2$", r"$\theta = \pi / 4$", r"$\theta = \pi / 8$"]
     num_gamma = np.size(gamma_span)
     num_theta = np.size(theta_span)
     L_in_kpc = 120 
@@ -658,12 +658,12 @@ def plot_morphology():
     vmin = -6
     vmax = 0
     cmap = "afmhot"
-    xtrim_fac = 0.35
+    xtrim_fac = 0.35 # reduce xspan by this factor
 
     set_plot_defaults()
     L_fig = 20.0 / 3
-    width_ratios = np.array([1] * num_theta + [0.05])
-    height_ratios = np.array([img_aspect / xtrim_fac] * num_gamma)
+    width_ratios = np.array([xtrim_fac] * num_theta + [0.05])
+    height_ratios = np.array([img_aspect] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
