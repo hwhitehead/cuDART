@@ -666,7 +666,7 @@ def plot_morphology():
     Y = np.linspace(-0.5 * sub_aspect, 0.5*sub_aspect,int(2048 * sub_aspect))
     XX, YY = np.meshgrid(X, Y, indexing="ij")
     vmin = -6
-    vmin = 0
+    vmax = 0
     cmap = "afmhot"
 
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
