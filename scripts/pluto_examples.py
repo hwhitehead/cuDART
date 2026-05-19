@@ -293,9 +293,8 @@ def build_lookback_data(num_snapshots = 10):
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
-def build_blob_data(num_snapshots = 10):
+def build_blob_data(num_snapshots = 10, save_dir="/mnt/kocsis1/cuDART_wdir/lookback_data/", gamma_bulk=2):
 
-    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
     header_str = os.path.join(save_dir, "header.txt")
     max_emm = 1.0
     long_dim = 500
@@ -308,7 +307,6 @@ def build_blob_data(num_snapshots = 10):
     xy_sqr = xx ** 2 + yy ** 2
     snapshot_size = np.size(xx)
 
-    gamma_bulk = 2
     v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
 
@@ -348,9 +346,8 @@ def build_blob_data(num_snapshots = 10):
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
-def build_boosted_lookback_data(num_snapshots = 10):
+def build_boosted_lookback_data(num_snapshots = 10, save_dir="/mnt/kocsis1/cuDART_wdir/lookback_data/"):
 
-    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
     max_emm = 1.0
     xspan = np.linspace(0,1,100)
     yspan = np.linspace(0,1,100)
@@ -627,10 +624,67 @@ def plot_superluminal(num_img=100, sparse_step=1):
 
     plt.close("all")
 
+def build_morphology_suite():
+
+    master_dir = "mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+    for gamma in [2,4,8]:
+        save_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
+        if not os.path.isdir(save_dir):
+            os.mkdir(save_dir)
+        build_blob_data(num_snapshots=50,save_dir=save_dir,gamma_bulk=gamma)
+
+def render_morphology():
+
+    master_dir = "mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+
+    # build template camera
+    template_camera = Camera()
+    template_camera.num_pixels_X = 2048
+    template_camera.num_pixels_Y = 512
+    template_camera.tilt = 0.0
+    template_camera.t_obs = 0.5 # in units of Myr
+    phi = epsilon
+    theta = np.pi / 2 + epsilon
+    template_camera.length_X = 1.0 * np.sin(theta) # size window to fit jet alignment
+    template_camera.length_Y = 0.25 * np.sin(theta)
+    template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+    
+    num_imgs_per_theta = 10
+    theta_ar = [np.pi / 2, np.pi / 4, np.pi / 8]
+    L_in_kpc = 120 
+    for gamma_bulk in [1.15,2,4,8]:
+        load_dir = os.path.join(master_dir, "gamma{0}".format(gamma_bulk))
+        npy_save_str = os.path.join(load_dir, )
+
+        # build cameras for this gamma value
+        v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
+        v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
+        T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
+        dist_to_camera_in_kpc = 2 * L_in_kpc
+        t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
+        t_delay_in_Myr *= 0.95
+        
+        cameras = []
+        for theta in theta_ar:
+            for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_img):
+                camera = copy.deepcopy(template_camera)
+                camera.theta = theta
+                camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
+                camera.t_obs = t
+                cameras.append(camera)
+        print("initialised cameras for gamma = {0}".format(gamma_bulk))
+
+        scene = Scene(load_dir, npy_save_str, cameras, relativistic=True, lookback=True)
+        print("finished rendering for gamma = {0}".format(gamma_bulk))
+
+
+
 
 if __name__ == "__main__":
 
     #build_blob_data(num_snapshots=50)
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     #render_lookback_example(relativistic=True, remove_raw_images = False)
-    plot_superluminal(num_img=100, sparse_step=1)
+    # plot_superluminal(num_img=100, sparse_step=1)
+    build_morphology_suite()
+    render_morphology()
