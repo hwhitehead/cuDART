@@ -652,7 +652,7 @@ def plot_morphology():
     height_ratios = np.array([sub_aspect] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
-    gs = fig.add_subplot(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
 
     axes = []
     for i in range(num_gamma):
