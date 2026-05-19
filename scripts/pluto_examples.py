@@ -644,9 +644,22 @@ def plot_morphology():
     theta_labels = [r"$\pi / 2$", r"$\pi / 4$", r"$\pi / 8$"]
     num_gamma = np.size(gamma_span)
     num_theta = np.size(theta_span)
+    L_in_kpc = 120 
+    sub_aspect = 5.0 / 2
+    r_blob_in_kpc = 2.5
+    r_blob_in_code = r_blob_in_kpc / L_in_kpc
+    long_res = 256
+    long_scale = 10 * r_blob_in_code
+    short_res = int(long_res * sub_aspect)
+    short_scale = sub_aspect * long_scale
+    X = np.linspace(-0.5 * long_scale, 0.5 * long_scale, long_res)
+    Y = np.linspace(-0.5 * short_scale, 0.5 * short_scale, short_res)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    vmin = -6
+    vmax = 0
+    cmap = "afmhot"
 
     set_plot_defaults()
-    sub_aspect = 0.1
     L_fig = 20.0 / 3
     width_ratios = np.array([1] * num_theta + [0.05])
     height_ratios = np.array([sub_aspect] * num_gamma)
@@ -661,13 +674,6 @@ def plot_morphology():
             row.append(fig.add_subplot(gs[i,j]))
         axes.append(row)
     cax = fig.add_subplot(gs[:,-1])
-
-    X = np.linspace(-0.5,0.5,2048)
-    Y = np.linspace(-0.5 * sub_aspect, 0.5*sub_aspect,int(2048 * sub_aspect))
-    XX, YY = np.meshgrid(X, Y, indexing="ij")
-    vmin = -6
-    vmax = 0
-    cmap = "afmhot"
 
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
     fig.colorbar(sm, cax=cax, orientation="vertical")
@@ -702,8 +708,6 @@ def plot_morphology():
 def render_morphology(gamma_span=[1.15,2,4,8]):
 
     master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
-
-
     theta_ar = [np.pi / 2, np.pi / 4, np.pi / 8]
     L_in_kpc = 120 
     r_blob_in_kpc = 2.5
@@ -775,5 +779,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    render_morphology()
+    #render_morphology()
     plot_morphology()
