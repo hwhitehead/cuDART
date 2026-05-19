@@ -695,6 +695,7 @@ def plot_morphology():
             if j != 0:
                 axes[i][j].yaxis.set_visible(False)
 
+    plt.subplots_adjust(hspace=0,wspace=0)
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
     plt.close("all")
 
@@ -722,7 +723,6 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
     template_camera.length_X = long_scale
     template_camera.length_Y = long_scale * img_aspect
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
-    
 
     for gamma_bulk in gamma_span:
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma_bulk))
@@ -737,6 +737,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
         t_delay_in_Myr *= 0.95
         
         # cycle over orientations
+        cameras = []
         for theta in theta_ar:
             # find proper time
             L_projected = L_in_kpc * np.sin(theta)
