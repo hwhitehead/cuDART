@@ -684,8 +684,9 @@ def plot_morphology():
             axes[i][j].set_facecolor("k")
             n = spec_snapshot + num_imgs_per_theta * j # select 2nd panel from 10
             load_str = os.path.join(load_dir, "raw" + str(n).zfilll(5) + ".npy")
-            img = np.load(load_str)
-            axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
+            if os.path.exists(load_str):
+                img = np.load(load_str)
+                axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
     
             if i == 0:
                 axes[i][j].xaxis.set_label_position("top")
@@ -758,5 +759,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    render_morphology()
+    #render_morphology()
     plot_morphology()
