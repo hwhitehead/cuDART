@@ -696,7 +696,7 @@ def plot_morphology():
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
             axes[i][j].plot([],[],alpha=0,label=label)
-            axes[i][j].legend(loc="upper left", frameon=False,textcolor='w')
+            axes[i][j].legend(loc="upper left", frameon=False,labelcolor='w')
 
             if i == 0:
                 axes[i][j].xaxis.set_label_position("top")
