@@ -744,10 +744,11 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
                 cameras.append(camera)
         print("initialised cameras for gamma = {0}".format(gamma_bulk))
 
-        scene = Scene(load_dir, npy_save_str, cameras, relativistic=True, lookback=True)
+        scene = Scene(load_dir, npy_save_str, cameras)
         print("finished rendering for gamma = {0}".format(gamma_bulk))
 
-
+        scene.render(verbose = True, relativistic = True, lookback=True)
+        print("finished rendering raw images for gamma = {0}".format(gamma_bulk))
 
 
 if __name__ == "__main__":
@@ -756,6 +757,6 @@ if __name__ == "__main__":
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
-    build_morphology_suite(gamma_span=[1.15])
+    #build_morphology_suite(gamma_span=[1.15])
     render_morphology()
     plot_morphology()
