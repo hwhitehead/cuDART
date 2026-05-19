@@ -658,11 +658,12 @@ def plot_morphology():
     vmin = -6
     vmax = 0
     cmap = "afmhot"
+    xtrim_fac = 0.2
 
     set_plot_defaults()
     L_fig = 20.0 / 3
     width_ratios = np.array([1] * num_theta + [0.05])
-    height_ratios = np.array([img_aspect] * num_gamma)
+    height_ratios = np.array([img_aspect / xtrim_fac] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
@@ -682,10 +683,9 @@ def plot_morphology():
     cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
 
     for i, gamma in enumerate(gamma_span):
-        axes[i][0].yaxis.set_ticks([])
-        axes[i][0].set_ylabel("$\Gamma$ = {0}".format(gamma))
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
         for j, theta in enumerate(theta_span):
+            axes[i][j].set_xlim([-xtrim_fac, xtrim_fac])
             axes[i][j].set_facecolor("k")
             load_str = os.path.join(load_dir, "raw" + str(j).zfill(5) + ".npy")
             if os.path.exists(load_str):
@@ -699,7 +699,10 @@ def plot_morphology():
             else:
                 axes[i][j].xaxis.set_visible(False)
             
-            if j != 0:
+            if j == 0:
+                axes[i][j].yaxis.set_ticks([])
+                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma))
+            else:
                 axes[i][j].yaxis.set_visible(False)
 
     plt.subplots_adjust(hspace=0,wspace=0)
