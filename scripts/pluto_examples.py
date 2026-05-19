@@ -633,14 +633,84 @@ def build_morphology_suite(num_snapshots=50,gamma_span=[2,4,8]):
             os.mkdir(save_dir)
         build_blob_data(num_snapshots=num_snapshots,save_dir=save_dir,gamma_bulk=gamma)
 
-def render_morphology():
+def plot_morphology():
+
+    master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+    save_str = os.path.join(master_dir,"morphology.png")
+
+    num_imgs_per_theta = 10
+    spec_snapshot = 2
+    gamma_span = [1.15, 2, 4, 8]
+    theta_span = [np.pi / 2, np.pi / 4, np.pi / 8]
+    theta_labels = [r"$\pi / 2$", r"$\pi / 4$", r"$\pi / 8$"]
+    num_gamma = np.size(gamma_span)
+    num_theta = np.size(theta_span)
+
+    sub_aspect = 0.25
+    L_fig = 20.0 / 3
+    width_ratios = np.array([1] * num_theta + [0.05])
+    height_ratios = np.array([sub_aspect] * num_gamma)
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
+    gs = fig.add_subplot(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+
+    axes = []
+    for i in range(num_gamma):
+        row = []
+        for j in range(num_theta):
+            row.append(fig.add_subplot(gs[i,j]))
+        axes.append(row)
+    cax = fig.add_subplot(gs[:,-1])
+
+    X = np.linspace(-0.5,0.5,2048)
+    Y = np.linspace(-0.5 * sub_aspect, 0.5*sub_aspect,int(2048 * sub_aspect))
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    vmin = -6
+    vmin = 0
+    cmap = "afmhot"
+
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.yaxis.tick_right()
+    cax.yaxis.set_label_position("right")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
+
+
+    for i, gamma in enumerate(gamma_span):
+        axes[i][0].yaxis.set_ticks([])
+        axes[i][0].set_ylabel("$Gamma$ = {0}".format(gamma))
+        load_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
+        for j, theta in enumerate(theta_span):
+            axes[i][j].set_facecolor("k")
+            n = spec_snapshot + num_imgs_per_theta * j # select 2nd panel from 10
+            load_str = os.path.join(load_dir, "raw" + str(n).zfilll(5) + ".npy")
+            img = np.load(load_str)
+            axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
+    
+            if i == 0:
+                axes[i][j].xaxis.set_label_position("top")
+                axes[i][j].set_xlabel(theta_labels[j])
+            else:
+                axes[i][j].xaxis.set_visible(False)
+            
+            if j != 0:
+                axes[i][j].yaxis.set_visible(False)
+
+    
+
+    fig.savefig(save_str, dpi=600, bbox_inches="tight")
+    plt.close("all")
+
+
+def render_morphology(gamma_span=[1.15,2,4,8]):
 
     master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
 
     # build template camera
+    aspect = 0.25
     template_camera = Camera()
     template_camera.num_pixels_X = 2048
-    template_camera.num_pixels_Y = 512
+    template_camera.num_pixels_Y = int(2048 * aspect)
     template_camera.tilt = 0.0
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
@@ -652,7 +722,7 @@ def render_morphology():
     num_imgs_per_theta = 10
     theta_ar = [np.pi / 2, np.pi / 4, np.pi / 8]
     L_in_kpc = 120 
-    for gamma_bulk in [1.15,2,4,8]:
+    for gamma_bulk in gamma_span:
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma_bulk))
         npy_save_str = os.path.join(load_dir, )
 
@@ -666,7 +736,7 @@ def render_morphology():
         
         cameras = []
         for theta in theta_ar:
-            for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_img):
+            for t in np.linspace(t_delay_in_Myr, t_delay_in_Myr + T_in_Myr * 2, num_imgs_per_theta):
                 camera = copy.deepcopy(template_camera)
                 camera.theta = theta
                 camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
@@ -686,5 +756,6 @@ if __name__ == "__main__":
     #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
-    build_morphology_suite()
+    build_morphology_suite(gamma_span=[1.15])
     render_morphology()
+    plot_morphology()
