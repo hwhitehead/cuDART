@@ -662,7 +662,7 @@ def plot_morphology():
     set_plot_defaults()
     L_fig = 20.0 / 3
     width_ratios = np.array([1] * num_theta + [0.05])
-    height_ratios = np.array([sub_aspect] * num_gamma)
+    height_ratios = np.array([img_aspect] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
@@ -782,5 +782,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    render_morphology()
+    #render_morphology()
     plot_morphology()
