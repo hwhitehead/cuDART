@@ -760,6 +760,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
             d_in_m = x_obs_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
             t_obs_in_s = d_in_m / c_light
             t_obs = t_obs_in_s / Myr_to_s # cast to Myr
+            print("gamma = {0}, theta = {1}, t_obs = {2}Myr".format(gamma,theta,t_obs))
             # t_obs = t_delay_in_Myr + 0.1 * T_in_Myr
 
             # find proper camera position (shift in X)
