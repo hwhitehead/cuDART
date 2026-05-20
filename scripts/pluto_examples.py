@@ -749,6 +749,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
         dist_to_camera_in_kpc = 2.0 * L_in_kpc
         t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
         T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
+        print("T = {0}Myr".format(T_in_Myr))
 
         # cycle over orientations
         cameras = []
