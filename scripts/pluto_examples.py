@@ -779,10 +779,10 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
 
         print("initialised cameras for gamma = {0}".format(gamma_bulk))
 
-        scene = Scene(load_dir, npy_save_str, cameras)
+        #scene = Scene(load_dir, npy_save_str, cameras)
         print("finished rendering for gamma = {0}".format(gamma_bulk))
 
-        scene.render(verbose = True, relativistic = True, lookback=True)
+        #scene.render(verbose = True, relativistic = True, lookback=True)
         print("finished rendering raw images for gamma = {0}".format(gamma_bulk))
 
 
