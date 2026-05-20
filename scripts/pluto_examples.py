@@ -756,7 +756,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
             # find proper time
             L_projected = L_in_kpc * np.sin(theta) # projected size of domain 
             x_obs_in_m = 0.5 * L_projected * kpc_to_m # in SI, target displacement from center
-            D_in_m = dist_to_camera_in_kpc * kpc_to_km
+            D_in_m = 2.0 * L_in_kpc * kpc_to_m
             d_in_m = x_obs_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
             t_obs_in_s = d_in_m / c_light
             t_obs = t_obs_in_s / Myr_to_s # cast to Myr
