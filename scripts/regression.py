@@ -208,7 +208,7 @@ if __name__ == "__main__":
 
     # dict for camera args
     camera_args = {"num_img": 10,
-                    "resize_img": False
+                    "resize_img": False,
                     "relativistic": True,
                     "template": template_camera,
                     "camera_file_name": None,
