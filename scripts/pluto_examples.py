@@ -755,7 +755,7 @@ def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, 
         print("t_delay = {0}Myr".format(t_delay_in_Myr))
         # cycle over orientations
         cameras = []
-        for theta in theta_ar:
+        for theta in theta_span:
             # find proper time
             L_projected = L_in_kpc * np.sin(theta) # projected size of domain 
             x_obs_in_m = 0.5 * L_projected * kpc_to_m # in SI, target displacement from center
