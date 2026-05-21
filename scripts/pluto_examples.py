@@ -709,7 +709,7 @@ def plot_morphology():
             y_offset = 0.25 * img_aspect * ytrim_fac
             no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False)
             axes[i][j].add_patch(no_beam)
-            beamed = patches.Ellipse((x_offset,0,rad),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='w',fill=False)
+            beamed = patches.Ellipse((x_offset,0),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='w',fill=False)
             axes[i][j].add_patch(beamed)
 
             if i == 0:
