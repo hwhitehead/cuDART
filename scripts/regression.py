@@ -127,7 +127,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
     scene.render(verbose = verbose, relativistic = camera_args["relativistic"])
     if (verbose): print("finished rendering raw images.")
 
-    if (camera_args["save_fig"])
+    if (camera_args["save_fig"]):
         scene.plot(png_save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = remove_raw_images, vmin=-6, vmax=0)
         print("finished rendering figures.")
 
