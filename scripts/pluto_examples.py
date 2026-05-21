@@ -659,11 +659,12 @@ def plot_morphology():
     vmax = 0
     cmap = "afmhot"
     xtrim_fac = 0.8 # mult xspan of subplots by this factor
-    ytrim_fac = 3
+    ytrim_fac = 2.5
 
     set_plot_defaults()
     L_fig = 20.0 / 3
-    width_ratios = np.array([xtrim_fac,xtrim_fac*0.2] * num_theta + [0.05])
+    spacer_scale = 0.05
+    width_ratios = np.array([xtrim_fac,xtrim_fac*spacer_scale] * num_theta + [0.05])
     height_ratios = np.array([img_aspect * ytrim_fac] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
@@ -701,7 +702,7 @@ def plot_morphology():
             if os.path.exists(load_str):
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
-            axes[i][j].text(0,0,s=label,va="bottom",ha="center",color="w")
+            axes[i][j].text(0,0.45*img_aspect*ytrim_fac,s=label,va="top",ha="center",color="w")
             # axes[i][j].plot([],[],alpha=0,label=label)
             # axes[i][j].legend(loc="upper left", frameon=False,labelcolor='w')
             # axes[i][j].axvline(x=-0.5 * np.sin(theta),color='w')
