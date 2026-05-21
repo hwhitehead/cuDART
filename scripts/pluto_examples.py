@@ -659,11 +659,12 @@ def plot_morphology():
     vmax = 0
     cmap = "afmhot"
     xtrim_fac = 0.8 # mult xspan of subplots by this factor
+    ytrim_fac = 1.5
 
     set_plot_defaults()
     L_fig = 20.0 / 3
     width_ratios = np.array([xtrim_fac] * num_theta + [0.05])
-    height_ratios = np.array([img_aspect] * num_gamma)
+    height_ratios = np.array([img_aspect * ytrim_fac] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
@@ -689,14 +690,16 @@ def plot_morphology():
             length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
             label = "$\mathcal{L}$" + " = {0:.2f}".format(length_ratio)
             axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
+            axes[i][j].set_xlim([-0.5 * img_aspect * ytrim_fac, 0.5 * img_aspect * ytrim_fac])
             axes[i][j].set_aspect("equal")
             axes[i][j].set_facecolor("k")
             load_str = os.path.join(load_dir, "raw" + str(j).zfill(5) + ".npy")
             if os.path.exists(load_str):
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
-            axes[i][j].plot([],[],alpha=0,label=label)
-            axes[i][j].legend(loc="upper left", frameon=False,labelcolor='w')
+            axes[i][j].text(0,0,s=label,va="bottom",ha="center",color="w")
+            # axes[i][j].plot([],[],alpha=0,label=label)
+            # axes[i][j].legend(loc="upper left", frameon=False,labelcolor='w')
             # axes[i][j].axvline(x=-0.5 * np.sin(theta),color='w')
             # axes[i][j].axvline(x=0.5 * np.sin(theta),color='w')
 
@@ -709,7 +712,7 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma))
+                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma), rotation=90)
             else:
                 axes[i][j].yaxis.set_visible(False)
 
@@ -795,5 +798,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    render_morphology()
+    #render_morphology()
     plot_morphology()
