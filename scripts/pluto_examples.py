@@ -728,7 +728,7 @@ def plot_morphology():
     # add external legend
     axes[-1][1].plot([],[],color='k',linestyle="dashed",label="True Silhouette")
     axes[-1][1].plot([],[],color='k',linestyle="solid",label="Observed Silhouette")
-    axes[-1][1].legend(frameon=False,loc="outside lower center")
+    fig.legend(frameon=False,loc="outside lower center")
 
     plt.subplots_adjust(hspace=0,wspace=0)
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
