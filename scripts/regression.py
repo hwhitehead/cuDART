@@ -35,7 +35,7 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
     Lz = 1.0                                                                    # set domain length in z to unity in code units
     Ly = Lz * sim_args["domain_dims"][1] / sim_args["domain_dims"][2]           # auto scale x, y directions
     Lx = Lz * sim_args["domain_dims"][0] / sim_args["domain_dims"][2] 
-    xspan = np.linspace(-0.5 * Lx, 0.5 * Lz, sim_args["domain_dims"][0])        # build domain centered on (0,0,0)
+    xspan = np.linspace(-0.5 * Lx, 0.5 * Lx, sim_args["domain_dims"][0])        # build domain centered on (0,0,0)
     yspan = np.linspace(-0.5 * Ly, 0.5 * Ly, sim_args["domain_dims"][1])
     zspan = np.linspace(-0.5 * Lz, 0.5 * Lz, sim_args["domain_dims"][2])
     ispan = np.array([0,1,2,3])                                                 # dummy indices for spatial, velocity axes
@@ -118,7 +118,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
         raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(npy_load_str))
 
     # prepare array of cameras (cycle in theta)
-    if (verbose): print(r"building {0} cameras evenly spanning theta \in [0,\pi]".format(camera_args["num_img"]))
+    if (verbose): print(r"building {0} cameras evenly spanning theta in [0,pi]".format(camera_args["num_img"]))
     theta_ar = np.linspace(epsilon, np.pi - epsilon,camera_args["num_img"])
     cameras = []
     for i, theta in enumerate(theta_ar):

@@ -7,6 +7,9 @@ import pandas as pd
 str_zfill = 5
 epsilon = 1e-6
 
+# supress div zero warnings from log10 usage
+np.seterr(divide="ignore")
+
 def set_plot_defaults(use_tex = True):
     """
     assign default plot settings before figure creation
