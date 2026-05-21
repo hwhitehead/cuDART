@@ -102,7 +102,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
         if not os.path.isdir(path):
             raise Exception("{0} does not exist".format(save_dir))
 
-    npy_load_str = os.path.join(load_dir, "snapshot" + str(snapshot_index).zfill(5) + ".npy")
+    npy_load_str = os.path.join(load_dir, "snapshot" + str(int(snapshot_index)).zfill(5) + ".npy")
     npy_save_str = os.path.join(save_dir, "raw")
     png_save_str = os.path.join(save_dir, "img")
 
