@@ -110,7 +110,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
         raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(npy_load_str))
 
     # prepare array of cameras (cycle theta)
-    theta_ar = np.linspace(epsilon, np.pi - epsilon,num_img)
+    theta_ar = np.linspace(epsilon, np.pi - epsilon,camera_args["num_img"])
     cameras = []
     for i, theta in enumerate(theta_ar):
         camera = copy.deepcopy(camera_args["template"])
