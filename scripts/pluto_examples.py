@@ -2,6 +2,7 @@
 import sys, os, gc
 import numpy as np
 import matplotlib.image as mpimg
+import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import pandas as pd
 
@@ -703,10 +704,13 @@ def plot_morphology():
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
             axes[i][j].text(0,0.45*img_aspect*ytrim_fac,s=label,va="top",ha="center",color="w")
-            # axes[i][j].plot([],[],alpha=0,label=label)
-            # axes[i][j].legend(loc="upper left", frameon=False,labelcolor='w')
-            # axes[i][j].axvline(x=-0.5 * np.sin(theta),color='w')
-            # axes[i][j].axvline(x=0.5 * np.sin(theta),color='w')
+            
+            x_offset = -0.25 * xtrim_fac * np.sin(theta)
+            y_offset = 0.25 * img_aspect * ytrim_fac
+            no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False)
+            axes[i][j].add_patch(no_beam)
+            beamed = patches.Ellipse((x_offset,0,rad),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='w',fill=False)
+            axes[i][j].add_patch(beamed)
 
             if i == 0:
                 axes[i][j].xaxis.set_label_position("top")
