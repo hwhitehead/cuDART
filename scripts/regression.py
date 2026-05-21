@@ -36,6 +36,7 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
     xspan = np.linspace(-0.5 * Lx, 0.5 * Lz, sim_args["domain_dims"][0])
     yspan = np.linspace(-0.5 * Ly, 0.5 * Ly, sim_args["domain_dims"][1])
     zspan = np.linspace(-0.5 * Lz, 0.5 * Lz, sim_args["domain_dims"][2])
+    ispan = np.array([0,1,2,3]) 
     xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
     xy_sqr = xx ** 2 + yy ** 2
     snapshot_size = np.size(xx)
