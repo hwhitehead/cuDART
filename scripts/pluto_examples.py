@@ -647,7 +647,7 @@ def plot_morphology():
     L_in_kpc = 120 
     r_blob_in_kpc = 2.5
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
-    long_res = 256
+    long_res = 1024
     long_scale = 1.0 # fill domain vertically
     short_scale = 4.0 * r_blob_in_code
     img_aspect = short_scale / long_scale
@@ -725,7 +725,7 @@ def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, 
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
 
     # build template camera
-    long_res = 256
+    long_res = 1024
     long_scale = 1.0 # fill domain vertically (ignore projection effects)
     short_scale = 4.0 * r_blob_in_code
     img_aspect = short_scale / long_scale
@@ -795,5 +795,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    #render_morphology()
+    render_morphology()
     plot_morphology()
