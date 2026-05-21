@@ -675,7 +675,7 @@ def plot_morphology():
         row = []
         for j in range(num_theta):
             row.append(fig.add_subplot(gs[i,2*j]))
-            spacers.append(gif.add_subplot(gs[i,2*j+1]))
+            spacers.append(fig.add_subplot(gs[i,2*j+1]))
         axes.append(row)
     cax = fig.add_subplot(gs[:,-1])
     for spacer in spacers:
