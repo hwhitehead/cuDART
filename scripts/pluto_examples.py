@@ -688,7 +688,7 @@ def plot_morphology():
         for j, theta in enumerate(theta_span):
             length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
             label = "$\mathcal{L}$" + " = {0:.2f}".format(length_ratio)
-            axes[i][j].set_xlim([-xtrim_fac, xtrim_fac])
+            axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
             axes[i][j].set_aspect("equal")
             axes[i][j].set_facecolor("k")
             load_str = os.path.join(load_dir, "raw" + str(j).zfill(5) + ".npy")
@@ -697,8 +697,8 @@ def plot_morphology():
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
             axes[i][j].plot([],[],alpha=0,label=label)
             axes[i][j].legend(loc="upper left", frameon=False,labelcolor='w')
-            axes[i][j].axvline(x=-0.5 * np.sin(theta),color='w')
-            axes[i][j].axvline(x=0.5 * np.sin(theta),color='w')
+            # axes[i][j].axvline(x=-0.5 * np.sin(theta),color='w')
+            # axes[i][j].axvline(x=0.5 * np.sin(theta),color='w')
 
             if i == 0:
                 axes[i][j].xaxis.set_label_position("top")
@@ -795,5 +795,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    render_morphology()
+    #render_morphology()
     plot_morphology()
