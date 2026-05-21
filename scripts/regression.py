@@ -242,24 +242,24 @@ if __name__ == "__main__":
 
     args = vars(parser.parse_args())
     
-    if (args["-r"] and args["-rl"]):
+    if (args["r"] and args["rl"]):
         raise Exception("no-lookback and lookback share write space, please select only one")
 
-    if (args["-b"]):
-        if (args["--data_dir"] is None):
+    if (args["b"]):
+        if (args["data_dir"] is None):
             raise Exception("unable to build regression suite data without save location (use --data_dir)")
         build_regression_suite(save_dir, sim_args, args["-v"])
     
-    if (args["-r"]):
-        if (args["--save_dir"] is None):
+    if (args["r"]):
+        if (args["save_dir"] is None):
             raise Exception("unable to run no-lookback test without save location (use --save_dir)")
-        if (args["--data_dir"] is None):
+        if (args["data_dir"] is None):
             raise Exception("unable to run no-lookback test without load location (use --data_dir)")
-        run_nolookback_test(args["--data_dir"], args["--save_dir"], sim_args, camera_args, args["-v"])
+        run_nolookback_test(args["data_dir"], args["save_dir"], sim_args, camera_args, args["-v"])
     
-    if (args["-rl"]):
-        if (args["--save_dir"] is None):
+    if (args["rl"]):
+        if (args["save_dir"] is None):
             raise Exception("unable to run lookback test without save location (use --save_dir)")
-        if (args["--data_dir"] is None):
+        if (args["data_dir"] is None):
             raise Exception("unable to run lookback test without load location (use --data_dir)")
-        run_lookback_test(args["--data_dir"], args["--save_dir"], sim_args, camera_args, args["-v"])
+        run_lookback_test(args["data_dir"], args["save_dir"], sim_args, camera_args, args["-v"])
