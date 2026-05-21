@@ -649,7 +649,7 @@ def plot_morphology():
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
     long_res = 256
     long_scale = 1.0 # fill domain vertically
-    short_scale = 2.0 * r_blob_in_code
+    short_scale = 4.0 * r_blob_in_code
     img_aspect = short_scale / long_scale
     short_res = int(long_res * img_aspect)
     X = np.linspace(-0.5 * long_scale, 0.5 * long_scale, long_res)
@@ -727,7 +727,7 @@ def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, 
     # build template camera
     long_res = 256
     long_scale = 1.0 # fill domain vertically (ignore projection effects)
-    short_scale = 2.0 * r_blob_in_code
+    short_scale = 4.0 * r_blob_in_code
     img_aspect = short_scale / long_scale
     template_camera = Camera()
     template_camera.tilt = np.pi / 2
@@ -758,7 +758,7 @@ def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, 
         for theta in theta_span:
             # find proper time
             L_projected = L_in_kpc * np.sin(theta) # projected size of domain 
-            x_obs_in_m = 0.5 * L_projected * kpc_to_m # in SI, target displacement from center
+            x_obs_in_m = 0.25 * L_projected * kpc_to_m # in SI, target displaced half from center
             D_in_m = 2.0 * L_in_kpc * kpc_to_m
             d_in_m = x_obs_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
             t_obs_in_s = d_in_m / c_light
@@ -782,10 +782,10 @@ def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, 
 
         print("initialised cameras for gamma = {0}".format(gamma_bulk))
 
-        #scene = Scene(load_dir, npy_save_str, cameras)
+        scene = Scene(load_dir, npy_save_str, cameras)
         print("finished rendering for gamma = {0}".format(gamma_bulk))
 
-        #scene.render(verbose = True, relativistic = True, lookback=True)
+        scene.render(verbose = True, relativistic = True, lookback=True)
         print("finished rendering raw images for gamma = {0}".format(gamma_bulk))
 
 if __name__ == "__main__":
