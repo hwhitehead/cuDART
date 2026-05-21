@@ -103,18 +103,22 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
             print("selected snapshot exceeds simulation bounds, using last ({0})".format(last_index))
             snapshot_index = last_index
 
+    # check input, output directory existence
     for path in [load_dir, save_dir]:
         if not os.path.isdir(path):
             raise Exception("{0} does not exist".format(save_dir))
 
+    # format input and output paths
     npy_load_str = os.path.join(load_dir, "snapshot" + str(int(snapshot_index)).zfill(5) + ".npy")
     npy_save_str = os.path.join(save_dir, "raw")
     png_save_str = os.path.join(save_dir, "img")
 
+    # check for specific snapshot input file
     if not os.path.exists(npy_load_str):
         raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(npy_load_str))
 
-    # prepare array of cameras (cycle theta)
+    # prepare array of cameras (cycle in theta)
+    if (verbose): print(r"building {0} cameras evenly spanning theta \in [0,\pi]".format(camera_args["num_img"]))
     theta_ar = np.linspace(epsilon, np.pi - epsilon,camera_args["num_img"])
     cameras = []
     for i, theta in enumerate(theta_ar):
@@ -144,7 +148,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
 
 def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
 
-    # run a rendering test on multiple snapshot of data (TODO: populate this)
+    # run a rendering test on multiple snapshot of data (TODO: needs full write, non-func copy of nolookback)
     if (verbose): print("starting lookback render test...")
 
     # check user input
