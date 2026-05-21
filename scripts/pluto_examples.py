@@ -700,6 +700,7 @@ def plot_morphology():
             doppler_fac = 1.0 / (gamma * (1 - beta * np.cos(theta)))
             length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
             length_label = "$\mathcal{L} \simeq$" + "{0:.1f}".format(length_ratio)
+            doppler_label = r"$D=$" + "{0:.2f}".format(doppler_fac)
             axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
             axes[i][j].set_ylim([-0.5 * img_aspect * ytrim_fac, 0.5 * img_aspect * ytrim_fac])
             axes[i][j].set_aspect("equal")
@@ -709,7 +710,8 @@ def plot_morphology():
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
             axes[i][j].text(0.475*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
-            
+            axes[i][j].text(0.475*xtrim_fac,-0.4*img_aspect*ytrim_fac,s=doppler_label,va="bottom",ha="right",color="w")
+
             x_offset = -0.25 * np.sin(theta)
             y_offset = 0.25 * img_aspect * ytrim_fac
             no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False,linestyle="dashed",lw=0.5)
@@ -727,8 +729,7 @@ def plot_morphology():
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])#
                 ylabel = r"$\Gamma=$" + "{0:.2f}\n".format(gamma) 
-                ylabel += r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$\n"
-                ylabel += r"$D=$" + "{0:.2f}".format(doppler_fac)
+                ylabel += r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$"
                 axes[i][j].set_ylabel(ylabel, rotation="horizontal",ha="right",va="center")
             else:
                 axes[i][j].yaxis.set_visible(False)
