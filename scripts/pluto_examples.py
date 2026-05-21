@@ -665,8 +665,12 @@ def plot_morphology():
     set_plot_defaults()
     L_fig = 20.0 / 3
     spacer_scale = 0.05
-    width_ratios = np.array([xtrim_fac,xtrim_fac*spacer_scale] * num_theta + [0.05])
-    height_ratios = np.array([img_aspect * ytrim_fac] * num_gamma)
+    width = xtrim_fac
+    height = img_aspect * ytrim_fac
+    half_width = 0.5 * width
+    half_height = 0.5 * height
+    width_ratios = np.array([width,width*spacer_scale] * num_theta + [width*0.1])
+    height_ratios = np.array([height,height] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
@@ -694,7 +698,7 @@ def plot_morphology():
         beta = np.sqrt(1 - 1.0 / gamma ** 2)
         for j, theta in enumerate(theta_span):
             length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
-            length_label = "$\mathcal{L}$" + " = {0:.2f}".format(length_ratio)
+            length_label = "$\mathcal{L} \simeq$" + "{0:.1f}".format(length_ratio)
             axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
             axes[i][j].set_ylim([-0.5 * img_aspect * ytrim_fac, 0.5 * img_aspect * ytrim_fac])
             axes[i][j].set_aspect("equal")
@@ -705,7 +709,7 @@ def plot_morphology():
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
             axes[i][j].text(0.475*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
             
-            x_offset = -0.25 * xtrim_fac * np.sin(theta)
+            x_offset = -0.25 * np.sin(theta)
             y_offset = 0.25 * img_aspect * ytrim_fac
             no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False,linestyle="dashed")
             axes[i][j].add_patch(no_beam)
