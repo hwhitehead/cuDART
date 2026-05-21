@@ -721,7 +721,7 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$ = {0.:2f}".format(gamma), rotation="horizontal",ha="right")
+                axes[i][j].set_ylabel("$\Gamma$" +  "= {0:.2f}".format(gamma), rotation="horizontal",ha="right")
             else:
                 axes[i][j].yaxis.set_visible(False)
 
