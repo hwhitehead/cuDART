@@ -88,7 +88,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
 
     # check user input
     if camera_args["snapshot_index"] is None: # select middle snapshot
-        snapshot_index = np.floor(0.5 * (sim_args["num_snapshots"] - 1))
+        snapshot_index = int(np.floor(0.5 * (sim_args["num_snapshots"] - 1)))
         print("auto setting snapshot_index = {0}".format(snapshot_index))
     elif (camera_args["snapshot_index"] < 0): # check snapshot lower oob
         print("selected snapshot negative, using first snapshot.")
