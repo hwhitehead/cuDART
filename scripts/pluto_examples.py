@@ -721,7 +721,7 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$" +  "= {0:.2f}\n".format(gamma) + r"$\theta_\mathrm{crit}$" + " = {0:.2f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$", rotation="horizontal",ha="right")
+                axes[i][j].set_ylabel("$\Gamma$" +  "={0:.2f}\n".format(gamma) + r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$", rotation="horizontal",ha="right")
             else:
                 axes[i][j].yaxis.set_visible(False)
 
