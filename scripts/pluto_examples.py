@@ -710,10 +710,10 @@ def plot_morphology():
             axes[i][j].text(0.475*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
             
             x_offset = -0.25 * np.sin(theta)
-            y_offset = 0#0.25 * img_aspect * ytrim_fac
-            no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='g',fill=False,linestyle="dashed")
+            y_offset = 0.25 * img_aspect * ytrim_fac
+            no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False,linestyle="dashed",lw=0.5)
             axes[i][j].add_patch(no_beam)
-            beamed = patches.Ellipse((x_offset,-y_offset),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='r',fill=False)
+            beamed = patches.Ellipse((x_offset,-y_offset),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='r',fill=False,lw=0.5)
             axes[i][j].add_patch(beamed)
 
             if i == 0:
