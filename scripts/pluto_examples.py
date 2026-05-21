@@ -707,7 +707,7 @@ def plot_morphology():
             
             x_offset = -0.25 * xtrim_fac * np.sin(theta)
             y_offset = 0.25 * img_aspect * ytrim_fac
-            no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False)
+            no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False,linestyle="dashed")
             axes[i][j].add_patch(no_beam)
             beamed = patches.Ellipse((x_offset,-y_offset),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='w',fill=False)
             axes[i][j].add_patch(beamed)
@@ -721,9 +721,14 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma), rotation="horizontal",ha="right")
+                axes[i][j].set_ylabel("$\Gamma$ = {0.:2f}".format(gamma), rotation="horizontal",ha="right")
             else:
                 axes[i][j].yaxis.set_visible(False)
+
+    # add external legend
+    axes[-1][1].plot([],[],color='k',linestyle="dashed",label="True Silhouette")
+    axes[-1][1].plot([],[],color='k',linestyle="solid",label="Observed Silhouette")
+    axes[-1][1].legend(frameon=False,loc="outside lower center")
 
     plt.subplots_adjust(hspace=0,wspace=0)
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
