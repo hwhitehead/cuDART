@@ -634,7 +634,7 @@ def build_morphology_suite(num_snapshots=50,gamma_span=[2,4,8]):
             os.mkdir(save_dir)
         build_blob_data(num_snapshots=num_snapshots,save_dir=save_dir,gamma_bulk=gamma)
 
-def plot_morphology():
+def plot_morphology(show_labels=False):
 
     master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
     save_str = os.path.join(master_dir,"morphology.png")
@@ -709,8 +709,9 @@ def plot_morphology():
             if os.path.exists(load_str):
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
-            axes[i][j].text(0.475*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
-            axes[i][j].text(0.475*xtrim_fac,-0.4*img_aspect*ytrim_fac,s=doppler_label,va="bottom",ha="right",color="w")
+            if (show_labels):
+                axes[i][j].text(0.475*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
+                axes[i][j].text(0.475*xtrim_fac,-0.4*img_aspect*ytrim_fac,s=doppler_label,va="bottom",ha="right",color="w")
 
             x_offset = -0.25 * np.sin(theta)
             y_offset = 0.25 * img_aspect * ytrim_fac
@@ -729,7 +730,8 @@ def plot_morphology():
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])#
                 ylabel = r"$\Gamma=$" + "{0:.2f}\n".format(gamma) 
-                ylabel += r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$"
+                if (show_labels): 
+                    ylabel += r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$"
                 axes[i][j].set_ylabel(ylabel, rotation="horizontal",ha="right",va="center")
             else:
                 axes[i][j].yaxis.set_visible(False)
