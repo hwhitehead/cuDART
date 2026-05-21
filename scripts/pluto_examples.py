@@ -690,7 +690,7 @@ def plot_morphology():
             length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
             label = "$\mathcal{L}$" + " = {0:.2f}".format(length_ratio)
             axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
-            axes[i][j].set_xlim([-0.5 * img_aspect * ytrim_fac, 0.5 * img_aspect * ytrim_fac])
+            axes[i][j].set_ylim([-0.5 * img_aspect * ytrim_fac, 0.5 * img_aspect * ytrim_fac])
             axes[i][j].set_aspect("equal")
             axes[i][j].set_facecolor("k")
             load_str = os.path.join(load_dir, "raw" + str(j).zfill(5) + ".npy")
@@ -712,7 +712,7 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma), rotation=90)
+                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma), rotation="horizontal")
             else:
                 axes[i][j].yaxis.set_visible(False)
 
