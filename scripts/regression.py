@@ -218,26 +218,26 @@ if __name__ == "__main__":
     # handle command line arguments for regression tests
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", 
-                        action="store_true"
+                        action="store_true",
                         default=False,
                         help="build regression suite data")
     parser.add_argument("-r", 
-                        action="store_true"
+                        action="store_true",
                         default=False,
                         help="run in no-lookback test")
     parser.add_argument("-rl", 
-                        action="store_true"
+                        action="store_true",
                         default=False,
                         help="run in lookback mode")
     parser.add_argument("-v", 
-                        action="store_true"
+                        action="store_true",
                         default=False,
                         help="run in verbose mode")
     parser.add_argument("--save_dir",
                         default=None,
                         help="path to raw/figure outputs")
     parser.add_argument("--data_dir",
-                        default=None.
+                        default=None,
                         help="path to input datasets")
 
     args = vars(parser.parse_args())
