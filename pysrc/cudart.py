@@ -444,6 +444,8 @@ class Scene:
         XX, YY = np.meshgrid(X, Y, indexing="ij")
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
+        ax.set_xlim([0,1])
+        ax.set_ylim([0,1])
 
         num_images = len(self.cameras)
         for i in range(num_images):

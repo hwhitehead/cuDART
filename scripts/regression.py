@@ -17,7 +17,9 @@ c_light = 3e8
 def build_regression_suite(save_dir, sim_args, verbose=True):
 
     # construct template data for regression suite
-    if (verbose): print("starting regression suite data construction...")
+    if (verbose): 
+        print("starting regression suite data construction...")
+        print("saving data at {0}".format(save_dir))
 
     if not os.path.isdir(save_dir):
         raise Exception("{0} does not exist".format(save_dir))
@@ -84,7 +86,10 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
 def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
 
     # run a rendering test on a single snapshot of data
-    if (verbose): print("starting no-lookback render test...")
+    if (verbose): 
+        print("starting no-lookback render test...")
+        print("reading data from {0}".format(load_dir))
+        print("saving data at {0}".format(save_dir))
 
     # check user input
     if camera_args["snapshot_index"] is None: # select middle snapshot
