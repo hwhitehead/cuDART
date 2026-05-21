@@ -23,28 +23,28 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
         raise Exception("{0} does not exist".format(save_dir))
 
     # define simulation parameters
-    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)
-    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
-    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]
-    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr # duration to reach domain edge
+    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
+    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]                  # cast to code units (where L_domain = 1.0)
+    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
     
     # build empty domain 
     max_emm = 1.0
-    Lz = sim_args["L_domain"]
-    Ly = (Lz * sim_args["domain_dims"][1]) / sim_args["domain_dims"][1] 
-    Lx = (Lz * sim_args["domain_dims"][1]) / sim_args["domain_dims"][1] 
-    xspan = np.linspace(-0.5 * Lx, 0.5 * Lz, sim_args["domain_dims"][0])
+    Lz = 1.0                                                                    # set domain length in z to unity in code units
+    Ly = Lz * sim_args["domain_dims"][1] / sim_args["domain_dims"][2]           # auto scale x, y directions
+    Lx = Lz * sim_args["domain_dims"][0] / sim_args["domain_dims"][2] 
+    xspan = np.linspace(-0.5 * Lx, 0.5 * Lz, sim_args["domain_dims"][0])        # build domain centered on (0,0,0)
     yspan = np.linspace(-0.5 * Ly, 0.5 * Ly, sim_args["domain_dims"][1])
     zspan = np.linspace(-0.5 * Lz, 0.5 * Lz, sim_args["domain_dims"][2])
-    ispan = np.array([0,1,2,3]) 
-    xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")
+    ispan = np.array([0,1,2,3])                                                 # dummy indices for spatial, velocity axes
+    xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")     # construct mesh as (x,y,z,i)
     xy_sqr = xx ** 2 + yy ** 2
     snapshot_size = np.size(xx)
     if (verbose): print("built empty mesh.")
 
     # build header data
     header_str = os.path.join(save_dir, "header.txt")
-    t_span = np.linspace(0, T_in_Myr, sim_args["num_snapshots"]) # evenly space over duration
+    t_span = np.linspace(0, T_in_Myr, sim_args["num_snapshots"])                # evenly snapshot times over duration
     with open(header_str, "w") as f:
         f.write("{0} {1} {2} {3}".format(sim_args["num_snapshots"], snapshot_size, t_span[1], sim_args["L_domain"]))
     if (verbose): print("built header.")
@@ -53,30 +53,30 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
     for n, t_in_Myr in enumerate(t_span):
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         save_data = np.zeros_like(xx)
-        lead_center_in_kpc = t_in_Myr * v_in_kpc_per_Myr
-        lead_center = lead_center_in_kpc / sim_args["L_domain"] # cast to code units
-        tail_center = -lead_center
+        lead_center_in_kpc = t_in_Myr * v_in_kpc_per_Myr                        # calculate ejecta position in kpc
+        lead_center = lead_center_in_kpc / sim_args["L_domain"]                 # cast to code units
+        tail_center = -lead_center                                              # tailing ejecta symmetric in x-y
         lead_ZZ = zz - lead_center
         tail_ZZ = zz - tail_center
 
-        rr_lead_sqr = ((zz - lead_center) ** 2 + xy_sqr) / r_blob_in_code ** 2
+        rr_lead_sqr = ((zz - lead_center) ** 2 + xy_sqr) / r_blob_in_code ** 2  # sph radius from leading/tailing ejecta
         rr_tail_sqr = ((zz - tail_center) ** 2 + xy_sqr) / r_blob_in_code ** 2
 
         in_lead = (rr_lead_sqr < 1)
         in_tail = (rr_tail_sqr < 1)
-        emm_lead = max_emm * (1.0 - rr_lead_sqr)
+        emm_lead = max_emm * (1.0 - rr_lead_sqr)                                # emission falls off quadratically from center
         emm_tail = max_emm * (1.0 - rr_tail_sqr)
 
         lead_emm_mask = (in_lead) & (ii == 0)
         tail_emm_mask = (in_tail) & (ii == 0)
         lead_vel_mask = (in_lead) & (ii == 3)
         tail_vel_mask = (in_tail) & (ii == 3)
-        save_data[lead_emm_mask] = emm_lead[lead_emm_mask]
-        save_data[tail_emm_mask] = emm_tail[tail_emm_mask]
-        save_data[lead_vel_mask] = v_in_c
+        save_data[lead_emm_mask] = emm_lead[lead_emm_mask]                      # match emission in lead/tail
+        save_data[tail_emm_mask] = emm_tail[tail_emm_mask]  
+        save_data[lead_vel_mask] = v_in_c                                       # invert velocity in lead/tail
         save_data[tail_vel_mask] = -v_in_c
-        save_data = save_data.astype(np.float32)
-        np.save(save_str, save_data)
+        save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
+        np.save(save_str, save_data)                                            # save snapshot data
         if (verbose): print("built dataset for snapshot {0}".format(n))
     
     if (verbose): print("finished dataset construction.")
@@ -201,14 +201,14 @@ if __name__ == "__main__":
 
     # template camera
     template_camera = Camera()
-    template_camera.num_pixels_X = 2048
+    template_camera.tilt = (45.0 / 180) * np.pi     # default 45deg tilt from bias aligned with z axis 
+    template_camera.t_obs = 0.5                     # observer time, in units of Myr
+    phi = epsilon                                   # small value, system axisymmetric in phi
+    theta = np.pi / 2 + epsilon                     # overwritten to even spacing in theta
+    template_camera.length_X = 1.0                  # longest simulation size 1.0 in code units
+    template_camera.length_Y = 1.0
+    template_camera.num_pixels_X = 2048             # ensure square pixels
     template_camera.num_pixels_Y = 2048
-    template_camera.tilt = (60.0 / 180) * np.pi
-    template_camera.t_obs = 0.5 # in units of Myr
-    phi = epsilon
-    theta = np.pi / 2 + epsilon
-    template_camera.length_X = 1.0 * np.sin(theta) # size window to fit initial orientation
-    template_camera.length_Y = 1.0 * np.sin(theta) # longest simulation length 1.0 in code units
 
     # dict for camera args
     camera_args = {"num_img": 10,
