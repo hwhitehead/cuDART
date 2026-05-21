@@ -703,7 +703,7 @@ def plot_morphology():
             if os.path.exists(load_str):
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
-            axes[i][j].text(0.45*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
+            axes[i][j].text(0.475*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
             
             x_offset = -0.25 * xtrim_fac * np.sin(theta)
             y_offset = 0.25 * img_aspect * ytrim_fac
@@ -721,7 +721,7 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$" +  "= {0:.2f}\n".format(gamma) + "$\theta_\mathrm{crit}$" + " = {0:.2f}".format(np.arccos(beta)), rotation="horizontal",ha="right")
+                axes[i][j].set_ylabel("$\Gamma$" +  "= {0:.2f}\n".format(gamma) + r"$\theta_\mathrm{crit}$" + " = {0:.2f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$", rotation="horizontal",ha="right")
             else:
                 axes[i][j].yaxis.set_visible(False)
 
