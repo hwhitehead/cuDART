@@ -659,23 +659,27 @@ def plot_morphology():
     vmax = 0
     cmap = "afmhot"
     xtrim_fac = 0.8 # mult xspan of subplots by this factor
-    ytrim_fac = 1.5
+    ytrim_fac = 3
 
     set_plot_defaults()
     L_fig = 20.0 / 3
-    width_ratios = np.array([xtrim_fac] * num_theta + [0.05])
+    width_ratios = np.array([xtrim_fac,xtrim_fac*0.2] * num_theta + [0.05])
     height_ratios = np.array([img_aspect * ytrim_fac] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
 
     axes = []
+    spacers = []
     for i in range(num_gamma):
         row = []
         for j in range(num_theta):
-            row.append(fig.add_subplot(gs[i,j]))
+            row.append(fig.add_subplot(gs[i,2*j]))
+            spacers.append(gif.add_subplot(gs[i,2*j+1]))
         axes.append(row)
     cax = fig.add_subplot(gs[:,-1])
+    for spacer in spacers:
+        spacer.axis("off")
 
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
     fig.colorbar(sm, cax=cax, orientation="vertical")
@@ -712,7 +716,7 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma), rotation="horizontal")
+                axes[i][j].set_ylabel("$\Gamma$ = {0}".format(gamma), rotation="horizontal",ha="right")
             else:
                 axes[i][j].yaxis.set_visible(False)
 
