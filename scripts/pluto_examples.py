@@ -670,7 +670,7 @@ def plot_morphology():
     half_width = 0.5 * width
     half_height = 0.5 * height
     width_ratios = np.array([width,width*spacer_scale] * num_theta + [width*0.1])
-    height_ratios = np.array([height,height*spacer_scale] * num_gamma)
+    height_ratios = np.array([height] * num_gamma)
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
