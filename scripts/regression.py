@@ -118,7 +118,8 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
         if (camera_args["resize_img"]):
             camera.length_X = camera_args["template"].length_X * np.sin(theta)
             camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
-        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)    
+        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+        cameras.append(camera)    
         if (verbose): print("built camera {0}...".format(i))
     if (verbose): print("finished camera initialisation.")
 
