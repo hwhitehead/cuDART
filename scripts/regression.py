@@ -17,6 +17,10 @@ c_light = 3e8
 def build_regression_suite(save_dir, sim_args, verbose=True):
 
     # construct template data for regression suite
+    # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
+    # the emitting regions are spheres in the observer frame
+    # the emission in the spheres falls off quadratically with radius, out to a fixed, finite radius
+
     if (verbose): 
         print("starting regression suite data construction...")
         print("saving data at {0}".format(save_dir))
@@ -86,6 +90,10 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
 def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
 
     # run a rendering test on a single snapshot of data
+    # data should be loaded from suite built using build_regression_suite (-b flag)
+    # render uses a set number of cameras evenly spanning the azimuthal axis 
+    # optional call included to render raws as figures (.npy -> .png)
+
     if (verbose): 
         print("starting no-lookback render test...")
         print("reading data from {0}".format(load_dir))
