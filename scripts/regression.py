@@ -87,10 +87,12 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
     if (verbose): print("starting no-lookback render test...")
 
     # check user input
-    if sim_args["snapshot_index"] is None:
+    if camera_args["snapshot_index"] is None: # select middle snapshot
         snapshot_index = np.floor(0.5 * (sim_args["num_snapshots"] - 1))
         print("auto setting snapshot_index = {0}".format(snapshot_index))
-    else:
+    elif (camera_args["snapshot_index"] < 0): # check snapshot lower oob
+        print("selected snapshot negative, using first snapshot.")
+    else: # check snapshot upper oob
         last_index = sim_args["num_snapshots"] - 1
         if sim_args["snapshot_index"] > last_index:
             print("selected snapshot exceeds simulation bounds, using last ({0})".format(last_index))
@@ -140,7 +142,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     if (verbose): print("starting lookback render test...")
 
     # check user input
-    if sim_args["snapshot_index"] is None:
+    if camera_args["snapshot_index"] is None:
         snapshot_index = np.floor(0.5 * (sim_args["num_snapshots"] - 1))
         print("auto setting snapshot_index = {0}".format(snapshot_index))
     else:
