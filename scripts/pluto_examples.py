@@ -795,5 +795,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    render_morphology(theta_span=[np.pi/4],gamma_span=[2])
+    render_morphology()
     plot_morphology()
