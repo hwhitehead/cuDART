@@ -697,6 +697,8 @@ def plot_morphology():
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
             axes[i][j].plot([],[],alpha=0,label=label)
             axes[i][j].legend(loc="upper left", frameon=False,labelcolor='w')
+            axes[i][j].axvline(x=-0.5 * np.sin(theta),color='w')
+            axes[i][j].axvline(x=0.5 * np.sin(theta),color='w')
 
             if i == 0:
                 axes[i][j].xaxis.set_label_position("top")
@@ -715,10 +717,9 @@ def plot_morphology():
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
     plt.close("all")
 
-def render_morphology(gamma_span=[1.15,2,4,8]):
+def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, np.pi / 8]):
 
     master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
-    theta_ar = [np.pi / 2, np.pi / 4, np.pi / 8]
     L_in_kpc = 120 
     r_blob_in_kpc = 2.5
     r_blob_in_code = r_blob_in_kpc / L_in_kpc
@@ -729,14 +730,14 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
     short_scale = 2.0 * r_blob_in_code
     img_aspect = short_scale / long_scale
     template_camera = Camera()
-    template_camera.num_pixels_X = long_res
-    template_camera.num_pixels_Y = int(long_res * img_aspect)
     template_camera.tilt = np.pi / 2
     template_camera.t_obs = 0.5 # in units of Myr
     phi = epsilon
     theta = np.pi / 2 + epsilon
     template_camera.length_X = long_scale
-    template_camera.length_Y = long_scale * img_aspect
+    template_camera.length_Y = short_scale
+    template_camera.num_pixels_X = long_res
+    template_camera.num_pixels_Y = int(long_res * img_aspect)
     template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
 
     for gamma_bulk in gamma_span:
@@ -744,7 +745,7 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
         npy_save_str = os.path.join(load_dir, "raw")
 
         # build cameras for this gamma value
-        v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
+        v_in_c = np.sqrt(1.0 - 1.0 / gamma_bulk ** 2)
         v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
         dist_to_camera_in_kpc = 2.0 * L_in_kpc
         t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
@@ -787,7 +788,6 @@ def render_morphology(gamma_span=[1.15,2,4,8]):
         #scene.render(verbose = True, relativistic = True, lookback=True)
         print("finished rendering raw images for gamma = {0}".format(gamma_bulk))
 
-
 if __name__ == "__main__":
 
     #build_blob_data(num_snapshots=50)
@@ -795,5 +795,5 @@ if __name__ == "__main__":
     #render_lookback_example(relativistic=True, remove_raw_images = False)
     # plot_superluminal(num_img=100, sparse_step=1)
     #build_morphology_suite(gamma_span=[1.15])
-    render_morphology()
+    render_morphology(theta_span=[np.pi/4],gamma_span=[2])
     plot_morphology()
