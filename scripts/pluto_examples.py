@@ -697,6 +697,7 @@ def plot_morphology():
         load_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
         beta = np.sqrt(1 - 1.0 / gamma ** 2)
         for j, theta in enumerate(theta_span):
+            doppler_fac = 1.0 / (gamma * (1 - beta * np.cos(theta)))
             length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
             length_label = "$\mathcal{L} \simeq$" + "{0:.1f}".format(length_ratio)
             axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
@@ -713,7 +714,7 @@ def plot_morphology():
             y_offset = 0.25 * img_aspect * ytrim_fac
             no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False,linestyle="dashed",lw=0.5)
             axes[i][j].add_patch(no_beam)
-            beamed = patches.Ellipse((x_offset,-y_offset),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='r',fill=False,lw=0.5)
+            beamed = patches.Ellipse((x_offset,-y_offset),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='w',fill=False,lw=0.5)
             axes[i][j].add_patch(beamed)
 
             if i == 0:
@@ -724,8 +725,11 @@ def plot_morphology():
                 axes[i][j].xaxis.set_visible(False)
             
             if j == 0:
-                axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$" +  "={0:.2f}\n".format(gamma) + r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$", rotation="horizontal",ha="right")
+                axes[i][j].yaxis.set_ticks([])#
+                ylabel = r"$\Gamma=$" + "{0:.2f}\n".format(gamma) 
+                ylabel += r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$\n"
+                ylabel += r"$D=$" + "{0:.2f}".format(doppler_fac)
+                axes[i][j].set_ylabel(ylabel, rotation="horizontal",ha="right",va="center")
             else:
                 axes[i][j].yaxis.set_visible(False)
 
