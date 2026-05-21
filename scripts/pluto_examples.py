@@ -642,7 +642,7 @@ def plot_morphology():
     spec_snapshot = 2
     gamma_span = [1.15, 2, 4, 8]
     theta_span = [np.pi / 2, np.pi / 4, np.pi / 8]
-    theta_labels = [r"$\theta = \pi / 2$", r"$\theta = \pi / 4$", r"$\theta = \pi / 8$"]
+    theta_labels = [r"$\theta = 90.0^\circ$", r"$\theta = 45.0^\circ$", r"$\theta = 22.5^\circ$"]
     num_gamma = np.size(gamma_span)
     num_theta = np.size(theta_span)
     L_in_kpc = 120 
@@ -694,7 +694,7 @@ def plot_morphology():
         beta = np.sqrt(1 - 1.0 / gamma ** 2)
         for j, theta in enumerate(theta_span):
             length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
-            label = "$\mathcal{L}$" + " = {0:.2f}".format(length_ratio)
+            length_label = "$\mathcal{L}$" + " = {0:.2f}".format(length_ratio)
             axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
             axes[i][j].set_ylim([-0.5 * img_aspect * ytrim_fac, 0.5 * img_aspect * ytrim_fac])
             axes[i][j].set_aspect("equal")
@@ -703,7 +703,7 @@ def plot_morphology():
             if os.path.exists(load_str):
                 img = np.load(load_str)
                 axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
-            axes[i][j].text(0.45*xtrim_fac,0.45*img_aspect*ytrim_fac,s=label,va="top",ha="right",color="w")
+            axes[i][j].text(0.45*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
             
             x_offset = -0.25 * xtrim_fac * np.sin(theta)
             y_offset = 0.25 * img_aspect * ytrim_fac
@@ -721,14 +721,14 @@ def plot_morphology():
             
             if j == 0:
                 axes[i][j].yaxis.set_ticks([])
-                axes[i][j].set_ylabel("$\Gamma$" +  "= {0:.2f}".format(gamma), rotation="horizontal",ha="right")
+                axes[i][j].set_ylabel("$\Gamma$" +  "= {0:.2f}\n".format(gamma) + "$\theta_\mathrm{crit}$" + " = {0:.2f}".format(np.arccos(beta)), rotation="horizontal",ha="right")
             else:
                 axes[i][j].yaxis.set_visible(False)
 
     # add external legend
     axes[-1][1].plot([],[],color='k',linestyle="dashed",label="True Silhouette")
     axes[-1][1].plot([],[],color='k',linestyle="solid",label="Observed Silhouette")
-    fig.legend(frameon=False,loc="outside lower center")
+    fig.legend(frameon=False,loc="outside lower center",ncol=2)
 
     plt.subplots_adjust(hspace=0,wspace=0)
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
