@@ -135,7 +135,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
         if (camera_args["resize_img"]):
             camera.length_X = camera_args["template"].length_X * np.sin(theta)
             camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
-        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+        camera.set_sph_pos(r = 2.0, target_origin = True)
         cameras.append(camera)    
         if (verbose): print("built camera {0} at theta = {1:.2f}deg...".format(i,theta*180.0/np.pi))
     if (verbose): print("finished camera initialisation.")
@@ -200,12 +200,12 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     t_max = t_min + dt_max                                                                      # offset by t_min
 
     # generate array of cameras, evenly seperated in observer time
-    if (verbose): print(r"building {0} cameras evenly spanning observer time in [{0},{1}]".format(t_min, t_max))
+    if (verbose): print(r"building {0} cameras evenly spanning observer time in [{1},{2}]".format(camera_args["num_img"],t_min, t_max))
     t_obs_ar = np.linspace(t_min, t_max, camera_args["num_img"])
     if (camera_args["resize_img"]): # apply resize by orientaiton if flagged
             camera_args["template"].length_X *= np.sin(theta)
             camera_args["template"].length_Y *= np.sin(theta)
-    camera_args["template"].set_sph_pos(r = 2.0, theta = camera_args["template"].theta, phi = camera_args["template"].phi, target_origin = True)
+    camera_args["template"].set_sph_pos(r = 2.0, target_origin = True)
     cameras = []
     for i, t_obs in enumerate(t_obs_ar):
         camera = copy.deepcopy(camera_args["template"])
