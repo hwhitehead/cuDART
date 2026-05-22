@@ -840,16 +840,20 @@ def comp_aliasing():
 
     set_plot_defaults()
     L_fig = 20.0 / 3
-    width_ratios = np.array([1,1,1,0.05])
+    spacer_scale = 0.01
+    width_ratios = np.array([1,spacer_scale]*3+[0.05])
     height_ratios = np.array([1])    
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
     fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
 
     axes = []
+    spacers = []
     for i in range(3):
-        axes.append(fig.add_subplot(gs[:,i]))
+        axes.append(fig.add_subplot(gs[:,2*i]))
+        spacers.append(fig.add_subplot(gs[:,2*i+1]))
     cax = fig.add_subplot(gs[:,-1])
+    for spacer in spacers: spacer.axis("off")
 
     cmap = "afmhot"
     vmin = -6
@@ -869,6 +873,15 @@ def comp_aliasing():
         load_str = os.path.join(load_dir, "raw" + str(snap_num).zfill(5) + ".npy")
         img = np.load(load_str)
         axes[i].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
+        axes[i].xaxis.set_visible(False)
+        axes[i].yaxis.set_visible(False)
+        axes[i].set_facecolor("k")
+        axes[i].set_xlim([-0.5 * trim_fac, 0.5 * trim_fac])
+        axes[i].set_ylim([-0.5 * trim_fac, 0.5 * trim_fac])
+        axes[i].text(-0.45 * trim_fac, 0.45 * trim_fac, s="$\Delta t$ = " + "{0:.2f}Myr".format(dt_ar[i]), color='w',va="top",ha="left")
+
+        if i == 1:
+            axes[i].set_title("$\Delta t_\mathrm{crit}$ = " + "{0:.2f}Myr".format(dt_crit))
 
     plt.subplots_adjust(hspace=0,wspace=0)
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
