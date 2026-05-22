@@ -14,7 +14,7 @@ kpc_to_m = 1e3 * 3.086e+16
 Myr_to_s = 1e6 * 365 * 24 * 60 * 60
 c_light = 3e8
 
-def build_regression_suite(save_dir, sim_args, verbose=True, target_theta=None):
+def build_regression_suite(save_dir, sim_args, verbose=True):
 
     # construct template data for regression suite
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
@@ -50,8 +50,8 @@ def build_regression_suite(save_dir, sim_args, verbose=True, target_theta=None):
     if (verbose): print("built empty mesh.")
 
     # determine cadence
-    if target_theta is not None:
-        crit_fac = (1 - v_in_c * np.cos(target_theta)) / np.sin(target_theta)
+    if sim_args["target_theta"] is not None:
+        crit_fac = (1 - v_in_c * np.cos(sim_args["target_theta"])) / np.sin(sim_args["target_theta"])
         dt_crit_in_s = crit_fac * sim_args["r_blob"] * kpc_to_m / (v_in_c * c_light)
         dt_crit = dt_crit_in_s / Myr_to_s
         num_snapshots_crit = int(T_in_Myr / dt_crit)
@@ -246,7 +246,8 @@ if __name__ == "__main__":
                 "L_domain": 120.0,
                 "r_blob": 2.5,
                 "domain_dims": [100,100,200],
-                "num_snapshots": 100}
+                "num_snapshots": 100,
+                "target_theta": None}
 
     # construct template camera
     template_camera = Camera()
@@ -301,7 +302,7 @@ if __name__ == "__main__":
     if (args["b"]):
         if (args["data_dir"] is None):
             raise Exception("unable to build regression suite data without save location (use --data_dir)")
-        build_regression_suite(args["data_dir"], sim_args, args["v"], 0.25 * np.pi + epsilon)
+        build_regression_suite(args["data_dir"], sim_args, args["v"])
     
     if (args["r"]):
         if (args["save_dir"] is None):
