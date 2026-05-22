@@ -185,9 +185,6 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
     theta = camera_args["template"].theta                                                       # collect orientation from template
-    
-    print(theta)
-    return
 
     # calculate start time (just before light from origin reaches camera)
     D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
@@ -197,7 +194,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
 
     # calculate stop time (when receding ejectum reaches maximal extent)
     x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
-    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
+    d_in_m = x_max_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
     dt_max_in_s = d_in_m / c_light                                                              # observer time when RECEDING blob reaches domain edge
     dt_max = dt_max_in_s / Myr_to_s                                                             # cast to astro/code units    
     t_max = t_min + dt_max                                                                      # offset by t_min
@@ -252,7 +249,7 @@ if __name__ == "__main__":
     template_camera.num_pixels_Y = 2048
 
     # dict for camera args
-    camera_args = {"num_img": 100,
+    camera_args = {"num_img": 10,
                     "resize_img": False,
                     "relativistic": True,
                     "template": template_camera,
