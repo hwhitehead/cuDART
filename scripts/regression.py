@@ -14,12 +14,13 @@ kpc_to_m = 1e3 * 3.086e+16
 Myr_to_s = 1e6 * 365 * 24 * 60 * 60
 c_light = 3e8
 
-def build_regression_suite(save_dir, sim_args, verbose=True):
+def build_regression_suite(save_dir, sim_args, verbose=True, target_theta=None):
 
     # construct template data for regression suite
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
     # the emitting regions are spheres in the observer frame
     # the emission in the spheres falls off quadratically with radius, out to a fixed, finite radius
+    # if given specific theta, ensure sampling occurs at unaliased frequency
 
     if (verbose): 
         print("starting regression suite data construction...")
@@ -48,9 +49,19 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
     snapshot_size = np.size(xx)
     if (verbose): print("built empty mesh.")
 
+    # determine cadence
+    if target_theta is not None:
+        dt_crit = (1 - v_in_c * np.cos(target_theta)) / np.sin(target_theta)
+        dt_crit /= Myr_to_s
+        num_snapshots_crit = int(T_in_Myr / dt_crit)
+        num_snapshots = num_snapshots_crit if num_snapshots_crit > sim_args["num_snapshots"] else sim_args["num_snapshots"]
+    else:
+        num_snapshots = sim_args["num_snapshots"]    
+    t_span = np.linspace(0, T_in_Myr, sim_args["num_snapshots"])                # evenly snapshot times over duration
+
     # build header data
     header_str = os.path.join(save_dir, "header.txt")
-    t_span = np.linspace(0, T_in_Myr, sim_args["num_snapshots"])                # evenly snapshot times over duration
+    
     with open(header_str, "w") as f:
         f.write("{0} {1} {2} {3}".format(sim_args["num_snapshots"], snapshot_size, t_span[1], sim_args["L_domain"]))
     if (verbose): print("built header.")
@@ -234,7 +245,7 @@ if __name__ == "__main__":
                 "L_domain": 120.0,
                 "r_blob": 2.5,
                 "domain_dims": [100,100,200],
-                "num_snapshots": 100}
+                "num_snapshots": 10}
 
     # construct template camera
     template_camera = Camera()
