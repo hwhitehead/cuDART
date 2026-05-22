@@ -266,7 +266,7 @@ class Camera:
     The Camera class is a basic struct to wrap the image viewing orientation and dimensions
     """
     def __init__(self, origin = np.array([1.0,0.0,0.0]), normal = np.array([-1.0,0.0,0.0]), bias = np.array([0.0,0.0,1.0]),
-                    num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0, t_obs = 0.0
+                    num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0, t_obs = 0.0,
                     theta = 0.5 * np.pi - epsilon, phi = epsilon):
         self.origin = origin
         self.normal = normal
