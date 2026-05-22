@@ -248,7 +248,7 @@ if __name__ == "__main__":
     template_camera.num_pixels_Y = 2048
 
     # dict for camera args
-    camera_args = {"num_img": 10,
+    camera_args = {"num_img": 100,
                     "resize_img": False,
                     "relativistic": True,
                     "template": template_camera,
