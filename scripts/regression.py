@@ -300,7 +300,7 @@ if __name__ == "__main__":
     if (args["b"]):
         if (args["data_dir"] is None):
             raise Exception("unable to build regression suite data without save location (use --data_dir)")
-        build_regression_suite(args["data_dir"], sim_args, args["v"])
+        build_regression_suite(args["data_dir"], sim_args, args["v"], True)
     
     if (args["r"]):
         if (args["save_dir"] is None):
