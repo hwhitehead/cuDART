@@ -816,12 +816,64 @@ def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, 
         scene.render(verbose = True, relativistic = True, lookback=True)
         print("finished rendering raw images for gamma = {0}".format(gamma_bulk))
 
+def comp_aliasing():
+
+    host_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/lookback"
+    save_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/lookback/alias.png"
+    snap_num = 22
+    labels = ["low_cadence", "critical", "high_cadence"]
+    num_snapshots_ar = [10,50,100]
+
+    Gamma = 2
+    theta = np.pi / 4
+    r_blob = 2.5
+    L_domain = 120
+    v_in_c = np.sqrt(1 - 1.0 / Gamma ** 2)                          
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 
+    r_blob_in_code = r_blob / L_domain                 
+    T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr 
+
+    dt_ar = [T_in_Myr / n for n in num_snapshots_ar]
+    crit_fac = (1 - v_in_c * np.cos(theta)) / np.sin(theta)
+    dt_crit_in_s = crit_fac * r_blob * kpc_to_m / (v_in_c * c_light)
+    dt_crit = dt_crit_in_s / Myr_to_s
+
+    set_plot_defaults()
+    L_fig = 20.0 / 3
+    width_ratios = np.array([1,1,1,0.05])
+    height_ratios = np.array([1])    
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+
+    axes = []
+    for i in range(3):
+        axes.append(fig.add_subplot(gs[:,i]))
+    cax = fig.add_subplot(gs[:,-1])
+
+    cmap = "afmhot"
+    vmin = -6
+    vmax = 0
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.yaxis.tick_right()
+    cax.yaxis.set_label_position("right")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
+
+    trim_fac = 0.5
+    X = np.linspace(-0.5, 0.5, 2048)
+    Y = np.linspace(-0.5, 0.5, 2048)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    for i in range(3):
+        load_dir =os.path.join(host_dir, labels[i])
+        load_str = os.path.join(load_dir, "raw" + str(snap_num).zfill(5) + ".npy")
+        img = np.load(load_str)
+        axes[i].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
+
+    plt.subplots_adjust(hspace=0,wspace=0)
+    fig.savefig(save_str, dpi=600, bbox_inches="tight")
+    plt.close("all")
+
 if __name__ == "__main__":
 
-    #build_blob_data(num_snapshots=50)
-    #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    #render_lookback_example(relativistic=True, remove_raw_images = False)
-    # plot_superluminal(num_img=100, sparse_step=1)
-    #build_morphology_suite(gamma_span=[1.15])
-    #render_morphology()
-    plot_morphology()
+    comp_aliasing()

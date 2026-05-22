@@ -246,7 +246,7 @@ if __name__ == "__main__":
                 "L_domain": 120.0,
                 "r_blob": 2.5,
                 "domain_dims": [100,100,200],
-                "num_snapshots": 43}
+                "num_snapshots": 100}
 
     # construct template camera
     template_camera = Camera()
