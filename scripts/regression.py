@@ -137,7 +137,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
             camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
         camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
         cameras.append(camera)    
-        if (verbose): print("built camera {0}...".format(i))
+        if (verbose): print("built camera {0} at theta = {1:.2f}deg...".format(i,theta*180.0/np.pi))
     if (verbose): print("finished camera initialisation.")
 
     # generate scene
@@ -156,41 +156,61 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
 
 def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
 
-    # run a rendering test on multiple snapshot of data (TODO: needs full write, non-func copy of nolookback)
-    if (verbose): print("starting lookback render test...")
+    # run a rendering test using finite speed of light with multiple snapshots
+    # data should be loaded from suite built using build_regression_suite (-b flag)
+    # render uses a set number of cameras evenly spaced in observer time
+    # optional call included to render raws as figures (.npy -> .png)
 
-    # check user input
-    if camera_args["snapshot_index"] is None:
-        snapshot_index = np.floor(0.5 * (sim_args["num_snapshots"] - 1))
-        print("auto setting snapshot_index = {0}".format(snapshot_index))
-    else:
-        last_index = sim_args["num_snapshots"] - 1
-        if sim_args["snapshot_index"] > last_index:
-            print("selected snapshot exceeds simulation bounds, using last ({0})".format(last_index))
-            snapshot_index = last_index
+    if (verbose): 
+        print("starting lookback render test...")
+        print("reading data from {0}".format(load_dir))
+        print("saving data at {0}".format(save_dir))
 
+    # check input, output directory existence
     for path in [load_dir, save_dir]:
         if not os.path.isdir(path):
             raise Exception("{0} does not exist".format(save_dir))
 
-    npy_load_str = os.path.join(load_dir, "snapshot" + str(snapshot_index).zfill(5) + ".npy")
+    # format input and output paths
+    npy_load_str = load_dir
     npy_save_str = os.path.join(save_dir, "raw")
     png_save_str = os.path.join(save_dir, "img")
 
-    if not os.path.exists(npy_load_str):
-        raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(npy_load_str))
+    # check for ALL snapshot input files
+    for n in range(0, sim_args["num_snapshots"]):
+        snapshot_str = os.path.join(npy_load_str, "snapshot" + str(n).zfill(5) + ".npy")
+        if not os.path.exists(snapshot_str):
+            raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(snapshot_str))
 
-    # prepare array of cameras (cycle theta)
-    theta_ar = np.linspace(epsilon, np.pi - epsilon,num_img)
+    # collect data from args
+    v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                      # calculate velocity in units of c
+    theta = camera_args["template_camera"].theta                                              # collect orientation from template
+    
+    # calculate start time (just before light from origin reaches camera)
+    dist_to_camera_in_m = 2.0 * sim_args["L_domain"]                                          # origin-camera seperation 
+    t_min_in_s = dist_to_camera_in_m / c_light                                                # light flight time from origin to camera
+    t_min = t_min_in_s / Myr_to_s                                                             # cast to astro/code units                 
+    t_min *= 0.95                                                                             # start render just before flight time 
+
+    # calculate stop time (when receding ejectum reaches maximal extent)
+    x_max_in_m = sim_args["L_domain"] * np.sin(theta) * kpc_to_m                              # maximal blob displacement for given orientation
+    D_in_m = x_obs_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m    # invert superluminal motion eq to calc flight time
+    t_max_in_s = d_in_m / c_light                                                             # observer time when RECEDING blob reaches domain edge
+    t_max = t_obs_in_s / Myr_to_s                                                             # cast to astro/code units    
+
+    # generate array of cameras, evenly seperated in observer time
+    if (verbose): print(r"building {0} cameras evenly spanning observer time in [{0},{1}]".format(t_min, t_max))
+    t_obs_ar = np.linspace(t_min, t_max, camera_args["num_img"])
+    if (camera_args["resize_img"]): # apply resize by orientaiton if flagged
+            camera_args["template"].length_X *= np.sin(theta)
+            camera_args["template"].length_Y *= np.sin(theta)
+    camera_args["template"].set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
     cameras = []
-    for i, theta in enumerate(theta_ar):
+    for i, t_obs in enumerate(t_obs_ar):
         camera = copy.deepcopy(camera_args["template"])
-        camera.theta = theta
-        if (camera_args["resize_img"]):
-            camera.length_X = camera_args["template"].length_X * np.sin(theta)
-            camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
-        camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)    
-        if (verbose): print("built camera {0}...".format(i))
+        camera.t_obs = t_obs
+        cameras.append(camera) 
+        if (verbose): print("built camera {0} at t_obs = {1:.3f}...".format(i,t_obs))
     if (verbose): print("finished camera initialisation.")
 
     # generate scene
@@ -202,7 +222,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
-        scene.plot(png_save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = remove_raw_images, vmin=-6, vmax=0)
+        scene.plot(png_save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = False, vmin=-6, vmax=0)
         print("finished rendering figures.")
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
@@ -219,9 +239,9 @@ if __name__ == "__main__":
     # template camera
     template_camera = Camera()
     template_camera.tilt = (45.0 / 180) * np.pi     # default 45deg tilt from bias aligned with z axis 
-    template_camera.t_obs = 0.5                     # observer time, in units of Myr
+    template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback
     phi = epsilon                                   # small value, system axisymmetric in phi
-    theta = np.pi / 2 + epsilon                     # overwritten to even spacing in theta
+    theta = 0.25 * np.pi + epsilon                  # overwritten to even spacing in theta for no-lookback
     template_camera.length_X = 1.0                  # longest simulation size 1.0 in code units
     template_camera.length_Y = 1.0
     template_camera.num_pixels_X = 2048             # ensure square pixels
