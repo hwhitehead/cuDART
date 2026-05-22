@@ -878,10 +878,10 @@ def comp_aliasing():
         axes[i].set_facecolor("k")
         axes[i].set_xlim([-0.5 * trim_fac, 0.5 * trim_fac])
         axes[i].set_ylim([-0.5 * trim_fac, 0.5 * trim_fac])
-        axes[i].text(-0.45 * trim_fac, 0.45 * trim_fac, s="$\Delta t$ = " + "{0:.2f}Myr".format(dt_ar[i]), color='w',va="top",ha="left")
+        axes[i].text(0, 0.45 * trim_fac, s="$\Delta t$ = " + "{0:.0f}kyr".format(dt_ar[i]*1e3), color='w',va="bottom",ha="center")
 
         if i == 1:
-            axes[i].set_title("$\Delta t_\mathrm{crit}$ = " + "{0:.2f}Myr".format(dt_crit))
+            axes[i].set_title("$\Delta t_\mathrm{crit}$ = " + "{0:.0f}kyr".format(dt_crit*1e3))
 
     plt.subplots_adjust(hspace=0,wspace=0)
     fig.savefig(save_str, dpi=600, bbox_inches="tight")
