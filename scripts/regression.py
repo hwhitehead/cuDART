@@ -57,13 +57,13 @@ def build_regression_suite(save_dir, sim_args, verbose=True, target_theta=None):
         num_snapshots = num_snapshots_crit if num_snapshots_crit > sim_args["num_snapshots"] else sim_args["num_snapshots"]
     else:
         num_snapshots = sim_args["num_snapshots"]    
-    t_span = np.linspace(0, T_in_Myr, sim_args["num_snapshots"])                # evenly snapshot times over duration
+    t_span = np.linspace(0, T_in_Myr, num_snapshots)                # evenly snapshot times over duration
 
     # build header data
     header_str = os.path.join(save_dir, "header.txt")
     
     with open(header_str, "w") as f:
-        f.write("{0} {1} {2} {3}".format(sim_args["num_snapshots"], snapshot_size, t_span[1], sim_args["L_domain"]))
+        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_domain"]))
     if (verbose): print("built header.")
 
     # build snapshots
@@ -94,8 +94,8 @@ def build_regression_suite(save_dir, sim_args, verbose=True, target_theta=None):
         save_data[tail_vel_mask] = -v_in_c
         save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
         np.save(save_str, save_data)                                            # save snapshot data
-        if (verbose): print("built dataset for snapshot {0}".format(n))
-    
+        if (verbose): print("built dataset for snapshot {0}/{1}".format(n,num_snapshots))
+
     if (verbose): print("finished dataset construction.")
 
 def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
