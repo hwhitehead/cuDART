@@ -186,6 +186,9 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
     theta = camera_args["template"].theta                                                       # collect orientation from template
     
+    print(theta)
+    return
+
     # calculate start time (just before light from origin reaches camera)
     D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
     t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
