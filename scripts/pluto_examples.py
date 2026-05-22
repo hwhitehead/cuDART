@@ -840,7 +840,7 @@ def comp_aliasing():
 
     set_plot_defaults()
     L_fig = 20.0 / 3
-    spacer_scale = 0.01
+    spacer_scale = 0.05
     width_ratios = np.array([1,spacer_scale]*3+[0.05])
     height_ratios = np.array([1])    
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
@@ -878,7 +878,7 @@ def comp_aliasing():
         axes[i].set_facecolor("k")
         axes[i].set_xlim([-0.5 * trim_fac, 0.5 * trim_fac])
         axes[i].set_ylim([-0.5 * trim_fac, 0.5 * trim_fac])
-        axes[i].text(0, 0.45 * trim_fac, s="$\Delta t$ = " + "{0:.0f}kyr".format(dt_ar[i]*1e3), color='w',va="bottom",ha="center")
+        axes[i].text(0, -0.45 * trim_fac, s="$\Delta t$ = " + "{0:.0f}kyr".format(dt_ar[i]*1e3), color='w',va="bottom",ha="center")
 
         if i == 1:
             axes[i].set_title("$\Delta t_\mathrm{crit}$ = " + "{0:.0f}kyr".format(dt_crit*1e3))
