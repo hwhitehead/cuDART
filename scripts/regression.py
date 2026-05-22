@@ -183,20 +183,21 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
             raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(snapshot_str))
 
     # collect data from args
-    v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                      # calculate velocity in units of c
-    theta = camera_args["template"].theta                                              # collect orientation from template
+    v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
+    theta = camera_args["template"].theta                                                       # collect orientation from template
     
     # calculate start time (just before light from origin reaches camera)
-    D_in_m = 2.0 * sim_args["L_domain"]                                          # origin-camera seperation 
-    t_min_in_s = D_in_m / c_light                                                # light flight time from origin to camera
-    t_min = t_min_in_s / Myr_to_s                                                             # cast to astro/code units                 
-    t_min *= 0.95                                                                             # start render just before flight time 
+    D_in_m = 2.0 * sim_args["L_domain"]                                                         # origin-camera seperation 
+    t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
+    t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
+    t_min *= 0.95                                                                               # start render just before flight time 
 
     # calculate stop time (when receding ejectum reaches maximal extent)
-    x_max_in_m = sim_args["L_domain"] * np.sin(theta) * kpc_to_m                              # maximal blob displacement for given orientation
-    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m    # invert superluminal motion eq to calc flight time
-    t_max_in_s = d_in_m / c_light                                                             # observer time when RECEDING blob reaches domain edge
-    t_max = t_max_in_s / Myr_to_s                                                             # cast to astro/code units    
+    x_max_in_m = sim_args["L_domain"] * np.sin(theta) * kpc_to_m                                # maximal blob displacement for given orientation
+    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
+    dt_max_in_s = d_in_m / c_light                                                              # observer time when RECEDING blob reaches domain edge
+    dt_max = dt_max_in_s / Myr_to_s                                                             # cast to astro/code units    
+    t_max = t_min + dt_max                                                                      # offset by t_min
 
     # generate array of cameras, evenly seperated in observer time
     if (verbose): print(r"building {0} cameras evenly spanning observer time in [{0},{1}]".format(t_min, t_max))
