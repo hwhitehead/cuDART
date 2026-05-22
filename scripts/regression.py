@@ -145,7 +145,7 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"])
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
@@ -196,7 +196,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     x_max_in_m = sim_args["L_domain"] * np.sin(theta) * kpc_to_m                              # maximal blob displacement for given orientation
     d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m    # invert superluminal motion eq to calc flight time
     t_max_in_s = d_in_m / c_light                                                             # observer time when RECEDING blob reaches domain edge
-    t_max = t_obs_in_s / Myr_to_s                                                             # cast to astro/code units    
+    t_max = t_max_in_s / Myr_to_s                                                             # cast to astro/code units    
 
     # generate array of cameras, evenly seperated in observer time
     if (verbose): print(r"building {0} cameras evenly spanning observer time in [{0},{1}]".format(t_min, t_max))
@@ -218,7 +218,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"])
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
