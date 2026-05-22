@@ -172,7 +172,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
             raise Exception("{0} does not exist".format(save_dir))
 
     # format input and output paths
-    npy_load_str = load_dir
+    npy_load_str = load_dir # input is entire data directory
     npy_save_str = os.path.join(save_dir, "raw")
     png_save_str = os.path.join(save_dir, "img")
 
@@ -235,7 +235,7 @@ if __name__ == "__main__":
                 "L_domain": 120.0,
                 "r_blob": 2.5,
                 "domain_dims": [100,100,200],
-                "num_snapshots": 10}
+                "num_snapshots": 100}
 
     # construct template camera
     template_camera = Camera()
