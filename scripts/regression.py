@@ -204,7 +204,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     if (camera_args["resize_img"]): # apply resize by orientaiton if flagged
             camera_args["template"].length_X *= np.sin(theta)
             camera_args["template"].length_Y *= np.sin(theta)
-    camera_args["template"].set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+    camera_args["template"].set_sph_pos(r = 2.0, theta = camera_args["template"].theta, phi = camera_args["template"].phi, target_origin = True)
     cameras = []
     for i, t_obs in enumerate(t_obs_ar):
         camera = copy.deepcopy(camera_args["template"])
@@ -236,14 +236,14 @@ if __name__ == "__main__":
                 "domain_dims": [100,100,200],
                 "num_snapshots": 10}
 
-    # template camera
+    # construct template camera
     template_camera = Camera()
     template_camera.tilt = (45.0 / 180) * np.pi     # default 45deg tilt from bias aligned with z axis 
-    template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback
-    phi = epsilon                                   # small value, system axisymmetric in phi
-    theta = 0.25 * np.pi + epsilon                  # overwritten to even spacing in theta for no-lookback
+    template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
+    template_camera.phi = epsilon                   # small value, system axisymmetric in phi
+    template_camera.theta = 0.25 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
     template_camera.length_X = 1.0                  # longest simulation size 1.0 in code units
-    template_camera.length_Y = 1.0
+    template_camera.length_Y = 1.0                  # square domain
     template_camera.num_pixels_X = 2048             # ensure square pixels
     template_camera.num_pixels_Y = 2048
 
