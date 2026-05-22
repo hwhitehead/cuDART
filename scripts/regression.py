@@ -187,7 +187,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
     theta = camera_args["template"].theta                                                       # collect orientation from template
     
     # calculate start time (just before light from origin reaches camera)
-    D_in_m = 2.0 * sim_args["L_domain"]                                                         # origin-camera seperation 
+    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
     t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
     t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
     t_min *= 0.95                                                                               # start render just before flight time 
