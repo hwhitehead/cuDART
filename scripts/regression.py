@@ -51,8 +51,9 @@ def build_regression_suite(save_dir, sim_args, verbose=True, target_theta=None):
 
     # determine cadence
     if target_theta is not None:
-        dt_crit = (1 - v_in_c * np.cos(target_theta)) / np.sin(target_theta)
-        dt_crit /= Myr_to_s
+        crit_fac = (1 - v_in_c * np.cos(target_theta)) / np.sin(target_theta)
+        dt_crit_in_s = crit_fac * sim_args["r_blob"] / (v_in_c * c_light)
+        dt_crit = dt_crit_in_s / Myr_to_s
         num_snapshots_crit = int(T_in_Myr / dt_crit)
         num_snapshots = num_snapshots_crit if num_snapshots_crit > sim_args["num_snapshots"] else sim_args["num_snapshots"]
     else:
