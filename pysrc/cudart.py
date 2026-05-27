@@ -343,6 +343,7 @@ class Mesh:
 
     def write_header(self):
         # build text file with header data for each MeshBlock
+        print(self.mb_headers)
         header_str = os.path.join(self.data_dir, "header.txt")
         with open(header_str, "w") as f:
             for mb_header in self.mb_headers:
