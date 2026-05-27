@@ -291,14 +291,9 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True)
         if not os.path.isdir(path):
             raise Exception("{0} does not exist".format(save_dir))
 
-    # format input and output paths
-    npy_load_str = load_dir # input is entire data directory
-    npy_save_str = os.path.join(save_dir, "raw")
-    png_save_str = os.path.join(save_dir, "img")
-
     # check for ALL snapshot input files
     for n in range(0, sim_args["num_snapshots"]):
-        snapshot_str = os.path.join(npy_load_str, "snapshot" + str(n).zfill(5) + ".npy")
+        snapshot_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
         if not os.path.exists(snapshot_str):
             raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(snapshot_str))
 
@@ -319,7 +314,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True)
     t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units    
 
     # generate array of cameras, evenly seperated in observer time
-    if (verbose): print(r"building {0} cameras evenly spanning observer time in [{1},{2}]".format(camera_args["num_img"],t_min, t_max))
+    if (verbose): print(r"building {0} cameras evenly spanning t_obs in [{1},{2}]Myr".format(camera_args["num_img"],t_min, t_max))
     t_obs_ar = np.linspace(t_min, t_max, camera_args["num_img"])
     if (camera_args["resize_img"]): # apply resize by orientaiton if flagged
             camera_args["template"].length_X *= np.sin(theta)
@@ -338,11 +333,11 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True)
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True)
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
-        scene.plot(png_save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = False, vmin = -6, vmax = 0)
+        scene.plot(fig_save_dir = save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
         print("finished rendering figures.")
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
