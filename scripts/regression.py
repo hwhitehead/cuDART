@@ -416,11 +416,18 @@ if __name__ == "__main__":
             raise Exception("unable to run no-lookback test without save location (use --save_dir)")
         if (args["data_dir"] is None):
             raise Exception("unable to run no-lookback test without load location (use --data_dir)")
-        run_nolookback_test(args["data_dir"], args["save_dir"], camera_args, args["v"])
+        run_nolookback_test(load_dir = args["data_dir"], 
+                            save_dir = args["save_dir"], 
+                            camera_args = camera_args, 
+                            verbose = args["v"])
     
     if (args["rl"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run lookback test without save location (use --save_dir)")
         if (args["data_dir"] is None):
             raise Exception("unable to run lookback test without load location (use --data_dir)")
-        run_lookback_test(args["data_dir"], args["save_dir"], sim_args, camera_args, args["v"])
+        run_lookback_test(load_dir = args["data_dir"], 
+                            save_dir = args["save_dir"], 
+                            sim_args = sim_args, 
+                            camera_args = camera_args, 
+                            verbose = args["v"])
