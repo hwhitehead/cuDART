@@ -70,7 +70,7 @@ class Camera:
         # stash inputs
 
         # test vector types
-        for var_name, vec_type_input in zip([origin, normal, bias],["origin", "normal", "bias"]):
+        for vec_type_input, var_name in zip([origin, normal, bias],["origin", "normal", "bias"]):
             if not isinstance(vec_type_input, np.ndarray):
                 raise Exception("input {0} must be array type".format(var_name))
 
