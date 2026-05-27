@@ -330,11 +330,11 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True)
         camera = copy.deepcopy(camera_args["template"])
         camera.t_obs = t_obs
         cameras.append(camera) 
-        if (verbose): print("built camera {0} at t_obs = {1:.3f}...".format(i,t_obs))
+        if (verbose): print("built camera {0}/{1} at t_obs = {2:.3f}Myr...".format(i + 1, camera_args["num_img"], t_obs))
     if (verbose): print("finished camera initialisation.")
 
     # generate scene
-    scene = Scene(npy_load_str, npy_save_str, cameras, camera_file_name=camera_args["camera_file_name"])
+    scene = Scene(load_str = load_dir, save_dir = save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
     if (verbose): print("built scene.")
 
     # render and save images
@@ -342,7 +342,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
-        scene.plot(png_save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = False, vmin=-6, vmax=0)
+        scene.plot(png_save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = False, vmin = -6, vmax = 0)
         print("finished rendering figures.")
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
