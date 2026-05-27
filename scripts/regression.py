@@ -232,8 +232,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
                 num_snapshots = len(npy_files)
                 if num_snapshots is None:
                     raise Exception("unable to locate .npy files at {0}".format(load_dir))
-        else:
-            snapshot_index = np.floor(0.5 * (num_snapshots-1))
+        snapshot_index = np.floor(0.5 * (num_snapshots-1))
 
     # check input, output directory existence
     for path in [load_dir, save_dir]:
