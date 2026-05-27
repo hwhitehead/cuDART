@@ -300,7 +300,7 @@ class Scene:
         for i in range(num_images):
             # build load, save paths
             load_str = os.path.join(self.save_dir, "raw{0}.npy".format(str(i).zfill(str_zfill)))
-            save_str = os.path.join(fig_save_dir, "img{0}.npy".format(str(i).zfill(str_zfill)))
+            save_str = os.path.join(fig_save_dir, "img{0}.png".format(str(i).zfill(str_zfill)))
 
             # load image data
             img = np.load(load_str)
