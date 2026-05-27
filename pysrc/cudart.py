@@ -134,7 +134,7 @@ class Scene:
         # check existence and types
         if not os.path.exists(self.load_str):
             raise Exception("unable to locate {0} for loading".format(self.load_str))#
-        elif not (os.path.isdir(self.load_str) or self.load_str.ends_with(".npy")):
+        elif not (os.path.isdir(self.load_str) or self.load_str.endswith(".npy")):
             raise Exception("load_str ({0}) must be .npy file or directory (for unlabelled/labelled runs respecitvely).")
         if not os.path.exists(self.save_dir):
             print("unable to locate {0} for saving".format(self.save_dir))

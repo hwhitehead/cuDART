@@ -255,7 +255,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
             camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
         camera.set_sph_pos(r = 2.0, target_origin = True)
         cameras.append(camera)    
-        if (verbose): print("built camera {0}/{1} at theta = {1:.2f}deg...".format(i+1,camera_args["num_img"],theta*180.0/np.pi))
+        if (verbose): print("built camera {0}/{1} at theta = {2:.2f}deg...".format(i+1,camera_args["num_img"],theta*180.0/np.pi))
     if (verbose): print("finished camera initialisation.")
 
     # generate scene
