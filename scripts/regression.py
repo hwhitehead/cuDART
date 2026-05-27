@@ -221,7 +221,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
     if snapshot_index is None:
         if num_snapshots is None:
             # calculate number of snapshots in load_dir 
-            (root, dirs, files) = os.walk(load_dir)
+            _, dirs, files = next(os.walk(load_dir))
             num_dirs = len(dirs)
             if num_dirs > 0: # assume data is labelled
                 num_snapshots = num_dirs
