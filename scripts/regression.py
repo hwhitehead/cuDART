@@ -228,7 +228,6 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
             else:
                 file_array = np.array(files)
                 npy_files = [file for file in files if file.startswith("snapshot")]
-                print(npy_files)
                 num_snapshots = len(npy_files)
                 if num_snapshots is None:
                     raise Exception("unable to locate .npy files at {0}".format(load_dir))
@@ -240,7 +239,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
             raise Exception("{0} does not exist".format(save_dir))
 
     # check for specific snapshot input file
-    load_str = os.path.join(load_dir, "snapshot" + str(snapshot_index).zfill(str_zfill) + ".npy")
+    load_str = os.path.join(load_dir, "snapshot" + str(int(snapshot_index)).zfill(str_zfill) + ".npy")
     if not os.path.exists(load_str):
         raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(load_str))
 
