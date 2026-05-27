@@ -12,7 +12,7 @@ pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
 sys.path.append(pysrc)
 from cudart import *
 
-def build_regression_suite(save_dir, sim_args, verbose=True):
+def build_unlabelled_regression_suite(save_dir, sim_args, verbose=True):
 
     # construct template data for regression suite, without labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
@@ -382,6 +382,10 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="build regression suite data")
+    parser.add_argument("-bl",
+                        action="store_true",
+                        default=False,
+                        help="build labelled regression suite data")
     parser.add_argument("-r", 
                         action="store_true",
                         default=False,
@@ -406,14 +410,22 @@ if __name__ == "__main__":
     # except multiple run-type flags
     if (args["r"] and args["rl"]):
         raise Exception("no-lookback and lookback share write space, please select only one")
+    
+    # except multiple build-type flags
+    if (args["b"] and args["bl"]):
+        raise Exception("labelled and unlabelled builders share write space, please select only one") 
 
-    # construct regression data suite
+    # construct regression data suite with or without labels
     if (args["b"]):
         if (args["data_dir"] is None):
-            raise Exception("unable to build regression suite data without save location (use --data_dir)")
-        build_regression_suite(args["data_dir"], sim_args, args["v"])
-    
-    # run render routine without lookback
+            raise Exception("unable to build unlabelled regression suite data without save location (use --data_dir)")
+        build_unlabelled_regression_suite(args["data_dir"], sim_args, args["v"])
+    elif (args["bl"]):
+        if (args["data_dir"] is None):
+            raise Exception("unable to build labelled regression suite data without save location (use --data_dir)")
+        build_labelled_regression_suite(args["data_dir"], sim_args, args["v"])
+
+    # run render routine with or without lookback
     if (args["r"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run no-lookback test without save location (use --save_dir)")
@@ -423,9 +435,7 @@ if __name__ == "__main__":
                             save_dir = args["save_dir"], 
                             camera_args = camera_args, 
                             verbose = args["v"])
-    
-    # run render routine with lookback
-    if (args["rl"]):
+    elif (args["rl"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run lookback test without save location (use --save_dir)")
         if (args["data_dir"] is None):
