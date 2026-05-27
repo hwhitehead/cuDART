@@ -222,15 +222,16 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
         if num_snapshots is None:
             # calculate number of snapshots in load_dir 
             _, dirs, files = next(os.walk(load_dir))
-            print(dirs)
-            print(files)
             num_dirs = len(dirs)
             if num_dirs > 0: # assume data is labelled
                 num_snapshots = num_dirs
             else:
                 file_array = np.array(files)
                 npy_files = [file for file in files if file.startswith("snapshot")]
+                print(npy_files)
                 num_snapshots = len(npy_files)
+                if num_snapshots is None:
+                    raise Exception("unable to locate .npy files at {0}".format(load_dir))
         else:
             snapshot_index = np.floor(0.5 * (num_snapshots-1))
 
