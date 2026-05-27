@@ -162,7 +162,12 @@ class Scene:
                 raise Exception("all Camera objects must have consistent image dimensions.")
 
     def __str__(self):
-
+        # print summary of scene properties
+        print_str = "printing scene data...\n"
+        print_str += "load_str = {0}\n".format(self.load_str)
+        print_str += "save_dir = {0}\n".format(self.save_dir)
+        print_str += "num_cameras = {0}\n".format(len(self.cameras))
+        print_str += "camera_file_name = {0}\n".format(self.temp_camera_file)
 
     def build_camera_file(self):
         # constructs a text file containing the camera information
