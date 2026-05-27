@@ -238,7 +238,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
             raise Exception("{0} does not exist".format(save_dir))
 
     # check for specific snapshot input file
-    load_str = os.path.join(load_dir, "snapshot" + str(int(camera_args.snapshot_index)).zfill(str_zfill) + ".npy")
+    load_str = os.path.join(load_dir, "snapshot" + str(snapshot_index).zfill(str_zfill) + ".npy")
     if not os.path.exists(load_str):
         raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(load_str))
 
