@@ -305,3 +305,41 @@ class BSpline:
         return C
 
 class GuidedCamera:
+
+    def __init__(self, checkpoints = None, targets = None):
+        self.checkpoints = checkpoints
+        self.targets = targets
+
+    def generate_cameras(self, p = 3, mode = "chord", num_img = 100, template_camera = None, camera_times = None):
+        if template_camera is None:
+            template_camera = Camera()
+            template_camera.num_pixels_X = 512
+            template_camera.num_pixels_Y = 512
+            template_camera.tilt = 0
+            template_camera.length_X = 0.66
+            template_camera.length_Y = 0.66
+
+        if self.checkpoints is None:
+            raise Exception("require checkpoints set before camera generation")
+
+        # if self.targets is None:
+        #     self.targets = [0,0,0]
+        # elif np.shape(self.targets)[0] > 1:
+        #     raise Exception("multi target currently unsupported")
+
+        if camera_times is None: # even spacing
+            self.camera_times = np.linspace(0, 1, num_img)
+        else: # normalise
+            max_time = np.max(camera_times)
+            self.camera_times = np.array(camera_times) / max_time
+
+        self.origin_spline = BSpline(p, self.checkpoints, mode)
+        origins = self.origin_spline.eval_spline(self.camera_times)
+        cameras = []
+        for i in range(num_img):
+            camera = copy.deepcopy(template_camera)
+            camera.origin = origins[i,:]
+            camera.set_target(self.targets[0]) # single target for now
+            cameras.append(camera)
+
+        return cameras
