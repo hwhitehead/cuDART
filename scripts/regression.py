@@ -1,3 +1,7 @@
+"""
+This file contains a collection of functions to build mock data sets, and render images with or without the lookback routine
+"""
+
 # external imports
 import sys, os
 import numpy as np
@@ -399,14 +403,17 @@ if __name__ == "__main__":
 
     args = vars(parser.parse_args())
     
+    # except multiple run-type flags
     if (args["r"] and args["rl"]):
         raise Exception("no-lookback and lookback share write space, please select only one")
 
+    # construct regression data suite
     if (args["b"]):
         if (args["data_dir"] is None):
             raise Exception("unable to build regression suite data without save location (use --data_dir)")
         build_regression_suite(args["data_dir"], sim_args, args["v"])
     
+    # run render routine without lookback
     if (args["r"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run no-lookback test without save location (use --save_dir)")
@@ -417,6 +424,7 @@ if __name__ == "__main__":
                             camera_args = camera_args, 
                             verbose = args["v"])
     
+    # run render routine with lookback
     if (args["rl"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run lookback test without save location (use --save_dir)")
