@@ -272,7 +272,7 @@ class Scene:
                 os.remove(self.temp_camera_file)
                 if verbose: print("removed temporary camera file.")
 
-    def plot(self, fig_save_dir=None, cmap="Greys", vmin=-6, vmax=-0, remove_raw_npy=False, verbose=False, log_data=True):
+    def plot(self, fig_save_dir = None, cmap = "afmhot", vmin = -6, vmax = 0, remove_raw_npy = False, verbose = False, log_data = True):
         
         # generate simple .png figure from raw .npy images
         

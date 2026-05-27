@@ -255,7 +255,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
             camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
         camera.set_sph_pos(r = 2.0, target_origin = True)
         cameras.append(camera)    
-        if (verbose): print("built camera {0}/{1} at theta = {2:.2f}deg...".format(i+1,camera_args["num_img"],theta*180.0/np.pi))
+        if (verbose): print("built camera {0}/{1} at theta = {2:.2f}deg...".format(i+1, camera_args["num_img"], theta*180.0/np.pi))
     if (verbose): print("finished camera initialisation.")
 
     # generate scene
@@ -263,11 +263,11 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False)
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
-        scene.plot(fig_save_dir = save_dir, cmap = "afmhot", verbose = verbose, remove_raw_images = False, vmin=-6, vmax=0)
+        scene.plot(fig_save_dir = save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin= -6, vmax = 0)
         if (verbose): print("finished rendering figures.")
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
