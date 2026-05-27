@@ -16,6 +16,17 @@
 
 This repository contains tools for raytracing heterogenous orthogonal meshes, intended for visualisation of line-of-sight quantities in simulated data, such as optically thin emission or column density. Such visualisations, especially from arbitrary viewpoints, have the potential to be very expensive due to the large number of cells that a line-of-sight may intersect with. In `cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular meshes, previously implemented in Python [here](https://github.com/hwhitehead/DART), but now utilising the CUDA toolkit to perform ray propagation and summation exceptionally quickly. As well as properties independent of line-of-sight, such as density, `cuDART` supports relativistic beaming of emissivity when provided with velocity data. `cuDART` also supports using a finite speed of light in intensity calculations, allowing for geometric effects such as superluminal motion to be recovered. The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. 
 
+## Capability
+
+If provided multiple snapshots in time of a 3D domain, featuring velocity and emissivity data, `cuDART` can accurately generate synthetic observations consistent with both relativistic effects (such as beaming) and geometric effects (such as superluminal motion and deformation along the line of sight). This is demonstrated in the figure below, depiciting a series of spherical (in the observer frame) ejecta travelling at various velocities and orientations to the line of sight (parameterised by $\Gamma$ and $\theta$ respectively). Relativistic effects beam radiation toward the direction of motion, resulting in brigher emission from ejecta more closely aligned with the line of sight. Geometric effects result in a smearing of the spherical structure along the line of sight, most pronounced for faster ejecta viewed from the critical angle $\theta_\mathrm{crit}=\cos^{-1}(\beta)$.
+
+<p align="center">
+  <img src=https://github.com/hwhitehead/cuDART/blob/morphology/gallery/morphology.png width = "600"/>
+</p>
+<p align="center"">
+  <em> Synethic images of anti-parallel ejecta launched at various angles to the line-of-sight $\theta$ and velocities parameterised by the Lorentz factor $\Gamma$. Relativistic and geometric effects result in changes in apparent brightness and deformations in the observed ejecta structure (naturally spheres, but observed as prolate spheroids).</em>
+</p>
+
 ## Usage
 
 Broadly speaking, `cuDART` can be split into a frontend system (written in Python) and a backend (written in C++/CUDA). The user can interact with the backend directly, or use Python to make, setup, run the executable and embed images into figures. 
