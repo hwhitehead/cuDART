@@ -4,8 +4,14 @@ import os, sys, subprocess, copy, pathlib
 import glob
 import pandas as pd
 
-str_zfill = 5
-epsilon = 1e-6
+# define global constants
+str_zfill = 5       # num zeros for zpadding strings
+epsilon = 1e-6      # small value for off-axis casts
+
+# define unit conversions
+kpc_to_m = 1e3 * 3.086e+16
+Myr_to_s = 1e6 * 365 * 24 * 60 * 60
+c_light = 3e8
 
 # supress div zero warnings from log10 usage
 np.seterr(divide="ignore")
@@ -54,220 +60,20 @@ def set_plot_defaults(use_tex = True):
     plt.rcParams['ytick.major.size']=3
     plt.rcParams['ytick.minor.size']=9/4
 
-class Profiler:
-
-    def __init__(self, data_dir, prof_dir):
-        self.data_dir = data_dir
-        self.prof_dir = prof_dir
-
-    def build(self, D_span = [64,128,256,512], save_boosted = True):
-
-        self.D_span = D_span
-
-        for D in D_span:
-            shape = (D, D, D)
-            data = np.full(shape=shape, fill_value=0.5, dtype=np.float32)
-            save_str = os.path.join(self.data_dir, "unboosted_" + str(D) + ".npy")
-            np.save(save_str, data.astype(np.float32))
-
-            if save_boosted:
-                shape = (D, D, D, 4)
-                data = np.full(shape=shape, fill_value=0.5, dtype=np.float32)
-                save_str = os.path.join(self.data_dir, "boosted_" + str(D) + ".npy")
-                np.save(save_str, data.astype(np.float32))
-
-    def run(self, N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = 10, rand_view = True):
-
-        epsilon = 1e-4
-
-        template_camera = Camera()
-        template_camera.tilt = 0.0
-        template_camera.length_X = 0.5
-        template_camera.length_Y = 0.5
-        
-        if rand_view:
-            phi = np.random.uniform(epsilon, 2 * np.pi - epsilon, num_iter)
-            cos_theta = np.random.uniform(-1.0 + epsilon ,1.0 - epsilon, num_iter)
-            theta = np.arccos(cos_theta)
-            cameras = []
-            for i in range(num_iter):
-                camera = copy.deepcopy(template_camera)
-                camera.set_sph_pos(r = 2.0, theta = theta[i], phi = phi[i], target_origin = True)
-            cameras.append(camera)
-        else:
-            template_camera.set_sph_pos(r = 2.0, theta = 0.5 * np.pi - epsilon, phi = epsilon, target_origin = True)
-            cameras = [template_camera] * num_iter
-
-        
-        for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
-            for j, D in enumerate(D_span):
-                for i, N in enumerate(N_span):
-                    # target data
-                    npy_load_str = os.path.join(self.data_dir, label + str(D) + ".npy")
-                    npy_save_str = os.path.join(self.data_dir, "scratch") # overwrite output, TODO: add off switch to write
-                    
-                    # update camera
-                    for camera in cameras:
-                        camera.num_pixels_X = int(N)
-                        camera.num_pixels_Y = int(N)
-                    
-                    scene = Scene(npy_load_str, npy_save_str, cameras)
-                    save_profile = os.path.join(self.prof_dir, "profile_N{0}D{1}b{2}.txt".format(N, D, relativistic))
-                    scene.render(verbose = False, relativistic = relativistic, save_profile = save_profile)
-
-                    print("finished N = " + str(N) + ", D = " + str(D) + " relativistic = " + str(relativistic))
-                    print("\n\n\n\n\n")
-
-    def time_from_prof(self, load_str):
-
-        # read average duration for render_from_mesh kernel in seconds
-
-        df = pd.read_csv(load_str, skiprows=3)
-        df = df.fillna(0)
-
-        # find time unit
-        Avg = df["Avg"]
-        time_type = Avg.iloc[0]
-
-        # find average time
-        task_names = df["Name"]
-        row = np.where(task_names == "render_from_mesh(Camera, float*, Mesh**, bool)")[0][0]
-        avg_time = float(df["Avg"].iloc[row])
-
-        if (time_type == "ms"):
-            return 1e-3 * avg_time
-        elif (time_type == "us"):
-            return 1e-6 * avg_time
-        elif (time_type == "s"):
-            return avg_time
-        else:
-            raise Exception("unable to parse time type in " + load_str)
-
-    def save_timings(self, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512]):
-
-        dd, ii = np.meshgrid(D_span, N_span, indexing="ij")
-        log_data_dims = np.log10(D_span)
-        log_image_dims = np.log10(N_span)
-
-        avg_times = np.zeros(shape=(np.size(N_span), np.size(D_span), 2)) # N, D, ub/b
-
-        for i, N in enumerate(N_span):
-            for j, D in enumerate(D_span):
-                for label, relativistic in zip(["unboosted_", "boosted_"], [False, True]):
-                    load_str = os.path.join(self.prof_dir, "profile_N" + str(N) + "D" + str(D) + "b" + str(relativistic) + ".txt")
-                    render_time = self.time_from_prof(load_str)
-                    if relativistic:
-                        avg_times[i,j,1] = render_time
-                    else:
-                        avg_times[i,j,0] = render_time
-
-        np.save(save_str, avg_times)
-
-    def plot_timings(self, load_str, save_str, N_span = [64,128,256,512], D_span = [64,128,256,512], num_iter = None):
-
-
-        avg_times = np.load(load_str) * 1e3 # to ms
-
-        log_N = np.log10(N_span)
-        log_D = np.log10(D_span)
-        N_labels = [str(N) for N in N_span]
-        D_labels = [str(D) for D in D_span]
-
-        set_plot_defaults()
-        height_ratios = np.array([1.0, 1.0, 1.0])
-        width_ratios = np.array([2.0, 0.05])
-        h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
-        L = 20.0 / 3
-        fig = plt.figure(figsize=(L, L * h_over_w))
-        gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
-        ax0 = fig.add_subplot(gs[0,0])
-        ax1 = fig.add_subplot(gs[1,0])
-        ax2 = fig.add_subplot(gs[2,0])
-        cax0 = fig.add_subplot(gs[0,1])
-        cax1 = fig.add_subplot(gs[1,1])
-        cax2 = fig.add_subplot(gs[2,1])
-
-        plasma = plt.get_cmap("plasma")
-        viridis = plt.get_cmap("viridis")
-        N_colors = [viridis(x) for x in np.linspace(0, 0.999, np.size(N_span))]
-        D_colors = [plasma(x) for x in np.linspace(0, 0.999, np.size(D_span))]
-        
-        title_str = r"Render Image $N^2$ from domain $D^3$"
-        if num_iter is not None and num_iter > 1:
-            title_str += " (averaged over {0} calls)".format(num_iter)
-
-        axr = ax0.twinx()
-        axr.yaxis.set_visible(False)
-        axr.plot([],[],color=plasma(0), linestyle="solid", label="Unboosted")
-        axr.plot([],[],color=plasma(0), linestyle="dashed", label="Boosted")
-        axr.legend(loc="upper left", frameon=False)
-
-        ax0.set_title(title_str)
-        ax0.set_xlabel(r"$\log_{10}(N)$")
-        ax0.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
-        for j, D in enumerate(D_span):
-            ax0.plot(log_N, np.log10(avg_times[:, j, 0]), linestyle="solid", color=D_colors[j])
-            ax0.plot(log_N, np.log10(avg_times[:, j, 1]), linestyle="dashed", color=D_colors[j])
-        ax0.set_xticks(log_N, labels=N_labels)
-        ax0.set_xlim([log_N[0], log_N[-1]])
-        ax0.set_ylim([-1, 2.5])
-
-        ax1.set_xlabel(r"$\log_{10}(D)$")
-        ax1.set_ylabel(r"$\log_{10}(\tau [\mathrm{ms}])$")
-        for i, N in enumerate(N_span):
-            ax1.plot(log_D, np.log10(avg_times[i, :, 0]), linestyle="solid", color=N_colors[i])
-            ax1.plot(log_D, np.log10(avg_times[i, :, 1]), linestyle="dashed", color=N_colors[i])
-        ax1.set_xticks(log_D, labels=D_labels)
-        ax1.set_xlim([log_D[0], log_D[-1]])
-        ax1.set_ylim([-1, 2.5])
-
-        ax2.set_xlabel(r"$\log_{10}(D)$")
-        ax2.set_ylabel(r"$\log_{10}(\mathrm{MP}/\mathrm{s})$")
-        for i, N in enumerate(N_span):
-            MP_ps = 1e-6 * N ** 2 / (1e-3 * avg_times[i, :, :])
-            ax2.plot(log_D, np.log10(MP_ps[:, 0]), linestyle="solid", color=N_colors[i])
-            ax2.plot(log_D, np.log10(MP_ps[:, 1]), linestyle="dashed", color=N_colors[i])
-        ax2.set_xticks(log_D, labels=D_labels)
-        ax2.set_xlim([log_D[0], log_D[-1]])
-
-        sm = plt.cm.ScalarMappable(cmap="plasma", norm=plt.Normalize(vmin=log_D[0], vmax=log_D[-1]))
-        fig.colorbar(sm, cax=cax0, orientation="vertical")
-        cax0.set_ylabel(r"Domain Size $D$")
-        cax0.set_yticks(log_D, labels=D_labels)
-
-        sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=log_N[0], vmax=log_N[-1]))
-        fig.colorbar(sm, cax=cax1, orientation="vertical")
-        cax1.set_ylabel(r"Image Size $N$")
-        cax1.set_yticks(log_N, labels=N_labels)
-
-        sm = plt.cm.ScalarMappable(cmap="viridis", norm=plt.Normalize(vmin=log_N[0], vmax=log_N[-1]))
-        fig.colorbar(sm, cax=cax2, orientation="vertical")
-        cax2.set_ylabel(r"Image Size $N$")
-        cax2.set_yticks(log_N, labels=N_labels)
-
-        # add trendlines
-        fine_N_span = np.linspace(log_N[0], log_N[-1], 100)
-        fine_D_span = np.linspace(log_D[0], log_D[-1], 100)
-        m_N = 2
-        m_D = 1
-        y_int_N = -2.25
-        y_int_D = -1.125
-        ax0.plot(fine_N_span, fine_N_span * m_N + (y_int_N - m_N * fine_N_span[0]), color='k', linestyle="dotted", zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log N} = 2$")
-        ax1.plot(fine_D_span, fine_D_span * m_D + (y_int_D - m_D * fine_D_span[0]), color='k', linestyle="dotted", zorder=-10, alpha=0.5, label=r"$\frac{d\log \tau}{d\log D} = 1$")
-        ax0.legend(loc="lower right", frameon=False)
-        ax1.legend(loc="lower right", frameon=False)
-
-        plt.subplots_adjust(wspace=0)
-        fig.savefig(save_str, dpi=300, bbox_inches="tight")
-        plt.close("all")
-
 class Camera:
-    """
-    The Camera class is a basic struct to wrap the image viewing orientation and dimensions
-    """
+   
+    # the Camera class contains all the information required to define an image place for render generation
+
     def __init__(self, origin = np.array([1.0,0.0,0.0]), normal = np.array([-1.0,0.0,0.0]), bias = np.array([0.0,0.0,1.0]),
                     num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0, t_obs = 0.0,
-                    theta = 0.5 * np.pi - epsilon, phi = epsilon):
+                    theta = 0.5 * np.pi - epsilon, phi = epsilon,r=2.0):
+        # stash inputs
+
+        # test vector types
+        for var_name, vec_type_input in zip([origin, normal, bias],["origin", "normal", "bias"]):
+            if not isinstance(vec_type_input, np.ndarray):
+                raise Exception("input {0} must be array type".format(var_name))
+
         self.origin = origin
         self.normal = normal
         self.bias = bias
@@ -282,14 +88,27 @@ class Camera:
         self.theta = theta
         self.phi = phi
 
+    def __str__(self):
+        # print summary of camera properties
+        print_str = "printing camera data...\n"
+        print_str += "origin = ({0},{1},{2})\n".format(*self.origin)
+        print_str += "normal = ({0},{1},{2})\n".format(*self.normal)
+        print_str += "bias = ({0},{1},{2})\n".format(*self.bias)
+        print_str += "(lx,ly) = ({0},{1})\n".format(self.length_X, self.length_Y)
+        return print_str
+
     def header_str(self):
+        # generate string for camera text file
         return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y, self.t_obs)
     
-    def set_sph_pos(self, r=2.0, theta=None, phi=None, target_origin=False):
-        if theta is None:
-            theta = self.theta
-        if phi is None:
-            phi = self.phi
+    def set_sph_pos(self, r=None, theta=None, phi=None, target_origin=False):
+        # set camera origin in spherical polar coordinates
+
+        # if not passed as arg, use internal values
+        if theta is None: theta = self.theta
+        if phi is None: phi = self.phi
+        if r is None: r = self.r
+
         sin_theta = np.sin(theta)
         cos_theta = np.cos(theta)
         sin_phi = np.sin(phi)
@@ -297,52 +116,56 @@ class Camera:
         self.origin = r * np.array([sin_theta * cos_phi, sin_theta * sin_phi, cos_theta])
         if (target_origin): self.set_target(np.array([0.0, 0.0, 0.0])) # target coordinate origin
 
-    def set_cyl_pos(self, R, phi, z, target_origin=False):
-        self.origin = np.array([R * np.cos(phi), R * np.sin(phi), z])
-        if (target_origin): self.set_target(np.array([0.0, 0.0, 0.0])) # target coordinate origin
-
     def set_target(self, target):
         self.normal = target - self.origin
-
-    def __str__(self):
-        retstr = "origin = ({0},{1},{2})\n".format(*self.origin)
-        retstr += "normal = ({0},{1},{2})\n".format(*self.normal)
-        retstr += "bias = ({0},{1},{2})\n".format(*self.bias)
-        retstr += "(lx,ly) = ({0},{1})\n".format(self.length_X, self.length_Y)
-        return retstr
-
+        self.normal = self.normal / np.linalg.norm(self.normal)
+    
 class Scene:
     """ 
     this class provides a simple way for the user to call cuDART and process the results
     """
-    def __init__(self, npy_load_str, npy_save_str, cameras = None, camera_file_name = None): 
+    def __init__(self, load_str, save_dir, cameras = None, camera_file_name = None): 
 
         # parse load/save strings        
-        self.npy_load_str = npy_load_str # TODO: rename, is not .npy string if labelled data
-        self.npy_save_str = npy_save_str.removesuffix(".png")
+        self.load_str = load_str # must be .npy file, or directory
+        self.save_dir = save_dir # may not exist, should be directory
+        self.camera_file_name = camera_file_name 
 
+        # check existence and types
+        if not os.path.exists(self.load_str):
+            raise Exception("unable to locate {0} for loading".format(self.load_str))#
+        else if not (os.path.isdir(self.load_str) or self.load_str.ends_with(".npy")):
+            raise Exception("load_str ({0}) must be .npy file or directory (for unlabelled/labelled runs respecitvely).")
+        if not os.path.exists(self.save_dir):
+            print("unable to locate {0} for saving".format(self.save_dir))
+            os.mkdir(self.save_dir)
+
+        # handle None, list/array or single pass for cameras
         if cameras is None:
             self.cameras = [Camera()] # initialise single default camera
         elif isinstance(cameras, list) or isinstance(cameras, np.ndarray):
             self.cameras = cameras # pass list type input directly
         else:
             self.cameras = [cameras] # package singel type input
-        self.camera_file_name = camera_file_name
-
+        
+        # handle None pass to camera_file_name
         if self.camera_file_name is None:
             self.temp_camera_file = "temp_camera_file.txt"
         else:
             self.temp_camera_file = self.camera_file_name
 
-        # check camera dimensions are const across all cameras
+        # check camera dimensions are consistent across all cameras
         self.num_pixels_X = cameras[0].num_pixels_X
         self.num_pixels_Y = cameras[0].num_pixels_Y
         for camera in self.cameras:
-            if camera.num_pixels_X != self.num_pixels_X or camera.num_pixels_Y != self.num_pixels_Y:
-                raise Exception("all Camera objects must have coherant image dimensions.")
+            if (camera.num_pixels_X != self.num_pixels_X) or (camera.num_pixels_Y != self.num_pixels_Y):
+                raise Exception("all Camera objects must have consistent image dimensions.")
+
+    def __str__(self):
+
 
     def build_camera_file(self):
-
+        # constructs a text file containing the camera information
         with open(self.temp_camera_file, "w") as f:
             # add header with const image dimensions (zero packed for istringstream read)
             f.write("{0} {1} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y))
@@ -351,13 +174,15 @@ class Scene:
                 f.write(camera.header_str())
 
     def make_clean(self):
+        # calls the 'make clean' routine from the Makefile
         subprocess.run(["make","clean"], check = True)       
 
     def make(self):
+        # calls the 'make' routine within the Makefile
         subprocess.run(["make"], check = True)
 
     def print_command(self, command):
-
+        # print to stdout details of command passed to .cpp executable
         i = 0
         while i < np.size(command): 
             # handle end case
@@ -372,79 +197,87 @@ class Scene:
                 i += 1
         print("\n")
 
-    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, plot = False, 
+    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, 
                 max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
-                lookback = False):
+                lookback = False, verbose_cpp = False):
+
+        # given a constructed scene, invoke the .cpp executable with proper flags
+        # if 'plot' specified, generate .png figures from the raw .npy images
 
         # prepare camera space
         self.build_camera_file()
         if (verbose):
-            print("generated camera file at " + self.temp_camera_file)
-
-        # check savespace exists
-        save_dir = os.path.dirname(self.npy_save_str)
-        if not os.path.isdir(save_dir):
-            os.mkdir(save_dir)
+            print("generated camera file at {0}.".format(self.temp_camera_file))
 
         # check executable exists, or build
         pysrc_dir = pathlib.Path(__file__).parent.resolve()
         path_to_executable = os.path.join(pysrc_dir, "..", "bin","cudart")
         if not os.path.isfile(path_to_executable):
             if (verbose):
-                print("unable to located executable, forcing remake.")
+                print("unable to located executable, forcing remake...")
             self.make()
         elif check_make:
             if verbose:
-                print("checking for updates since last make")
+                print("checking for updates since last make...")
             self.make()
         elif force_make:
             if verbose:
-                print("forcing remake of executable")
+                print("forcing remake of executable...")
             self.make_clean()
             self.make
 
-        # call executable        
-        command = [path_to_executable, "-i", self.npy_load_str, "-s", self.npy_save_str,"-c",self.temp_camera_file]
+        # prepare command line argument to invoke .cpp executable, with proper flags  
+        command = [path_to_executable, "-i", self.load_str, "-s", self.save_dir,"-c",self.temp_camera_file]
+        # run executable with nvprof
         if save_profile is not None: 
             command = ["nvprof", "--csv", "--log-file", save_profile] + command
-        if verbose:
+        # pass verbose flag 
+        if verbose_cpp: 
             command = command + ["-v"]
+        # pass VRAM limit 
         if max_mem is not None:
             command = command + ["-m", str(max_mem)]
+        # run using relativistic boosting
         if relativistic:
             command = command + ["-r"]
+        # run using finite speed of light (required directory-type input)
         if lookback:
-            command = command + ["-l"] # TODO: add check for input type (must be dir)
+            if not os.path.isdir(self.load_str):
+                raise Exception("if using lookback mode, input must be directory.")
+            command = command + ["-l"]
+        # run using specific power-law for rest-frame emission
         if power_law_index is not None:
             command = command + ["-p", str(power_law_index)]
         elif doppler_index is not None: # power_law has priority over doppler
             command = command + ["-d", str(doppler_index)]
+        # when saving raw images, add to existing files in save space
         if append:
             command = command + ["-a"]
-        print("calling render executable")
-        if (verbose): self.print_command(command)
-        subprocess.run(command, check = True)
-        print("executable finished.")
 
-        # destroy temp camera file if called
-        if not self.temp_camera_file == self.camera_file_name:
+        # invoke executable
+        if (verbose):
+            print("calling render executable...")
+            self.print_command(command)
+        subprocess.run(command, check = True)
+        if (verbose): print("executable finished.")
+
+        # destroy temp camera file if not specified at Scene init
+        if self.camera_file_name is None:
             if os.path.exists(self.temp_camera_file):
                 os.remove(self.temp_camera_file)
-                if verbose:
-                    print("removed temporary camera file")
+                if verbose: print("removed temporary camera file.")
 
-    def plot(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False, log_c=True, show_grid=False):
+    def plot(self, fig_save_dir=None, cmap="Greys", vmin=-6, vmax=-0, remove_raw_npy=False, verbose=False, log_data=True):
         
-        # TODO: add labelling options, axes?
+        # generate simple .png figure from raw .npy images
         
-        save_location = save_location.removesuffix(".png") # strip as needed
+        # build write space if needed
+        if fig_save_dir is None: # if None, use same directory as raw .npy files
+            fig_save_dir = self.save_dir
+        elif not os.path.isdir(fig_save_dir):
+            os.mkdir(fig_save_dir)
 
-        # check savespace exists
-        save_dir = os.path.dirname(save_location)
-        if not os.path.isdir(save_dir):
-            os.mkdir(save_dir)
-
-        # define persistent figure
+        # define persistent figure to reuse for each image
         fig = plt.figure(figsize=(10.0/3,10.0/3))
         ax = fig.add_subplot()
         ax.set_facecolor("k")
@@ -457,255 +290,59 @@ class Scene:
         ax.set_xlim([0,1])
         ax.set_ylim([0,1])
 
+        # iterate over raw images
         num_images = len(self.cameras)
         for i in range(num_images):
+            # build load, save paths
+            load_str = os.path.join(self.save_dir, "raw{0}.npy".format(str(i).zfill(str_zfill)))
+            save_str = os.path.join(fig_save_dir, "img{0}.npy".format(str(i).zfill(str_zfill)))
 
-            load_str = self.npy_save_str + str(i).zfill(str_zfill) + ".npy"
-            save_str = save_location + str(i).zfill(str_zfill) + ".png"
-
+            # load image data
             img = np.load(load_str)
-            if log_c: img = np.log10(img)
+            if log_data: img = np.log10(img) # if flagged, apply log10 to img data
             pc = ax.pcolormesh(XX, YY, img, vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
             
-            if (show_grid):
-                ax.axhline(y=0.5, color='w', alpha=0.2, zorder=20)
-                ax.axvline(x=0.5, color='w', alpha=0.2, zorder=20)
-            
+            # save figure, and cleanup
             fig.savefig(save_str, dpi=300, bbox_inches="tight")
             pc.remove()
-            if (verbose):
-                print("saved png at " + save_str)
+            if (verbose): print("saved png at {0}".format(save_str))
 
-            if (remove_raw_images):
+            if (remove_raw_npy):
                 os.remove(load_str)
-                if (verbose):
-                    print("removed data file at " + load_str)
-
-
-        plt.close("all")
-
-    def calc_lightcurve(self, save_location = None):
-
-        save_location = save_location.removesuffix(".png") # strip as needed
-
-        num_raws = len(self.cameras)
-        lum_ar = np.zeros(shape=(num_raws))
-        for i in range(num_raws):
-
-            raw_str = self.npy_save_str + str(i).zfill(str_zfill) + ".npy"
-            raw_img = np.load(raw_str)
-            lum = np.sum(raw_img)
-            lum_ar[i] = lum
-
-        if save_location is not None:
-            np.save(save_location, lum_ar)
-
-        return lum_ar
-
-    def plot_wlightcurve(self, save_location, cmap="Greys", vmin=-13, vmax=-10, remove_raw_images=False, verbose=False):
-        
-        save_location = save_location.removesuffix(".png") # strip as needed
-        lum_ar = self.calc_lightcurve(save_location)
-
-        # check savespace exists
-        save_dir = os.path.dirname(save_location)
-        if not os.path.isdir(save_dir):
-            os.mkdir(save_dir)
-
-        # define persistent figure
-        height_ratios = np.array([0.3,1])
-        width_ratios = np.array([1,0.05])
-        set_plot_defaults(False)
-        h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
-        fig = plt.figure(figsize=(10.0/3,10.0/3 * h_over_w))
-        gs = fig.add_gridspec(2,2,height_ratios=height_ratios,width_ratios=width_ratios)
-        ax = fig.add_subplot(gs[1,0])
-        tax = fig.add_subplot(gs[0,0])
-        cax = fig.add_subplot(gs[1,1])
-        ax.set_facecolor("k")
-        plt.subplots_adjust(hspace=0, wspace=0)
-        X = np.linspace(0,1,self.num_pixels_X+1)
-        Y = np.linspace(0,1,self.num_pixels_Y+1)
-        XX, YY = np.meshgrid(X, Y, indexing="ij")
-        ax.xaxis.set_visible(False)
-        ax.yaxis.set_visible(False)
-
-        # plot header
-        num_images = len(self.cameras)
-        x_span = np.linspace(0,1,num_images)
-        tax.set_xlim([0,1])
-        delta = (lum_ar - np.mean(lum_ar)) / np.mean(lum_ar)
-        tax.plot(x_span, delta, color='k')
-        #tax.plot(x_span, np.log10(lum_ar), color='k')
-        #tax.set_ylim([22, 24.2])
-        #tax.set_xlabel(r"log$_{10}$ Luminosity [arb.]")
-        tax.set_xlabel(r"$\left(L_\nu - \langle L_\nu \rangle\right)/ \langle L_\nu \rangle$")
-        tax.axhline(y=0, color='k', linestyle="dashed", zorder=-10)
-        #tax.set_ylim([-0.4,0.4])
-        #tax.set_yticks([-0.4, -0.2, 0, 0.2, 0.4])
-        #tax.set_yticklabels(["-40%", "-20%", "mean", "+20%", "+40%"])
-        tax.xaxis.set_label_position("top")
-        tax.xaxis.set_ticks([])
-
-        # plot colorbar
-        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
-        fig.colorbar(sm, cax=cax, orientation="vertical")
-        cax.yaxis.tick_right()
-        cax.yaxis.set_label_position("right")
-        cax.set_ylabel(r"$\log_{10}\left(I_{\nu}\right)$")
-
-        # plot inserts
-        for i in range(num_images):
-
-            load_str = self.npy_save_str + str(i).zfill(str_zfill) + ".npy"
-            save_str = save_location + str(i).zfill(str_zfill) + ".png"
-
-            img = np.load(load_str)
-            tstamp = tax.axvline(x=x_span[i], color='k', alpha=0.2)
-
-            pc = ax.pcolormesh(XX, YY, np.log10(img), vmin=vmin, vmax=vmax, cmap=cmap, shading="flat")
-            fig.savefig(save_str, dpi=300, bbox_inches="tight")
-            pc.remove()
-            tstamp.remove()
-            if (verbose):
-                print("saved png at " + save_str)
-
-            if (remove_raw_images):
-                os.remove(load_str)
-                if (verbose):
-                    print("removed data file at " + load_str)
+                if (verbose): print("removed data file at {0}".format(load_str))
 
         plt.close("all")
 
 class Mesh:
 
-    def __init__(self, data_dir, nzfill=5):
+    # the Mesh class is used when running cuDART in labelled mode, acting as a wrapper for multiple sub-domains termed MeshBlocks
 
-        self.data_dir = data_dir
-        if not os.path.isdir(self.data_dir):
+    def __init__(self, data_dir):
+        # check inputs and stash
+        self.data_dir = data_dir                    # main directory for data
+        if not os.path.isdir(self.data_dir):        # check existance, build if needed
             os.mkdir(self.data_dir)
-        self.num_mb = 0
-        self.mb_headers = []
-        self.nzfill = nzfill
+        self.num_mb = 0                             # initially Mesh is empty
+        self.mb_headers = []                        # list for MeshBlock header stash
     
     def add_meshblock(self, mb_data, xl, xr):
-
-        # TODO: add check against VRAM to ensure no meshblock exceeds limit, then auto refine
-
-        mb_data = mb_data.astype(np.float32)
-        npy_str = os.path.join(self.data_dir, "meshblock" + str(self.num_mb).zfill(self.nzfill) + ".npy")
-        np.save(npy_str, mb_data)
-        mb_shape = np.shape(mb_data)[:3]
-        mb_size = np.size(mb_data)
-        mb_header = [mb_size,*mb_shape,*xl,*xr]
-        self.mb_headers.append(mb_header)
-        self.num_mb += 1
+        # package MeshBlock data and append to Mesh
+        mb_data = mb_data.astype(np.float32)        # enforce cast to float32 type
+        npy_str = os.path.join(self.data_dir, "meshblock" + str(self.num_mb).zfill(str_zfill) + ".npy")
+        np.save(npy_str, mb_data)                   # save data to main dir
+        mb_shape = np.shape(mb_data)[:3]            # "shape" is spatial only, ignore 4th axis
+        mb_size = np.size(mb_data)                  # "size" is for memory usage, include all axes
+        mb_header = [mb_size,*mb_shape,*xl,*xr]     
+        self.mb_headers.append(mb_header)           # stash header
+        self.num_mb += 1                            # update MeshBlock count
 
     def write_header(self):
-
+        # build text file with header data for each MeshBlock
         header_str = os.path.join(self.data_dir, "header.txt")
         with open(header_str, "w") as f:
             for mb_header in self.mb_headers:
                 f.write("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}\n".format(*mb_header))
 
-class BSpline:
-
-    # referencing: https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/INT-APP/CURVE-INT-global.html
-
-    def __init__(self, p, D_array, mode="chord", len_power=0.5):
-        # load data
-        self.D_array = D_array
-        self.n = np.shape(D_array)[0] - 1
-        if (p > self.n):
-            raise Exception("degree must be less than or equal to number of data points")
-        self.p = p # order
-        self.m = self.n + self.p + 1
-        num_middle = (self.m + 1) - 2 * (self.p + 1)
-        self.u_list = [0] * (self.p + 1) + np.linspace(0, 1, num_middle + 2)[1:-1].tolist() + [1] * (self.p + 1)
-
-        # package data
-        self.set_spacing(mode, len_power)
-        self.build_N_array()
-
-        # solve data
-        self.solve_P()
-
-    def set_spacing(self, mode, len_power):
-        if mode == "uniform":
-            self.t_list = np.linspace(0, 1, self.n+1)
-        elif mode in ["chord", "centripetal"]:
-            if mode == "chord":
-                len_power = 1.0
-            sides = self.D_array[1:,:] - self.D_array[:-1,:] # D_{k+1} - D_k
-            lengths = np.sum(np.power(np.abs(sides),len_power), axis=1)
-            total_length = np.sum(lengths)
-            t_list = np.zeros(shape=self.n+1)
-            t_list[-1] = 1
-            for i in range(1,self.n):
-                t_list[i] = t_list[i-1] + lengths[i] / total_length
-            self.t_list = t_list
-        else:
-            raise Exception("unable to recognised mode, select form [\"uniform\",\"chord\",\"centripetal\"]")
-
-        self.tl = self.t_list[0]
-        self.tr = self.t_list[-1]
-
-    def build_N_row(self, u):
-
-        # init row as zero
-        N_row = np.zeros(shape=(self.n+1))
-
-        # handle edge cases
-        if u == self.u_list[0]:
-            N_row[0] = 1.0
-            return N_row
-        elif u == self.u_list[-1]:
-            N_row[self.n] = 1.0
-            return N_row
-
-        k = np.argmax(self.u_list > u) - 1
-
-        # loop over degrees
-        N_row[k] = 1.0
-        for d in range(1,self.p+1):
-            N_row[k-d] = N_row[k-d+1] * (self.u_list[k+1] - u) / (self.u_list[k+1] - self.u_list[k-d+1])
-            for i in range(k-d+1,k):
-                N_row[i] = N_row[i] * (u - self.u_list[i]) / (self.u_list[i+d] - self.u_list[i])
-                N_row[i] += N_row[i+1] * (self.u_list[i+d+1] - u) / (self.u_list[i+d+1] - self.u_list[i+1])
-            N_row[k] = N_row[k] * (u - self.u_list[k]) / (self.u_list[k+d] - self.u_list[k])
-
-        return N_row
-
-    def build_N_array(self):
-        N_array = np.zeros(shape=(self.n+1, self.n+1))
-        for row, t in enumerate(self.t_list):
-            N_row = self.build_N_row(t)
-            N_array[row,:] = N_row
-        self.N_array = N_array
-
-    def solve_P(self):
-        # solve lin equation set for each column
-        P_array = np.zeros(shape=(self.n+1, 3))
-        for i in range(3):
-            D_column = self.D_array[:,i]
-            P_column = np.linalg.solve(self.N_array, D_column)
-            P_array[:,i] = P_column
-
-        self.P_array = P_array
-
-    def eval_spline(self, t_span):
-
-        C = np.zeros(shape=(np.size(t_span),3))
-        for i, t in enumerate(t_span):
-            N_coeffs = self.build_N_row(t)
-            C_i = np.zeros(shape=(3))
-            for j in range(self.n+1):
-                C_i += N_coeffs[j] * self.P_array[j,:]
-            C[i,:] = C_i
-
-        return C
-
-class GuidedCamera:
 
     def __init__(self, checkpoints = None, targets = None):
         self.checkpoints = checkpoints

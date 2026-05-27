@@ -40,7 +40,7 @@ If `lookback`is enabled, `cuDART` will read multiple snapshots in time to accoun
   <img src=https://github.com/hwhitehead/cuDART/blob/morphology/gallery/alias.png width = "800"/>
 </p>
 <p align="center"">
-  <em> Low-resolution, synethic images of anti-parallel ejecta, with simulations states sampled at below, near and above the critical cadence (left to right). While the rightmost panel faithfully captures the finite speed-of-light behaviour, resulting in a smearing of the emission along the direction of travel, the leftmost panel features multiple images as the cadence is too low.</em>
+  <em> Low-resolution, synethic images of anti-parallel ejecta, with simulations states sampled at below, near and above the critical cadence (left to right). While the rightmost panel faithfully captures the finite speed-of-light behaviour, resulting in a smearing of the emission along the direction of travel, the leftmost panel features multiple images as the cadence for the provided simulation data is too low.</em>
 </p>
 
 ## Data Formats

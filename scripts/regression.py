@@ -8,15 +8,97 @@ pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
 sys.path.append(pysrc)
 from cudart import *
 
-# define units
-epislon = 1e-2 # small angle to avoid casts along coordinate axes
-kpc_to_m = 1e3 * 3.086e+16
-Myr_to_s = 1e6 * 365 * 24 * 60 * 60
-c_light = 3e8
-
 def build_regression_suite(save_dir, sim_args, verbose=True):
 
-    # construct template data for regression suite
+    # construct template data for regression suite, without labels
+    # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
+    # the emitting regions are spheres in the observer frame
+    # the emission in the spheres falls off quadratically with radius, out to a fixed, finite radius
+    # if given specific theta, ensure sampling occurs at unaliased frequency
+
+    if (verbose): 
+        print("starting regression suite data construction...")
+        print("saving data at {0}".format(save_dir))
+
+    if not os.path.isdir(save_dir):
+        raise Exception("{0} does not exist".format(save_dir))
+
+    # define simulation parameters
+    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
+    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]                  # cast to code units (where L_domain = 1.0)
+    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
+    
+    # build empty domain 
+    max_emm = 1.0
+    Lz = 1.0                                                                    # set domain length in z to unity in code units
+    Ly = Lz * sim_args["domain_dims"][1] / sim_args["domain_dims"][2]           # auto scale x, y directions
+    Lx = Lz * sim_args["domain_dims"][0] / sim_args["domain_dims"][2] 
+    xspan = np.linspace(-0.5 * Lx, 0.5 * Lx, sim_args["domain_dims"][0])        # build domain centered on (0,0,0)
+    yspan = np.linspace(-0.5 * Ly, 0.5 * Ly, sim_args["domain_dims"][1])
+    zspan = np.linspace(-0.5 * Lz, 0.5 * Lz, sim_args["domain_dims"][2])
+    ispan = np.array([0,1,2,3])                                                 # dummy indices for spatial, velocity axes
+    xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")     # construct mesh as (x,y,z,i)
+    xy_sqr = xx ** 2 + yy ** 2
+    snapshot_size = np.size(xx)
+    if (verbose): print("built empty mesh.")
+
+    # determine cadence, if critical timing routine flagged
+    if sim_args["target_theta"] is not None:
+        crit_fac = (1 - v_in_c * np.cos(sim_args["target_theta"])) / np.sin(sim_args["target_theta"])
+        dt_crit_in_s = crit_fac * sim_args["r_blob"] * kpc_to_m / (v_in_c * c_light)
+        dt_crit = dt_crit_in_s / Myr_to_s
+        num_snapshots_crit = int(T_in_Myr / dt_crit)
+        num_snapshots = num_snapshots_crit if (num_snapshots_crit > sim_args["num_snapshots"]) else sim_args["num_snapshots"]
+    else:
+        num_snapshots = sim_args["num_snapshots"]    
+    t_span = np.linspace(0, T_in_Myr, num_snapshots)                # evenly snapshot times over duration
+
+    # build header data
+    header_str = os.path.join(save_dir, "header.txt")
+    
+    with open(header_str, "w") as f:
+        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_domain"]))
+    if (verbose): print("built header.")
+
+    # build snapshots
+    for n, t_in_Myr in enumerate(t_span):
+        # unlabelled data is a single .npy file, without a header
+        save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        
+        # build data array for this snapshot in time
+        save_data = np.zeros_like(xx)
+        lead_center_in_kpc = t_in_Myr * v_in_kpc_per_Myr                        # calculate ejecta position in kpc
+        lead_center = lead_center_in_kpc / sim_args["L_domain"]                 # cast to code units
+        tail_center = -lead_center                                              # tailing ejecta symmetric in x-y
+        lead_ZZ = zz - lead_center
+        tail_ZZ = zz - tail_center
+
+        rr_lead_sqr = ((zz - lead_center) ** 2 + xy_sqr) / r_blob_in_code ** 2  # sph radius from leading/tailing ejecta
+        rr_tail_sqr = ((zz - tail_center) ** 2 + xy_sqr) / r_blob_in_code ** 2
+
+        in_lead = (rr_lead_sqr < 1)
+        in_tail = (rr_tail_sqr < 1)
+        emm_lead = max_emm * (1.0 - rr_lead_sqr)                                # emission falls off quadratically from center
+        emm_tail = max_emm * (1.0 - rr_tail_sqr)
+
+        lead_emm_mask = (in_lead) & (ii == 0)
+        tail_emm_mask = (in_tail) & (ii == 0)
+        lead_vel_mask = (in_lead) & (ii == 3)
+        tail_vel_mask = (in_tail) & (ii == 3)
+        save_data[lead_emm_mask] = emm_lead[lead_emm_mask]                      # match emission in lead/tail
+        save_data[tail_emm_mask] = emm_tail[tail_emm_mask]  
+        save_data[lead_vel_mask] = v_in_c                                       # invert velocity in lead/tail
+        save_data[tail_vel_mask] = -v_in_c
+        save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
+        np.save(save_str, save_data)                                            # save snapshot data
+        if (verbose): print("built dataset for snapshot {0}/{1}".format(n,num_snapshots))
+
+    if (verbose): print("finished dataset construction.")
+
+def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
+
+    # construct template data for regression suite, with labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
     # the emitting regions are spheres in the observer frame
     # the emission in the spheres falls off quadratically with radius, out to a fixed, finite radius
@@ -69,7 +151,12 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
 
     # build snapshots
     for n, t_in_Myr in enumerate(t_span):
-        save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        # labelled data lives in its own folder, including a header text file
+        save_dir = os.path.join(save_dir, "snapshot" + str(n).zfill(5))
+        if not os.path.isdir(save_dir):
+            os.mkdir(save_dir)
+        
+        # build data array for this snapshot in time
         save_data = np.zeros_like(xx)
         lead_center_in_kpc = t_in_Myr * v_in_kpc_per_Myr                        # calculate ejecta position in kpc
         lead_center = lead_center_in_kpc / sim_args["L_domain"]                 # cast to code units
@@ -94,12 +181,31 @@ def build_regression_suite(save_dir, sim_args, verbose=True):
         save_data[lead_vel_mask] = v_in_c                                       # invert velocity in lead/tail
         save_data[tail_vel_mask] = -v_in_c
         save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
-        np.save(save_str, save_data)                                            # save snapshot data
-        if (verbose): print("built dataset for snapshot {0}/{1}".format(n,num_snapshots))
+        
+        # for demonstration, partition data into two MeshBlocks split along z = 0
+        mask_a = (zz >= 0)                                          
+        mask_b = (zz < 0)
 
-    if (verbose): print("finished dataset construction.")
+        # build Mesh to contain MeshBlock data
+        mesh = Mesh(save_dir)
 
-def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
+        # partitioned data needs to have spatial labels
+        mb_data_a = save_data[mask_a]                                           # select lower half of data 
+        xl_a = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                      # lower corner of data_a
+        xr_a = np.array([0.5 * Lx, 0.5 * Ly, 0.0])                              # upper corner of data_a
+        mesh.add_meshblock(mb_data_a, xl_a, xr_a)                               # add MeshBlock to Mesh
+
+        mb_data_b = save_data[mask_b]                                           # select upper half of data
+        xl_b = np.array([-0.5 * Lx, -0.5 * Ly, 0.0])                            # lower corner of data_b
+        xr_b = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                         # upper corner of data_b
+        mesh.add_meshblock(mb_data_b, xl_b, xr_b)                               # add MeshBlock to Mesh
+
+        mesh.write_header()                                                     # save header for Mesh directory
+        if (verbose): print("built labelled dataset for snapshot {0}/{1}".format(n,num_snapshots))
+
+    if (verbose): print("finished labelled dataset construction.")
+
+def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True):
 
     # run a rendering test on a single snapshot of data
     # data should be loaded from suite built using build_regression_suite (-b flag)
@@ -111,35 +217,34 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
         print("reading data from {0}".format(load_dir))
         print("saving data at {0}".format(save_dir))
 
-    # check user input
-    if camera_args["snapshot_index"] is None: # select middle snapshot
-        snapshot_index = int(np.floor(0.5 * (sim_args["num_snapshots"] - 1)))
-        print("auto setting snapshot_index = {0}".format(snapshot_index))
-    elif (camera_args["snapshot_index"] < 0): # check snapshot lower oob
-        print("selected snapshot negative, using first snapshot.")
-    else: # check snapshot upper oob
-        last_index = sim_args["num_snapshots"] - 1
-        if sim_args["snapshot_index"] > last_index:
-            print("selected snapshot exceeds simulation bounds, using last ({0})".format(last_index))
-            snapshot_index = last_index
+    # calculate snapshot_index if not specified
+    if snapshot_index is None:
+        if num_snapshots is None:
+            # calculate number of snapshots in load_dir 
+            root, dirs, files = os.walk(load_dir)
+            num_dirs = len(dirs)
+            if num_dirs > 0: # assume data is labelled
+                num_snapshots = num_dirs
+            else:
+                file_array = np.array(files)
+                npy_files = [file for file in files if file.startswith("snapshot")]
+                num_snapshots = len(npy_files)
+        else:
+            snapshot_index = np.floor(0.5 * (num_snapshots-1))
 
     # check input, output directory existence
     for path in [load_dir, save_dir]:
         if not os.path.isdir(path):
             raise Exception("{0} does not exist".format(save_dir))
 
-    # format input and output paths
-    npy_load_str = os.path.join(load_dir, "snapshot" + str(int(snapshot_index)).zfill(5) + ".npy")
-    npy_save_str = os.path.join(save_dir, "raw")
-    png_save_str = os.path.join(save_dir, "img")
-
     # check for specific snapshot input file
-    if not os.path.exists(npy_load_str):
-        raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(npy_load_str))
+    load_str = os.path.join(load_dir, "snapshot" + str(int(camera_args.snapshot_index)).zfill(str_zfill) + ".npy")
+    if not os.path.exists(load_str):
+        raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(load_str))
 
-    # prepare array of cameras (cycle in theta)
+    # prepare array of cameras (cycle evenly over theta in [0,pi])
     if (verbose): print(r"building {0} cameras evenly spanning theta in [0,pi]".format(camera_args["num_img"]))
-    theta_ar = np.linspace(epsilon, np.pi - epsilon,camera_args["num_img"])
+    theta_ar = np.linspace(epsilon, np.pi - epsilon, camera_args["num_img"])
     cameras = []
     for i, theta in enumerate(theta_ar):
         camera = copy.deepcopy(camera_args["template"])
@@ -149,11 +254,11 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
             camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
         camera.set_sph_pos(r = 2.0, target_origin = True)
         cameras.append(camera)    
-        if (verbose): print("built camera {0} at theta = {1:.2f}deg...".format(i,theta*180.0/np.pi))
+        if (verbose): print("built camera {0}/{1} at theta = {1:.2f}deg...".format(i+1,camera_args["num_img"],theta*180.0/np.pi))
     if (verbose): print("finished camera initialisation.")
 
     # generate scene
-    scene = Scene(npy_load_str, npy_save_str, cameras, camera_file_name=camera_args["camera_file_name"])
+    scene = Scene(load_str, save_str, cameras, camera_file_name=camera_args["camera_file_name"])
     if (verbose): print("built scene.")
 
     # render and save images
@@ -161,17 +266,19 @@ def run_nolookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
-        scene.plot(png_save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = False, vmin=-6, vmax=0)
-        print("finished rendering figures.")
+        scene.plot(save_str, cmap = "afmhot", verbose = verbose, remove_raw_images = False, vmin=-6, vmax=0)
+        if (verbose): print("finished rendering figures.")
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
-def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose=True):
+def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True):
 
     # run a rendering test using finite speed of light with multiple snapshots
     # data should be loaded from suite built using build_regression_suite (-b flag)
     # render uses a set number of cameras evenly spaced in observer time
     # optional call included to render raws as figures (.npy -> .png)
+    # sim_args is passed here to calculate timings, generally it is not required
+
 
     if (verbose): 
         print("starting lookback render test...")
@@ -309,7 +416,7 @@ if __name__ == "__main__":
             raise Exception("unable to run no-lookback test without save location (use --save_dir)")
         if (args["data_dir"] is None):
             raise Exception("unable to run no-lookback test without load location (use --data_dir)")
-        run_nolookback_test(args["data_dir"], args["save_dir"], sim_args, camera_args, args["v"])
+        run_nolookback_test(args["data_dir"], args["save_dir"], camera_args, args["v"])
     
     if (args["rl"]):
         if (args["save_dir"] is None):
