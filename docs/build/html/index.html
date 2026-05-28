@@ -41,8 +41,9 @@
 <p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is a relativistic ray-tracing code designed to generate synthentic observations via line-of-sight summation of optically thin emission.
 Generating such visualisations, especially from arbitrary viewpoints, can prove very expensive due to the large number of cells that a line-of-sight may intersect with.
 In <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer.
-DDA allows for iterative low-cost propagation of rays through regular meshes, <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> uses the CUDA toolkit to perform ray propagation and summation exceptionally quickly.
-<code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> allows the computations including relativistic boosting, and supports a finite speed of light, allowing for geometric effects such as superluminal motion to be recovered.</p>
+DDA allows for iterative low-cost propagation of rays through regular Cartesian meshes, <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> uses the CUDA toolkit to perform ray propagation and summation exceptionally quickly.
+<code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> allows the computations including relativistic boosting, and supports a finite speed of light, allowing for geometric effects such as superluminal motion to be recovered.
+<code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is capable to forming composite renderings from an arbitrary number of sub-domains, with locally fixed resolution but globally variable.</p>
 <p>The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. The code is available on <a class="reference external" href="https://github.com/hwhitehead/cuDART">GitHub</a>.
 Please report any issues and suggestions for improvement here. Development for <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is use-case driven; if there are projects that you think may benefit from this code, but requires additional features
 please get in touch with the authors.</p>
@@ -95,6 +96,8 @@ please get in touch with the authors.</p>
 <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inputs.html">Input Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example Operation</a></li>
 </ul>
 
 <div class="relations">

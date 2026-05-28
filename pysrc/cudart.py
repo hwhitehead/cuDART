@@ -66,7 +66,7 @@ class Camera:
 
     def __init__(self, origin = np.array([1.0,0.0,0.0]), normal = np.array([-1.0,0.0,0.0]), bias = np.array([0.0,0.0,1.0]),
                     num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0, t_obs = 0.0,
-                    theta = 0.5 * np.pi - epsilon, phi = epsilon,r=2.0):
+                    theta = 0.5 * np.pi - epsilon, phi = epsilon, r = 2.0):
         # stash inputs
 
         # test vector types
@@ -87,6 +87,7 @@ class Camera:
         self.t_obs = t_obs
         self.theta = theta
         self.phi = phi
+        self.r = r
 
     def __str__(self):
         # print summary of camera properties
@@ -101,7 +102,7 @@ class Camera:
         # generate string for camera text file
         return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y, self.t_obs)
     
-    def set_sph_pos(self, r=None, theta=None, phi=None, target_origin=False):
+    def set_sph_pos(self, r = None, theta = None, phi = None, target_origin = False):
         # set camera origin in spherical polar coordinates
 
         # if not passed as arg, use internal values

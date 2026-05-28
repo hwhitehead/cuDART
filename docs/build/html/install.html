@@ -14,6 +14,7 @@
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Input Formats" href="inputs.html" />
     <link rel="prev" title="cuDART documentation" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -34,17 +35,20 @@
             
   <section id="installation-and-requirements">
 <h1>Installation and Requirements<a class="headerlink" href="#installation-and-requirements" title="Link to this heading">¶</a></h1>
-<p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is written in C++, and runs on the GPU. As such, to function it requires
-* A CUDA-capable GPU (from Ampere onwards)
-* The <code class="code docutils literal notranslate"><span class="pre">nvcc</span></code> compiler
-* Python (optional, but highly recommended for front-end), with the following modules</p>
-<blockquote>
-<div><ul class="simple">
+<p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is written in C++, and runs on the GPU. As such, to function it requires</p>
+<ul class="simple">
+<li><p>A CUDA-capable GPU (from Ampere onwards)</p></li>
+<li><p>The <code class="code docutils literal notranslate"><span class="pre">nvcc</span></code> compiler</p></li>
+<li><dl class="simple">
+<dt>Python (optional, but highly recommended for front-end), with the following modules</dt><dd><ul>
 <li><p>common modules such as <code class="code docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="code docutils literal notranslate"><span class="pre">matplotlib</span></code></p></li>
 <li><p>if using data from <code class="code docutils literal notranslate"><span class="pre">PLUTO</span></code>, the <code class="code docutils literal notranslate"><span class="pre">pyPLUTO</span></code> module (available <a class="reference external" href="https://github.com/GiMattia/PyPLUTO">here</a>)</p></li>
 <li><p>if using data in the HDF5 format, the <code class="code docutils literal notranslate"><span class="pre">h5py</span></code> module</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
+</li>
+</ul>
 <section id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
 <p>First, clone a local copy of the <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> codebase</p>
@@ -52,7 +56,7 @@
 </pre></div>
 </div>
 <p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is packaged with a template makefile, the user should configure before building</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>expot<span class="w"> </span><span class="nv">CUDART_DIR</span><span class="o">=</span>/path/to/cuDART
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">CUDART_DIR</span><span class="o">=</span>/path/to/cuDART
 $<span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$CUDART_DIR</span>
 $<span class="w"> </span>python3<span class="w"> </span>configure.py<span class="w"> </span>--arch<span class="o">=</span>GPU_ARCH<span class="w"> </span>--gpu<span class="o">=</span>GPU_MODEL
 $<span class="w"> </span>make<span class="w"> </span>clean
@@ -60,11 +64,35 @@ $<span class="w"> </span>make
 </pre></div>
 </div>
 <p>where here the <code class="code docutils literal notranslate"><span class="pre">--arch</span></code> and <code class="code docutils literal notranslate"><span class="pre">--gpu</span></code> flags allow the user to target their own GPU architecture or model.
-This allows <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to <code class="code docutils literal notranslate"><span class="pre">configure.py</span></code>
+This allows <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to <code class="code docutils literal notranslate"><span class="pre">configure.py</span></code>,
 <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> will pre-compile GPU-agnostic code valid for any NVIDIA GPU at least as modern as Ampere.</p>
 </section>
-<section id="running-cudart">
-<h2>Running <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code><a class="headerlink" href="#running-cudart" title="Link to this heading">¶</a></h2>
+<section id="regression">
+<h2>Regression<a class="headerlink" href="#regression" title="Link to this heading">¶</a></h2>
+<p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> comes packaged with regression testing routines to construct mock data and peform a range of rendering operations.
+These routines can be found at <code class="code docutils literal notranslate"><span class="pre">scripts/regression.py</span></code>. These tests can be invoked from the command line as</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$CUDART_DIR</span>
+$<span class="w"> </span>python3<span class="w"> </span>scripts/regression.py<span class="w"> </span>&lt;flags&gt;
+</pre></div>
+</div>
+<p>where the choices for flags are</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">-b</span></code> invokes the <code class="code docutils literal notranslate"><span class="pre">build_unlabelled_regresssion_suite</span></code> function, generating a series of mock simulation snapshots in time</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">-bl</span></code> invokes the <code class="code docutils literal notranslate"><span class="pre">build_labelled_regression_suite</span></code> function, generation a series of mock simulation snapshots in time, splitting the simulation into sub-domains for use in labelled model</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">--data_dir=&lt;data_dir&gt;</span></code> accepts a path to specify the directory in which to generate mock snapshots, and to read from for rendering</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">--save_dir=&lt;save_dir&gt;</span></code> accepts a path to specificy the directory in which to save raw <code class="code docutils literal notranslate"><span class="pre">.npy</span></code> renders, and <code class="code docutils literal notranslate"><span class="pre">.png</span></code> figures</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">-r</span></code> invokes the <code class="code docutils literal notranslate"><span class="pre">run_nolookback_test</span></code> routine, which renders a series of images from a single snapshot, varying the camera position</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">-rl</span></code> involes the <code class="code docutils literal notranslate"><span class="pre">run_lookback_test</span></code> routine, which renders a series of images from multiple snapshots, varying the camera time</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">-v</span></code> results in additional verbose prints to the terminal</p></li>
+</ul>
+<p>For example, if the user wishes to generate an unlabelled mock data set at <code class="code docutils literal notranslate"><span class="pre">$DATA_DIR</span></code>, render it using the lookback method and save the resulting
+<code class="code docutils literal notranslate"><span class="pre">.npy</span></code> raw images and <code class="code docutils literal notranslate"><span class="pre">.png</span></code> figures at <code class="code docutils literal notranslate"><span class="pre">$SAVE_DIR</span></code>, they might run the following</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$CUDART_DIR</span>
+$<span class="w"> </span>python3<span class="w"> </span>scripts/regression.py<span class="w"> </span>-v<span class="w"> </span>-bl<span class="w"> </span>-rl<span class="w"> </span>--data_dir<span class="o">=</span><span class="nv">$DATA_DIR</span><span class="w"> </span>--save_dir<span class="o">=</span><span class="nv">$SAVE_DIR</span>
+</pre></div>
+</div>
+<p>As both the labelled and unlabelled build routines share the <code class="code docutils literal notranslate"><span class="pre">data_dir</span></code> write space, the two flags cannot be used together.
+Similarly, the lookback and no-lookback render routines share the <code class="code docutils literal notranslate"><span class="pre">save_dir</span></code> write space, so are also exclusive.</p>
 </section>
 </section>
 
@@ -97,6 +125,7 @@ This allows <code class="code docutils literal notranslate"><span class="pre">cu
 <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inputs.html">Input Formats</a></li>
 </ul>
 
 <div class="relations">
@@ -104,6 +133,7 @@ This allows <code class="code docutils literal notranslate"><span class="pre">cu
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">cuDART documentation</a></li>
+      <li>Next: <a href="inputs.html" title="next chapter">Input Formats</a></li>
   </ul></li>
 </ul>
 </div>

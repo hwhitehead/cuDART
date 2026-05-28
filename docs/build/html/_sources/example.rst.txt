@@ -1,0 +1,99 @@
+##################
+Example Operation
+##################
+
+This page contains code snippets intended to illustrate how a user might generate their own renders using :code:`cuDART`. 
+Example usage is given for
+
+A. building a labelled simulation data set 
+B. running a render of a single simulation snapshot
+C. running a rander of multiple simulation snapshot (using the lookback routine)
+
+B: Formatting an Unlabelled Data Set
+------------------------------------
+
+.. code-block:: python 
+
+    pysrc = os.path.join("path/to/pysrc")
+    from cudart import *
+    import numpy as np
+
+    # specify size of domain
+    nx, ny, nz = 100, 100, 200                          # spatial dimensions         
+    data_dims = np.array([nx, ny, nz, 4])               # data dimensions
+
+    # load simulation data for domain
+    emissivity = np.load("path/to/emissivity/data")     # emissivity data
+    vel_x = np.load("path/to/velocity_x/data")          # velocity, in units c
+    vel_y = np.load("path/to/velocity_y/data")
+    vel_z = np.load("path/to/velocity_z/data")
+
+    # package data into single array
+    mesh_data = np.zeros(shape=data_dims)
+    mesh_data[..., 0] = emissivity
+    mesh_data[..., 1] = vel_x
+    mesh_data[..., 2] = vel_y
+    mesh_data[..., 3] = vel_z
+    mesh_data = mesh_data.astype(np.float32)            # enforce cast to float32
+    np.save("/path/to/save/location.npy",mesh_data)
+
+If the user is not running with relativisitc boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
+
+B: Formatting a Labelled Data Set
+---------------------------------
+
+Here we show how a user might package a series of subdomains for a single snapshot in time, into a labelled directory containing files for each sub-domain.
+
+.. code-block:: python 
+
+    pysrc = os.path.join("path/to/pysrc")
+    from cudart import *
+    import numpy as np
+
+    # construct Mesh object to hold sub-domains
+    mesh = Mesh("path/to/data/dir")
+
+    # iterate over sub-domains, labelled MeshBlock
+    num_meshblocks = 10 
+    for n in range(num_meshblocks):
+
+        # specify size of sub-domain
+        nx, ny, nz = 100, 100, 200                          # spatial dimensions         
+        data_dims = np.array([nx, ny, nz, 4])               # data dimensions
+
+        # load simulation data for sub-domain
+        emissivity = np.load("path/to/emissivity/data")     # emissivity data
+        vel_x = np.load("path/to/velocity_x/data")          # velocity, in units c
+        vel_y = np.load("path/to/velocity_y/data")
+        vel_z = np.load("path/to/velocity_z/data")
+
+        # package data into single array
+        meshblock_data = np.zeros(shape=data_dims)
+        meshblock_data[..., 0] = emissivity
+        meshblock_data[..., 1] = vel_x
+        meshblock_data[..., 2] = vel_y
+        meshblock_data[..., 3] = vel_z
+        meshblock_data = meshblock_data.astype(np.float32)  # enforce cast to float32
+
+        # add MeshBlock to Mesh, with spatial information
+        xl = np.array([0.0, 0.0, 0.0])                      # vector position of lower meshblock corner
+        xr = np.array([1.0, 1.0, 1.0])                      # vector position of upper meshblock corner
+        mesh.add_meshblock(mb_data, xl, xr)
+
+    # build header file for Mesh
+    mesh.write_header()
+
+If the user is not running with relativisitc boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
+
+B. Rendering from a single snapshot
+-----------------------------------
+
+Here we show how a user might use a single simulation snapshot in time to generate multiple rendered images using a list of cameras.
+
+.. code-block:: python
+
+    pysrc = os.path.join("path/to/pysrc")
+    from cudart import *
+    import numpy as np
+
+    path_to_snapshot = "path/to/single/snapshot"        # single file, or directory (unlabelled/labelled)

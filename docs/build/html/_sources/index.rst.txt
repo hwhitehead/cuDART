@@ -12,8 +12,9 @@ cuDART documentation
 :code:`cuDART` is a relativistic ray-tracing code designed to generate synthentic observations via line-of-sight summation of optically thin emission. 
 Generating such visualisations, especially from arbitrary viewpoints, can prove very expensive due to the large number of cells that a line-of-sight may intersect with. 
 In :code:`cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. 
-DDA allows for iterative low-cost propagation of rays through regular meshes, :code:`cuDART` uses the CUDA toolkit to perform ray propagation and summation exceptionally quickly. 
-:code:`cuDART` allows the computations including relativistic boosting, and supports a finite speed of light, allowing for geometric effects such as superluminal motion to be recovered.
+DDA allows for iterative low-cost propagation of rays through regular Cartesian meshes, :code:`cuDART` uses the CUDA toolkit to perform ray propagation and summation exceptionally quickly. 
+:code:`cuDART` allows the computations including relativistic boosting, and supports a finite speed of light, allowing for geometric effects such as superluminal motion to be recovered. 
+:code:`cuDART` is capable to forming composite renderings from an arbitrary number of sub-domains, with locally fixed resolution but globally variable. 
 
 The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. The code is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
 Please report any issues and suggestions for improvement here. Development for :code:`cuDART` is use-case driven; if there are projects that you think may benefit from this code, but requires additional features
@@ -37,6 +38,7 @@ Authors and contributors to the :code:`cuDART` code and their institutions are:
 Henry Whitehead
     DPhil candidate, Department of Physics, Astrophysics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford, OX1 3RH, UK
 
+
 .. toctree::
     :titlesonly:
     :glob:
@@ -44,5 +46,6 @@ Henry Whitehead
     :caption: Documentation
 
     install
-    *
+    inputs
+    example
 
