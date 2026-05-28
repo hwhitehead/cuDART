@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>cuDART documentation &#8212; cuDART 0.9 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=049aceee"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation and Requirements" href="install.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cudart-documentation">
+<h1>cuDART documentation<a class="headerlink" href="#cudart-documentation" title="Link to this heading">¶</a></h1>
+<figure class="align-default">
+<a class="reference internal image-reference" href="_images/magnetised_jets.png"><img alt="_images/magnetised_jets.png" src="_images/magnetised_jets.png" style="width: 800px;" />
+</a>
+</figure>
+<p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is a relativistic ray-tracing code designed to generate synthentic observations via line-of-sight summation of optically thin emission.
+Generating such visualisations, especially from arbitrary viewpoints, can prove very expensive due to the large number of cells that a line-of-sight may intersect with.
+In <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer.
+DDA allows for iterative low-cost propagation of rays through regular meshes, <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> uses the CUDA toolkit to perform ray propagation and summation exceptionally quickly.
+<code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> allows the computations including relativistic boosting, and supports a finite speed of light, allowing for geometric effects such as superluminal motion to be recovered.</p>
+<p>The workhorse of the code is written in C++/CUDA, but Python scripts are provided for user ease on the frontend. The code is available on <a class="reference external" href="https://github.com/hwhitehead/cuDART">GitHub</a>.
+Please report any issues and suggestions for improvement here. Development for <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is use-case driven; if there are projects that you think may benefit from this code, but requires additional features
+please get in touch with the authors.</p>
+<section id="publications">
+<h2>Publications<a class="headerlink" href="#publications" title="Link to this heading">¶</a></h2>
+<p>Earlier iterations of this codebase have been use to generate synethic observations for the following publications:</p>
+<ul class="simple">
+<li><p>Gasealahwe et al. (2025): <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract">A relativistic jet from a neutron star breaking out of its natal supernova remnant</a>,</p></li>
+<li><p>Elley et al. (2026): <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract">The impact of flickering variability and magnetisation on the dynamics, stability and morphology of radio-loud AGN jets</a>.</p></li>
+</ul>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Link to this heading">¶</a></h2>
+<p>Authors and contributors to the <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> code and their institutions are:</p>
+<dl class="simple">
+<dt>Henry Whitehead</dt><dd><p>DPhil candidate, Department of Physics, Astrophysics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford, OX1 3RH, UK</p>
+</dd>
+</dl>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">cuDART</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and Requirements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="install.html" title="next chapter">Installation and Requirements</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Henry Whitehead.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

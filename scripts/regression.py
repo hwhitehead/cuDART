@@ -102,6 +102,8 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose=True):
 
 def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
 
+    # TODO: test this deployment
+
     # construct template data for regression suite, with labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
     # the emitting regions are spheres in the observer frame

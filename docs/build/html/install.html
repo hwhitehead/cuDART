@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Installation and Requirements &#8212; cuDART 0.9 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=049aceee"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="cuDART documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="installation-and-requirements">
+<h1>Installation and Requirements<a class="headerlink" href="#installation-and-requirements" title="Link to this heading">¶</a></h1>
+<p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is written in C++, and runs on the GPU. As such, to function it requires
+* A CUDA-capable GPU (from Ampere onwards)
+* The <code class="code docutils literal notranslate"><span class="pre">nvcc</span></code> compiler
+* Python (optional, but highly recommended for front-end), with the following modules</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>common modules such as <code class="code docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="code docutils literal notranslate"><span class="pre">matplotlib</span></code></p></li>
+<li><p>if using data from <code class="code docutils literal notranslate"><span class="pre">PLUTO</span></code>, the <code class="code docutils literal notranslate"><span class="pre">pyPLUTO</span></code> module (available <a class="reference external" href="https://github.com/GiMattia/PyPLUTO">here</a>)</p></li>
+<li><p>if using data in the HDF5 format, the <code class="code docutils literal notranslate"><span class="pre">h5py</span></code> module</p></li>
+</ul>
+</div></blockquote>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Link to this heading">¶</a></h2>
+<p>First, clone a local copy of the <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> codebase</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:hwhitehead/cuDART.git
+</pre></div>
+</div>
+<p><code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> is packaged with a template makefile, the user should configure before building</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>expot<span class="w"> </span><span class="nv">CUDART_DIR</span><span class="o">=</span>/path/to/cuDART
+$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="nv">$CUDART_DIR</span>
+$<span class="w"> </span>python3<span class="w"> </span>configure.py<span class="w"> </span>--arch<span class="o">=</span>GPU_ARCH<span class="w"> </span>--gpu<span class="o">=</span>GPU_MODEL
+$<span class="w"> </span>make<span class="w"> </span>clean
+$<span class="w"> </span>make
+</pre></div>
+</div>
+<p>where here the <code class="code docutils literal notranslate"><span class="pre">--arch</span></code> and <code class="code docutils literal notranslate"><span class="pre">--gpu</span></code> flags allow the user to target their own GPU architecture or model.
+This allows <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to <code class="code docutils literal notranslate"><span class="pre">configure.py</span></code>
+<code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> will pre-compile GPU-agnostic code valid for any NVIDIA GPU at least as modern as Ampere.</p>
+</section>
+<section id="running-cudart">
+<h2>Running <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code><a class="headerlink" href="#running-cudart" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">cuDART</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and Requirements</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">cuDART documentation</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Henry Whitehead.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/install.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
