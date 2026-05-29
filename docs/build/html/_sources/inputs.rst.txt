@@ -8,17 +8,20 @@ The formatting of these files depends on the intended operation mode. Each :code
 * :code:`(nx,ny,nz)`: if running without relativisitc boosting
 * :code:`(nx,ny,nz,4)`: if running with relativistic boosting
 
-where here :code:`nx`, :code:`ny` and :code:`nz` are the number of cells in each cardinal direction and in the relativistic case
-the fourth index spans emissivity and velocity in each of the cardinal directions. 
+where here :code:`nx`, :code:`ny` and :code:`nz` are the number of cells in each cardinal direction. If running without relativistic boosting, the array should
+contian the data that will be summed along the line-of-sight such as density, emissivity. If running with relativistic boosting, the fourth index spans the quantity
+to be traced (the rest-frame emissivity) and the velocity in each of the cardinal directions.
 
-It is worth noting that Python genarlly does not ensure its arrays have consistent C-style ordering. It is up to the user to ensure
-that the saved :code:`.npy` data has true C-style array ordering and has not been reordered through stride meta-data alteration. C-style ordering
-can be forced in Python using :code:`data = np.array(data, order="C")`.
+The input data should have column-major ordering (C-style). It is worth noting that Python prefers to edit stride meta-data rather than explicitly rearrange its memory,
+which can result in initially column-major ordered arrays losing this property. It is left to the user to ensure that their input data has true C-style ordering, this
+can be forced in Python using :code:`input_data = np.array(input_data, order="C")`.
 
-Input data may be unlabelled, or labeled:
+The input data may be unlabelled, or labeled:
 
-* Unlabelled mode: each simulation snapshot is stored a single :code:`.npy` file
-* Labelled mode: each simulation snapshot is stored within a directory, containing multiple :code:`.npy` files for each sub-domian, and a header file :code:`header.txt` which contains additional information
+* :ref:`Unlabelled <inputs_unlabelled>` mode: each simulation snapshot is stored a single :code:`.npy` file
+* :ref:`Labelled <inputs_labelled>` mode: each simulation snapshot is stored within a directory, containing multiple :code:`.npy` files for each sub-domain, and a header file :code:`header.txt` which contains additional information
+
+.. _inputs_unlabelled:
 
 Unlabelled Mode
 ---------------
@@ -29,10 +32,15 @@ has a length of unity. If the domain does not feature cubic cells, or contains m
 then labelled mode should be used. The data directory containing unlabelled simulation data might take the form
 
 | data_directory
+| ├── header.txt
 | ├── snapshot00000.npy
 | ├── snapshot00001.npy
 | ├── snapshot00002.npy
 | ├── ...
+
+Note the single header file, which should contain information about time and length units. This file is only necessary if rendering with lookback.
+
+.. _inputs_labelled:
 
 Labelled Mode
 -------------
@@ -42,6 +50,7 @@ In this case, the data directory should contain a :code:`.npy` file for each sub
 of each sub-domain (as well as meta-data concerning the number of cells in each domain). The directory containing labelled simulation data might take the form
 
 | data_directory
+| ├── header.txt
 | ├── snapshot00000
 | │   ├── header.txt
 | │   ├── meshblock00000.npy
@@ -54,10 +63,12 @@ of each sub-domain (as well as meta-data concerning the number of cells in each 
 | │   ├── ...
 | ├── ...
 
-Header files can be automatically formatted using the :code:`Mesh` class (see `Example Usage <example>`).
+Header files can be automatically formatted using the :code:`Mesh` class (see `Example Usage <example>`). 
+Note the additional header file at the top of the tree, this file contains information about time and length units. This file is only necessary if rendering with lookback.
 
 Converting Simulation Data
 --------------------------
-While useful for manipulation in Python, :code:`.npy` files are not the standard outputs from hydrodynamic simulations codes. To support conversion 
+While useful for manipulation in Python, :code:`.npy` files are generally not the standard outputs from hydrodynamic simulation codes. To support conversion 
 between standard simulation file formats and the :code:`.npy` files required by :code:`cuDART`, additional functions are included in :code:`pysrc`.
 Currently conversion support is available for the :code:`.vtk` files output from :code:`PLUTO`, and the :code:`.hdf5` files output from :code:`Athena++`.
+We recommend the user develops their own routines for conversion between simulation output and :code:`.npy` file as approriate for their own use case.

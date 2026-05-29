@@ -1,0 +1,123 @@
+C++ API
+#######
+
+While it is perfectly possible (and perhaps recommended) to interact with :code:`cuDART` entirely through its Pythonic frontend,
+the user can also interface directly with the C++ executable through the command line. The C++ API can be found entirely within the :code:`src` directory.
+Here we describe the functionality of the main classes used within :code:`cuDART`.
+
+1. The :ref:`vec3 <cpp_api_vec3>` class
+2. The :ref:`Ray <cpp_api_ray>` class
+3. The :ref:`Camera <cpp_api_camera>` class
+4. The :ref:`MeshBlock <cpp_api_meshblock>` class
+5. The :ref:`Mesh <cpp_api_mesh>` class 
+
+Outside of this class structure, the main code routines can be split into 
+
+1. :ref:`Kernels <cpp_api_kernels>`
+2. :ref:`Tools <cpp_api_tools>`
+
+Included within the C++ API is :code:`npy.hpp`, which provides functionality for reading and writing :code:`.npy` files with C++. 
+This library is imported verbatim from the `libnpy <https://github.com/llohse/libnpy>`_ repository created by Leon Merten Lohse (`github <https://github.com/llohse>`_) 
+under MIT `license <https://github.com/llohse/libnpy/blob/master/LICENSE>`_. We do not include documentation for this librarhy here, please refer to the original libnpy repository.
+
+
+For brevity, this page gives only simple descriptions of classes, member and non-member functions. For a full description of class attributes and function parameters, 
+refer to the source code within the :code:`src` directory. Life is too short to use Doxygen, Breathe, Sphinx and ReadTheDocs to auto-document relatively 
+straightforward C++ code...
+
+Classes
+-------
+
+.. _cpp_api_vec3:
+
+.. cpp:class:: vec3
+
+    The :code:`vec3` class is used to support basic vector arithmetic in C++, such as normalisation, dot and cross products and rotations about 
+    another vector. 
+
+.. _cpp_api_ray:
+
+.. cpp:class:: Ray
+
+    The :code:`Ray` class describes a line-of-sight for a pixel, defined by an origin and a normal vector
+
+    .. cpp:member:: vec3 march(float s)
+
+        Return the point given by traversing a distance :code:`s` from the origin along the normal vector
+
+.. _cpp_api_camera:
+
+.. cpp:class:: Camera
+
+    The :code:`Camera` class is responsible for loading in camera properties and genrating rays for each pixels in an image
+
+    .. cpp:member:: void build_camera()
+
+        Generates an image plane using internal positional and orientional arguments 
+
+    .. cpp:member:: vec3 calc_pixel_origin(const int i, const int j)
+
+        Returns the ray origin for a pixel given its 2D indices in the image plane
+
+.. _cpp_api_meshblock:
+
+.. cpp:class:: MeshBlock
+
+    The :code:`MeshBlock` class is the keystone of the C++ API, responsible for containing a regular simulation sub-domain and providing 
+    methods to calculate line-of-sight summations over this sub-domain using the DDA alogorithm.
+
+    .. cpp:member:: bool calc_mb_intercept(const Ray *r, float &s_entry, float &s_exit)
+
+        Determine if intersection occurs between a :code:`Ray` and the :code:`MeshBlock`; if so then store the entry and exit locations as 
+        parameterised by :code:`s_entry` and :code:`s_exit`
+    
+    .. cpp:member:: float calc_trace(const Ray &r, TraceArgs trace_args)
+
+        Calculate a summation through the :code:`MeshBlock` sub-domain, on a path given by a :code:`Ray`'s line of sight. Apply runtime flags stored within the `TraceArgs` struct.
+
+.. _cpp_api_mesh:
+
+.. cpp:class:: Mesh 
+
+    Akin to the Pythonic :ref:`Mesh <python_api_mesh>` class, in the C++ code the :code:`Mesh` class is a container for all sub-domains, labelling
+    :code:`MeshBlocks` within a single snapshot of the simulation. The :code:`Mesh` able to accept lines-of-sight generated within 
+    the :code:`Camera` class and iterate over all :code:`MeshBlocks` to perform the path summation. 
+    Unlike the Pythonic Mesh, in C++ :code:`Mesh` is used regardless of running in labelled or unlabelled mode.
+
+    .. cpp:function:: float calc_trace(const Ray &r, TraceArgs trace_args)
+
+        Calculate the total summation through the full domain for a given ray's line-of-sight, summing over contributions from each :code:`MeshBlock`
+    
+.. _cpp_api_kernels:
+
+Kernels
+-------
+
+Kernels are functions called from the host, but deployed on the device. All kernels have :code:`__global__` scope.
+
+.. cpp:function:: render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceArgs trace_args)
+
+    Principle render kernel, calculates pixel values on a thread-by-thread basis
+
+.. cpp:function:: init_mesh(Mesh **mesh, MeshBlock **mb_list, int num_meshblocks)
+
+    Allocated and initialises a :code:`Mesh` container on the device
+
+.. cpp:function:: free_mesh(Mesh **mesh, int num_meshblocks) 
+
+    Deletes :code:`Mesh` container from device, frees each :code:`MeshBlock`
+
+.. cpp:function:: init_meshblock(MeshBlockInfo mb_info, MeshBlock **mb_list, float *data) 
+
+    Builds :code:`MeshBlock` on device, adds to list 
+
+.. cpp:function:: wipe_img(Camera camera, float *img)
+
+    Sets all values in the image buffer to zero as prep for next render
+
+.. _cpp_api_tools:
+
+Tools
+-----
+
+Here we list some of the more important non-method, non-kernel functions

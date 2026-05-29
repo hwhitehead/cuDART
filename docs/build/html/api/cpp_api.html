@@ -1,0 +1,249 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C++ API &mdash; cuDART 0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=049aceee"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Python API" href="python_api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cuDART
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation and Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../inputs.html">Input Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example.html">Example Operation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="python_api.html">Python API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">C++ API</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cuDART</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+      <li class="breadcrumb-item active">C++ API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/cpp_api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="c-api">
+<h1>C++ API<a class="headerlink" href="#c-api" title="Link to this heading"></a></h1>
+<p>While it is perfectly possible (and perhaps recommended) to interact with <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code> entirely through its Pythonic frontend,
+the user can also interface directly with the C++ executable through the command line. The C++ API can be found entirely within the <code class="code docutils literal notranslate"><span class="pre">src</span></code> directory.
+Here we describe the functionality of the main classes used within <code class="code docutils literal notranslate"><span class="pre">cuDART</span></code>.</p>
+<ol class="arabic simple">
+<li><p>The <a class="reference internal" href="#cpp-api-vec3"><span class="std std-ref">vec3</span></a> class</p></li>
+<li><p>The <a class="reference internal" href="#cpp-api-ray"><span class="std std-ref">Ray</span></a> class</p></li>
+<li><p>The <a class="reference internal" href="#cpp-api-camera"><span class="std std-ref">Camera</span></a> class</p></li>
+<li><p>The <a class="reference internal" href="#cpp-api-meshblock"><span class="std std-ref">MeshBlock</span></a> class</p></li>
+<li><p>The <a class="reference internal" href="#cpp-api-mesh"><span class="std std-ref">Mesh</span></a> class</p></li>
+</ol>
+<p>Outside of this class structure, the main code routines can be split into</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#cpp-api-kernels"><span class="std std-ref">Kernels</span></a></p></li>
+<li><p><a class="reference internal" href="#cpp-api-tools"><span class="std std-ref">Tools</span></a></p></li>
+</ol>
+<p>Included within the C++ API is <code class="code docutils literal notranslate"><span class="pre">npy.hpp</span></code>, which provides functionality for reading and writing <code class="code docutils literal notranslate"><span class="pre">.npy</span></code> files with C++.
+This library is imported verbatim from the <a class="reference external" href="https://github.com/llohse/libnpy">libnpy</a> repository created by Leon Merten Lohse (<a class="reference external" href="https://github.com/llohse">github</a>)
+under MIT <a class="reference external" href="https://github.com/llohse/libnpy/blob/master/LICENSE">license</a>. We do not include documentation for this librarhy here, please refer to the original libnpy repository.</p>
+<p>For brevity, this page gives only simple descriptions of classes, member and non-member functions. For a full description of class attributes and function parameters,
+refer to the source code within the <code class="code docutils literal notranslate"><span class="pre">src</span></code> directory. Life is too short to use Doxygen, Breathe, Sphinx and ReadTheDocs to auto-document relatively
+straightforward C++ code…</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<dl class="cpp class" id="cpp-api-vec3">
+<dt class="sig sig-object cpp" id="_CPPv44vec3">
+<span id="_CPPv34vec3"></span><span id="_CPPv24vec3"></span><span id="vec3"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">vec3</span></span></span><a class="headerlink" href="#_CPPv44vec3" title="Link to this definition"></a><br /></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">vec3</span></code> class is used to support basic vector arithmetic in C++, such as normalisation, dot and cross products and rotations about
+another vector.</p>
+</dd></dl>
+
+<dl class="cpp class" id="cpp-api-ray">
+<dt class="sig sig-object cpp" id="_CPPv43Ray">
+<span id="_CPPv33Ray"></span><span id="_CPPv23Ray"></span><span id="Ray"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Ray</span></span></span><a class="headerlink" href="#_CPPv43Ray" title="Link to this definition"></a><br /></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">Ray</span></code> class describes a line-of-sight for a pixel, defined by an origin and a normal vector</p>
+<dl class="cpp member">
+<dt class="sig sig-object cpp" id="_CPPv4N3Ray5marchE">
+<span id="_CPPv3N3Ray5marchE"></span><span id="_CPPv2N3Ray5marchE"></span><a class="reference internal" href="#_CPPv44vec3" title="vec3"><span class="n"><span class="pre">vec3</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">march</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3Ray5marchE" title="Link to this definition"></a><br /></dt>
+<dd><p>Return the point given by traversing a distance <code class="code docutils literal notranslate"><span class="pre">s</span></code> from the origin along the normal vector</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp class" id="cpp-api-camera">
+<dt class="sig sig-object cpp" id="_CPPv46Camera">
+<span id="_CPPv36Camera"></span><span id="_CPPv26Camera"></span><span id="Camera"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Camera</span></span></span><a class="headerlink" href="#_CPPv46Camera" title="Link to this definition"></a><br /></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">Camera</span></code> class is responsible for loading in camera properties and genrating rays for each pixels in an image</p>
+<dl class="cpp member">
+<dt class="sig sig-object cpp" id="_CPPv4N6Camera12build_cameraE">
+<span id="_CPPv3N6Camera12build_cameraE"></span><span id="_CPPv2N6Camera12build_cameraE"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">build_camera</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6Camera12build_cameraE" title="Link to this definition"></a><br /></dt>
+<dd><p>Generates an image plane using internal positional and orientional arguments</p>
+</dd></dl>
+
+<dl class="cpp member">
+<dt class="sig sig-object cpp" id="_CPPv4N6Camera17calc_pixel_originE">
+<span id="_CPPv3N6Camera17calc_pixel_originE"></span><span id="_CPPv2N6Camera17calc_pixel_originE"></span><a class="reference internal" href="#_CPPv44vec3" title="vec3"><span class="n"><span class="pre">vec3</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calc_pixel_origin</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">i</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">j</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N6Camera17calc_pixel_originE" title="Link to this definition"></a><br /></dt>
+<dd><p>Returns the ray origin for a pixel given its 2D indices in the image plane</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp class" id="cpp-api-meshblock">
+<dt class="sig sig-object cpp" id="_CPPv49MeshBlock">
+<span id="_CPPv39MeshBlock"></span><span id="_CPPv29MeshBlock"></span><span id="MeshBlock"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MeshBlock</span></span></span><a class="headerlink" href="#_CPPv49MeshBlock" title="Link to this definition"></a><br /></dt>
+<dd><p>The <code class="code docutils literal notranslate"><span class="pre">MeshBlock</span></code> class is the keystone of the C++ API, responsible for containing a regular simulation sub-domain and providing
+methods to calculate line-of-sight summations over this sub-domain using the DDA alogorithm.</p>
+<dl class="cpp member">
+<dt class="sig sig-object cpp" id="_CPPv4N9MeshBlock17calc_mb_interceptE">
+<span id="_CPPv3N9MeshBlock17calc_mb_interceptE"></span><span id="_CPPv2N9MeshBlock17calc_mb_interceptE"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calc_mb_intercept</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv43Ray" title="Ray"><span class="n"><span class="pre">Ray</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">r</span></span>, <span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">s_entry</span></span>, <span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">s_exit</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N9MeshBlock17calc_mb_interceptE" title="Link to this definition"></a><br /></dt>
+<dd><p>Determine if intersection occurs between a <code class="code docutils literal notranslate"><span class="pre">Ray</span></code> and the <code class="code docutils literal notranslate"><span class="pre">MeshBlock</span></code>; if so then store the entry and exit locations as
+parameterised by <code class="code docutils literal notranslate"><span class="pre">s_entry</span></code> and <code class="code docutils literal notranslate"><span class="pre">s_exit</span></code></p>
+</dd></dl>
+
+<dl class="cpp member">
+<dt class="sig sig-object cpp" id="_CPPv4N9MeshBlock10calc_traceE">
+<span id="_CPPv3N9MeshBlock10calc_traceE"></span><span id="_CPPv2N9MeshBlock10calc_traceE"></span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calc_trace</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv43Ray" title="Ray"><span class="n"><span class="pre">Ray</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">r</span></span>, <span class="n"><span class="pre">TraceArgs</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">trace_args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N9MeshBlock10calc_traceE" title="Link to this definition"></a><br /></dt>
+<dd><p>Calculate a summation through the <code class="code docutils literal notranslate"><span class="pre">MeshBlock</span></code> sub-domain, on a path given by a <code class="code docutils literal notranslate"><span class="pre">Ray</span></code>’s line of sight. Apply runtime flags stored within the <cite>TraceArgs</cite> struct.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp class" id="cpp-api-mesh">
+<dt class="sig sig-object cpp" id="_CPPv44Mesh">
+<span id="_CPPv34Mesh"></span><span id="_CPPv24Mesh"></span><span id="Mesh"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Mesh</span></span></span><a class="headerlink" href="#_CPPv44Mesh" title="Link to this definition"></a><br /></dt>
+<dd><p>Akin to the Pythonic <a class="reference internal" href="python_api.html#python-api-mesh"><span class="std std-ref">Mesh</span></a> class, in the C++ code the <code class="code docutils literal notranslate"><span class="pre">Mesh</span></code> class is a container for all sub-domains, labelling
+<code class="code docutils literal notranslate"><span class="pre">MeshBlocks</span></code> within a single snapshot of the simulation. The <code class="code docutils literal notranslate"><span class="pre">Mesh</span></code> able to accept lines-of-sight generated within
+the <code class="code docutils literal notranslate"><span class="pre">Camera</span></code> class and iterate over all <code class="code docutils literal notranslate"><span class="pre">MeshBlocks</span></code> to perform the path summation.
+Unlike the Pythonic Mesh, in C++ <code class="code docutils literal notranslate"><span class="pre">Mesh</span></code> is used regardless of running in labelled or unlabelled mode.</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N4Mesh10calc_traceERK3Ray9TraceArgs">
+<span id="_CPPv3N4Mesh10calc_traceERK3Ray9TraceArgs"></span><span id="_CPPv2N4Mesh10calc_traceERK3Ray9TraceArgs"></span><span id="Mesh::calc_trace__RayCR.TraceArgs"></span><span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calc_trace</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv43Ray" title="Ray"><span class="n"><span class="pre">Ray</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">r</span></span>, <span class="n"><span class="pre">TraceArgs</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">trace_args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N4Mesh10calc_traceERK3Ray9TraceArgs" title="Link to this definition"></a><br /></dt>
+<dd><p>Calculate the total summation through the full domain for a given ray’s line-of-sight, summing over contributions from each <code class="code docutils literal notranslate"><span class="pre">MeshBlock</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="kernels">
+<span id="cpp-api-kernels"></span><h2>Kernels<a class="headerlink" href="#kernels" title="Link to this heading"></a></h2>
+<p>Kernels are functions called from the host, but deployed on the device. All kernels have <code class="code docutils literal notranslate"><span class="pre">__global__</span></code> scope.</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416render_from_mesh6CameraPfPP4Mesh9TraceArgs">
+<span id="_CPPv316render_from_mesh6CameraPfPP4Mesh9TraceArgs"></span><span id="_CPPv216render_from_mesh6CameraPfPP4Mesh9TraceArgs"></span><span id="render_from_mesh__Camera.floatP.MeshPP.TraceArgs"></span><span class="sig-name descname"><span class="n"><span class="pre">render_from_mesh</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv46Camera" title="Camera"><span class="n"><span class="pre">Camera</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">camera</span></span>, <span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">img</span></span>, <a class="reference internal" href="#_CPPv44Mesh" title="Mesh"><span class="n"><span class="pre">Mesh</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mesh</span></span>, <span class="n"><span class="pre">TraceArgs</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">trace_args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416render_from_mesh6CameraPfPP4Mesh9TraceArgs" title="Link to this definition"></a><br /></dt>
+<dd><p>Principle render kernel, calculates pixel values on a thread-by-thread basis</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49init_meshPP4MeshPP9MeshBlocki">
+<span id="_CPPv39init_meshPP4MeshPP9MeshBlocki"></span><span id="_CPPv29init_meshPP4MeshPP9MeshBlocki"></span><span id="init_mesh__MeshPP.MeshBlockPP.i"></span><span class="sig-name descname"><span class="n"><span class="pre">init_mesh</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44Mesh" title="Mesh"><span class="n"><span class="pre">Mesh</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mesh</span></span>, <a class="reference internal" href="#_CPPv49MeshBlock" title="MeshBlock"><span class="n"><span class="pre">MeshBlock</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mb_list</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_meshblocks</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49init_meshPP4MeshPP9MeshBlocki" title="Link to this definition"></a><br /></dt>
+<dd><p>Allocated and initialises a <code class="code docutils literal notranslate"><span class="pre">Mesh</span></code> container on the device</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49free_meshPP4Meshi">
+<span id="_CPPv39free_meshPP4Meshi"></span><span id="_CPPv29free_meshPP4Meshi"></span><span id="free_mesh__MeshPP.i"></span><span class="sig-name descname"><span class="n"><span class="pre">free_mesh</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44Mesh" title="Mesh"><span class="n"><span class="pre">Mesh</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mesh</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_meshblocks</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49free_meshPP4Meshi" title="Link to this definition"></a><br /></dt>
+<dd><p>Deletes <code class="code docutils literal notranslate"><span class="pre">Mesh</span></code> container from device, frees each <code class="code docutils literal notranslate"><span class="pre">MeshBlock</span></code></p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414init_meshblock13MeshBlockInfoPP9MeshBlockPf">
+<span id="_CPPv314init_meshblock13MeshBlockInfoPP9MeshBlockPf"></span><span id="_CPPv214init_meshblock13MeshBlockInfoPP9MeshBlockPf"></span><span id="init_meshblock__MeshBlockInfo.MeshBlockPP.floatP"></span><span class="sig-name descname"><span class="n"><span class="pre">init_meshblock</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">MeshBlockInfo</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">mb_info</span></span>, <a class="reference internal" href="#_CPPv49MeshBlock" title="MeshBlock"><span class="n"><span class="pre">MeshBlock</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mb_list</span></span>, <span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414init_meshblock13MeshBlockInfoPP9MeshBlockPf" title="Link to this definition"></a><br /></dt>
+<dd><p>Builds <code class="code docutils literal notranslate"><span class="pre">MeshBlock</span></code> on device, adds to list</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv48wipe_img6CameraPf">
+<span id="_CPPv38wipe_img6CameraPf"></span><span id="_CPPv28wipe_img6CameraPf"></span><span id="wipe_img__Camera.floatP"></span><span class="sig-name descname"><span class="n"><span class="pre">wipe_img</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv46Camera" title="Camera"><span class="n"><span class="pre">Camera</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">camera</span></span>, <span class="kt"><span class="pre">float</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">img</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48wipe_img6CameraPf" title="Link to this definition"></a><br /></dt>
+<dd><p>Sets all values in the image buffer to zero as prep for next render</p>
+</dd></dl>
+
+</section>
+<section id="tools">
+<span id="cpp-api-tools"></span><h2>Tools<a class="headerlink" href="#tools" title="Link to this heading"></a></h2>
+<p>Here we list some of the more important non-method, non-kernel functions</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="python_api.html" class="btn btn-neutral float-left" title="Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Henry Whitehead.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

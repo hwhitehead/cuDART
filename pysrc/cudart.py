@@ -18,7 +18,12 @@ np.seterr(divide="ignore")
 
 def set_plot_defaults(use_tex = True):
     """
-    assign default plot settings before figure creation
+        Assigns default matplotlib settings before figure creation
+        
+        Parameters
+        ----------
+        use_tex : bool
+            Boolean to use full tex rendering or MathTex
     """
     ## FIGURE
 
@@ -61,8 +66,50 @@ def set_plot_defaults(use_tex = True):
     plt.rcParams['ytick.minor.size']=9/4
 
 class Camera:
-   
-    # the Camera class contains all the information required to define an image place for render generation
+    """
+        Class allowing for the definitions of general images planes, and the construction of text files containing
+        the camera properties to be read at cpp runtime
+
+        Parameters
+        ----------
+        origin : 3-vector
+            Central Camera position 
+        normal : 3-vector
+            Camera look direction
+        num_pixels_X : int
+            Number of pixels in X direction
+        num_pixels_Y :  int
+            Number of pixels in Y direction
+        length_X : float
+            Spatial extent of screen in X direction
+        length_Y : float
+            Spatial extent of screen in Y direction
+        bias : 3-vector
+            Orientation vector, set Y direction for image plane
+        tilt : float
+            Angle to rotate X, Y axes about the normal
+        num_pixels : int
+            Total number of pixels 
+        t_obs : float
+            Time for observation (in Myr)
+        theta : float
+            Polar coordinate for camera origin
+        phi : float
+            Azimuthal coordinate for camera origin
+        r : float
+            Radial coordinate for camera origin
+         
+        Methods
+        -------
+        header_str()
+            Packages Camera properties for write to camera text file
+        set_sph_pos()
+            Set Camera origin in spherical polar coordinates
+        set_target()
+            Set the position for the Camera to target (sets normal)
+        __str__()
+            Prints the Camera properties to the command line
+    """
 
     def __init__(self, origin = np.array([1.0,0.0,0.0]), normal = np.array([-1.0,0.0,0.0]), bias = np.array([0.0,0.0,1.0]),
                     num_pixels_X = 512, num_pixels_Y = 512, length_X = 1.0, length_Y = 1.0, tilt = 0.0, t_obs = 0.0,
@@ -76,7 +123,6 @@ class Camera:
 
         self.origin = origin
         self.normal = normal
-        self.bias = bias
         self.num_pixels_X = num_pixels_X
         self.num_pixels_Y = num_pixels_Y
         self.length_X = length_X
@@ -90,7 +136,7 @@ class Camera:
         self.r = r
 
     def __str__(self):
-        # print summary of camera properties
+        """Print summary of camera properties"""
         print_str = "printing camera data...\n"
         print_str += "origin = ({0},{1},{2})\n".format(*self.origin)
         print_str += "normal = ({0},{1},{2})\n".format(*self.normal)
@@ -99,11 +145,25 @@ class Camera:
         return print_str
 
     def header_str(self):
-        # generate string for camera text file
+        """Package camera properties into string for write to camera text file"""
         return "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}\n".format(*self.origin, *self.normal, *self.bias, self.tilt, self.length_X, self.length_Y, self.t_obs)
     
     def set_sph_pos(self, r = None, theta = None, phi = None, target_origin = False):
-        # set camera origin in spherical polar coordinates
+        """
+            set the camera position in spherical polar coordinates
+            if coordinates not specified, use internal attributes
+
+            Parameters
+            ----------
+            r : float
+                Radial coordinate
+            theta : float
+                Polar coordinate
+            phi : float
+                Azimuthal coordinate
+            target_origin : bool
+                Boolean to auto-call set_target()
+        """
 
         # if not passed as arg, use internal values
         if theta is None: theta = self.theta
@@ -118,12 +178,51 @@ class Camera:
         if (target_origin): self.set_target(np.array([0.0, 0.0, 0.0])) # target coordinate origin
 
     def set_target(self, target):
+        """
+            Set look direction for camera and auto-normalise
+        
+            Parameters
+            ----------
+            target :  3-vector
+                Position for camera to target
+        """
         self.normal = target - self.origin
         self.normal = self.normal / np.linalg.norm(self.normal)
     
 class Scene:
-    """ 
-    this class provides a simple way for the user to call cuDART and process the results
+    """
+        The Scene class is used to call the main cpp executable as a subprocess (with optional flags).
+        The class also supports the generation of .png files from the raw .npy output data, and the ability
+        to remake the cpp executable from within Python.
+
+        Parameters
+        ----------
+        load_str : str
+            Path to data input, should by single .npy file or directory (unlabelled vs labelled mode)
+        save_dir : str
+            Path to write space, should be directory (will auto mkdir if possible)
+        camera_file_name : str
+            Path to camera file name, if file is to persist (else auto deleted)
+        cameras : str
+            List of **Camera** objects, to specify image properties
+        
+        Methods
+        -------
+        render()
+            Calls the cpp executable as a subprocess, running the main render routine
+        plot()
+            Converts the raw .npy images into .png figures
+        build_camera_file()
+            Generates a text file contaning all camera properties for read at cpp runtime
+        make_clean()
+            Calls the 'make clean' routine from the main Makefile
+        make()
+            Calls the 'make' routine from the main Makefile
+        print_command()
+            Prints full command line invokation of cpp executable to terminal
+        __str__()
+            Prints the Scene properties to the command line
+
     """
     def __init__(self, load_str, save_dir, cameras = None, camera_file_name = None): 
 
@@ -163,7 +262,7 @@ class Scene:
                 raise Exception("all Camera objects must have consistent image dimensions.")
 
     def __str__(self):
-        # print summary of scene properties
+        """Prints the Scene properties to the command line"""
         print_str = "printing scene data...\n"
         print_str += "load_str = {0}\n".format(self.load_str)
         print_str += "save_dir = {0}\n".format(self.save_dir)
@@ -171,7 +270,7 @@ class Scene:
         print_str += "camera_file_name = {0}\n".format(self.temp_camera_file)
 
     def build_camera_file(self):
-        # constructs a text file containing the camera information
+        """Generates a text file contaning all camera properties for read at cpp runtime"""
         with open(self.temp_camera_file, "w") as f:
             # add header with const image dimensions (zero packed for istringstream read)
             f.write("{0} {1} 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0\n".format(self.cameras[0].num_pixels_X, self.cameras[0].num_pixels_Y))
@@ -180,15 +279,15 @@ class Scene:
                 f.write(camera.header_str())
 
     def make_clean(self):
-        # calls the 'make clean' routine from the Makefile
+        """Calls the 'make clean' routine from the main Makefile"""
         subprocess.run(["make","clean"], check = True)       
 
     def make(self):
-        # calls the 'make' routine within the Makefile
+        """Calls the 'make' routine from the main Makefile"""
         subprocess.run(["make"], check = True)
 
     def print_command(self, command):
-        # print to stdout details of command passed to .cpp executable
+        """Prints full command line invokation of cpp executable to terminal"""
         i = 0
         while i < np.size(command): 
             # handle end case
@@ -207,8 +306,35 @@ class Scene:
                 max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
                 lookback = False, verbose_cpp = False):
 
-        # given a constructed scene, invoke the .cpp executable with proper flags
-        # if 'plot' specified, generate .png figures from the raw .npy images
+        """
+            Given a constructed Scene, format a subprocess invokation of the main cpp executable with any 
+            specified flags. Remove any temporary files post render.
+
+            Parameters
+            ----------
+            relativistic : bool
+                Runs render using relativistic boosting (default False)
+            lookback : bool
+                Runs render using finite speed of light implementation (default False)
+            power_law_index : None
+                Sets power law slope for rest frame emission (default None, autos to -0.6 in cpp)
+            doppler_index : None
+                Sets exponent for Doppler factor (overwritten by power_law_index, default None)
+            verbose : bool
+                Prints progress of pythonic execution to terminal (default False)
+            verbose_cpp :  bool
+                Prints progress of cpp execution to terminal (default False)
+            save_profile : bool
+                Runs cpp executable within nvprof for runtime profiling (default False)
+            append : bool
+                Sums render output to existing .npy files (default False)
+            check_make : bool 
+                Checks to see if executable requires remake (default False)
+            force_make : bool
+                Makes explicit call to the ``make clean``, ``make`` methods (default False)
+            max_mem : int
+                Sets maximum allowed VRAM occupancy for execution (default None)
+        """
 
         # prepare camera space
         self.build_camera_file()
@@ -275,7 +401,26 @@ class Scene:
 
     def plot(self, fig_save_dir = None, cmap = "afmhot", vmin = -6, vmax = 0, remove_raw_npy = False, verbose = False, log_data = True):
         
-        # generate simple .png figure from raw .npy images
+        """
+            Generates .png figures from raw .npy images
+        
+            Parameters
+            ----------
+            fig_save_dir: str
+                Path to save location for .png files (autos to .npy dir, will auto mkdir if possible)
+            cmap : str
+                Matplotlib colormap (default "afmhot")
+            vmin : float
+                Minimum value for colormap scaling (default -6)
+            vmax : float
+                Maxmimum value for colormap scaling (default 0)
+            log_data : bool
+                Boolean to plot image data in logspace (default True)
+            verbose : bool
+                Prints progress of the plotting process (default False)
+            remove_raw_npy : bool
+                Removes .npy files after .png generation (default False)
+        """
         
         # build write space if needed
         if fig_save_dir is None: # if None, use same directory as raw .npy files
@@ -321,7 +466,28 @@ class Scene:
 
 class Mesh:
 
-    # the Mesh class is used when running cuDART in labelled mode, acting as a wrapper for multiple sub-domains termed MeshBlocks
+    """
+        The Mesh class is used when running cuDART in labelled mode, acting as a wrapper for multiple sub-domains termed MeshBlocks
+    
+        Parameters
+        ----------
+        data_dir : str
+            Path to directory, where labelled data will be build (will auto mkdir if possilbe)
+        
+        Attributes
+        ----------
+        num_mb : int
+            Number of subdomains (MeshBlocks) within Mesh
+        mb_headers : list
+            List of strings containing MeshBlock metadata
+
+        Methods
+        -------
+        add_meshblock()
+            Package a sub-domain and add to the labelled dataset
+        write_header()
+            Generate a header text file with subdomain metadata
+    """
 
     def __init__(self, data_dir):
         # check inputs and stash
@@ -332,7 +498,18 @@ class Mesh:
         self.mb_headers = []                        # list for MeshBlock header stash
     
     def add_meshblock(self, mb_data, xl, xr):
-        # package MeshBlock data and append to Mesh
+        """
+            Package MeshBlock data and append to Mesh
+
+            Parameters
+            ----------
+            mb_data : numpy array
+                rank 3 or rank 4 numpy array containing subdomain simulation data
+            xl : 3-vector
+                spatial coordinate of lower subdomain vertex (xmin, ymin, zmin)
+            xr : 3-vector
+                spatial coordinate of upper subdomain vertex (xmax, ymax, zmax)
+        """
         mb_data = mb_data.astype(np.float32)        # enforce cast to float32 type
         npy_str = os.path.join(self.data_dir, "meshblock" + str(self.num_mb).zfill(str_zfill) + ".npy")
         np.save(npy_str, mb_data)                   # save data to main dir
@@ -343,7 +520,7 @@ class Mesh:
         self.num_mb += 1                            # update MeshBlock count
 
     def write_header(self):
-        # build text file with header data for each MeshBlock
+        """Generate a header text file with subdomain metadata"""
         print(self.mb_headers)
         header_str = os.path.join(self.data_dir, "header.txt")
         with open(header_str, "w") as f:

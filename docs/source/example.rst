@@ -5,14 +5,16 @@ Example Operation
 This page contains code snippets intended to illustrate how a user might generate their own renders using :code:`cuDART`. 
 Example usage is given for
 
-A. Formatting an unlabelled simulation snapshot
-B. Formatting a labelled simulation snapshot
-C. Rendering a single simulation snapshot
-D. Rendering a multiple simulation snapshots together (using the lookback routine)
+A. Formatting an unlabelled simulation snapshot (:ref:`Example <example_section_A>`)
+B. Formatting a labelled simulation snapshot (:ref:`Example <example_section_B>`)
+C. Rendering a single pre-formatted simulation snapshot (:ref:`Example <example_section_C>`)
+D. Rendering multiple pre-formatted simulation snapshots with the lookback routine (:ref:`Example <example_section_D>`)
 
 Additional example usage can be found within the regression testing suite, available at :code:`scripts/regression.py`.
 
-A: Formatting an Unlabelled Data Set
+.. _example_section_A:
+
+A: Formatting an unlabelled data set
 ------------------------------------
 
 Here we show how a user might format a single homogenous simulation mesh, representing a single snapshot in time.
@@ -24,12 +26,12 @@ Here we show how a user might format a single homogenous simulation mesh, repres
     import numpy as np
 
     # specify size of domain
-    nx, ny, nz = 100, 100, 200                          # spatial dimensions         
-    data_dims = np.array([nx, ny, nz, 4])               # data dimensions
+    nx, ny, nz = 100, 100, 200                                      # spatial dimensions         
+    data_dims = np.array([nx, ny, nz, 4])                           # data dimensions
 
     # load simulation data for domain
-    emissivity = np.load("path/to/emissivity/data")     # emissivity data
-    vel_x = np.load("path/to/velocity_x/data")          # velocity, in units c
+    emissivity = np.load("path/to/emissivity/data")                 # emissivity data
+    vel_x = np.load("path/to/velocity_x/data")                      # velocity, in units c
     vel_y = np.load("path/to/velocity_y/data")
     vel_z = np.load("path/to/velocity_z/data")
 
@@ -39,14 +41,16 @@ Here we show how a user might format a single homogenous simulation mesh, repres
     mesh_data[..., 1] = vel_x
     mesh_data[..., 2] = vel_y
     mesh_data[..., 3] = vel_z
-    mesh_data = mesh_data.astype(np.float32)            # enforce cast to float32
+    mesh_data = mesh_data.astype(np.float32)                        # enforce cast to float32
     np.save("/path/to/save/location.npy",mesh_data)
 
-Note that no spatial labels are saved; :code:`cuDART` will automatically center the data around the origin, scaling the domain so that its longest length is unity. 
+Note that no spatial labels are saved; :code:`cuDART` will automatically center the data around the origin, scaling the domain so that its longest size has length unity in code units.
 The code also assumes that the simulation cells are cubic. If this is not the case, the user should apply labels (see Example B).
 If the user is not running with relativisitc boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
 
-B: Formatting a Labelled Data Set
+.. _example_section_B:
+
+B: Formatting a labelled data set
 ---------------------------------
 
 Here we show how a user might package a series of subdomains for a single snapshot in time, into a labelled directory containing files for each sub-domain.
@@ -65,12 +69,12 @@ Here we show how a user might package a series of subdomains for a single snapsh
     for n in range(num_meshblocks):
 
         # specify size of sub-domain
-        nx, ny, nz = 100, 100, 200                          # spatial dimensions         
-        data_dims = np.array([nx, ny, nz, 4])               # data dimensions
+        nx, ny, nz = 100, 100, 200                              # spatial dimensions         
+        data_dims = np.array([nx, ny, nz, 4])                   # data dimensions
 
         # load simulation data for sub-domain
-        emissivity = np.load("path/to/emissivity/data")     # emissivity data
-        vel_x = np.load("path/to/velocity_x/data")          # velocity, in units c
+        emissivity = np.load("path/to/emissivity/data")         # emissivity data
+        vel_x = np.load("path/to/velocity_x/data")              # velocity, in units c
         vel_y = np.load("path/to/velocity_y/data")
         vel_z = np.load("path/to/velocity_z/data")
 
@@ -80,11 +84,11 @@ Here we show how a user might package a series of subdomains for a single snapsh
         meshblock_data[..., 1] = vel_x
         meshblock_data[..., 2] = vel_y
         meshblock_data[..., 3] = vel_z
-        meshblock_data = meshblock_data.astype(np.float32)  # enforce cast to float32
+        meshblock_data = meshblock_data.astype(np.float32)      # enforce cast to float32
 
         # add MeshBlock to Mesh, with spatial information
-        xl = np.array([0.0, 0.0, 0.0])                      # vector position of lower meshblock corner
-        xr = np.array([1.0, 1.0, 1.0])                      # vector position of upper meshblock corner
+        xl = np.array([0.0, 0.0, 0.0])                          # vector position of lower meshblock corner
+        xr = np.array([1.0, 1.0, 1.0])                          # vector position of upper meshblock corner
         mesh.add_meshblock(mb_data, xl, xr)
 
     # build header file for Mesh
@@ -92,8 +96,10 @@ Here we show how a user might package a series of subdomains for a single snapsh
 
 If the user is not running with relativisitc boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
 
-C. Rendering from a single snapshot
------------------------------------
+.. _example_section_C:
+
+C. Rendering from a single pre-formatted snapshot
+-------------------------------------------------
 
 Here we show how a user might use a single simulation snapshot in time to generate multiple rendered images using a list of cameras.
 
@@ -104,16 +110,16 @@ Here we show how a user might use a single simulation snapshot in time to genera
     import numpy as np
 
     # specify load/save string
-    path_to_snapshot = "path/to/single/snapshot"        # single file, or directory (unlabelled/labelled)
-    path_to_save_npy = "path/to/npy/dir"                # directory for raw image outputs (.npy)
-    path_to_save_png = "path/to/png/dir"                # directory for figure image outputs (.png)
+    path_to_snapshot = "path/to/single/snapshot"                # single file, or directory (unlabelled/labelled)
+    path_to_save_npy = "path/to/npy/dir"                        # directory for raw image outputs (.npy)
+    path_to_save_png = "path/to/png/dir"                        # directory for figure image outputs (.png)
 
     # generate a template camera using properties consistent between images
     template_camera = Camera()
-    template_camera.length_X = 1.0                  # image plane size in X direction
-    template_camera.length_Y = 1.0                  # image plane size in Y direction
-    template_camera.num_pixels_X = 2048             # num pixels in X direction
-    template_camera.num_pixels_Y = 2048             # num pixels in Y direction 
+    template_camera.length_X = 1.0                              # image plane size in X direction
+    template_camera.length_Y = 1.0                              # image plane size in Y direction
+    template_camera.num_pixels_X = 2048                         # num pixels in X direction
+    template_camera.num_pixels_Y = 2048                         # num pixels in Y direction 
 
     # generate array of cameras (or use just one)
     # in this example, vary the polar angle describing the camera position 
@@ -137,7 +143,10 @@ Here we show how a user might use a single simulation snapshot in time to genera
 
 Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see full documentation.
 
-D. Rendering from multiple snapshots
+.. _example_section_D:
+
+D. Rendering from multiple pre-formatted snapshots
+--------------------------------------------------
 
 If the user wishes to account for a finite speed of light, then multiple snapshots must be read by :code:`cuDART`. 
 Multiple cameras (and hence images) can still be specified.
@@ -149,26 +158,26 @@ Multiple cameras (and hence images) can still be specified.
     import numpy as np
 
     # specify load/save string
-    path_to_snapshot = "path/to/all/snapshots"          # directory, containing all snapshots + header file
-    path_to_save_npy = "path/to/npy/dir"                # directory for raw image outputs (.npy)
-    path_to_save_png = "path/to/png/dir"                # directory for figure image outputs (.png)
+    path_to_snapshot = "path/to/all/snapshots"                  # directory, containing all snapshots + header file
+    path_to_save_npy = "path/to/npy/dir"                        # directory for raw image outputs (.npy)
+    path_to_save_png = "path/to/png/dir"                        # directory for figure image outputs (.png)
 
     # generate a template camera using properties consistent between images
     template_camera = Camera()
-    template_camera.length_X = 1.0                      # image plane size in X direction
-    template_camera.length_Y = 1.0                      # image plane size in Y direction
-    template_camera.num_pixels_X = 2048                 # num pixels in X direction
-    template_camera.num_pixels_Y = 2048                 # num pixels in Y direction 
-    template_camera.theta = np.pi / 2 - epsilon         # polar camera position
-    template_camara.phi = epsilon                       # azimuthal camera position
-    template_camera.r                                   # origin-camera seperaton
-    template_camera.set_sph_pos                         # init position
+    template_camera.length_X = 1.0                              # image plane size in X direction
+    template_camera.length_Y = 1.0                              # image plane size in Y direction
+    template_camera.num_pixels_X = 2048                         # num pixels in X direction
+    template_camera.num_pixels_Y = 2048                         # num pixels in Y direction 
+    template_camera.theta = np.pi / 2 - epsilon                 # polar camera position
+    template_camara.phi = epsilon                               # azimuthal camera position
+    template_camera.r                                           # origin-camera seperaton
+    template_camera.set_sph_pos                                 # init position
 
     # generate array of cameras (or use just one)
     # in this example, vary the time at which the observation is made
     num_imgs = 100
     cameras = []
-    t_first = 0                                         # all times in Myr
+    t_first = 0                                                 # all times in Myr
     t_last = 1 
     t_ar = np.linspace(t_first, t_last, num_imgs)
     for i, t_obs in enumerate(t_ar):
@@ -187,6 +196,6 @@ Multiple cameras (and hence images) can still be specified.
 
 Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see full documentation.
 The units for the origin-camera distance are inherited from the :code:`header.txt` file that should exist at :code:`path/to/all/snapshots/header.txt`.
-This header file should feature a single line of text in the form :code:`num_snapshots snapshot_size dt L_domain` where `num_snapshots` is the total number 
-of snapshots within the data dir, :code:`snapshot_size`` is the maximum snapshot size (number of cells), :code:`dt` is the (fixed) time between snapshots in Myr and 
+This header file should feature a single line of text in the form :code:`num_snapshots snapshot_size dt L_domain` where :code:`num_snapshots` is the total number 
+of snapshots within the data dir, :code:`snapshot_size` is the maximum snapshot size (by cells), :code:`dt` is the (fixed) time between snapshots in Myr and 
 :code:`L_domain` is the code unit for length (in kpc). 
