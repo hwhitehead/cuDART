@@ -22,5 +22,4 @@ outputs/
 docs/sphinx_venv/
 docs/build/doctrees/
 docs/build/html/
-docs/soruce/_static/
 !docs/Makefile

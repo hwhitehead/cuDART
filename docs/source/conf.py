@@ -30,6 +30,7 @@ add_module_names = False
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_favicon = '_static/favicon.svg'
 
 # auto-doc
 import sys, os
