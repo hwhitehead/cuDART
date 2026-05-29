@@ -17,3 +17,7 @@ outputs/
 # editor temp files
 *~
 *.swp
+
+# sphinx files
+docs/build/doctrees/
+docs/build/html/
