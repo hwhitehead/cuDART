@@ -20,14 +20,14 @@ We also detail a non-physical phenomenon related to the user providing the rende
 Relativistic Beaming
 --------------------
 
-Emmission that is isotropic in the emitter rest frame is beamed stowards the emitter's direction of motion 
+Emmission that is isotropic in the emitter rest frame is beamed towards the emitter's direction of motion 
 (see :ref:`this <calculation_header>` page for details). This means that the brightness of a source is dependent 
 on its orientation. In the figure :ref:`below <phenomena_rotate_gif>`, an animation depicts a series of viewpoints rotated 
-about hydrodynamic simulation data featuring a double-ended relativistic jet. The total luminosity of the system
-is plotted as a function of angle in the top panel. In the lower panels, the simulation is rendered with relativistic 
-beaming turned off and on (left and right respectively). For system without beaming, the luminosity is independent of 
+about hydrodynamic simulation data featuring a double-ended relativistic jet (data provided by `Elley et al. 2026 <https://ui.adsabs.harvard.edu/abs/2026MNRAS.546ag131E/abstract>`_). The total luminosity of the system
+is plotted as a function of viewing angle in the top panel. In the lower panels, the simulation is rendered with relativistic 
+beaming turned off and on (left and right respectively). For system without beaming, the totla luminosity is independent of 
 the viewing angle, but for the right system, the luminosity peaks when one of the jets is pointed directly towards the 
-observer. We can also see that in the right system, there is an asymmetry between the jets, as the end pointed toward the 
+observer (:math:`\theta \sim 0, \pi`). We can also see that in the right system, there is an asymmetry between the jets, as the end pointed toward the 
 observer is brighter. 
 
 .. _phenomena_rotate_gif:
@@ -35,7 +35,7 @@ observer is brighter.
 .. figure:: ../../gallery/comp.gif
     :width: 800px
 
-This morphology is consistent with real observations of relativistic jets launched from Active Galctic Nuclei. 
+This asymmetric morphology is consistent with real observations of relativistic jets launched from Active Galctic Nuclei. 
 As asymmetry may also be driven by anistropy in the ambient environment, understanding the degree of asymmetry driven by 
 relativistic beaming is crucial for comparing synthetic and real observations.
     
@@ -44,14 +44,14 @@ relativistic beaming is crucial for comparing synthetic and real observations.
 Superluminal Motion
 -------------------
 
-If an emitting region travelling close to the speed of light has a velocity component along the line of sight, the obsered transverse motion
+If an emitting region travelling close to the speed of light has a velocity component along the line of sight, the observed transverse motion
 of the region will be different from the true transverse velocity, as the distance between the emitting region and the observer is changing. 
-In order to capture this effect, :code:`cuDART` is able to support a finite speed of light in the tracing algorithm, reading in multiple simulation
+In order to capture this effect, :code:`cuDART` supports a finite speed of light in the tracing algorithm, reading in multiple simulation
 snapshots in time to account for the non-zero communication time between emitter and observer. The figure :ref:`below <phenomena_superluminal_gif>` shows 
 anti-parallel spherical (in the observer frame) ejecta launched at 90 and 45 degrees to the line of sight (left and right panels respectively). when
 the ejecta's motion is perpendicular to the line-of-sight, both ejecta show the same observed velocity. However, when the ejecta is pointed slight towards/away
 from the observer, the observed transverse velocity can be very different, even exceeding the speed of light. The observed shape of the approaching ejectum is 
-no longer a sphere, this is also a geometric effect (see `next <phenomena_morphology>` secton).
+no longer a sphere, this is also a geometric effect (see :ref:`next <phenomena_morphology>` secton).
 
 .. _phenomena_superluminal_gif:
 

@@ -24,12 +24,12 @@ such as superluminal motion to be recovered. :code:`cuDART` supports simulation 
 .. figure:: ../../gallery/magnetised_jets.png
     :width: 800px
 
-    Synethic radio observations of hydrodynamic simulation data, highly magnetised, variable power jet launched from an Active Galactic Nucleus, viewed from three different orientations. 
+    Synthetic radio observations of hydrodynamic simulation data, highly magnetised, variable power jet launched from an Active Galactic Nucleus, viewed from three different orientations. 
     Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. 
     Simulation data featured in Elley at al. 2026 (`NASA ADS <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_).
 
 The workhorse of the :code:`cuDART` code is written in C++/CUDA, but the frontend is build in Python. The full codebase is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
-Please report any issues and suggestions for improvement here. Development for :code:`cuDART` is use-case driven; if there are projects that you think may benefit from this code, but requires additional features
+Please report any issues and suggestions for improvement here. Development for :code:`cuDART` is use-case driven; if there are projects that you think may benefit from this code, but require additional features
 please get in touch with the authors.
 
 ---------------------------------------
@@ -65,10 +65,10 @@ Much of the formatting for this documentation page is taken from the superior do
     :hidden:
     :caption: Documentation
 
+    calculation
+    phenomena
     install
     inputs
     example
     api
-    calculation
-    phenomena
     performance
