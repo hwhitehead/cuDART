@@ -3,20 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-cuDART documentation
-====================
+cuDART
+======
 
-:code:`cuDART` is a relativistic ray-tracing code designed to generate synthentic observations via line-of-sight summation of optically thin emission. 
-Generating such visualisations, especially from arbitrary viewpoints, can prove very expensive due to the large number of cells that a line-of-sight may intersect with. 
-In :code:`cuDART` two acceleration structures are implemented to triviliase this computation: GPU acceleration and DDA, the Digital Differential Analyzer. 
-DDA allows for iterative low-cost propagation of rays through regular Cartesian meshes, :code:`cuDART` uses the CUDA toolkit to perform ray propagation and summation exceptionally quickly. 
-:code:`cuDART` allows the computations including relativistic boosting, and supports a finite speed of light, allowing for geometric effects such as superluminal motion to be recovered. 
-:code:`cuDART` is capable to forming composite renderings from an arbitrary number of sub-domains, with locally fixed resolution but globally variable. 
+:code:`cuDART` is a relativistic ray-tracing code designed to post-process simluation data into synthetic observations of optically thin emission. 
+Generating such visualisations, especially from arbitrary viewpoints and for large simulation datasets, can prove very expensive due to the large 
+number of cells that a pixel's line-of-sight may intersect with. In :code:`cuDART` two acceleration structures are implemented to triviliase this computation: 
+GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular Cartesian meshes; together with the CUDA toolkit
+this allows for exceptionally fast line-of-sight summation. :code:`cuDART` supports rendering utilising relativistic boosting and a finite speed of light, allowing for geometric effects 
+such as superluminal motion to be recovered. :code:`cuDART` supports simulation data with a globally contant mesh resolution, and data that can be partitioned into subdomains of locally fixed resolution.
 
 .. figure:: ../../gallery/superluminal.gif
     :width: 800px
 
-    Animation showing synthetic radio observations of mock data featuring relativistic twin ejecta launched at angles of 90 and 45 degrees to the line-of-sight 
+    Animation showing synthetic radio observations of mock data featuring relativistic anti-parallel twin ejecta launched at angles of 90 and 45 degrees to the line-of-sight 
     (left and right panels respectively). In both panels, each of the ejecta has the same absolute velocity, but display different observed transverse velocities. 
     :code:`cuDART` automatically accounts for relativistic effects (the ejectum pointed toward the observer is brigther by relativistic beaming), and geometric effects
     (the approaching ejectrum exhibits a greater transverse velocity and is deformed along the line-of-sight).
@@ -50,6 +50,14 @@ Authors and contributors to the :code:`cuDART` code and their institutions are:
 Henry Whitehead
     DPhil candidate, Department of Physics, Astrophysics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford, OX1 3RH, UK
 
+----------------
+Acknowledgements 
+----------------
+
+:code:`cuDART` relies on the publically available (and internally included) `libnpy <https://github.com/llohse/libnpy>`_ library to read :code:`.npy` files into memory.
+Development of this code was supported by `this <https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-acceleration-structure/grid.html>`_ excellent guide on 
+acceleration structures in C, and `this <https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/>`_ developer blog on constructing ray tracers with CUDA. 
+Much of the formatting for this documentation page is taken from the superior documentation for the `SIROCCO <https://sirocco-rt.readthedocs.io/en/latest/>`_ radiative transfer code.
 
 .. toctree::
     :titlesonly:
@@ -61,3 +69,5 @@ Henry Whitehead
     inputs
     example
     api
+    calculation
+    phenomena

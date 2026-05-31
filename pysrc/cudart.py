@@ -193,14 +193,14 @@ class Scene:
     """
         The Scene class is used to call the main cpp executable as a subprocess (with optional flags).
         The class also supports the generation of .png files from the raw .npy output data, and the ability
-        to remake the cpp executable from within Python.
+        to make/remake the cpp executable from within Python.
 
         Parameters
         ----------
         load_str : str
-            Path to data input, should by single .npy file or directory (unlabelled vs labelled mode)
+            Path to the simulation data to render, should by single .npy file or directory (unlabelled vs labelled mode)
         save_dir : str
-            Path to write space, should be directory (will auto mkdir if possible)
+            Path to the output write space, should be directory (will auto mkdir if possible)
         camera_file_name : str
             Path to camera file name, if file is to persist (else auto deleted)
         cameras : str

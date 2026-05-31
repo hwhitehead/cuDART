@@ -18,7 +18,7 @@ Outside of this class structure, the main code routines can be split into
 
 Included within the C++ API is :code:`npy.hpp`, which provides functionality for reading and writing :code:`.npy` files with C++. 
 This library is imported verbatim from the `libnpy <https://github.com/llohse/libnpy>`_ repository created by Leon Merten Lohse (`github <https://github.com/llohse>`_) 
-under MIT `license <https://github.com/llohse/libnpy/blob/master/LICENSE>`_. We do not include documentation for this librarhy here, please refer to the original libnpy repository.
+under MIT `license <https://github.com/llohse/libnpy/blob/master/LICENSE>`_. We do not include documentation for this library here, please refer to the original libnpy repository.
 
 
 For brevity, this page gives only simple descriptions of classes, member and non-member functions. For a full description of class attributes and function parameters, 
@@ -39,7 +39,7 @@ Classes
 
 .. cpp:class:: Ray
 
-    The :code:`Ray` class describes a line-of-sight for a pixel, defined by an origin and a normal vector
+    The :code:`Ray` class describes the line-of-sight for a pixel, defined by an origin and a normal vector
 
     .. cpp:member:: vec3 march(float s)
 
@@ -49,7 +49,7 @@ Classes
 
 .. cpp:class:: Camera
 
-    The :code:`Camera` class is responsible for loading in camera properties and genrating rays for each pixels in an image
+    The :code:`Camera` class is responsible for loading in camera properties from a text file and generating ray origins for each pixels in an image
 
     .. cpp:member:: void build_camera()
 
@@ -63,8 +63,8 @@ Classes
 
 .. cpp:class:: MeshBlock
 
-    The :code:`MeshBlock` class is the keystone of the C++ API, responsible for containing a regular simulation sub-domain and providing 
-    methods to calculate line-of-sight summations over this sub-domain using the DDA alogorithm.
+    The :code:`MeshBlock` class is the keystone of the C++ API, responsible for containing a simulation sub-domain of fixed resolution and providing 
+    methods to calculate line-of-sight summations through this sub-domain using the DDA alogorithm.
 
     .. cpp:member:: bool calc_mb_intercept(const Ray *r, float &s_entry, float &s_exit)
 
@@ -73,27 +73,28 @@ Classes
     
     .. cpp:member:: float calc_trace(const Ray &r, TraceArgs trace_args)
 
-        Calculate a summation through the :code:`MeshBlock` sub-domain, on a path given by a :code:`Ray`'s line of sight. Apply runtime flags stored within the `TraceArgs` struct.
+        Calculate a summation through the :code:`MeshBlock` sub-domain, on a path given by a :code:`Ray`'s line of sight. Apply runtime flags as stored within the :code:`TraceArgs` struct.
 
 .. _cpp_api_mesh:
 
 .. cpp:class:: Mesh 
 
-    Akin to the Pythonic :ref:`Mesh <python_api_mesh>` class, in the C++ code the :code:`Mesh` class is a container for all sub-domains, labelling
+    Akin to the Pythonic :ref:`Mesh <python_api_mesh>` class, in the C++ code the :code:`Mesh` class is a container for all sub-domains, wrapping all
     :code:`MeshBlocks` within a single snapshot of the simulation. The :code:`Mesh` able to accept lines-of-sight generated within 
     the :code:`Camera` class and iterate over all :code:`MeshBlocks` to perform the path summation. 
-    Unlike the Pythonic Mesh, in C++ :code:`Mesh` is used regardless of running in labelled or unlabelled mode.
+    Unlike the Pythonic Mesh, in C++ the :code:`Mesh` class is used regardless of running in labelled or unlabelled mode. In the unlabelled case, the :code:`Mesh`
+    will contain only a single :code:`MeshBlock`
 
     .. cpp:function:: float calc_trace(const Ray &r, TraceArgs trace_args)
 
-        Calculate the total summation through the full domain for a given ray's line-of-sight, summing over contributions from each :code:`MeshBlock`
+        Calculate the total summation through the full domain for a given :code:`Ray`'s line-of-sight, summing over contributions from each :code:`MeshBlock`
     
 .. _cpp_api_kernels:
 
 Kernels
 -------
 
-Kernels are functions called from the host, but deployed on the device. All kernels have :code:`__global__` scope.
+Kernels are functions called from the host, but deployed on the device. All kernels have :code:`__global__` specifier.
 
 .. cpp:function:: render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceArgs trace_args)
 
@@ -109,7 +110,7 @@ Kernels are functions called from the host, but deployed on the device. All kern
 
 .. cpp:function:: init_meshblock(MeshBlockInfo mb_info, MeshBlock **mb_list, float *data) 
 
-    Builds :code:`MeshBlock` on device, adds to list 
+    Builds :code:`MeshBlock` on device, stash within the :code:`MeshBlock` list 
 
 .. cpp:function:: wipe_img(Camera camera, float *img)
 
@@ -132,7 +133,9 @@ Here we list some of the more important non-method, non-kernel functions
 
 .. cpp:function:: std::vector<MeshBlockInfo> load_labelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose, bool host_alloc)
 
+    Load labelled :code:`MeshBlock` from storage, read text file metadata, allocate and load into host. Return :code:`MeshBlock` metadata.
+
 .. cpp:function:: void build_containers(std::vector<MeshBlockInfo> all_mb_info, float* &d_data, MeshBlock ** &mb_list, Mesh ** &mesh, bool verbose) 
 
-    Allocate memory space on the device for the :code:`MeshBlock` list, initialise :code:`MeshBlock`s on device
+    Allocate memory space on the device for the :code:`MeshBlock` list, initialise :code:`MeshBlock` objects on device
     Allocate and initialise :code:`Mesh` on device 

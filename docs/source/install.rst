@@ -47,12 +47,12 @@ These routines can be found at :code:`scripts/regression.py`. These tests can be
 
 where the choices for flags are 
 
-* :code:`-b` invokes the :code:`build_unlabelled_regresssion_suite` function, generating a series of mock simulation snapshots in time
-* :code:`-bl` invokes the :code:`build_labelled_regression_suite` function, generation a series of mock simulation snapshots in time, splitting the simulation into sub-domains for use in labelled model
+* :code:`-b` calls the :code:`build_unlabelled_regresssion_suite` function, generating a series of mock simulation snapshots in time
+* :code:`-bl` calls the :code:`build_labelled_regression_suite` function, generation a series of mock simulation snapshots in time, splitting the simulation into sub-domains for use in labelled model
 * :code:`--data_dir=<data_dir>` accepts a path to specify the directory in which to generate mock snapshots, and to read from for rendering
 * :code:`--save_dir=<save_dir>` accepts a path to specificy the directory in which to save raw :code:`.npy` renders, and :code:`.png` figures
-* :code:`-r` invokes the :code:`run_nolookback_test` routine, which renders a series of images from a single snapshot, varying the camera position
-* :code:`-rl` involes the :code:`run_lookback_test` routine, which renders a series of images from multiple snapshots, varying the camera time
+* :code:`-r` calls the :code:`run_nolookback_test` routine, which renders a series of images from a single snapshot, varying the camera position
+* :code:`-rl` calls the :code:`run_lookback_test` routine, which renders a series of images from multiple snapshots, varying the camera time
 * :code:`-v` results in additional verbose prints to the terminal
 
 For example, if the user wishes to generate an unlabelled mock data set at :code:`$DATA_DIR`, render it using the lookback method and save the resulting

@@ -11,6 +11,7 @@ C. Rendering a single pre-formatted simulation snapshot (:ref:`Example <example_
 D. Rendering multiple pre-formatted simulation snapshots with the lookback routine (:ref:`Example <example_section_D>`)
 
 Additional example usage can be found within the regression testing suite, available at :code:`scripts/regression.py`.
+For a more detailed description of the functions and classes used here, see the :ref:`API documentation <api_main>`. 
 
 .. _example_section_A:
 
