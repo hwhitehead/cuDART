@@ -17,3 +17,9 @@ outputs/
 # editor temp files
 *~
 *.swp
+
+# sphinx files
+docs/sphinx_venv/
+docs/build/doctrees/
+docs/build/html/
+!docs/Makefile

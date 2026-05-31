@@ -2,6 +2,7 @@
 import sys, os, gc
 import numpy as np
 import matplotlib.image as mpimg
+import matplotlib.patches as patches
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import pandas as pd
 
@@ -293,9 +294,8 @@ def build_lookback_data(num_snapshots = 10):
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
-def build_blob_data(num_snapshots = 10):
+def build_blob_data(num_snapshots = 10, save_dir="/mnt/kocsis1/cuDART_wdir/lookback_data/", gamma_bulk=2):
 
-    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
     header_str = os.path.join(save_dir, "header.txt")
     max_emm = 1.0
     long_dim = 500
@@ -308,7 +308,6 @@ def build_blob_data(num_snapshots = 10):
     xy_sqr = xx ** 2 + yy ** 2
     snapshot_size = np.size(xx)
 
-    gamma_bulk = 2
     v_in_c = np.sqrt(1 - 1.0 / gamma_bulk ** 2)
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
 
@@ -348,9 +347,8 @@ def build_blob_data(num_snapshots = 10):
         save_data = save_data.astype(np.float32)
         np.save(save_str, save_data)
 
-def build_boosted_lookback_data(num_snapshots = 10):
+def build_boosted_lookback_data(num_snapshots = 10, save_dir="/mnt/kocsis1/cuDART_wdir/lookback_data/"):
 
-    save_dir = "/mnt/kocsis1/cuDART_wdir/lookback_data/"
     max_emm = 1.0
     xspan = np.linspace(0,1,100)
     yspan = np.linspace(0,1,100)
@@ -627,10 +625,268 @@ def plot_superluminal(num_img=100, sparse_step=1):
 
     plt.close("all")
 
+def build_morphology_suite(num_snapshots=50,gamma_span=[2,4,8]):
+
+    master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+    for gamma in gamma_span:
+        save_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
+        if not os.path.isdir(save_dir):
+            os.mkdir(save_dir)
+        build_blob_data(num_snapshots=num_snapshots,save_dir=save_dir,gamma_bulk=gamma)
+
+def plot_morphology(show_labels=False):
+
+    master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+    save_str = os.path.join(master_dir,"morphology.png")
+
+    spec_snapshot = 2
+    gamma_span = [1.15, 2, 4, 8]
+    theta_span = [np.pi / 2, np.pi / 4, np.pi / 8]
+    theta_labels = [r"$\theta = 90.0^\circ$", r"$\theta = 45.0^\circ$", r"$\theta = 22.5^\circ$"]
+    num_gamma = np.size(gamma_span)
+    num_theta = np.size(theta_span)
+    L_in_kpc = 120 
+    r_blob_in_kpc = 2.5
+    r_blob_in_code = r_blob_in_kpc / L_in_kpc
+    long_res = 1024
+    long_scale = 1.0 # fill domain vertically
+    short_scale = 4.0 * r_blob_in_code
+    img_aspect = short_scale / long_scale
+    short_res = int(long_res * img_aspect)
+    X = np.linspace(-0.5 * long_scale, 0.5 * long_scale, long_res)
+    Y = np.linspace(-0.5 * short_scale, 0.5 * short_scale, short_res)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    vmin = -6
+    vmax = 0
+    cmap = "afmhot"
+    xtrim_fac = 0.8 # mult xspan of subplots by this factor
+    ytrim_fac = 2.5
+
+    set_plot_defaults()
+    L_fig = 20.0 / 3
+    spacer_scale = 0.05
+    width = xtrim_fac
+    height = img_aspect * ytrim_fac
+    half_width = 0.5 * width
+    half_height = 0.5 * height
+    width_ratios = np.array([width,width*spacer_scale] * num_theta + [width*0.1])
+    height_ratios = np.array([height] * num_gamma)
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+
+    axes = []
+    spacers = []
+    for i in range(num_gamma):
+        row = []
+        for j in range(num_theta):
+            row.append(fig.add_subplot(gs[i,2*j]))
+            spacers.append(fig.add_subplot(gs[i,2*j+1]))
+        axes.append(row)
+    cax = fig.add_subplot(gs[:,-1])
+    for spacer in spacers:
+        spacer.axis("off")
+
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.yaxis.tick_right()
+    cax.yaxis.set_label_position("right")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
+
+    for i, gamma in enumerate(gamma_span):
+        load_dir = os.path.join(master_dir, "gamma{0}".format(gamma))
+        beta = np.sqrt(1 - 1.0 / gamma ** 2)
+        for j, theta in enumerate(theta_span):
+            doppler_fac = 1.0 / (gamma * (1 - beta * np.cos(theta)))
+            length_ratio = np.sqrt(1 - 2 * beta * np.cos(theta) + beta ** 2) / (1 - beta * np.cos(theta))
+            length_label = "$\mathcal{L} \simeq$" + "{0:.1f}".format(length_ratio)
+            doppler_label = r"$D=$" + "{0:.2f}".format(doppler_fac)
+            axes[i][j].set_xlim([-xtrim_fac * 0.5, xtrim_fac * 0.5])
+            axes[i][j].set_ylim([-0.5 * img_aspect * ytrim_fac, 0.5 * img_aspect * ytrim_fac])
+            axes[i][j].set_aspect("equal")
+            axes[i][j].set_facecolor("k")
+            load_str = os.path.join(load_dir, "raw" + str(j).zfill(5) + ".npy")
+            if os.path.exists(load_str):
+                img = np.load(load_str)
+                axes[i][j].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
+            if (show_labels):
+                axes[i][j].text(0.475*xtrim_fac,0.4*img_aspect*ytrim_fac,s=length_label,va="top",ha="right",color="w")
+                axes[i][j].text(0.475*xtrim_fac,-0.4*img_aspect*ytrim_fac,s=doppler_label,va="bottom",ha="right",color="w")
+
+            x_offset = -0.25 * np.sin(theta)
+            y_offset = 0.25 * img_aspect * ytrim_fac
+            no_beam = plt.Circle((x_offset,y_offset),radius=r_blob_in_code,edgecolor='w',fill=False,linestyle="dashed",lw=0.5)
+            axes[i][j].add_patch(no_beam)
+            beamed = patches.Ellipse((x_offset,-y_offset),width=2 * r_blob_in_code * length_ratio, height=2 * r_blob_in_code,edgecolor='w',fill=False,lw=0.5)
+            axes[i][j].add_patch(beamed)
+
+            if i == 0:
+                axes[i][j].xaxis.set_label_position("top")
+                axes[i][j].set_xlabel(theta_labels[j])
+                axes[i][j].xaxis.set_ticks([])
+            else:
+                axes[i][j].xaxis.set_visible(False)
+            
+            if j == 0:
+                axes[i][j].yaxis.set_ticks([])#
+                ylabel = r"$\Gamma=$" + "{0:.2f}\n".format(gamma) 
+                if (show_labels): 
+                    ylabel += r"$\theta_\mathrm{crit} \simeq$" + "{0:.0f}".format(np.arccos(beta) * 180/np.pi) + "$^\circ$"
+                axes[i][j].set_ylabel(ylabel, rotation="horizontal",ha="right",va="center")
+            else:
+                axes[i][j].yaxis.set_visible(False)
+
+    # add external legend
+    axes[-1][1].plot([],[],color='k',linestyle="dashed",label="True Silhouette")
+    axes[-1][1].plot([],[],color='k',linestyle="solid",label="Observed Silhouette")
+    fig.legend(frameon=False,loc="outside lower center",ncol=2)
+
+    plt.subplots_adjust(hspace=0,wspace=0)
+    fig.savefig(save_str, dpi=600, bbox_inches="tight")
+    plt.close("all")
+
+def render_morphology(gamma_span=[1.15,2,4,8],theta_span=[np.pi / 2, np.pi / 4, np.pi / 8]):
+
+    master_dir = "/mnt/kocsis2/hww27/cuDART_wdir/blob_data"
+    L_in_kpc = 120 
+    r_blob_in_kpc = 2.5
+    r_blob_in_code = r_blob_in_kpc / L_in_kpc
+
+    # build template camera
+    long_res = 1024
+    long_scale = 1.0 # fill domain vertically (ignore projection effects)
+    short_scale = 4.0 * r_blob_in_code
+    img_aspect = short_scale / long_scale
+    template_camera = Camera()
+    template_camera.tilt = np.pi / 2
+    template_camera.t_obs = 0.5 # in units of Myr
+    phi = epsilon
+    theta = np.pi / 2 + epsilon
+    template_camera.length_X = long_scale
+    template_camera.length_Y = short_scale
+    template_camera.num_pixels_X = long_res
+    template_camera.num_pixels_Y = int(long_res * img_aspect)
+    template_camera.set_sph_pos(r = 2.0, theta = theta, phi = phi, target_origin = True)
+
+    for gamma_bulk in gamma_span:
+        load_dir = os.path.join(master_dir, "gamma{0}".format(gamma_bulk))
+        npy_save_str = os.path.join(load_dir, "raw")
+
+        # build cameras for this gamma value
+        v_in_c = np.sqrt(1.0 - 1.0 / gamma_bulk ** 2)
+        v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)
+        dist_to_camera_in_kpc = 2.0 * L_in_kpc
+        t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
+        T_in_Myr = 0.5 * L_in_kpc / v_in_kpc_per_Myr # duration to reach domain edge
+        t_delay_in_Myr = dist_to_camera_in_kpc * kpc_to_m / (c_light * Myr_to_s)
+        print("T = {0}Myr".format(T_in_Myr))
+        print("t_delay = {0}Myr".format(t_delay_in_Myr))
+        # cycle over orientations
+        cameras = []
+        for theta in theta_span:
+            # find proper time
+            L_projected = L_in_kpc * np.sin(theta) # projected size of domain 
+            x_obs_in_m = 0.25 * L_projected * kpc_to_m # in SI, target displaced half from center
+            D_in_m = 2.0 * L_in_kpc * kpc_to_m
+            d_in_m = x_obs_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
+            t_obs_in_s = d_in_m / c_light
+            t_obs = t_obs_in_s / Myr_to_s # cast to Myr
+            print("gamma = {0}, theta = {1}, t_obs = {2}Myr".format(gamma_bulk,theta,t_obs))
+            # t_obs = t_delay_in_Myr + 0.1 * T_in_Myr
+
+            # find proper camera position (shift in X)
+            camera = copy.deepcopy(template_camera)
+            camera.t_obs = t_obs
+            camera.theta = theta
+            camera.set_sph_pos(r=2.0,theta=theta,phi=phi,target_origin=True)
+            # unit_normal = camera.normal / np.linalg.norm(camera.normal)
+            # unit_Y = camera.bias - np.dot(camera.bias,unit_normal)
+            # unit_Y /= np.linalg.norm(unit_Y)
+            # unit_X = np.cross(unit_normal, unit_Y)
+            # delta_X = -(target_x_obs / kpc_to_m) / L_in_kpc # in code units
+            # camera.origin += unit_X * delta_X
+
+            cameras.append(camera)
+
+        print("initialised cameras for gamma = {0}".format(gamma_bulk))
+
+        scene = Scene(load_dir, npy_save_str, cameras)
+        print("finished rendering for gamma = {0}".format(gamma_bulk))
+
+        scene.render(verbose = True, relativistic = True, lookback=True)
+        print("finished rendering raw images for gamma = {0}".format(gamma_bulk))
+
+def comp_aliasing():
+
+    host_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/lookback"
+    save_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/lookback/alias.png"
+    snap_num = 22
+    labels = ["low_cadence", "critical", "high_cadence"]
+    num_snapshots_ar = [10,50,100]
+
+    Gamma = 2
+    theta = np.pi / 4
+    r_blob = 2.5
+    L_domain = 120
+    v_in_c = np.sqrt(1 - 1.0 / Gamma ** 2)                          
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 
+    r_blob_in_code = r_blob / L_domain                 
+    T_in_Myr = 0.5 * L_domain / v_in_kpc_per_Myr 
+
+    dt_ar = [T_in_Myr / n for n in num_snapshots_ar]
+    crit_fac = (1 - v_in_c * np.cos(theta)) / np.sin(theta)
+    dt_crit_in_s = crit_fac * r_blob * kpc_to_m / (v_in_c * c_light)
+    dt_crit = dt_crit_in_s / Myr_to_s
+
+    set_plot_defaults()
+    L_fig = 20.0 / 3
+    spacer_scale = 0.05
+    width_ratios = np.array([1,spacer_scale]*3+[0.05])
+    height_ratios = np.array([1])    
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+
+    axes = []
+    spacers = []
+    for i in range(3):
+        axes.append(fig.add_subplot(gs[:,2*i]))
+        spacers.append(fig.add_subplot(gs[:,2*i+1]))
+    cax = fig.add_subplot(gs[:,-1])
+    for spacer in spacers: spacer.axis("off")
+
+    cmap = "afmhot"
+    vmin = -6
+    vmax = 0
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=vmin, vmax=vmax))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.yaxis.tick_right()
+    cax.yaxis.set_label_position("right")
+    cax.set_ylabel(r"$\log_{10}\left(I_{\nu}/I_{\nu,0}\right)$")
+
+    trim_fac = 0.5
+    X = np.linspace(-0.5, 0.5, 2048)
+    Y = np.linspace(-0.5, 0.5, 2048)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+    for i in range(3):
+        load_dir =os.path.join(host_dir, labels[i])
+        load_str = os.path.join(load_dir, "raw" + str(snap_num).zfill(5) + ".npy")
+        img = np.load(load_str)
+        axes[i].pcolormesh(XX, YY, np.log10(img), cmap=cmap, vmin=vmin, vmax=vmax)
+        axes[i].xaxis.set_visible(False)
+        axes[i].yaxis.set_visible(False)
+        axes[i].set_facecolor("k")
+        axes[i].set_xlim([-0.5 * trim_fac, 0.5 * trim_fac])
+        axes[i].set_ylim([-0.5 * trim_fac, 0.5 * trim_fac])
+        axes[i].text(0, -0.45 * trim_fac, s="$\Delta t$ = " + "{0:.3}kyr".format(dt_ar[i]*1e3), color='w',va="bottom",ha="center")
+
+        if i == 1:
+            axes[i].set_title("$\Delta t_\mathrm{crit}$ = " + "{0:.3}kyr".format(dt_crit*1e3))
+
+    plt.subplots_adjust(hspace=0,wspace=0)
+    fig.savefig(save_str, dpi=600, bbox_inches="tight")
+    plt.close("all")
 
 if __name__ == "__main__":
 
-    #build_blob_data(num_snapshots=50)
-    #render_pluto_data_example(relativistic=False, remove_raw_images = False, append=False)
-    #render_lookback_example(relativistic=True, remove_raw_images = False)
-    plot_superluminal(num_img=100, sparse_step=1)
+    comp_aliasing()
