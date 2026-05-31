@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
         
         // set trace args
         trace_args.snapshot_dt = snapshot_dt;                           // in Myr
-        trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
+        trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;      // in Myr^{-1}
         float kpc_to_m = 3.086e+19;                                     // in m
         float Myr_to_s = 1e6 * 365 * 24 * 60 * 60;                      // in s
         float c_light = 3e8;                                            // in m/s
@@ -296,13 +296,13 @@ int main(int argc, char *argv[]) {
         // float calc flexload limits
         int m_lower = 0, m_upper = num_snapshots - 1; // if no flexload, use full time range
         if (flexload) {
-            float domain_r_max = 1.0 // TODO: load this as part of header
+            float domain_r_max = 1.0 // TODO: load this as part of header (via mesh_xr, mesh_xl)
             float d_min_in_kpc = (camera_r_min - domain_r_max) * L_domain;          // minimum camera-domain seperation
             float d_max_in_kpc = (camera_r_max - domain_r_min) * L_domain;          // maixmum camera-domain seperation
             float t_min_in_Myr = camera_t_min - d_max_in_kpc / c_in_kpc_per_Myr;    // earliest contributing snapshot time
             float t_max_in_Myr = camera_t_max - d_min_in_kpc / c_in_kpc_per_Myr;    // latest contributing snapshot time
-            int m_min = std::floor(t_min_in_Myr / trace_args.snapshot_dt);          // earliest contributing snapshot index
-            int m_max = std::ceil(t_max_in_Myr / trace_args.snapshot_dt);           // latest contributing snapshot index 
+            int m_min = std::floor(t_min_in_Myr * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index
+            int m_max = std::ceil(t_max_in_Myr * trace_args.inv_snapshot_dt);           // latest contributing snapshot index 
             m_lower = (m_min > m_lower) ? m_min : m_lower;                          // start loop at earliest
             m_upper = (m_max < m_upper) ? m_max : m_upper;                          // end loop at latest
         }
@@ -386,6 +386,47 @@ int main(int argc, char *argv[]) {
             int img_count = 0;
             for (auto &camera : cameras) {
                 
+                // perform flexload check against domain size
+                if (flexload) {
+                    float d_min_mesh = std::numeric_limits<float>::max();
+                    float d_max_mesh = std::numeric_limits<float>::min();
+                    for (int mb_id = 0; mb_id < num_meshblocks; mb_id++) {
+                        // define sphere which contains subdomain (TODO:offload to mbinfo)
+                        vec3 mb_center = 0.5 * (all_mb_info[mb_id].xl + all_mb_info[mb_id].xr)
+                        float mb_radius = (all_mb_info[mb_id].xl - mb_center).vector_mag();
+
+                        // define radius which contains camera
+                        float camera_radius = (camera.origin - camera.lower_left).vector_mag()
+
+                        // calculate extremal camera-domain seperations
+                        float center_sep = (mb_center - camera.origin).vector_mag()
+                        float d_min_mb = center_sep - camera_radius - mb_radius
+                        float d_max_mb = center_sep + camera_radius + mb_radius
+
+                        // store mesh extrema
+                        d_min_mb = (d_min_mb < d_min_mesh) ? d_min_mb : d_min_mesh;
+                        d_max_mb = (d_max_mb > d_max_mesh) ? d_max_mb : d_max_mesh;
+                    } // end mb loop
+
+                    // find extremal snapshots in time
+                    float t_min_in_Myr = camera.t_obs - d_min * L_domain / c_in_kpc_per_Myr;
+                    float t_max_in_Myr = camera.t_obs - d_max * L_domain / c_in_kpc_per_Myr;
+                
+                    int m_min = std::floor(t_min_in_Myr * trace_args.inv_snapshot_dt);
+                    int m_max = std::ceil(t_max_in_Myr * trace_args.inv_snapshot_dt);
+
+                    // check if this camera can recieve contributions from this snapshot
+                    if (m_min > m) || (m_max < m) {
+                        if (verbose) {
+                            std::cout << ".............................................................\n";
+                            std::cout << "no overlap between snapshot " << m << " and camera " << img_count << ", skippping.";
+                            std::cout << ".............................................................\n";
+                        }
+                        continue;
+                    }
+                } // end flexload
+                
+
                 if (verbose) {
                     std::cout << ".............................................................\n";
                 }
