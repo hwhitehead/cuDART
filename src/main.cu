@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     std::string cudart_version = "version 0.9 - April 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     char *doppler_char = nullptr, *power_law_char = nullptr;
-    bool verbose = false, relativistic = false, append_mode = false, lookback = false;
+    bool verbose = false, relativistic = false, append_mode = false, lookback = false, flexload = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -48,6 +48,8 @@ int main(int argc, char *argv[]) {
                 case 'r':
                     break;
                 case 'l':
+                    break;
+                case 'f':
                     break;
                 case 'a':
                     break;
@@ -102,6 +104,7 @@ int main(int argc, char *argv[]) {
                     std::cout << " -d <value>   Doppler index for boosting (deprecated for power-law)\n";
                     std::cout << " -m <value>   max VRAM in GB\n";
                     std::cout << " -l           lookback routine flag\n";
+                    std::cout << " -f           flexible load flag\n";
                     std::cout << " -a           summation append flag\n";
                     std::cout << " -r           relativisitic boosting flag\n";
                     std::cout << " -v           verbosity flag\n";
@@ -184,6 +187,20 @@ int main(int argc, char *argv[]) {
     int num_images = cameras.size();
     size_t num_zero_pad = 5;
 
+    // grab extremal camera properties for flexload (only important for lookback)
+    float camera_min_r = std::numeric_limits<float>::max();
+    float camera_max_r = std::numeric_limits<float>::min();
+    float camera_min_t_obs = min_r;
+    float camera_max_t_obs = max_r;
+    for (int n = 0; n < num_images; n++) {
+        float camera_r = cameras[n].origin.vector_mag();
+        camera_min_r = (camera_r < camera_min_r) ? camera_r : camera_min_r;
+        camera_max_r = (camera_r > camera_max_r) ? camera_r : camera_max_r;
+        float camera_t_obs = camera[n].t_obs;
+        camera_min_t_obs = (camera_t_obs < camera_min_t_obs) ? camera_t_obs : camera_min_t_obs;
+        camera_max_t_obs = (camera_t_obs > camera_max_t_obs) ? camera_t_obs : camera_max_t_obs;
+    } // end camera loop
+
     // inherit image dimensions from the first camera
     Camera standard_camera = cameras[0];
     int num_pixels = standard_camera.num_pixels;
@@ -262,18 +279,33 @@ int main(int argc, char *argv[]) {
         } // end file open
         
         // set trace args
-        trace_args.snapshot_dt = snapshot_dt;
+        trace_args.snapshot_dt = snapshot_dt;                           // in Myr
         trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
-        float kpc_to_m = 3.086e+19; // in m
-        float Myr_to_s = 1e6 * 365 * 24 * 60 * 60; // in s
-        float c_light = 3e8; // in m/s
-        float velocity_code_units = L_domain * kpc_to_m / Myr_to_s; // unit length crossed in 1Myr
+        float kpc_to_m = 3.086e+19;                                     // in m
+        float Myr_to_s = 1e6 * 365 * 24 * 60 * 60;                      // in s
+        float c_light = 3e8;                                            // in m/s
+        float velocity_code_units = L_domain * kpc_to_m / Myr_to_s;     
         float c_in_code_units = c_light / velocity_code_units;
+        float c_in_kpc_per_Myr = c_light * Myr_to_s / kpc_to_m;
         trace_args.c = c_in_code_units;
         trace_args.inv_c = 1.0 / trace_args.c; 
         trace_args.num_snapshots = num_snapshots;
         trace_args.last_snapshot = num_snapshots - 1;
         trace_args.last_time = trace_args.last_snapshot * trace_args.snapshot_dt;
+
+        // float calc flexload limits
+        int m_lower = 0, m_upper = num_snapshots - 1; // if no flexload, use full time range
+        if (flexload) {
+            float domain_r_max = 1.0 // TODO: load this as part of header
+            float d_min_in_kpc = (camera_r_min - domain_r_max) * L_domain;          // minimum camera-domain seperation
+            float d_max_in_kpc = (camera_r_max - domain_r_min) * L_domain;          // maixmum camera-domain seperation
+            float t_min_in_Myr = camera_t_min - d_max_in_kpc / c_in_kpc_per_Myr;    // earliest contributing snapshot time
+            float t_max_in_Myr = camera_t_max - d_min_in_kpc / c_in_kpc_per_Myr;    // latest contributing snapshot time
+            int m_min = std::floor(t_min_in_Myr / trace_args.snapshot_dt);          // earliest contributing snapshot index
+            int m_max = std::ceil(t_max_in_Myr / trace_args.snapshot_dt);           // latest contributing snapshot index 
+            m_lower = (m_min > m_lower) ? m_min : m_lower;                          // start loop at earliest
+            m_upper = (m_max < m_upper) ? m_max : m_upper;                          // end loop at latest
+        }
 
         // allocate data on host
         clock_t h_alloc_start = clock();
@@ -313,7 +345,7 @@ int main(int argc, char *argv[]) {
             }
             std::cout << "-------------------------------------------------------------\n";
         }
-        for (int m = 0; m < num_snapshots; m++) {
+        for (int m = m_lower; m <= m_upper; m++) {
 
             clock_t snapshot_start = clock();
 
