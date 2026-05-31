@@ -7,8 +7,8 @@ cuDART
 ======
 
 :code:`cuDART` is a relativistic ray-tracing code designed to post-process simluation data into synthetic observations of optically thin emission. 
-Generating such visualisations, especially from arbitrary viewpoints and for large simulation datasets, can prove very expensive due to the large 
-number of cells that a pixel's line-of-sight may intersect with. In :code:`cuDART` two acceleration structures are implemented to triviliase this computation: 
+Generating such visualisations, especially from arbitrary viewpoints and for large datasets, can prove very expensive due to the large 
+number of simulation cells that an image pixel's line-of-sight may intersect with. In :code:`cuDART` two acceleration structures are implemented to triviliase this computation: 
 GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular Cartesian meshes; together with the CUDA toolkit
 this allows for exceptionally fast line-of-sight summation. :code:`cuDART` supports rendering utilising relativistic boosting and a finite speed of light, allowing for geometric effects 
 such as superluminal motion to be recovered. :code:`cuDART` supports simulation data with a globally contant mesh resolution, and data that can be partitioned into subdomains of locally fixed resolution.
@@ -71,3 +71,4 @@ Much of the formatting for this documentation page is taken from the superior do
     api
     calculation
     phenomena
+    performance
