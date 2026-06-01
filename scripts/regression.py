@@ -356,6 +356,87 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
+def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose = True):
+
+    if (verbose): 
+        print("starting lookback render test...")
+        print("reading data from {0}".format(load_dir))
+        print("saving data at {0}".format(save_dir))
+
+    # check input, output directory existence
+    for path in [load_dir, save_dir]:
+        if not os.path.isdir(path):
+            raise Exception("{0} does not exist".format(save_dir))
+
+    # check for ALL snapshot input files
+    for n in range(0, sim_args["num_snapshots"]):
+        snapshot_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        if not os.path.exists(snapshot_str):
+            raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(snapshot_str))
+
+    # collect data from args
+    v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
+    theta = 0.5 * np.pi / 2 + epsilon                                                           # fixed orientation for this example
+
+    # calculate start time (just before light from origin reaches camera)
+    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
+    t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
+    t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
+    t_min *= 0.95                                                                               # start render just before flight time 
+
+    # calculate stop time (when approaching ejectum reaches maximal extent)
+    x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
+    d_in_m = x_max_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
+    t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
+    t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units    
+
+    # first render at midpoint time for emitter
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                                 # cast to astro units
+    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                                    # calc duration for blob to reach domain edge
+    t_emitter = 0.5 * T_in_Myr
+    nolookback_camera = copy.deepcopy(camera_args["template"])
+    nolookback_camera.t_obs = t_em
+
+    # second render at midpoint time for observer
+    t_obs = 0.5 * (t_min + t_max)
+    
+    # generate single camera
+    camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = 0.5 * np.pi + epsilon, target_origin = True)
+    camera_args["template"].t_obs = t_obs # only used with the lookback render
+    cameras = [camera_args["template"]]
+
+    # generate scene WITHOUT lookback
+    nolookback_save_dir = os.path.join(save_dir, "nolookback")
+    if not os.path.exists(nolookback_save_dir):
+        os.mkdir(nolookback_save_dir)
+    scene = Scene(load_str = load_dir, save_dir = nolookback_save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+    if (verbose): print("built no-lookback scene.")
+
+    # render single image WITHOUT lookback
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose, flexload = flexload)
+    if (verbose): print("finished no-lookbakc render")
+
+    if (camera_args["save_fig"]):
+        scene.plot(fig_save_dir = nolookback_save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
+        print("finished rendering figures.")
+
+    # generate scene WITH lookback
+    lookback_save_dir = os.path.join(save_dir, "lookback")
+    if not os.path.exists(nolookback_save_dir):
+        os.mkdir(nolookback_save_dir)
+    scene = Scene(load_str = load_dir, save_dir = lookback_save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+    if (verbose): print("built no-lookback scene.")
+
+    # render single image WITH lookback
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose, flexload = flexload)
+    if (verbose): print("finished no-lookback render")
+
+    if (camera_args["save_fig"]):
+        scene.plot(fig_save_dir = lookback_save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
+        print("finished rendering figures.")
+
+    if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
+
 if __name__ == "__main__":
 
     # dict for simulation args (all lengths in kpc)
