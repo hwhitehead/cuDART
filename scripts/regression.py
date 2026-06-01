@@ -490,7 +490,7 @@ if __name__ == "__main__":
                         default=False,
                         help="run in lookback mode")
     parser.add_argument("-rpt",
-                        action="store true",
+                        action="store_true",
                         default=False,
                         help="run penrose-terrel test")
     parser.add_argument("-f",
