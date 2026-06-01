@@ -11,6 +11,9 @@ struct MeshBlockInfo {
     int mb_size, mem_start, mb_index;
     bool beta_in_data;
     vec3 mb_dims, xl, xr;
+    // flexload data
+    vec3 mb_origin;
+    float mb_radius;
 };
 
 class MeshBlock {
@@ -77,6 +80,9 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     mb_info.beta_in_data = beta_in_data;
     mb_info.mem_start = 0;
     mb_info.mb_index = 0;
+    // flexload data
+    mb_info.mb_origin = 0.5 * (xl + xr);
+    mb_info.mb_radius = (xl - mb_origin).vector_mag();
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
@@ -128,6 +134,9 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
                 mb_info.xl = vec3(xl,yl,zl);
                 mb_info.xr = vec3(xr,yr,zr);
                 mb_info.mb_dims = vec3(nx,ny,nz);
+                // flexload data
+                mb_info.mb_origin = 0.5 * (xl + xr);
+                mb_info.mb_radius = (xl - mb_origin).vector_mag();
                 all_mb_info.push_back(mb_info);
                 npy_floats += mb_size;
             }
