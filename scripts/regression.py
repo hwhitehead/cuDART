@@ -455,7 +455,7 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     cax.set_ylabel(r"$\log_{10}(I_\nu / I_{\nu,0})$")
 
     plt.subplots_adjust(hspace = 0, wspace= 0)
-    fig.savefig(save_str, dpi=300, bbox_inches="tight")
+    fig.savefig(png_str, dpi=300, bbox_inches="tight")
     plt.close("all")
 
     if (verbose): print("finished penrose-terrel test, see {0} for output".format(png_str))
