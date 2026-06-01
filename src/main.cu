@@ -303,8 +303,8 @@ int main(int argc, char *argv[]) {
         int m_lower = 0, m_upper = num_snapshots - 1; // if no flexload, use full time range
         if (flexload) { // TODO: this can also be performed more simply in code units
             float domain_r_max = 0.5 * std::sqrt(3.0); // TODO: load this as part of header (via mesh_xr, mesh_xl)
-            float d_min = camera_r_min + domain_r_max;
-            float d_max = camera_r_max - domain_r_max;
+            float d_min = camera_r_min - domain_r_max;
+            float d_max = camera_r_max + domain_r_max;
             float t_min = camera_t_min - d_max * trace_args.inv_c;
             float t_max = camera_t_max - d_min * trace_args.inv_c;
             std::cout << "t_min = " << t_min << ", t_max = " << t_max << std::endl;
