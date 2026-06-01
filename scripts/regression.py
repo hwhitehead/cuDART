@@ -454,9 +454,6 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     fig.colorbar(sm, cax=cax, orientation="vertical")
     cax.set_ylabel(r"$\log_{10}(I_\nu / I_{\nu,0})$")
 
-    axes[0].text(0.05,0.95,s=r"$\Gamma$" + " = {0:.2f}".format(sim_args["Gamma"]),color="w",va="top", ha="left")
-    axes[0].text(0.05,0.05,s=r"*emitter is spherical in REST frame",color="w",va="bottom", ha="left")
-
     plt.subplots_adjust(hspace = 0, wspace= 0)
     fig.savefig(png_str, dpi=300, bbox_inches="tight")
     plt.close("all")
