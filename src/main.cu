@@ -307,6 +307,7 @@ int main(int argc, char *argv[]) {
             float d_max = camera_r_max - domain_r_max;
             float t_min = camera_t_min - d_max * trace_args.inv_c;
             float t_max = camera_t_max - d_min * trace_args.inv_c;
+            std::cout << "t_min = " << t_min << ", t_max = " << t_max << std::endl;
             int m_min = std::floor(t_min * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index
             int m_max = std::ceil(t_max * trace_args.inv_snapshot_dt);           // latest contributing snapshot index 
             m_lower = (m_min > m_lower) ? m_min : m_lower;                          // start loop at earliest
