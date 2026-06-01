@@ -211,7 +211,7 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
 
     if (verbose): print("finished labelled dataset construction.")
 
-def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True, flexload = False):
+def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True):
 
     # run a rendering test on a single snapshot of data
     # data should be loaded from suite built using build_regression_suite (-b flag)
@@ -269,7 +269,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose, flexload = flexload)
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
@@ -278,7 +278,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
-def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True):
+def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True, flexload = False):
 
     # run a rendering test using finite speed of light with multiple snapshots
     # data should be loaded from suite built using build_regression_suite (-b flag)
@@ -339,7 +339,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True)
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose)
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose, flexload = flexload)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
