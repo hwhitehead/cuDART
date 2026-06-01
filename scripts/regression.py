@@ -407,19 +407,53 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     camera_args["template"].t_obs = t_obs # only used with the lookback render
     cameras = [camera_args["template"]]
 
-    labels = ["nolookback", "lookback"]
-    save_dirs = [os.path.join(save_dir, label) for label in labels]
-    for save_dir in save_dirs:
-        if not os.path.exists(save_dir):
-            os.mkdir(save_dir)
-    load_strs = [nolookback_load_str, load_dir]
-    lookbacks = [False, True]
-    for i, label in enumerate(labels):
-        scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
-        scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
+    # build scene and call render, with and without lookback
+    # labels = ["nolookback", "lookback"]
+    # save_dirs = [os.path.join(save_dir, label) for label in labels]
+    # for save_dir in save_dirs:
+    #     if not os.path.exists(save_dir):
+    #         os.mkdir(save_dir)
+    # load_strs = [nolookback_load_str, load_dir]
+    # lookbacks = [False, True]
+    # for i, label in enumerate(labels):
+    #     scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+    #     scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
+    #     #scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
+    # if (verbose): print("finished raw image generation")
 
-    if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
+    # plot composite
+    set_plot_defaults()
+    height_ratios = np.array([1])
+    width_ratios = np.array([1,1,0.05])
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    L_fig = 20.0 / 3
+    fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
+    axl = fig.add_subplot(gs[:, 0])
+    axr = fig.add_subplot(gs[:, 1])
+    cax = fig.add_subplot(gs[:, 2])
+    axes = [axl, axr]
+
+    X = np.linspace(0,camera_args["template_camera"].length_X,camera_args["template_camera"].num_pixels_X)
+    Y = np.linspace(0,camera_args["template_camera"].length_Y,camera_args["template_camera"].num_pixels_Y)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+
+    titles = ["No Lookback", "Lookback"]
+    for i, save_dir in enumerate(save_dirs):
+        raw_str = os.path.join(save_dir, "raw00000.npy")
+        img = np.load(raw_str)
+        pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmin = 0, cmap = "afmhot")
+        axes[i].set_xlim([0,1])
+        axes[i].set_ylim([0,1])
+        axes[i].xaxis.set_visible(False)
+        axes[i].yaxis.set_visible(False)
+        axes[i].set_title(titles[i])
+
+    sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.set_ylabel(r"$\log_{10}(I_\nu / I_{\nu,0})$")
+
+    if (verbose): print("finished penrose-terrel test, see {0} for output".format(png_str))
 
 if __name__ == "__main__":
 
