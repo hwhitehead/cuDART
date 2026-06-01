@@ -92,6 +92,8 @@ int main(int argc, char *argv[]) {
                 case 'c':
                     camera_char = argv[++i];
                     break;
+                case 'f':
+                    flexload = true;
                 case 'h':
                 default:
                     std::cout << "cuDART " << cudart_version << std::endl;
