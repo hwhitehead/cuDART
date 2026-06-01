@@ -409,7 +409,7 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
 
     # build scene and call render, with and without lookback
     # labels = ["nolookback", "lookback"]
-    # save_dirs = [os.path.join(save_dir, label) for label in labels]
+    save_dirs = [os.path.join(save_dir, label) for label in labels]
     # for save_dir in save_dirs:
     #     if not os.path.exists(save_dir):
     #         os.mkdir(save_dir)
@@ -439,6 +439,7 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
     titles = ["No Lookback", "Lookback"]
+    png_str = os.path.join(save_dir, "penrose-terrel.png")
     for i, save_dir in enumerate(save_dirs):
         raw_str = os.path.join(save_dir, "raw00000.npy")
         img = np.load(raw_str)
