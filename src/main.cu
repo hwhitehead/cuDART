@@ -395,12 +395,12 @@ int main(int argc, char *argv[]) {
                 if (flexload) {
                     float d_min_mesh = std::numeric_limits<float>::max();
                     float d_max_mesh = std::numeric_limits<float>::min();
-                    float camera_radius = (camera.origin - camera.lower_left).vector_mag();
-                    for (auto &mb_info : all_mb_info) {
+                    float camera_radius = (camera.origin - camera.lower_left).vector_mag();     // size of binding sphere for camera plane
+                    for (auto &mb_info : all_mb_info) {                                         // loop over all MeshBlocks in snapshot
                         // calculate extremal camera-domain seperations
-                        float center_sep = (mb_info.mb_origin - camera.origin).vector_mag();
-                        float d_min_mb = center_sep - camera_radius - mb_info.mb_radius;
-                        float d_max_mb = center_sep + camera_radius + mb_info.mb_radius;
+                        float center_sep = (mb_info.mb_origin - camera.origin).vector_mag();    // camera-domain origin seperation
+                        float d_min_mb = center_sep - camera_radius - mb_info.mb_radius;        // minimum camera-domain seperation
+                        float d_max_mb = center_sep + camera_radius + mb_info.mb_radius;        // maximum camera-domain seperation
                         // store mesh extrema
                         d_min_mesh = (d_min_mb < d_min_mesh) ? d_min_mb : d_min_mesh;
                         d_max_mesh = (d_max_mb > d_max_mesh) ? d_max_mb : d_max_mesh;
@@ -409,13 +409,14 @@ int main(int argc, char *argv[]) {
                     // check if this camera can recieve contributions from this snapshot
                     float t_min = camera.t_obs - d_max_mesh * trace_args.inv_c;
                     float t_max = camera.t_obs - d_min_mesh * trace_args.inv_c;
+                    std::cout << "t_min = " << t_min << ", t_max = " << t_max << ", t_snap = " << m * trace_args.snapshot_dt << std::endl;
                     int m_min = std::floor(t_min * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index for THIS camera
                     int m_max = std::ceil(t_max * trace_args.inv_snapshot_dt);           // latest contributing snapshot index for THIS camera
                     if ((m < m_min) || (m > m_max)) {
                         flexload_render_skip++;
                         if (verbose) {
                             std::cout << ".............................................................\n";
-                            std::cout << "no overlap between snapshot " << m << " and camera " << img_count << ", skippping.";
+                            std::cout << "no overlap of snapshot " << m << " and camera " << img_count << ", skippping render.";
                             std::cout << ".............................................................\n";
                         }
                         continue;
@@ -457,6 +458,7 @@ int main(int argc, char *argv[]) {
                 img_count++;
             } // end camera loop
 
+            // report snapshot total duration
             if (verbose) {
                 float snapshot_dur = (float)(clock() - snapshot_start)/CLOCKS_PER_SEC;
                 std::cout << ".............................................................\n";
