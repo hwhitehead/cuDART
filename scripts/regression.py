@@ -408,7 +408,7 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     cameras = [camera_args["template"]]
 
     # build scene and call render, with and without lookback
-    # labels = ["nolookback", "lookback"]
+    labels = ["nolookback", "lookback"]
     save_dirs = [os.path.join(save_dir, label) for label in labels]
     # for save_dir in save_dirs:
     #     if not os.path.exists(save_dir):
