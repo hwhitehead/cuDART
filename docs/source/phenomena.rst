@@ -88,9 +88,16 @@ This ratio, as with superluminal motion, is maximised at the critical orientatio
 *own* rest-frame, then the effects of relativistic length contraction and geometric smearing cancel out, resulting the observed object also being a sphere; this is known as the 
 `Penrose-Terrell <https://en.wikipedia.org/wiki/Terrell_rotation>`_ effect. This is also captured in :code:`cuDART`, if the emitting region is a sphere in its own rest frame, then
 in the observer frame, it will be an oblate spheroid with a compression factor of :math:`\Gamma`. The figure below shows how such a spheroid would be imaged within :code:`cuDART`;
-on the left :code:`lookback=False` and on the right :code:`lookback=True`. In the right panel we see 
+on the left :code:`lookback=False` and on the right :code:`lookback=True`.
 
-.. _phenomena_aliasing:
+.. figure:: ../../gallery/penrose-terrell.png
+    :width: 800px
+
+We can see that if a finite speed of light is not included, the image generated shows an ellipsoid with a compression factor of :math:`\Gamma=2` along the direction of motion (horizontally).
+However, if the render is flagged with :code:`lookback`, then the proper obsered shape of a sphere is captured.
+
+
+.. _phenomena_aliasing: 
 
 Aliasing
 --------
