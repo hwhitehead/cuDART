@@ -411,12 +411,12 @@ int main(int argc, char *argv[]) {
                         float d_max_mb = center_sep + camera_radius + mb_radius;
 
                         // store mesh extrema
-                        d_min_mb = (d_min_mb < d_min_mesh) ? d_min_mb : d_min_mesh;
-                        d_max_mb = (d_max_mb > d_max_mesh) ? d_max_mb : d_max_mesh;
+                        d_min_mesh = (d_min_mb < d_min_mesh) ? d_min_mb : d_min_mesh;
+                        d_max_mesh = (d_max_mb > d_max_mesh) ? d_max_mb : d_max_mesh;
                     } // end mb loop
 
-                    std::cout << "d_min_mb = " << d_min_mb << std::endl;
-                    std::cout << "d_max_mb = " << d_max_mb << std::endl;
+                    std::cout << "d_min_mesh = " << d_min_mesh << std::endl;
+                    std::cout << "d_max_mesh = " << d_max_mesh << std::endl;
 
                     // find extremal snapshots in time
                     float t_min_in_Myr = camera.t_obs - d_max_mesh * L_domain / c_in_kpc_per_Myr;
