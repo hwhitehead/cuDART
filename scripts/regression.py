@@ -356,7 +356,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
-def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose = True):
+def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose = True, flexload = False):
 
     if (verbose): 
         print("starting lookback render test...")
@@ -489,6 +489,10 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="run in lookback mode")
+    parser.add_argument("-rpt",
+                        action="store true",
+                        default=False,
+                        help="run penrose-terrel test")
     parser.add_argument("-f",
                         action="store_true",
                         default=False,
@@ -545,3 +549,14 @@ if __name__ == "__main__":
                             camera_args = camera_args, 
                             verbose = args["v"],
                             flexload=args["f"])
+    elif (args["rpt"]):
+        if (args["save_dir"] is None):
+            raise Exception("unable to run penrose-terrel test without save location (use --save_dir)")
+        if (args["data_dir"] is None):
+            raise Exception("unable to run penrose-terrel test without load location (use --data_dir)")
+        run_penrose_terrel_test(load_dir = args["data_dir"], 
+                                save_dir = args["save_dir"], 
+                                sim_args = sim_args, 
+                                camera_args = camera_args, 
+                                verbose = args["v"],
+                                flexload=args["f"])
