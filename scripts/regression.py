@@ -402,39 +402,21 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = 0.5 * np.pi + epsilon, target_origin = True)
+    camera_args["template"].tilt = 0.0
     camera_args["template"].t_obs = t_obs # only used with the lookback render
     cameras = [camera_args["template"]]
 
-    # generate scene WITHOUT lookback
-    nolookback_save_dir = os.path.join(save_dir, "nolookback")
-    
-    if not os.path.exists(nolookback_save_dir):
-        os.mkdir(nolookback_save_dir)
-    scene = Scene(load_str = nolookback_load_str, save_dir = nolookback_save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-    if (verbose): print("built no-lookback scene.")
-
-    # render single image WITHOUT lookback
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose, flexload = flexload)
-    if (verbose): print("finished no-lookbakc render")
-
-    if (camera_args["save_fig"]):
-        scene.plot(fig_save_dir = nolookback_save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
-        print("finished rendering figures.")
-
-    # generate scene WITH lookback
-    lookback_save_dir = os.path.join(save_dir, "lookback")
-    if not os.path.exists(nolookback_save_dir):
-        os.mkdir(nolookback_save_dir)
-    scene = Scene(load_str = load_dir, save_dir = lookback_save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-    if (verbose): print("built no-lookback scene.")
-
-    # render single image WITH lookback
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose, flexload = flexload)
-    if (verbose): print("finished no-lookback render")
-
-    if (camera_args["save_fig"]):
-        scene.plot(fig_save_dir = lookback_save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
-        print("finished rendering figures.")
+    labels = ["nolookback", "lookback"]
+    save_dirs = [os.path.join(save_dir, label) for label in labels]
+    for save_dir in save_dirs:
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+    load_strs = [nolookback_load_str, load_dir]
+    lookbacks = [False, True]
+    for i, label in enumerate(labels):
+        scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
+        scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 

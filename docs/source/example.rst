@@ -159,7 +159,7 @@ Multiple cameras (and hence images) can still be specified.
     import numpy as np
 
     # specify load/save string
-    path_to_snapshot = "path/to/all/snapshots"                  # directory, containing all snapshots + header file
+    path_to_snapshots = "path/to/all/snapshots"                 # directory, containing all snapshots + header file
     path_to_save_npy = "path/to/npy/dir"                        # directory for raw image outputs (.npy)
     path_to_save_png = "path/to/png/dir"                        # directory for figure image outputs (.png)
 
@@ -187,7 +187,7 @@ Multiple cameras (and hence images) can still be specified.
         cameras.append(camera)
 
     # generate Scene, the main class for rendering
-    scene = Scene(load_str = path_to_snapshot, save_dir = path_to_save_npy, cameras = cameras)
+    scene = Scene(load_str = path_to_snapshots, save_dir = path_to_save_npy, cameras = cameras)
 
     # use Scene to call the .cpp executable 
     scene.render(lookback = True)                  
