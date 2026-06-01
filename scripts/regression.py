@@ -395,7 +395,7 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                                    # calc duration for blob to reach domain edge
     t_emitter = 0.5 * T_in_Myr
     nolookback_snapshot = int(sim_args["num_snapshots"] * t_emitter / T_in_Myr)
-    nolookback_load_str = os.path.join(load_str, "snapshot" + str(nolookback_snapshot).zfill(5) + ".npy")
+    nolookback_load_str = os.path.join(load_dir, "snapshot" + str(nolookback_snapshot).zfill(5) + ".npy")
 
     # second render at midpoint time for observer
     t_obs = 0.5 * (t_min + t_max)
