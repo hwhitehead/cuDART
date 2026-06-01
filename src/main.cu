@@ -407,11 +407,10 @@ int main(int argc, char *argv[]) {
                     } // end mb loop
 
                     // check if this camera can recieve contributions from this snapshot
-                    float t_min = camera.t_obs - d_max_mesh * trace_args.inv_c;
-                    float t_max = camera.t_obs - d_min_mesh * trace_args.inv_c;
-                    std::cout << "t_min = " << t_min << ", t_max = " << t_max << ", t_snap = " << m * trace_args.snapshot_dt << std::endl;
-                    int m_min = std::floor(t_min * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index for THIS camera
-                    int m_max = std::ceil(t_max * trace_args.inv_snapshot_dt);           // latest contributing snapshot index for THIS camera
+                    float t_min = camera.t_obs - d_max_mesh * trace_args.inv_c;                 // earliest contributing time for THIS camera
+                    float t_max = camera.t_obs - d_min_mesh * trace_args.inv_c;                 // latest contributing time for THIS camera
+                    int m_min = std::floor(t_min * trace_args.inv_snapshot_dt);                 // earliest contributing snapshot index for THIS camera
+                    int m_max = std::ceil(t_max * trace_args.inv_snapshot_dt);                  // latest contributing snapshot index for THIS camera
                     if ((m < m_min) || (m > m_max)) {
                         flexload_render_skip++;
                         if (verbose) {

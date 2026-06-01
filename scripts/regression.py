@@ -12,7 +12,7 @@ pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
 sys.path.append(pysrc)
 from cudart import *
 
-def build_unlabelled_regression_suite(save_dir, sim_args, verbose=True):
+def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True, sphere_in_rest = False):
 
     # construct template data for regression suite, without labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
@@ -65,6 +65,11 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose=True):
         f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_domain"]))
     if (verbose): print("built header.")
 
+    if sphere_in_rest:
+        z_scale = 1.0 / sim_args["Gamma"]
+    else:
+        z_scale = 1.0
+
     # build snapshots
     for n, t_in_Myr in enumerate(t_span):
         # unlabelled data is a single .npy file, without a header
@@ -78,8 +83,11 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose=True):
         lead_ZZ = zz - lead_center
         tail_ZZ = zz - tail_center
 
-        rr_lead_sqr = ((zz - lead_center) ** 2 + xy_sqr) / r_blob_in_code ** 2  # sph radius from leading/tailing ejecta
-        rr_tail_sqr = ((zz - tail_center) ** 2 + xy_sqr) / r_blob_in_code ** 2
+        dz_lead = (zz - lead_center) / z_scale
+        dz_tail = (zz - tail_center) / z_scale
+
+        rr_lead_sqr = (dz_lead ** 2 + xy_sqr) / r_blob_in_code ** 2             # sph radius from leading/tailing ejecta
+        rr_tail_sqr = (dz_tail ** 2 + xy_sqr) / r_blob_in_code ** 2
 
         in_lead = (rr_lead_sqr < 1)
         in_tail = (rr_tail_sqr < 1)
@@ -100,7 +108,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose=True):
 
     if (verbose): print("finished dataset construction.")
 
-def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
+def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_rest = False):
 
     # TODO: test this deployment
 
@@ -388,6 +396,10 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="build labelled regression suite data")
+    parser.add_argument("-pt",
+                        action="store_true",
+                        help=False,
+                        help="build as sphere in rest frame")
     parser.add_argument("-r", 
                         action="store_true",
                         default=False,
@@ -425,11 +437,11 @@ if __name__ == "__main__":
     if (args["b"]):
         if (args["data_dir"] is None):
             raise Exception("unable to build unlabelled regression suite data without save location (use --data_dir)")
-        build_unlabelled_regression_suite(args["data_dir"], sim_args, args["v"])
+        build_unlabelled_regression_suite(args["data_dir"], sim_args, args["v"], args["pt"])
     elif (args["bl"]):
         if (args["data_dir"] is None):
             raise Exception("unable to build labelled regression suite data without save location (use --data_dir)")
-        build_labelled_regression_suite(args["data_dir"], sim_args, args["v"])
+        build_labelled_regression_suite(args["data_dir"], sim_args, args["v"], args["pt"])
 
     # run render routine with or without lookback
     if (args["r"]):
