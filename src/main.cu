@@ -348,7 +348,7 @@ int main(int argc, char *argv[]) {
             }
             std::cout << "-------------------------------------------------------------\n";
         }
-        int flexload_snapshot_skip = m_upper - m_lower;
+        int num_snapshots_loaded = 0;
         int flexload_render_skip = 0;
         for (int m = m_lower; m <= m_upper; m++) {
 
@@ -470,6 +470,7 @@ int main(int argc, char *argv[]) {
             checkCudaErrors(cudaDeviceSynchronize());
             checkCudaErrors(cudaFree(mesh));
             checkCudaErrors(cudaFree(mb_list));
+            num_snapshots_loaded++;
         } // end snapshot loop
 
         // image buffer populated, save render data as npy
@@ -517,12 +518,12 @@ int main(int argc, char *argv[]) {
             printf("free all                  (device/host)       %.6fs\n",free_dur);
             if (flexload) {
                 int total_inflex_renders = num_snapshots * num_images;
-                int total_skipped_renders = flexload_render_skip + flexload_snapshot_skip * num_images;
-                int total_flex_renders = total_inflex_renders - total_skipped_renders;
+                int total_flex_renders = num_snapshots_loaded * num_images - flexload_render_skip;
+                int total_skipped_renders = total_inflex_renders - total_flex_renders;
                 float perc_reduction = 100.0 * total_skipped_renders / total_flex_renders;
                 std::cout << "=============================================================\n";
                 printf("Reporting flexload speedup....\n");
-                printf("total snapshots skipped                       %d\n",flexload_snapshot_skip);
+                printf("total snapshots skipped                       %d\n",num_snapshots - num_snapshots_loaded);
                 printf("total renders skipped                         %d\n",total_skipped_renders);
                 printf("estimated runtime reduction                   %.3f%\n",perc_reduction);
                 std::cout << "=============================================================\n";
