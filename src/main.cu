@@ -677,12 +677,13 @@ int main(int argc, char *argv[]) {
             int total_skipped_renders = flexload_render_skip + flexload_snapshot_skip * num_images;
             int total_flex_renders = total_inflex_renders - total_skipped_renders;
             float perc_reduction = 100.0 * total_skipped_renders / total_flex_renders;
+            std::cout << "=============================================================\n";
             printf("Reporting flexload speedup....\n");
             printf("total snapshots skipped                       %d\n",flexload_snapshot_skip);
             printf("total renders skipped                         %d\n",total_skipped_renders);
             printf("estimated runtime reduction                   %.3f%\n",perc_reduction);
+            std::cout << "=============================================================\n";
         }
-
         float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
         printf("total runtime                                 %.6fs\n",main_dur);
         std::cout << "=============================================================\n";

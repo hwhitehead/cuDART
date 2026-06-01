@@ -82,7 +82,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     mb_info.mb_index = 0;
     // flexload data
     mb_info.mb_origin = 0.5 * (xl + xr);
-    mb_info.mb_radius = (xl - mb_origin).vector_mag();
+    mb_info.mb_radius = (xl - mb_info.mb_origin).vector_mag();
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
@@ -136,7 +136,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
                 mb_info.mb_dims = vec3(nx,ny,nz);
                 // flexload data
                 mb_info.mb_origin = 0.5 * (xl + xr);
-                mb_info.mb_radius = (xl - mb_origin).vector_mag();
+                mb_info.mb_radius = (xl - mb_info.mb_origin).vector_mag();
                 all_mb_info.push_back(mb_info);
                 npy_floats += mb_size;
             }
