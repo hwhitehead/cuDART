@@ -195,14 +195,17 @@ int main(int argc, char *argv[]) {
     float camera_r_max = std::numeric_limits<float>::min();
     float camera_t_min = camera_r_min;
     float camera_t_max = camera_r_max;
-    for (int n = 0; n < num_images; n++) {
-        float camera_r = cameras[n].origin.vector_mag();
+    for (auto &camera : cameras) {
+        float camera_r = camera.origin.vector_mag();
         camera_r_min = (camera_r < camera_r_min) ? camera_r : camera_r_min;
         camera_r_max = (camera_r > camera_r_max) ? camera_r : camera_r_max;
-        float camera_t_obs = cameras[n].t_obs;
+        float camera_t_obs = camera.t_obs;
         camera_t_min = (camera_t_obs < camera_t_min) ? camera_t_obs : camera_t_min;
         camera_t_max = (camera_t_obs > camera_t_max) ? camera_t_obs : camera_t_max;
     } // end camera loop
+
+    std::cout << "t_min = " << camera_t_min << ", t_max = " << camera_t_max << std::endl;
+    std::cout << "r_min = " << camera_r_min << ", r_max = " << camera_r_max << std::endl;
 
     // inherit image dimensions from the first camera
     Camera standard_camera = cameras[0];
