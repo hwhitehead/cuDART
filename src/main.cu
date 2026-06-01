@@ -308,6 +308,7 @@ int main(int argc, char *argv[]) {
             int m_max = std::ceil(t_max_in_Myr * trace_args.inv_snapshot_dt);           // latest contributing snapshot index 
             m_lower = (m_min > m_lower) ? m_min : m_lower;                          // start loop at earliest
             m_upper = (m_max < m_upper) ? m_max : m_upper;                          // end loop at latest
+            std::cout << "m_lower= " << m_lower << ", m_upper = " << m_upper << std::endl;
         }
 
         // allocate data on host
