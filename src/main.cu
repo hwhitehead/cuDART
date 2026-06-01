@@ -415,15 +415,18 @@ int main(int argc, char *argv[]) {
                         d_max_mb = (d_max_mb > d_max_mesh) ? d_max_mb : d_max_mesh;
                     } // end mb loop
 
+                    std::cout << "d_min_mb = " << d_min_mb << std::endl;
+                    std::cout << "d_max_mb = " << d_max_mb << std::endl;
+
                     // find extremal snapshots in time
-                    float t_min_in_Myr = camera.t_obs - d_min_mesh * L_domain / c_in_kpc_per_Myr;
-                    float t_max_in_Myr = camera.t_obs - d_max_mesh * L_domain / c_in_kpc_per_Myr;
+                    float t_min_in_Myr = camera.t_obs - d_max_mesh * L_domain / c_in_kpc_per_Myr;
+                    float t_max_in_Myr = camera.t_obs - d_min_mesh * L_domain / c_in_kpc_per_Myr;
                 
                     int m_min = std::floor(t_min_in_Myr * trace_args.inv_snapshot_dt);
                     int m_max = std::ceil(t_max_in_Myr * trace_args.inv_snapshot_dt);
 
                     // check if this camera can recieve contributions from this snapshot
-                    if ((m_min > m) || (m_max < m)) {
+                    if ((m < m_min) || (m > m_max)) {
                         if (verbose) {
                             std::cout << ".............................................................\n";
                             std::cout << "no overlap between snapshot " << m << " and camera " << img_count << ", skippping.";
