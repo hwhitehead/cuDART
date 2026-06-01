@@ -294,7 +294,6 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
     # optional call included to render raws as figures (.npy -> .png)
     # sim_args is passed here to calculate timings, generally it is not required
 
-
     if (verbose): 
         print("starting lookback render test...")
         print("reading data from {0}".format(load_dir))
@@ -410,16 +409,16 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     # build scene and call render, with and without lookback
     labels = ["nolookback", "lookback"]
     save_dirs = [os.path.join(save_dir, label) for label in labels]
-    # for save_dir in save_dirs:
-    #     if not os.path.exists(save_dir):
-    #         os.mkdir(save_dir)
-    # load_strs = [nolookback_load_str, load_dir]
-    # lookbacks = [False, True]
-    # for i, label in enumerate(labels):
-    #     scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-    #     scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
-    #     #scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
-    # if (verbose): print("finished raw image generation")
+    for save_dir in save_dirs:
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+    load_strs = [nolookback_load_str, load_dir]
+    lookbacks = [False, True]
+    for i, label in enumerate(labels):
+        scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
+        #scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
+    if (verbose): print("finished raw image generation")
 
     # plot composite
     set_plot_defaults()
@@ -449,6 +448,7 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
         axes[i].xaxis.set_visible(False)
         axes[i].yaxis.set_visible(False)
         axes[i].set_title(titles[i])
+        axes[i].set_facecolor("k")
 
     sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
     fig.colorbar(sm, cax=cax, orientation="vertical")
@@ -465,7 +465,7 @@ if __name__ == "__main__":
     # dict for simulation args (all lengths in kpc)
     sim_args = {"Gamma": 2.0,
                 "L_domain": 120.0,
-                "r_blob": 2.5,
+                "r_blob": 10.0,
                 "domain_dims": [100,100,200],
                 "num_snapshots": 100,
                 "target_theta": None}
