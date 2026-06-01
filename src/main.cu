@@ -305,13 +305,15 @@ int main(int argc, char *argv[]) {
             float domain_r_max = std::sqrt(3.0); // TODO: load this as part of header (via mesh_xr, mesh_xl)
             float d_min_in_kpc = (camera_r_min - domain_r_max) * L_domain;          // minimum camera-domain seperation
             float d_max_in_kpc = (camera_r_max - domain_r_max) * L_domain;          // maixmum camera-domain seperation
+            std::cout << "d_min_in_kpc" << d_min_in_kpc << ", d_max_in_kpc = " << d_max_in_kpc << std::endl;
             float t_min_in_Myr = camera_t_min - d_max_in_kpc / c_in_kpc_per_Myr;    // earliest contributing snapshot time
             float t_max_in_Myr = camera_t_max - d_min_in_kpc / c_in_kpc_per_Myr;    // latest contributing snapshot time
+            std::cout << "t_min_in_Myr" << t_min_in_Myr << ", t_max_in_Myr = " << t_max_in_Myr << std::endl;
             int m_min = std::floor(t_min_in_Myr * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index
             int m_max = std::ceil(t_max_in_Myr * trace_args.inv_snapshot_dt);           // latest contributing snapshot index 
             m_lower = (m_min > m_lower) ? m_min : m_lower;                          // start loop at earliest
             m_upper = (m_max < m_upper) ? m_max : m_upper;                          // end loop at latest
-            std::cout << "m_lower= " << m_lower << ", m_upper = " << m_upper << std::endl;
+            std::cout << "m_lower = " << m_lower << ", m_upper = " << m_upper << std::endl;
         }
 
         // allocate data on host
