@@ -94,6 +94,7 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'f':
                     flexload = true;
+                    break;
                 case 'h':
                 default:
                     std::cout << "cuDART " << cudart_version << std::endl;
