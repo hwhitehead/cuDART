@@ -51,7 +51,7 @@ snapshots in time to account for the non-zero communication time between emitter
 anti-parallel spherical (in the observer frame) ejecta launched at 90 and 45 degrees to the line of sight (left and right panels respectively). when
 the ejecta's motion is perpendicular to the line-of-sight, both ejecta show the same observed velocity. However, when the ejecta is pointed slight towards/away
 from the observer, the observed transverse velocity can be very different, even exceeding the speed of light. The observed shape of the approaching ejectum is 
-no longer a sphere, this is also a geometric effect (see :ref:`next <phenomena_morphology>` secton).
+no longer a sphere, this is also a geometric effect (see :ref:`next <phenomena_deformation>` secton).
 
 .. _phenomena_superluminal_gif:
 
@@ -87,14 +87,13 @@ by the render routine is consistent with geometric predictions (shown as white e
 This ratio, as with superluminal motion, is maximised at the critical orientation :math:`\theta_\mathrm{crit} = \cos^{-1}(\beta)`. If the emitting region is a sphere in its
 *own* rest-frame, then the effects of relativistic length contraction and geometric smearing cancel out, resulting the observed object also being a sphere; this is known as the 
 `Penrose-Terrell <https://en.wikipedia.org/wiki/Terrell_rotation>`_ effect. This is also captured in :code:`cuDART`, if the emitting region is a sphere in its own rest frame, then
-in the observer frame, it will be an oblate spheroid with a compression factor of :math:`\Gamma`. The figure below shows how such a spheroid would be imaged within :code:`cuDART`;
-on the left :code:`lookback=False` and on the right :code:`lookback=True`.
-
+in the observer frame, it will be an oblate spheroid with a compression factor of :math:`\Gamma`. The figure below shows how such a spheroid would be imaged by :code:`cuDART`.
 .. figure:: ../../gallery/penrose-terrell.png
     :width: 800px
 
-We can see that if a finite speed of light is not included, the image generated shows an ellipsoid with a compression factor of :math:`\Gamma=2` along the direction of motion (horizontally).
-However, if the render is flagged with :code:`lookback`, then the proper obsered shape of a sphere is captured.
+On the left, where a finite speed of light is not included, the image generated shows an ellipsoid with a compression factor of :math:`\Gamma=2` along the direction of motion (horizontally).
+On the right, with the render flagged with :code:`lookback` such that the finite speed of light is account for, then the proper obsered shape of a sphere is captured. The emitting region is a sphere in 
+its own rest frame, and ellipsoid in the lab frame and is observed as a sphere (albiet rotated).
 
 
 .. _phenomena_aliasing: 
