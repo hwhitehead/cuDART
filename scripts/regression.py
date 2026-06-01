@@ -388,7 +388,7 @@ if __name__ == "__main__":
 
     # handle command line arguments for regression tests
     parser = argparse.ArgumentParser()
-    parser.add_argument("-b", 
+    parser.add_argument("-b",
                         action="store_true",
                         default=False,
                         help="build regression suite data")
@@ -396,9 +396,9 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="build labelled regression suite data")
-    parser.add_argument("-pt",
+    parser.add_argument("-bpt",
                         action="store_true",
-                        help=False,
+                        default=False,
                         help="build as sphere in rest frame")
     parser.add_argument("-r", 
                         action="store_true",
@@ -437,11 +437,11 @@ if __name__ == "__main__":
     if (args["b"]):
         if (args["data_dir"] is None):
             raise Exception("unable to build unlabelled regression suite data without save location (use --data_dir)")
-        build_unlabelled_regression_suite(args["data_dir"], sim_args, args["v"], args["pt"])
+        build_unlabelled_regression_suite(args["data_dir"], sim_args, args["v"], args["bpt"])
     elif (args["bl"]):
         if (args["data_dir"] is None):
             raise Exception("unable to build labelled regression suite data without save location (use --data_dir)")
-        build_labelled_regression_suite(args["data_dir"], sim_args, args["v"], args["pt"])
+        build_labelled_regression_suite(args["data_dir"], sim_args, args["v"], args["bpt"])
 
     # run render routine with or without lookback
     if (args["r"]):
