@@ -250,7 +250,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
     # check input, output directory existence
     for path in [load_dir, save_dir]:
         if not os.path.isdir(path):
-            raise Exception("{0} does not exist".format(save_dir))
+            raise Exception("{0} does not exist".format(path))
 
     # check for specific snapshot input file
     load_str = os.path.join(load_dir, "snapshot" + str(int(snapshot_index)).zfill(str_zfill) + ".npy")
@@ -303,7 +303,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
     # check input, output directory existence
     for path in [load_dir, save_dir]:
         if not os.path.isdir(path):
-            raise Exception("{0} does not exist".format(save_dir))
+            raise Exception("{0} does not exist".format(path))
 
     # check for ALL snapshot input files
     for n in range(0, sim_args["num_snapshots"]):
@@ -366,7 +366,7 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     # check input, output directory existence
     for path in [load_dir, save_dir]:
         if not os.path.isdir(path):
-            raise Exception("{0} does not exist".format(save_dir))
+            raise Exception("{0} does not exist".format(path))
 
     # check for ALL snapshot input files
     for n in range(0, sim_args["num_snapshots"]):
@@ -394,8 +394,8 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                                 # cast to astro units
     T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                                    # calc duration for blob to reach domain edge
     t_emitter = 0.5 * T_in_Myr
-    nolookback_camera = copy.deepcopy(camera_args["template"])
-    nolookback_camera.t_obs = t_em
+    nolookback_snapshot = int(sim_args["num_snapshots"] * t_emmiter / T_in_Myr)
+    nolookback_load_str = os.path.join(load_str, "snapshot" + str(nolookback_snapshot).zfill(5) + ".npy")
 
     # second render at midpoint time for observer
     t_obs = 0.5 * (t_min + t_max)
@@ -407,9 +407,10 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
 
     # generate scene WITHOUT lookback
     nolookback_save_dir = os.path.join(save_dir, "nolookback")
+    
     if not os.path.exists(nolookback_save_dir):
         os.mkdir(nolookback_save_dir)
-    scene = Scene(load_str = load_dir, save_dir = nolookback_save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+    scene = Scene(load_str = nolookback_load_str, save_dir = nolookback_save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
     if (verbose): print("built no-lookback scene.")
 
     # render single image WITHOUT lookback
