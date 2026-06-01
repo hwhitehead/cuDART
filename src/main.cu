@@ -188,17 +188,17 @@ int main(int argc, char *argv[]) {
     size_t num_zero_pad = 5;
 
     // grab extremal camera properties for flexload (only important for lookback)
-    float camera_min_r = std::numeric_limits<float>::max();
-    float camera_max_r = std::numeric_limits<float>::min();
-    float camera_min_t_obs = min_r;
-    float camera_max_t_obs = max_r;
+    float camera_r_min = std::numeric_limits<float>::max();
+    float camera_r_max = std::numeric_limits<float>::min();
+    float camera_t_min = camera_min_r;
+    float camera_t_max = camera_r_max;
     for (int n = 0; n < num_images; n++) {
         float camera_r = cameras[n].origin.vector_mag();
-        camera_min_r = (camera_r < camera_min_r) ? camera_r : camera_min_r;
-        camera_max_r = (camera_r > camera_max_r) ? camera_r : camera_max_r;
-        float camera_t_obs = camera[n].t_obs;
-        camera_min_t_obs = (camera_t_obs < camera_min_t_obs) ? camera_t_obs : camera_min_t_obs;
-        camera_max_t_obs = (camera_t_obs > camera_max_t_obs) ? camera_t_obs : camera_max_t_obs;
+        camera_r_min = (camera_r < camera_r_min) ? camera_r : camera_r_min;
+        camera_r_max = (camera_r > camera_r_max) ? camera_r : camera_r_max;
+        float camera_t_obs = cameras[n].t_obs;
+        camera_t_min = (camera_t_obs < camera_t_min) ? camera_t_obs : camera_t_min;
+        camera_t_max = (camera_t_obs > camera_t_max) ? camera_t_obs : camera_t_max;
     } // end camera loop
 
     // inherit image dimensions from the first camera
@@ -296,9 +296,9 @@ int main(int argc, char *argv[]) {
         // float calc flexload limits
         int m_lower = 0, m_upper = num_snapshots - 1; // if no flexload, use full time range
         if (flexload) {
-            float domain_r_max = 1.0 // TODO: load this as part of header (via mesh_xr, mesh_xl)
+            float domain_r_max = 1.0; // TODO: load this as part of header (via mesh_xr, mesh_xl)
             float d_min_in_kpc = (camera_r_min - domain_r_max) * L_domain;          // minimum camera-domain seperation
-            float d_max_in_kpc = (camera_r_max - domain_r_min) * L_domain;          // maixmum camera-domain seperation
+            float d_max_in_kpc = (camera_r_min - domain_r_min) * L_domain;          // maixmum camera-domain seperation
             float t_min_in_Myr = camera_t_min - d_max_in_kpc / c_in_kpc_per_Myr;    // earliest contributing snapshot time
             float t_max_in_Myr = camera_t_max - d_min_in_kpc / c_in_kpc_per_Myr;    // latest contributing snapshot time
             int m_min = std::floor(t_min_in_Myr * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index
@@ -392,16 +392,16 @@ int main(int argc, char *argv[]) {
                     float d_max_mesh = std::numeric_limits<float>::min();
                     for (int mb_id = 0; mb_id < num_meshblocks; mb_id++) {
                         // define sphere which contains subdomain (TODO:offload to mbinfo)
-                        vec3 mb_center = 0.5 * (all_mb_info[mb_id].xl + all_mb_info[mb_id].xr)
+                        vec3 mb_center = 0.5 * (all_mb_info[mb_id].xl + all_mb_info[mb_id].xr);
                         float mb_radius = (all_mb_info[mb_id].xl - mb_center).vector_mag();
 
                         // define radius which contains camera
-                        float camera_radius = (camera.origin - camera.lower_left).vector_mag()
+                        float camera_radius = (camera.origin - camera.lower_left).vector_mag();
 
                         // calculate extremal camera-domain seperations
-                        float center_sep = (mb_center - camera.origin).vector_mag()
-                        float d_min_mb = center_sep - camera_radius - mb_radius
-                        float d_max_mb = center_sep + camera_radius + mb_radius
+                        float center_sep = (mb_center - camera.origin).vector_mag();
+                        float d_min_mb = center_sep - camera_radius - mb_radius;
+                        float d_max_mb = center_sep + camera_radius + mb_radius;
 
                         // store mesh extrema
                         d_min_mb = (d_min_mb < d_min_mesh) ? d_min_mb : d_min_mesh;
@@ -409,8 +409,8 @@ int main(int argc, char *argv[]) {
                     } // end mb loop
 
                     // find extremal snapshots in time
-                    float t_min_in_Myr = camera.t_obs - d_min * L_domain / c_in_kpc_per_Myr;
-                    float t_max_in_Myr = camera.t_obs - d_max * L_domain / c_in_kpc_per_Myr;
+                    float t_min_in_Myr = camera.t_obs - d_min_mesh * L_domain / c_in_kpc_per_Myr;
+                    float t_max_in_Myr = camera.t_obs - d_max_mesh * L_domain / c_in_kpc_per_Myr;
                 
                     int m_min = std::floor(t_min_in_Myr * trace_args.inv_snapshot_dt);
                     int m_max = std::ceil(t_max_in_Myr * trace_args.inv_snapshot_dt);
