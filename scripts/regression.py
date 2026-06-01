@@ -376,7 +376,8 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
-    theta = 0.5 * np.pi / 2 + epsilon                                                           # fixed orientation for this example
+    theta = 0.5 * np.pi + epsilon                                                           # fixed orientation for this example
+    tilt = 0.5 * np.pi
 
     # calculate start time (just before light from origin reaches camera)
     D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
@@ -401,8 +402,8 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     t_obs = 0.5 * (t_min + t_max)
     
     # generate single camera
-    camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = 0.5 * np.pi + epsilon, target_origin = True)
-    camera_args["template"].tilt = 0.0
+    camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
+    camera_args["template"].tilt = tilt
     camera_args["template"].t_obs = t_obs # only used with the lookback render
     cameras = [camera_args["template"]]
 
