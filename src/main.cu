@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
         // float calc flexload limits
         int m_lower = 0, m_upper = num_snapshots - 1; // if no flexload, use full time range
         if (flexload) { // TODO: this can also be performed more simply in code units
-            float domain_r_max = std::sqrt(3.0); // TODO: load this as part of header (via mesh_xr, mesh_xl)
+            float domain_r_max = 0.5 * std::sqrt(3.0); // TODO: load this as part of header (via mesh_xr, mesh_xl)
             float d_min_in_kpc = (camera_r_min - domain_r_max) * L_domain;          // minimum camera-domain seperation
             float d_max_in_kpc = (camera_r_max - domain_r_max) * L_domain;          // maixmum camera-domain seperation
             std::cout << "d_min_in_kpc" << d_min_in_kpc << ", d_max_in_kpc = " << d_max_in_kpc << std::endl;
