@@ -434,8 +434,8 @@ def run_penrose_terrel_test(load_dir, save_dir, sim_args, camera_args, verbose =
     cax = fig.add_subplot(gs[:, 2])
     axes = [axl, axr]
 
-    X = np.linspace(0,camera_args["template_camera"].length_X,camera_args["template_camera"].num_pixels_X)
-    Y = np.linspace(0,camera_args["template_camera"].length_Y,camera_args["template_camera"].num_pixels_Y)
+    X = np.linspace(0,camera_args["template"].length_X,camera_args["template"].num_pixels_X)
+    Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
     titles = ["No Lookback", "Lookback"]
