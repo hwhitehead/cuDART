@@ -396,6 +396,10 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="run in lookback mode")
+    parser.add_argument("-f",
+                        action="store_true",
+                        default=False,
+                        help="run with flexload")
     parser.add_argument("-v", 
                         action="store_true",
                         default=False,
@@ -446,4 +450,5 @@ if __name__ == "__main__":
                             save_dir = args["save_dir"], 
                             sim_args = sim_args, 
                             camera_args = camera_args, 
-                            verbose = args["v"])
+                            verbose = args["v"]
+                            flexload=args["f"])
