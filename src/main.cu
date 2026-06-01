@@ -299,9 +299,9 @@ int main(int argc, char *argv[]) {
         // float calc flexload limits
         int m_lower = 0, m_upper = num_snapshots - 1; // if no flexload, use full time range
         if (flexload) {
-            float domain_r_max = 1.0; // TODO: load this as part of header (via mesh_xr, mesh_xl)
+            float domain_r_max = std::sqrt(3.0); // TODO: load this as part of header (via mesh_xr, mesh_xl)
             float d_min_in_kpc = (camera_r_min - domain_r_max) * L_domain;          // minimum camera-domain seperation
-            float d_max_in_kpc = (camera_r_min - domain_r_max) * L_domain;          // maixmum camera-domain seperation
+            float d_max_in_kpc = (camera_r_max - domain_r_max) * L_domain;          // maixmum camera-domain seperation
             float t_min_in_Myr = camera_t_min - d_max_in_kpc / c_in_kpc_per_Myr;    // earliest contributing snapshot time
             float t_max_in_Myr = camera_t_max - d_min_in_kpc / c_in_kpc_per_Myr;    // latest contributing snapshot time
             int m_min = std::floor(t_min_in_Myr * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index
