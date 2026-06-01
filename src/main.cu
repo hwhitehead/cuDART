@@ -97,8 +97,8 @@ int main(int argc, char *argv[]) {
                     std::cout << "cuDART " << cudart_version << std::endl;
                     std::cout << "Usage: " << argv[0] << " [options]\n";
                     std::cout << "Options:\n";
-                    std::cout << " -i <file>    specify input target\n";
-                    std::cout << " -s <file>    specify save target\n";
+                    std::cout << " -i <file>    specify input target (directory or .npy)\n";
+                    std::cout << " -s <file>    specify save target (directory)\n";
                     std::cout << " -c <file>    specify camera data file\n";
                     std::cout << " -p <value>   power-law for rest-frame emission (default -0.6)\n";
                     std::cout << " -d <value>   Doppler index for boosting (deprecated for power-law)\n";
@@ -479,7 +479,7 @@ int main(int argc, char *argv[]) {
         // image buffer populated, save render data as npy
         clock_t npy_write_start = clock();
         for (int n = 0; n < num_images; n++) {
-            std::string save_str = save_str_header + zero_pad_str(n, num_zero_pad) + ".npy";
+            std::string save_str = save_str_header + "/img" + zero_pad_str(n, num_zero_pad) + ".npy";
             if (append_mode) {
                 // attempt to add values to existing file (if it exists)
                 bool file_exists = std::filesystem::is_regular_file(save_str);
@@ -614,7 +614,7 @@ int main(int argc, char *argv[]) {
 
             // save data
             clock_t npy_write_start = clock();
-            std::string save_str = save_str_header + zero_pad_str(img_count, num_zero_pad) + ".npy";
+            std::string save_str = save_str_header + "/img" + zero_pad_str(img_count, num_zero_pad) + ".npy";
             if (append_mode) {
                 // attempt to add values to existing file (if it exists)
                 bool file_exists = std::filesystem::is_regular_file(save_str);
