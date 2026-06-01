@@ -304,7 +304,7 @@ class Scene:
 
     def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, 
                 max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
-                lookback = False, verbose_cpp = False):
+                lookback = False, flexload = False, verbose_cpp = False):
 
         """
             Given a constructed Scene, format a subprocess invokation of the main cpp executable with any 
@@ -316,6 +316,8 @@ class Scene:
                 Runs render using relativistic boosting (default False)
             lookback : bool
                 Runs render using finite speed of light implementation (default False)
+            flexload : bool
+                Attempts to skip out-of-bounds snapshots in when running with lookback (default False)
             power_law_index : None
                 Sets power law slope for rest frame emission (default None, autos to -0.6 in cpp)
             doppler_index : None
@@ -377,6 +379,9 @@ class Scene:
             if not os.path.isdir(self.load_str):
                 raise Exception("if using lookback mode, input must be directory.")
             command = command + ["-l"]
+            # run using the flexload snapshot/camera skipping routine
+            if flexload:
+                command = command + ["-f"]
         # run using specific power-law for rest-frame emission
         if power_law_index is not None:
             command = command + ["-p", str(power_law_index)]

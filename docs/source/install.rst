@@ -4,8 +4,8 @@ Installation and Requirements
 
 :code:`cuDART` is written in C++, and runs on the GPU. As such, to function it requires
 
-* A CUDA-capable GPU (from Ampere onwards)
-* The :code:`nvcc` compiler
+* A CUDA-capable GPU (from Turing/Ampere onwards)
+* The :code:`nvcc` compiler (`documentation <https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/>`_)
 * Python (optional, but highly recommended for front-end), with the following modules
     * common modules such as :code:`numpy`, :code:`matplotlib`
     * if using data from :code:`PLUTO`, the :code:`pyPLUTO` module (available `here <https://github.com/GiMattia/PyPLUTO>`_)
