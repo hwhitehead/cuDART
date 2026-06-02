@@ -28,15 +28,15 @@ such as superluminal motion to be recovered. :code:`cuDART` supports simulation 
     Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. 
     Simulation data featured in Elley at al. 2026 (`NASA ADS <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_).
 
-The workhorse of the :code:`cuDART` code is written in C++/CUDA, but the frontend is build in Python. The full codebase is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
-Please report any issues and suggestions for improvement here. Development for :code:`cuDART` is use-case driven; if there are projects that you think may benefit from this code, but require additional features
-please get in touch with the authors.
+The workhorse of the :code:`cuDART` code is written in C++/CUDA, but the frontend is built in Python. The full codebase is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
+Please report any issues and suggestions for improvement there. Development for :code:`cuDART` is use-case driven; if there are projects that you think may benefit from this code, but require additional features
+please get in touch with the developers.
 
 ---------------------------------------
 Publications
 ---------------------------------------
 
-Earlier iterations of this codebase have been use to generate synethic observations for the following publications:
+Earlier iterations of this codebase have been use to generate synthetic observations for the following publications:
 
 * Gasealahwe et al. (2025): `A relativistic jet from a neutron star breaking out of its natal supernova remnant <https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract>`_,
 * Elley et al. (2026): `The impact of flickering variability and magnetisation on the dynamics, stability and morphology of radio-loud AGN jets <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_.

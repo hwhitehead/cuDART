@@ -220,12 +220,24 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
         float s_next_intercept[3] = {0.0, 0.0, 0.0};
         int exit_cond[3] = {0, 0, 0};
         int step_dir[3] = {0, 0, 0};
-        vec3 mb_entrance = r.march(s_entry);
+        
+        // use fast-forward, if flagged
+        if (trace_args.fast_forward) {
+            float t_early = trace_args.snapshot_dt * (trace_args.snapshot_index - 1);   // earliest contributing field
+            float t_late = trace_args.snapshot_dt * (trace_args.snapshot_index + 1);    // latest contributing field
+            float s_min = trace_args.c * (trace_args.t_obs - t_late);                   // shallowest contributing field
+            float s_max = trace_args.c * (trace_args.t_obs - t_early);                  // deepest contributing field
+            s_entry = s_min;
+            s_exit = s_max;
+        } // end fast-forward
 
-        // orientate trace
+        // prepare for traversal
+        vec3 mb_entrance = r.march(s_entry);
         for (int i = 0; i <= 2; i++) {
+            // identify entry cell
             float ray_mb_orgin = mb_entrance[i] - xl[i];
             cell[i] = int_clamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1);
+            // identify trace orientation
             if (r.sign[i]) { 
                 step_dir[i] = -1; // traverse backwards
                 exit_cond[i] = -1; // stop walk when leading edge reached
@@ -236,8 +248,8 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
                 exit_cond[i] = (int)mb_dims[i]; // stop walk when tailing edge reached
                 ds[i] = dx[i] * r.inv_normal[i];
                 s_next_intercept[i] = s_entry + ((cell[i]+1) * dx[i] - ray_mb_orgin) * r.inv_normal[i];
-            } // end if
-        } // end for
+            } // end if sign
+        } // end for direction
 
         // perform traversal
         float s_current = s_entry;
@@ -280,8 +292,8 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
 
             // check for termination (necessary?)
             if (cell[axis] == exit_cond[axis]) break;
-        } // end while     
-    } // end if
+        } // end while traversall
+    } // end if hit
     return trace;
 }
 

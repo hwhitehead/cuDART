@@ -164,10 +164,12 @@ int main(int argc, char *argv[]) {
 
     // package trace info (TEMP, consider importing within lookback header)
     TraceArgs trace_args;
+    trace_args.fast_forward = true; // TODO: add flag to load at runtime
     trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
     // the following are dummy values, overwritten in lookback routine
+    trace_args.t_obs = 0.0;
     trace_args.snapshot_dt = 1.0; 
     trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
     trace_args.c = 1.0;
@@ -422,6 +424,8 @@ int main(int argc, char *argv[]) {
                     }
                 } // end flexload
                 
+                // stash observer time for fast-forward
+                trace_args.t_obs = camera.t_obs;
 
                 if (verbose) {
                     std::cout << ".............................................................\n";
