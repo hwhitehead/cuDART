@@ -445,7 +445,7 @@ int main(int argc, char *argv[]) {
 
                 // call render
                 clock_t render_start = clock();
-                render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, trace_args);
+                render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img_buffer, mesh, trace_args);
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
                 if (verbose) {
@@ -453,15 +453,15 @@ int main(int argc, char *argv[]) {
                     printf("render kernel             (device)            %.6fs\n",render_dur);
                 }
 
-                // copy from scratch into buffer space
-                clock_t img_sum_start = clock();
-                scratch_to_buffer<<<blocks_per_grid,threads_per_block>>>(d_img, d_img_buffer, (m == m_lower));
-                checkCudaErrors(cudaPeekAtLastError());
-                checkCudaErrors(cudaDeviceSynchronize());
-                if (verbose) {
-                    float img_sum_dur = (float)(clock() - img_sum_start)/CLOCKS_PER_SEC;
-                    printf("scratch -> buffer         (device)            %.6fs\n",img_sum_dur);
-                }
+                // // copy from scratch into buffer space
+                // clock_t img_sum_start = clock();
+                // scratch_to_buffer<<<blocks_per_grid,threads_per_block>>>(camera, d_img, d_img_buffer, (m == m_lower));
+                // checkCudaErrors(cudaPeekAtLastError());
+                // checkCudaErrors(cudaDeviceSynchronize());
+                // if (verbose) {
+                //     float img_sum_dur = (float)(clock() - img_sum_start)/CLOCKS_PER_SEC;
+                //     printf("scratch -> buffer         (device)            %.6fs\n",img_sum_dur);
+                // }
 
                 // clear d_img as prep for next render call
                 wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);

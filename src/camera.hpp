@@ -40,7 +40,7 @@ __global__ void wipe_img(Camera camera, float *img) {
     return;
 }
 
-__global__ void scratch_to_buffer(float *d_img, float *d_img_buffer, bool first_transfer) {
+__global__ void scratch_to_buffer(Camera camera, float *d_img, float *d_img_buffer, bool first_transfer) {
     // sum img data from scratch into buffer space
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
