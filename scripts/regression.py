@@ -472,9 +472,9 @@ if __name__ == "__main__":
     sim_args = {"Gamma": 2.0,
                 "L_domain": 120.0,
                 "r_blob": 2.5,
-                "domain_dims": [500,500,1000],
+                "domain_dims": [250,250,500],
                 "num_snapshots": 100,
-                "target_theta": 0.25 * np.pi + epsilon}
+                "target_theta": None}
 
     # construct template camera
     template_camera = Camera()
