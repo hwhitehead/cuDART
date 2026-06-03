@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
     int num_pixels = standard_camera.num_pixels;
     const size_t bytes_in_img = num_pixels * sizeof(float);
 
-    // initialise image space on device 
+    // allocate space for single image on device 
     clock_t d_img_alloc_start = clock();
     float *d_img = nullptr;
     checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
@@ -250,13 +250,13 @@ int main(int argc, char *argv[]) {
             printf("malloc/init image buffer  (host)              %.6fs\n",buffer_alloc_dur);
         }
 
-        // allocate scratch space for image sum on host
-        clock_t scratch_alloc_start = clock();
-        float *img_scratch = (float*) malloc(bytes_in_img);
-        if (verbose) {
-            float scratch_alloc_dur = (float)(clock() - scratch_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc buffer             (host)              %.6fs\n",scratch_alloc_dur);
-        }
+        // // allocate scratch space for ALL images on host
+        // clock_t scratch_alloc_start = clock();
+        // float *img_scratch = (float*) malloc(bytes_in_img);
+        // if (verbose) {
+        //     float scratch_alloc_dur = (float)(clock() - scratch_alloc_start)/CLOCKS_PER_SEC;
+        //     printf("malloc buffer             (host)              %.6fs\n",scratch_alloc_dur);
+        // }
 
         // load header data from load dir
         // expect single line in form:
@@ -331,13 +331,22 @@ int main(int argc, char *argv[]) {
             CUDART_ERROR(err_msg);
         }
 
-        // allocate space on device
+        // allocate data space on device
         clock_t d_data_alloc_start = clock();
         float *d_data = nullptr;
         checkCudaErrors(cudaMalloc(&d_data, d_bytes));
         if (verbose) {
             float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
             printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
+        }
+
+        // allocate image space on device (buffer, all images)
+        clock_t d_img_buffer_alloc_start = clock();
+        float *d_img_buffer = nullptr;
+        checkCudaErrors(cudaMalloc((void **)&d_img_buffer, bytes_in_img * num_images));
+        if (verbose) {
+            float d_img_buffer_alloc_dur = (float)(clock() - d_img_buffer_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc image buffer       (device)            %.6fs\n",d_img_buffer_alloc_dur);
         }
 
         // loop over snapshots
@@ -443,15 +452,14 @@ int main(int argc, char *argv[]) {
                     printf("render kernel             (device)            %.6fs\n",render_dur);
                 }
 
-                // copy image data to scratch space, and sum into main buffer
-                clock_t img_copy_start = clock();
-                checkCudaErrors(cudaMemcpy(img_scratch, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
-                for (int i = 0; i < num_pixels; i++) {
-                    img_buffer[i + img_count * num_pixels] += img_scratch[i];
-                }
+                // copy from scratch into buffer space
+                clock_t img_sum_start = clock();
+                scratch_to_buffer<<<blocks_per_grid,threads_per_block>>>(d_img, d_img_buffer, (m == m_lower));
+                checkCudaErrors(cudaPeekAtLastError());
+                checkCudaErrors(cudaDeviceSynchronize());
                 if (verbose) {
-                    float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-                    printf("memcpy/sum image          (device->host)      %.6fs\n",img_copy_dur);
+                    float img_sum_dur = (float)(clock() - img_sum_start)/CLOCKS_PER_SEC;
+                    printf("scratch -> buffer         (device)            %.6fs\n",img_sum_dur);
                 }
 
                 // clear d_img as prep for next render call
@@ -477,6 +485,14 @@ int main(int argc, char *argv[]) {
             checkCudaErrors(cudaFree(mb_list));
             num_snapshots_loaded++;
         } // end snapshot loop
+
+        // copy image data from device buffer to image buffer
+        clock_t img_copy_start = clock();
+        checkCudaErrors(cudaMemcpy(img_buffer, d_img_buffer, num_images * bytes_in_img, cudaMemcpyDeviceToHost));
+        if (verbose) {
+            float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
+            printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
+        }
 
         // image buffer populated, save render data as npy
         clock_t npy_write_start = clock();
@@ -514,9 +530,10 @@ int main(int argc, char *argv[]) {
         clock_t free_start = clock();
         checkCudaErrors(cudaFree(d_img));
         checkCudaErrors(cudaFree(d_data));
+        checkCudaErrors(cudaFree(d_img_buffer));
         free(h_all_data);
         free(img_buffer);
-        free(img_scratch);
+        //free(img_scratch);
         cudaDeviceReset();
         if (verbose) {
             float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;

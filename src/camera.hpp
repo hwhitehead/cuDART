@@ -40,6 +40,20 @@ __global__ void wipe_img(Camera camera, float *img) {
     return;
 }
 
+__global__ void scratch_to_buffer(float *d_img, float *d_img_buffer, bool first_transfer) {
+    // sum img data from scratch into buffer space
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+    if (first_transfer) {
+        d_img_buffer[pixel_index] = d_img[pixel_index]; // set value
+    } else {
+        d_img_buffer[pixel_index] += d_img[pixel_index]; // append value
+    }
+    return;
+}
+
 __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
     // load camera data into a vector from camera .txt file
 
