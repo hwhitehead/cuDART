@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
 
     // package trace info (TEMP, consider importing within lookback header)
     TraceArgs trace_args;
-    trace_args.fast_forward = true; // TODO: add flag to load at runtime
+    trace_args.fast_forward = false; // TODO: add flag to load at runtime
     trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
