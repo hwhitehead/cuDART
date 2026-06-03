@@ -237,6 +237,9 @@ int main(int argc, char *argv[]) {
         // 2. loop over snapshots, load data to host, copy to device
         // 3. loop over cameras, append to disc within loop
 
+        // lookback uses communal device buffer for images
+        trace_args.save_to_buffer = true;
+
         // allocate image space on host
         // in lookback mode, each camera gets its own image space in host (device is reused)
         clock_t buffer_alloc_start = clock();
@@ -492,7 +495,7 @@ int main(int argc, char *argv[]) {
         checkCudaErrors(cudaMemcpy(img_buffer, d_img_buffer, num_images * bytes_in_img, cudaMemcpyDeviceToHost));
         if (verbose) {
             float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-            printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
+            printf("memcpy all images         (device->host)      %.6fs\n",img_copy_dur);
         }
 
         // image buffer populated, save render data as npy
@@ -557,6 +560,9 @@ int main(int argc, char *argv[]) {
         // 1. load data to host, allocate space on device, copy to device
         // 2. build containers on device
         // 3. loop over cameras, save to disc within loop
+
+        // no-lookback uses unique image buffer
+        trace_args.save_to_buffer = false;
 
         // allocate image space on host
         clock_t img_alloc_start = clock();
