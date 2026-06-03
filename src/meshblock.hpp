@@ -227,8 +227,8 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
             float t_late = trace_args.snapshot_dt * (trace_args.snapshot_index + 1);    // latest contributing field
             float s_min = trace_args.c * (trace_args.t_obs - t_late);                   // shallowest contributing field
             float s_max = trace_args.c * (trace_args.t_obs - t_early);                  // deepest contributing field
-            s_entry = s_min;
-            s_exit = s_max;
+            s_entry = (s_entry > s_min) ? s_entry : s_min;
+            s_exit = (s_entry < s_max) ? s_entry : s_max;
         } // end fast-forward
 
         // prepare for traversal
