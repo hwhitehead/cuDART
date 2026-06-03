@@ -364,7 +364,8 @@ class Scene:
         command = [path_to_executable, "-i", self.load_str, "-s", self.save_dir,"-c",self.temp_camera_file]
         # run executable with nvprof
         if save_profile is not None: # TODO: deprecate, nvprof legacy code
-            command = ["nvprof", "--csv", "--log-file", save_profile] + command
+            #command = ["nvprof", "--csv", "--log-file", save_profile] + command
+            command = ["nsys", "nvprof"] + command
         # pass verbose flag 
         if verbose_cpp: 
             command = command + ["-v"]

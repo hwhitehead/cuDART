@@ -30,9 +30,6 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceAr
     // initialise ray
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);
     Ray pixel_ray(pixel_origin, camera.normal);
-    
-    // copy camera observer time into trace_args
-    trace_args.t_obs = camera.t_obs;
 
     // determine stash address
     int mem_position = pixel_index;

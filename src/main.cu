@@ -211,15 +211,6 @@ int main(int argc, char *argv[]) {
     int num_pixels = standard_camera.num_pixels;
     const size_t bytes_in_img = num_pixels * sizeof(float);
 
-    // allocate space for single image on device 
-    clock_t d_img_alloc_start = clock();
-    float *d_img = nullptr;
-    checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
-    if (verbose) {
-        float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur);
-    }
-
     // define render shape    
     int tx = 16, ty = 16; // must not exceed 1024 (max thread per block)
     const dim3 threads_per_block(tx,ty); 
@@ -240,28 +231,19 @@ int main(int argc, char *argv[]) {
         // lookback uses communal device buffer for images
         trace_args.save_to_buffer = true;
 
-        // allocate image space on host
-        // in lookback mode, each camera gets its own image space in host (device is reused)
+        // allocate image space on host for ALL images
         clock_t buffer_alloc_start = clock();
         size_t bytes_in_all_images = bytes_in_img * num_images;
-        float *img_buffer = (float*) malloc(bytes_in_all_images);
+        float *h_img_buffer = (float*) malloc(bytes_in_all_images);
         for (int i = 0; i < num_images * num_pixels; i++) {
-            img_buffer[i] = 0.0; // init as zero, in prep for summation over m
+            h_img_buffer[i] = 0.0; // init as zero, in prep for summation over m
         }
         if (verbose) {
             float buffer_alloc_dur = (float)(clock() - buffer_alloc_start)/CLOCKS_PER_SEC;
             printf("malloc/init image buffer  (host)              %.6fs\n",buffer_alloc_dur);
         }
 
-        // // allocate scratch space for ALL images on host
-        // clock_t scratch_alloc_start = clock();
-        // float *img_scratch = (float*) malloc(bytes_in_img);
-        // if (verbose) {
-        //     float scratch_alloc_dur = (float)(clock() - scratch_alloc_start)/CLOCKS_PER_SEC;
-        //     printf("malloc buffer             (host)              %.6fs\n",scratch_alloc_dur);
-        // }
-
-        // load header data from load dir
+        // load header data for all snapshots from load dir
         // expect single line in form:
         // num_snapshots max_snapshot_size snapshot_dt L_domain
         std::string header_str = input_str + "/header.txt";
@@ -318,9 +300,9 @@ int main(int argc, char *argv[]) {
         // allocate data on host
         clock_t h_alloc_start = clock();
         size_t h_bytes = max_snapshot_size * sizeof(float);
-        float *h_all_data = (float*) malloc(h_bytes);
+        float *h_data_buffer = (float*) malloc(h_bytes);
         if (verbose) { 
-            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            float h_alloc_dur = (float)(clock() - h_data_buffer)/CLOCKS_PER_SEC;
             printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
         }
 
@@ -336,8 +318,8 @@ int main(int argc, char *argv[]) {
 
         // allocate data space on device
         clock_t d_data_alloc_start = clock();
-        float *d_data = nullptr;
-        checkCudaErrors(cudaMalloc(&d_data, d_bytes));
+        float *d_data_buffer = nullptr;
+        checkCudaErrors(cudaMalloc(&d_data_buffer, d_bytes));
         if (verbose) {
             float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
             printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
@@ -382,16 +364,16 @@ int main(int argc, char *argv[]) {
 
             if (labelled_data) { // TODO: add suppoort for labelled lookback
                 std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
-                all_mb_info = load_labelled_meshblocks(snapshot_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+                all_mb_info = load_labelled_meshblocks(snapshot_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
             } else {
                 std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad) + ".npy";
-                all_mb_info = load_unlabelled_meshblock(snapshot_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
+                all_mb_info = load_unlabelled_meshblock(snapshot_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
             }
             num_meshblocks = all_mb_info.size();
         
             // copy all data from host into device
             clock_t data_copy_start = clock();
-            checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
+            checkCudaErrors(cudaMemcpy(d_data_buffer, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
@@ -399,7 +381,7 @@ int main(int argc, char *argv[]) {
             }
 
             // initialise MeshBlock list on device
-            build_containers(all_mb_info, d_data, mb_list, mesh, verbose);
+            build_containers(all_mb_info, d_data_buffer, mb_list, mesh, verbose);
 
             // loop over cameras 
             int img_count = 0;
@@ -455,16 +437,6 @@ int main(int argc, char *argv[]) {
                     float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
                     printf("render kernel             (device)            %.6fs\n",render_dur);
                 }
-
-                // // copy from scratch into buffer space
-                // clock_t img_sum_start = clock();
-                // scratch_to_buffer<<<blocks_per_grid,threads_per_block>>>(camera, d_img, d_img_buffer, (m == m_lower));
-                // checkCudaErrors(cudaPeekAtLastError());
-                // checkCudaErrors(cudaDeviceSynchronize());
-                // if (verbose) {
-                //     float img_sum_dur = (float)(clock() - img_sum_start)/CLOCKS_PER_SEC;
-                //     printf("scratch -> buffer         (device)            %.6fs\n",img_sum_dur);
-                // }
 
                 // clear d_img as prep for next render call
                 wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
@@ -532,12 +504,10 @@ int main(int argc, char *argv[]) {
 
         // perform cleanup of device/host data
         clock_t free_start = clock();
-        checkCudaErrors(cudaFree(d_img));
-        checkCudaErrors(cudaFree(d_data));
-        checkCudaErrors(cudaFree(d_img_buffer));
-        free(h_all_data);
-        free(img_buffer);
-        //free(img_scratch);
+        checkCudaErrors(cudaFree(d_data_buffer));   // device data buffer
+        checkCudaErrors(cudaFree(d_img_buffer));    // device image buffer
+        free(h_data_buffer);                        // host data buffer
+        free(h_img_buffer);                           // host image buffer
         cudaDeviceReset();
         if (verbose) {
             float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
@@ -563,6 +533,15 @@ int main(int argc, char *argv[]) {
 
         // no-lookback uses unique image buffer
         trace_args.save_to_buffer = false;
+
+        // allocate space for single image on device 
+        clock_t d_img_alloc_start = clock();
+        float *d_img = nullptr;
+        checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
+        if (verbose) {
+            float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur);
+        }
 
         // allocate image space on host
         clock_t img_alloc_start = clock();
