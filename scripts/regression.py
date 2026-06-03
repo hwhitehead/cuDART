@@ -346,7 +346,8 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose, flexload = flexload)
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose, flexload = flexload,
+                save_profile=os.path.join(save_dir, "profling.txt"))
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):

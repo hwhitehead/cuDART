@@ -326,8 +326,8 @@ class Scene:
                 Prints progress of pythonic execution to terminal (default False)
             verbose_cpp :  bool
                 Prints progress of cpp execution to terminal (default False)
-            save_profile : bool
-                Runs cpp executable within nvprof for runtime profiling (default False)
+            save_profile : string
+                Path to profiling log of cpp executable, if None, runs without profiling (default None)
             append : bool
                 Sums render output to existing .npy files (default False)
             check_make : bool 
