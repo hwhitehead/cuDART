@@ -433,8 +433,9 @@ int main(int argc, char *argv[]) {
                     }
                 } // end flexload
                 
-                // stash observer time for fast-forward
+                // stash camera properties
                 trace_args.t_obs = camera.t_obs;
+                trace_args.camera_index = img_count;
 
                 if (verbose) {
                     std::cout << ".............................................................\n";

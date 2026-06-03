@@ -34,8 +34,14 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceAr
     // copy camera observer time into trace_args
     trace_args.t_obs = camera.t_obs;
 
+    // determine stash address
+    int mem_position = pixel_index;
+    if (trace_args.save_to_buffer) {
+        mem_position += camera.num_pixels * trace_args.camera_index;
+    }
+
     // calculate pixel value from MeshBlock data
-    img[pixel_index] += (*mesh)->calc_trace(pixel_ray, trace_args);
+    img[mem_position] += (*mesh)->calc_trace(pixel_ray, trace_args);
     return;
 }
 
