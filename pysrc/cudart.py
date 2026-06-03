@@ -363,7 +363,7 @@ class Scene:
         # prepare command line argument to invoke .cpp executable, with proper flags  
         command = [path_to_executable, "-i", self.load_str, "-s", self.save_dir,"-c",self.temp_camera_file]
         # run executable with nvprof
-        if save_profile is not None: 
+        if save_profile is not None: # TODO: deprecate, nvprof legacy code
             command = ["nvprof", "--csv", "--log-file", save_profile] + command
         # pass verbose flag 
         if verbose_cpp: 

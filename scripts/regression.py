@@ -346,8 +346,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose, flexload = flexload,
-                save_profile=os.path.join(save_dir, "profling.txt"))
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose, flexload = flexload)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
@@ -475,6 +474,9 @@ if __name__ == "__main__":
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
                 "target_theta": None}
+
+    # relativistic simulation suite will occupy this many GB
+    suite_size_in_GB = 1e-9 * sim_args.num_snapshots * sim_args.domain_dims[0] * sim_args.domain_dims[1] * sim_args.domain_dims[2] * 4 * 4
 
     # construct template camera
     template_camera = Camera()
