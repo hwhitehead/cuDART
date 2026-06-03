@@ -365,7 +365,7 @@ class Scene:
         # run executable with nvprof
         if save_profile is not None: # TODO: deprecate, nvprof legacy code
             #command = ["nvprof", "--csv", "--log-file", save_profile] + command
-            command = ["nsys", "nvprof"] + command
+            command = ["nsys", "profile", "--stats=true"] + command
         # pass verbose flag 
         if verbose_cpp: 
             command = command + ["-v"]

@@ -302,7 +302,7 @@ int main(int argc, char *argv[]) {
         size_t h_bytes = max_snapshot_size * sizeof(float);
         float *h_data_buffer = (float*) malloc(h_bytes);
         if (verbose) { 
-            float h_alloc_dur = (float)(clock() - h_data_buffer)/CLOCKS_PER_SEC;
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
             printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
         }
 
@@ -373,7 +373,7 @@ int main(int argc, char *argv[]) {
         
             // copy all data from host into device
             clock_t data_copy_start = clock();
-            checkCudaErrors(cudaMemcpy(d_data_buffer, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
+            checkCudaErrors(cudaMemcpy(d_data_buffer, h_data_buffer, d_bytes, cudaMemcpyHostToDevice)); 
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
                 float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
@@ -464,7 +464,7 @@ int main(int argc, char *argv[]) {
 
         // copy image data from device buffer to image buffer
         clock_t img_copy_start = clock();
-        checkCudaErrors(cudaMemcpy(img_buffer, d_img_buffer, num_images * bytes_in_img, cudaMemcpyDeviceToHost));
+        checkCudaErrors(cudaMemcpy(h_img_buffer, d_img_buffer, num_images * bytes_in_img, cudaMemcpyDeviceToHost));
         if (verbose) {
             float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
             printf("memcpy all images         (device->host)      %.6fs\n",img_copy_dur);
