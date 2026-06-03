@@ -439,7 +439,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 // clear d_img as prep for next render call
-                wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img);
+                wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img_buffer);
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
                 img_count++;
@@ -488,12 +488,12 @@ int main(int argc, char *argv[]) {
                     }
                     std::vector<float> img_vec = existing_npy_data.data;
                     for (int i = 0; i < standard_camera.num_pixels; i++) {
-                        img_buffer[i + n * num_pixels] += img_vec[i]; // add existing data to img buffer
+                        h_img_buffer[i + n * num_pixels] += img_vec[i]; // add existing data to img buffer
                     }
                 }
             }
             // point npy container to img sub-buffer
-            npy_img.data_ptr = img_buffer + n * num_pixels;
+            npy_img.data_ptr = h_img_buffer + n * num_pixels;
             npy::write_npy(save_str, npy_img);
         }
 
