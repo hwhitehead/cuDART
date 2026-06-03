@@ -475,9 +475,6 @@ if __name__ == "__main__":
                 "num_snapshots": 100,
                 "target_theta": None}
 
-    # relativistic simulation suite will occupy this many GB
-    suite_size_in_GB = 1e-9 * sim_args.num_snapshots * sim_args.domain_dims[0] * sim_args.domain_dims[1] * sim_args.domain_dims[2] * 4 * 4
-
     # construct template camera
     template_camera = Camera()
     template_camera.tilt = (45.0 / 180) * np.pi     # default 45deg tilt from bias aligned with z axis 
