@@ -470,7 +470,7 @@ if __name__ == "__main__":
     # dict for simulation args (all lengths in kpc)
     sim_args = {"Gamma": 2.0,
                 "L_domain": 120.0,
-                "r_blob": 10.0,
+                "r_blob": 2.5,
                 "domain_dims": [100,100,200],
                 "num_snapshots": 100,
                 "target_theta": None}
