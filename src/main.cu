@@ -11,6 +11,8 @@
 #include <vector>
 #include <map>
 #include <filesystem>
+#include <chrono>
+#include <ctime>
 
 // custom external library imports
 #include "npy.hpp"
@@ -27,6 +29,11 @@ int main(int argc, char *argv[]) {
 
     // start general timer
     clock_t main_start = clock();
+
+    // print start time
+    auto start_time_clock = std::chrono::system_clock::now();
+    std::time_t start_time = std::chrono::system_clock::to_time_t(start_time_clock);
+    std::cout << "Starting cuDART backend at " << std::ctime(&start_time) << std::endl;
 
     // define space for user settings
     std::string cudart_version = "version 0.9 - April 2026";
@@ -698,6 +705,11 @@ int main(int argc, char *argv[]) {
         std::cout << "=============================================================\n";
         printf("cuDART terminated.\n");
     }
+
+    // print start time
+    auto end_time_clock = std::chrono::system_clock::now();
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end_time_clock);
+    std::cout << "Ending cuDART backend at " << std::ctime(&end_time) << std::endl;
 
     return 0;
 }
