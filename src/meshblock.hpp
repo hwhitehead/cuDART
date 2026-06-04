@@ -227,11 +227,11 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
             float t_max = trace_args.snapshot_dt * (trace_args.snapshot_index + 1); // latest contributing field
             float s_min = trace_args.c * (trace_args.t_obs - t_max);                // shallowest contributing field
             float s_max = trace_args.c * (trace_args.t_obs - t_min);                // deepest contributing field
-            // if (s_max < s_entry) { // meshblock intersection too deep 
-            //     return 0.0; 
-            // } else if (s_min > s_entry) { // meshblock interseciton too shallow
-            //     return 0.0;
-            // }
+            if (s_max < s_entry) { // meshblock intersection too deep for observer time
+                return 0.0; 
+            } else if (s_min > s_exit) { // meshblock interseciton too shallow for observer time
+                return 0.0;
+            }
             s_entry = (s_min > s_entry) ? s_min : s_entry;
             s_exit = (s_max < s_exit) ? s_max : s_exit;
         } // end fast-forward
