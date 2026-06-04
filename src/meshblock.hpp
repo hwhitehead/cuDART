@@ -223,15 +223,15 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
         
         // use fast-forward, if flagged
         if (trace_args.fast_forward) {
-            float t_early = trace_args.snapshot_dt * (trace_args.snapshot_index - 1);   // earliest contributing field
-            float t_late = trace_args.snapshot_dt * (trace_args.snapshot_index + 1);    // latest contributing field
-            float s_min = trace_args.c * (trace_args.t_obs - t_late);                   // shallowest contributing field
-            float s_max = trace_args.c * (trace_args.t_obs - t_early);                  // deepest contributing field
-            if (s_max < s_entry) {  
-                return 0.0; 
-            } else if (s_min > s_entry) {
-                return 0.0;
-            }
+            float t_min = trace_args.snapshot_dt * (trace_args.snapshot_index - 1); // earliest contributing field
+            float t_max = trace_args.snapshot_dt * (trace_args.snapshot_index + 1); // latest contributing field
+            float s_min = trace_args.c * (trace_args.t_obs - t_max);                // shallowest contributing field
+            float s_max = trace_args.c * (trace_args.t_obs - t_min);                // deepest contributing field
+            // if (s_max < s_entry) { // meshblock intersection too deep 
+            //     return 0.0; 
+            // } else if (s_min > s_entry) { // meshblock interseciton too shallow
+            //     return 0.0;
+            // }
             s_entry = (s_min > s_entry) ? s_min : s_entry;
             s_exit = (s_max < s_exit) ? s_max : s_exit;
         } // end fast-forward
