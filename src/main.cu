@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
                     return 0; 
             } // end cases
         } // end 2 char check
-    }
+    } // end cl parse
 
     // handle fatal errors in input
     if (input_char == nullptr || save_char == nullptr) {
@@ -143,31 +143,22 @@ int main(int argc, char *argv[]) {
         doppler_index = 2.0 - power_law_index;
     }
     
-    // determine run mode (lookback)
+    // check input existance, and compatibility with lookback flag
     const std::string input_str(input_char);
     const std::filesystem::path input_path(input_char);
+    if (!std::filesystem::exists(input_path)) {
+        std::stringstream err_msg;
+        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "Unable to locate input path " << input_str << std::endl;
+        CUDART_ERROR(err_msg);
+    }
+
     if (lookback && !std::filesystem::is_directory(input_path)) {
         std::stringstream err_msg;
         err_msg << "### FATAL ERROR in main\n";
         err_msg << "Lookback mode requires directory of data to function\n";
         CUDART_ERROR(err_msg);
     }
-
-    // determine input mode (labelled/unlabelled)
-    bool labelled_data = false;   
-    if (!lookback) {
-        if (std::filesystem::is_directory(input_path)) {
-            labelled_data = true;
-        } else {
-            std::string npy_suffix = ".npy";
-            if (input_path.extension() != npy_suffix) {
-                std::stringstream err_msg;
-                err_msg << "### FATAL ERROR in main\n";
-                err_msg << "Input path must be .npy file (unlabelled data) or directory (labelled data)\n";
-                CUDART_ERROR(err_msg);
-            }
-        } // end if input not dir
-    } // end if !lookback
 
     // package trace info (TEMP, consider importing within lookback header)
     TraceArgs trace_args;
@@ -369,13 +360,22 @@ int main(int argc, char *argv[]) {
             Mesh **mesh;
             int num_meshblocks = 0;
 
-            if (labelled_data) { // TODO: add suppoort for labelled lookback
-                std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
+            // load snapshot, auto detect label state
+            const std::string snapshot_dir_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
+            const std::filesystem::path snapshot_dir_path(snapshot_dir_str);
+            if (std::filesystem::is_directory(snapshot_dir_path)) { // located sub directory, load as labelled data
                 all_mb_info = load_labelled_meshblocks(snapshot_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
             } else {
-                std::string snapshot_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad) + ".npy";
-                all_mb_info = load_unlabelled_meshblock(snapshot_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
-            }
+                const std::string snapshot_npy_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad) + ".npy";
+                if (std::filesystem::exists(snapshot_npy_str)) {
+                    all_mb_info = load_unlabelled_meshblock(snapshot_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
+                } else {
+                    std::stringstream err_msg;
+                    err_msg << "### FATAL ERROR in main ###\n";
+                    err_msg << "Unable to locate snapshot " << m << " in " << input_str << std::endl;
+                    CUDART_ERROR(err_msg);
+                }
+            } // end mb load
             num_meshblocks = all_mb_info.size();
         
             // copy all data from host into device
@@ -558,12 +558,12 @@ int main(int argc, char *argv[]) {
             printf("malloc image              (host)              %.6fs\n",img_alloc_dur);
         }
 
-        // import npy data to host
+        // import npy data to host, auto detect labelled state
         std::vector<MeshBlockInfo> all_mb_info;
         float *h_all_data = nullptr;
         size_t h_bytes = 0;
         bool host_malloc = true;
-        if (labelled_data) {
+        if (std::filesystem::is_directory(input_path)) {
             all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
         } else {
             all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
