@@ -53,7 +53,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
         err_msg << "Unable to locate input file at " << input_str << std::endl;
         CUDART_ERROR(err_msg);
     }
-    std::vector<unsigned long> data_shape = npy::npy_to_host(input_str, h_all_data, h_bytes, verbose, host_malloc);
+    std::vector<unsigned long> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, host_malloc);
     vec3 mb_dims((float)data_shape[0], (float)data_shape[1], (float)data_shape[2]);
     int mb_size = data_shape[0] * data_shape[1] * data_shape[2];
     int data_size = mb_size;
