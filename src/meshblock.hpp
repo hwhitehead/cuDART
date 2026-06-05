@@ -6,6 +6,7 @@
 #include "vec3.hpp"
 #include "ray.hpp"
 #include "tools.hpp"
+#include "npy.hpp"
 
 struct MeshBlockInfo {
     int mb_size, mem_start, mb_index;
@@ -78,7 +79,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     // }
     
     //assume equal spacing in x, y, z and centering at origin
-    float longest_side = static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
+    float longest_side = static_cast<float>(*std::max_element(data_shape.begin(), data_shape.end()));
     vec3 mb_extent = mb_dims / longest_side;
     vec3 xl = -0.5 * mb_extent;
     vec3 xr = 0.5 * mb_extent;

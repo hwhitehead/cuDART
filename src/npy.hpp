@@ -527,7 +527,7 @@ inline std::vector<unsigned long> npy_to_host(const std::string &file_str, float
     if (host_malloc) {
         h_bytes = data_size * sizeof(float);
         clock_t h_alloc_start = clock();
-        h_all_data = (float*) malloc(h_bytes);
+        host_addr = (float*) malloc(h_bytes);
         if (verbose) { 
             float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
             printf("malloc data               (host)              %.6fs\n",h_alloc_dur);

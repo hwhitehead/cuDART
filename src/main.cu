@@ -369,11 +369,11 @@ int main(int argc, char *argv[]) {
             const std::string snapshot_dir_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
             const std::filesystem::path snapshot_dir_path(snapshot_dir_str);
             if (std::filesystem::is_directory(snapshot_dir_path)) { // located sub directory, load as labelled data
-                all_mb_info = load_labelled_meshblocks(snapshot_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
+                all_mb_info = load_labelled_meshblocks(snapshot_dir_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
             } else {
                 const std::string snapshot_npy_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad) + ".npy";
                 if (std::filesystem::exists(snapshot_npy_str)) {
-                    all_mb_info = load_unlabelled_meshblock(snapshot_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
+                    all_mb_info = load_unlabelled_meshblock(snapshot_npy_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
                 } else {
                     std::stringstream err_msg;
                     err_msg << "### FATAL ERROR in main ###\n";
