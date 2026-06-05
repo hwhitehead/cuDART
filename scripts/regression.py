@@ -6,6 +6,7 @@ This file contains a collection of functions to build mock data sets, and render
 import sys, os
 import numpy as np
 import argparse, re
+import time
 
 # local import
 pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
@@ -467,7 +468,25 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     if (verbose): print("finished penrose-terrell test, see {0} for output".format(png_str))
 
+def demo_load_times():
+
+    load_dir = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/flexload/hr_data"
+
+    durations = []
+    for n in range(0,100,10):
+        start_time = time.time()
+        data = np.load(os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".png"))
+        duration = time.time() - start_time
+        durations.append(duration)
+
+    durations = np.array(durations)
+    av_duration = np.average(durations)
+    print(durations)
+    print(av_duration)
+
 if __name__ == "__main__":
+
+    demo_load_times()
 
     # dict for simulation args (all lengths in kpc)
     sim_args = {"Gamma": 2.0,
