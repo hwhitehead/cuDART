@@ -503,6 +503,44 @@ inline npy_data<Scalar> read_npy(std::istream &in) {
   return data;
 }
 
+inline std::vector<unsigned long> npy_to_host(const std::string &file_str, float* &host_addr, size_t &h_bytes, bool verbose, bool host_malloc) {
+    // cast to stream
+    std::ifstream file_stream(file_str, std::ifstream::binary);
+    if (!file_stream) {
+        throw std::runtime_error("io error: failed to open a file.");
+    }
+
+    // load header data
+    std::string header_str = read_header(file_stream);
+    header_t header = parse_header(header_str);
+
+    // check if the typestring matches float32
+    const dtype_t dtype = dtype_map.at(std::type_index(typeid(float)));
+    if (header.dtype.tie() != dtype.tie()) {
+        throw std::runtime_error("formatting error: input data must be float32 dtype");
+    }
+
+    // compute data size based on shape
+    auto data_size = static_cast<size_t>(comp_size(header.shape));
+
+    // if flagged, allocate data
+    if (host_malloc) {
+        h_bytes = data_size * sizeof(float);
+        clock_t h_alloc_start = clock();
+        h_all_data = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        } // end verbose
+    } // end host_malloc
+
+    // read data into host_addr
+    file_stream.read(reinterpret_cast<char *>(host_addr), sizeof(float) * data_size);
+
+    // return shape
+    return header.shape;
+}
+
 template <typename Scalar>
 inline npy_data<Scalar> read_npy(const std::string &filename) {
   std::ifstream stream(filename, std::ifstream::binary);

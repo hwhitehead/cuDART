@@ -162,11 +162,12 @@ int main(int argc, char *argv[]) {
 
     // package trace info (TEMP, consider importing within lookback header)
     TraceArgs trace_args;
-    trace_args.fast_forward = true; // TODO: add flag to load at runtime
+    
     trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
-    // the following are dummy values, overwritten in lookback routine
+    // the following are dummy values, overwritten in lookback/no-lookback routines
+    trace_args.fast_forward = false;
     trace_args.t_obs = 0.0;
     trace_args.snapshot_dt = 1.0; 
     trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
@@ -224,10 +225,14 @@ int main(int argc, char *argv[]) {
         // run with lookback
         // 1. allocate space on device for data
         // 2. loop over snapshots, load data to host, copy to device
-        // 3. loop over cameras, append to disc within loop
+        // 3. loop over cameras, save images to buffer on device
+        // 4. return image buffer to host
 
         // lookback uses communal device buffer for images
         trace_args.save_to_buffer = true;
+
+        // lookback uses fast-forward for meshblock traversal
+        trace_args.fast_forward = true;
 
         // allocate image space on host for ALL images
         clock_t buffer_alloc_start = clock();

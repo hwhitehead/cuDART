@@ -52,18 +52,30 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
         err_msg << "Unable to locate input file at " << input_str << std::endl;
         CUDART_ERROR(err_msg);
     }
-    npy::npy_data npy_data = npy::read_npy<float>(input_str);
-    std::vector<float> npy_vector = npy_data.data; 
-    std::vector<unsigned long> npy_shape = npy_data.shape;
-    vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
-    int mb_size = npy_shape[0] * npy_shape[1] * npy_shape[2];
+    std::vector<unsigned long> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, host_malloc);
+    vec3 mb_dims((float)data_shape[0], (float)data_shape[1], (float)data_shape[2]);
+    int mb_size = data_shape[0] * data_shape[1] * data_shape[2];
     int data_size = mb_size;
-    bool beta_in_data = (npy_shape.size() > 3); // does data vector contain beta info?
-    if (beta_in_data) data_size *= npy_shape[3];
+    bool beta_in_data = (data_shape.size() > 3);
+    if (beta_in_data) data_size *= data_shape[3];
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("npy read                  (host)              %.6fs\n",npy_read_dur);
     }
+
+
+    // npy::npy_data npy_data = npy::read_npy<float>(input_str);
+    // std::vector<float> npy_vector = npy_data.data; 
+    // std::vector<unsigned long> npy_shape = npy_data.shape;
+    // vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
+    // int mb_size = npy_shape[0] * npy_shape[1] * npy_shape[2];
+    // int data_size = mb_size;
+    // bool beta_in_data = (npy_shape.size() > 3); // does data vector contain beta info?
+    // if (beta_in_data) data_size *= npy_shape[3];
+    // if (verbose) {
+    //     float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
+    //     printf("npy read                  (host)              %.6fs\n",npy_read_dur);
+    // }
     
     //assume equal spacing in x, y, z and centering at origin
     float longest_side = static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
@@ -86,23 +98,23 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     all_mb_info.push_back(mb_info);
 
     // allocate space on host
-    if (host_malloc) {
-        h_bytes = data_size * sizeof(float);
-        clock_t h_alloc_start = clock();
-        h_all_data = (float*) malloc(h_bytes);
-        if (verbose) { 
-            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
-        } // end verbose
-    } // end host_malloc
+    // if (host_malloc) {
+    //     h_bytes = data_size * sizeof(float);
+    //     clock_t h_alloc_start = clock();
+    //     h_all_data = (float*) malloc(h_bytes);
+    //     if (verbose) { 
+    //         float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+    //         printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+    //     } // end verbose
+    // } // end host_malloc
     
     // load mb data into host memory
-    clock_t memcpy_start = clock();
-    std::memcpy(h_all_data, npy_vector.data(), data_size * sizeof(float));
-    if (verbose) { 
-        float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
-        printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
-    }
+    // clock_t memcpy_start = clock();
+    // std::memcpy(h_all_data, npy_vector.data(), data_size * sizeof(float));
+    // if (verbose) { 
+    //     float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
+    //     printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
+    // }
 
     return all_mb_info;
 }
