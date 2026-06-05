@@ -486,7 +486,7 @@ def demo_load_times():
 
 if __name__ == "__main__":
 
-    demo_load_times()
+    # demo_load_times()
 
     # dict for simulation args (all lengths in kpc)
     sim_args = {"Gamma": 2.0,
