@@ -90,25 +90,25 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     return 0; // snapshot is not adjacent, no contribution
 }
 
-__host__ void host_to_npy(const std::string &filename, float* host_addr, std::vector<unsigned long> data_shape) {
+__host__ void host_to_npy(const std::string &filename, float* host_addr, std::vector<unsigned long int> data_shape) {
 
     std::ofstream file_stream(filename, std::ofstream::binary);
     if (!file_stream) {
         throw std::runtime_error("I/O error, unable to save file at " + filename);
     }
 
-    const dtype_t dtype = npy::dtype_map.at(std::type_index(typeid(float)));
+    const npy::dtype_t dtype = npy::dtype_map.at(std::type_index(typeid(float)));
 
     npy::header_t header{dtype, false, data_shape}; // always save with C-order indexing
     npy::write_header(file_stream, header);
 
     auto data_size = static_cast<size_t>(npy::comp_size(data_shape));
 
-    file_stream.write(reinterpret_cast<const char *>(host_addr), sizeof(float) * size);
+    file_stream.write(reinterpret_cast<const char *>(host_addr), sizeof(float) * data_size);
     return;
 }
 
-__host___ std::vector<unsigned long> npy_to_host(const std::string &file_str, float* &host_addr, size_t &h_bytes, bool verbose, bool host_malloc) {
+__host___ std::vector<unsigned long int> npy_to_host(const std::string &file_str, float* &host_addr, size_t &h_bytes, bool verbose, bool host_malloc) {
     // cast to stream
     std::ifstream file_stream(file_str, std::ifstream::binary);
     if (!file_stream) {
