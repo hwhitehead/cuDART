@@ -27,6 +27,9 @@
 
 int main(int argc, char *argv[]) {
 
+    // allow async with cin and stdio
+    std::ios_base::sync_with_stdio(false);
+
     // start general timer
     clock_t main_start = clock();
 
