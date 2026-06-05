@@ -108,7 +108,7 @@ __host__ void host_to_npy(const std::string &filename, float* host_addr, std::ve
     return;
 }
 
-__host___ std::vector<unsigned long int> npy_to_host(const std::string &file_str, float* &host_addr, size_t &h_bytes, bool verbose, bool host_malloc) {
+__host__ std::vector<unsigned long int> npy_to_host(const std::string &file_str, float* &host_addr, size_t &h_bytes, bool verbose, bool host_malloc) {
     // cast to stream
     std::ifstream file_stream(file_str, std::ifstream::binary);
     if (!file_stream) {
