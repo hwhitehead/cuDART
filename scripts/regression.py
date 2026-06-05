@@ -475,7 +475,7 @@ def demo_load_times():
     durations = []
     for n in range(0,100,10):
         start_time = time.time()
-        data = np.load(os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".png"))
+        data = np.load(os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy"))
         duration = time.time() - start_time
         durations.append(duration)
 
