@@ -120,7 +120,7 @@ __host__ std::vector<unsigned long int> npy_to_host(const std::string &file_str,
     npy::header_t header = npy::parse_header(header_str);
 
     // check if the typestring matches float32
-    const dtype_t dtype = npy::dtype_map.at(std::type_index(typeid(float)));
+    const npy::dtype_t dtype = npy::dtype_map.at(std::type_index(typeid(float)));
     if (header.dtype.tie() != dtype.tie()) {
         throw std::runtime_error("formatting error: input data must be float32 dtype");
     }
