@@ -7,6 +7,7 @@ import sys, os
 import numpy as np
 import argparse, re
 import time
+import matplotlib.patches as patches
 
 # local import
 pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
