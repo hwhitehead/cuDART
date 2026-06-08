@@ -550,11 +550,11 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 
     # plot ejecta bounding box
     L_box = r_blob_in_code
-    app_box = patches.Rectangle((X_app - L_box * app_ratio. Y_app - L_box), 
+    app_box = patches.Rectangle((X_app - L_box * app_ratio, Y_app - L_box), 
                                 width = 2 * L_box * app_ratio, height_ratio = 2 * L_box,
                                 angle = tilt, rotation_point="center",
                                 edgecolor = "w", fill = False)
-    rec_box = patches.Rectangle((X_rec - L_box * rec_ratio. Y_rec - L_box), 
+    rec_box = patches.Rectangle((X_rec - L_box * rec_ratio, Y_rec - L_box), 
                                 width = 2 * L_box * rec_ratio, height_ratio = 2 * L_box,
                                 angle = -tilt, rotation_point="center",
                                 edgecolor = "w", fill = False)
