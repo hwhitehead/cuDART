@@ -13,7 +13,6 @@
 #include <filesystem>
 #include <chrono>
 #include <ctime>
-#include <print>
 
 // custom external library imports
 #include "npy.hpp"
@@ -38,7 +37,7 @@ int main(int argc, char *argv[]) {
     // print start time
     auto start_time_clock = std::chrono::system_clock::now();
     std::time_t start_time = std::chrono::system_clock::to_time_t(start_time_clock);
-    std::print("Starting cuDART backend at {}\n", std::ctime(&start_time));
+    std::cout << "Starting cuDART backend at " << std::ctime(&start_time) << std::endl;
 
     // define space for user settings
     std::string cudart_version = "version 0.9 - April 2026";
@@ -109,21 +108,22 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'h':
                 default:
-                    std::print("cuDART v{}\n", cudart_version);
-                    std::print("Usage: {} [options]\n", argv[0]);
-                    std::print(" -i <file>    path to input (directory or .npy)\n");
-                    std::print(" -s <file>    path to output (directory)\n");
-                    std::print(" -c <file>    path to camera data file\n");
-                    std::print(" -p <value>   power-law for rest-frame emission (default -0.6)\n");
-                    std::print(" -d <value>   Doppler index for boosting (deprecated for power-law)\n");
-                    std::print(" -m <value>   max VRAM in GB\n");
-                    std::print(" -r           run with relativistic boosting\n");
-                    std::print(" -l           run with lookback routine\n");
-                    std::print(" -f           run with flexload\n");
-                    std::print(" -a           sum raw output to existing files\n");
-                    std::print(" -v           run with verbose logging\n");
-                    std::print(" -h           print this help message\n");
-                    return 0;
+                    std::cout << "cuDART " << cudart_version << std::endl;
+                    std::cout << "Usage: " << argv[0] << " [options]\n";
+                    std::cout << "Options:\n";
+                    std::cout << " -i <file>    specify input target (directory or .npy)\n";
+                    std::cout << " -s <file>    specify save target (directory)\n";
+                    std::cout << " -c <file>    specify camera data file\n";
+                    std::cout << " -p <value>   power-law for rest-frame emission (default -0.6)\n";
+                    std::cout << " -d <value>   Doppler index for boosting (deprecated for power-law)\n";
+                    std::cout << " -m <value>   max VRAM in GB\n";
+                    std::cout << " -l           lookback routine flag\n";
+                    std::cout << " -f           flexible load flag\n";
+                    std::cout << " -a           summation append flag\n";
+                    std::cout << " -r           relativisitic boosting flag\n";
+                    std::cout << " -v           verbosity flag\n";
+                    std::cout << " -h           this help message\n"; 
+                    return 0; 
             } // end cases
         } // end 2 char check
     } // end cl parse
@@ -717,7 +717,7 @@ int main(int argc, char *argv[]) {
     // print start time
     auto end_time_clock = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end_time_clock);
-    std::print("Ending cuDART backend at {0}.\n", std::ctime(&end_time));
+    std::cout << "Ending cuDART backend at " << std::ctime(&end_time) << std::endl;
 
     return 0;
 }
