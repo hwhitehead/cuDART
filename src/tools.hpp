@@ -14,6 +14,8 @@ __host__ void check_cuda(cudaError_t result, char const *const func, const char 
     }
 }
 
+size_t num_zero_pad = 5;
+
 struct TraceArgs {
     // relativistic settings
     bool relativistic; 

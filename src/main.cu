@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
 
     // allow async with cin and stdio
     std::ios_base::sync_with_stdio(false);
+    std::cin.tie(0);
 
     // start general timer
     clock_t main_start = clock();
@@ -192,7 +193,6 @@ int main(int argc, char *argv[]) {
     // load camera data and store in vector
     std::vector<Camera> cameras = load_cameras(camera_char, verbose);
     int num_images = cameras.size();
-    size_t num_zero_pad = 5;
 
     // grab extremal camera properties for flexload (only important for lookback)
     float camera_r_min = std::numeric_limits<float>::max();

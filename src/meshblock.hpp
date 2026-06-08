@@ -54,30 +54,21 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
         CUDART_ERROR(err_msg);
     }
     std::vector<unsigned long int> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, host_malloc);
-    vec3 mb_dims((float)data_shape[0], (float)data_shape[1], (float)data_shape[2]);
-    int mb_size = data_shape[0] * data_shape[1] * data_shape[2];
-    int data_size = mb_size;
-    bool beta_in_data = (data_shape.size() > 3);
-    if (beta_in_data) data_size *= data_shape[3];
+    vec3 mb_dims((float)data_shape[0], (float)data_shape[1], (float)data_shape[2]); // extract first three indices for spatial dims
+    int mb_size = data_shape[0] * data_shape[1] * data_shape[2]; // number of spatial cells (<= all cells)
+    bool beta_in_data = (data_shape.size() > 3); // if fourth axis, contains velocity data
+    // check dimensions
+    if ((data_shape.size() == 3) && (relativistic)) {
+        std::stringstream err_msg;
+        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "Relativistic flagged, but did not find velocity data in " << npy_str << std::endl;
+        CUDART_ERROR(err_msg);
+    }  
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("npy read                  (host)              %.6fs\n",npy_read_dur);
     }
 
-
-    // npy::npy_data npy_data = npy::read_npy<float>(input_str);
-    // std::vector<float> npy_vector = npy_data.data; 
-    // std::vector<unsigned long> npy_shape = npy_data.shape;
-    // vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
-    // int mb_size = npy_shape[0] * npy_shape[1] * npy_shape[2];
-    // int data_size = mb_size;
-    // bool beta_in_data = (npy_shape.size() > 3); // does data vector contain beta info?
-    // if (beta_in_data) data_size *= npy_shape[3];
-    // if (verbose) {
-    //     float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-    //     printf("npy read                  (host)              %.6fs\n",npy_read_dur);
-    // }
-    
     //assume equal spacing in x, y, z and centering at origin
     float longest_side = static_cast<float>(*std::max_element(data_shape.begin(), data_shape.end()));
     vec3 mb_extent = mb_dims / longest_side;
@@ -97,25 +88,6 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     mb_info.mb_origin = 0.5 * (mb_info.xl + mb_info.xr);
     mb_info.mb_radius = (mb_info.xl - mb_info.mb_origin).vector_mag();
     all_mb_info.push_back(mb_info);
-
-    // allocate space on host
-    // if (host_malloc) {
-    //     h_bytes = data_size * sizeof(float);
-    //     clock_t h_alloc_start = clock();
-    //     h_all_data = (float*) malloc(h_bytes);
-    //     if (verbose) { 
-    //         float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-    //         printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
-    //     } // end verbose
-    // } // end host_malloc
-    
-    // load mb data into host memory
-    // clock_t memcpy_start = clock();
-    // std::memcpy(h_all_data, npy_vector.data(), data_size * sizeof(float));
-    // if (verbose) { 
-    //     float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
-    //     printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
-    // }
 
     return all_mb_info;
 }
@@ -181,7 +153,6 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     // load mb data into host memory
     clock_t npy_read_start = clock();
     int mem_offset = 0;
-    size_t num_zero_pad = 5;
     for (int n = 0; n < all_mb_info.size(); n++) {
         // load meshblock data as (nx,ny,nz,p) where p = 1 or 4
         std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy";
@@ -192,25 +163,21 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             err_msg << "Unable to locate input file at " << input_str << std::endl;
             CUDART_ERROR(err_msg);
         }
-        npy::npy_data npy_data = npy::read_npy<float>(npy_str);
-        std::vector<float> npy_vector = npy_data.data; // populated
-        std::vector<unsigned long> npy_shape = npy_data.shape;
-        bool beta_in_data = (npy_shape.size() > 3);
+        std::vector<unsigned long int> data_shape = npy_to_host(innpy_str, h_all_data, h_bytes, verbose, host_malloc);
+        bool beta_in_data = (data_shape.size() > 3);
         all_mb_info[n].beta_in_data = beta_in_data;
         all_mb_info[n].mem_start = mem_offset;
         all_mb_info[n].mb_index = n;
         
         // check dimensions
-        if ((npy_shape.size() == 3) && (relativistic)) {
+        if ((data_shape.size() == 3) && (relativistic)) {
             std::stringstream err_msg;
             err_msg << "### FATAL ERROR in main\n";
-            err_msg << "missing velocity data in " << npy_str << std::endl;
+            err_msg << "Relativistic flagged, but did not find velocity data in " << npy_str << std::endl;
+            CUDART_ERROR(err_msg);
         }        
-        int floats_in_mb  = npy_vector.size();
-        size_t bytes_in_mb = floats_in_mb * sizeof(float);
-    
-        // copy emissivity data into host memory buffer
-        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_mb);        
+        int floats_in_mb  = data_shape.size();
+        size_t bytes_in_mb = floats_in_mb * sizeof(float);     
         mem_offset += floats_in_mb;
     } // end mb loop
 
