@@ -503,7 +503,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     t_obs = t_obs_in_s / Myr_to_s
     fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][-1]
     
-    print(snapshot_index)
+    print(fid_snapshot_index)
 
     # identify ejecta positions
     t_obs = t_obs_ar[fid_snapshot_index]
