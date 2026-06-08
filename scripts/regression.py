@@ -559,7 +559,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
                                 angle = -tilt, rotation_point="center",
                                 edgecolor = "w", fill = False)
     ax.add_patch(app_box)
-    ax.add_pach(rec_box)
+    ax.add_patch(rec_box)
 
     png_str = os.path.join(save_dir, "summary.png")
     plt.subplots_adjust(hspace = 0, wspace= 0)
