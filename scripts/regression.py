@@ -553,7 +553,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     tilt_in_deg = tilt * 180 / np.pi
     app_box = patches.Rectangle((X_app - L_box * app_ratio, Y_app - L_box), 
                                 width = 2 * L_box * app_ratio, height = 2 * L_box,
-                                angle = tilt_in_deg, rotation_point="center",
+                                angle = -tilt_in_deg, rotation_point="center",
                                 edgecolor = "w", fill = False)
     rec_box = patches.Rectangle((X_rec - L_box * rec_ratio, Y_rec - L_box), 
                                 width = 2 * L_box * rec_ratio, height = 2 * L_box,
@@ -561,6 +561,12 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
                                 edgecolor = "w", fill = False)
     ax.add_patch(app_box)
     ax.add_patch(rec_box)
+
+    domain = patches.Rectangle(xy = (0.5,0.5),
+                                width = np.sin(theta), height = np.sin(theta),
+                                angle = -tilt_in_deg, rotation_point = "center",
+                                edgecolor = "w", fill = False)
+    ax.add_patch(domain)
 
     png_str = os.path.join(save_dir, "summary.png")
     plt.subplots_adjust(hspace = 0, wspace= 0)
