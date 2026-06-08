@@ -61,7 +61,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     if ((data_shape.size() == 3) && (relativistic)) {
         std::stringstream err_msg;
         err_msg << "### FATAL ERROR in main\n";
-        err_msg << "Relativistic flagged, but did not find velocity data in " << npy_str << std::endl;
+        err_msg << "Relativistic flagged, but did not find velocity data in " << input_str << std::endl;
         CUDART_ERROR(err_msg);
     }  
     if (verbose) {
@@ -163,7 +163,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             err_msg << "Unable to locate input file at " << input_str << std::endl;
             CUDART_ERROR(err_msg);
         }
-        std::vector<unsigned long int> data_shape = npy_to_host(innpy_str, h_all_data, h_bytes, verbose, host_malloc);
+        std::vector<unsigned long int> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, host_malloc);
         bool beta_in_data = (data_shape.size() > 3);
         all_mb_info[n].beta_in_data = beta_in_data;
         all_mb_info[n].mem_start = mem_offset;
