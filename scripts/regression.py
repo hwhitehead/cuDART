@@ -540,25 +540,19 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 
     r_app_sqr = (XX - X_app) ** 2 + (YY - Y_app) ** 2
     r_rec_sqr = (XX - X_rec) ** 2 + (YY - Y_rec) ** 2
-    in_app = (r_app_sqr < (app_ratio * r_blob_in_code) ** 2)
-    in_rec = (r_rec_sqr < r_blob_in_code ** 2)
+    r_app_sqr /= (app_ratio * r_blob_in_code) ** 2
+    r_rec_sqr /= r_blob_in_code ** 2
+    in_app = (r_app_sqr < 1)
+    in_rec = (r_rec_sqr < 1)
     dA = (X[1] - X[0]) * (Y[1] - Y[0])
     lum_app = np.sum(img[in_app]) * dA
     lum_rec = np.sum(img[in_rec]) * dA
-    lum_app_ratio = lum_app / L_blob_rest
-    lum_rec_ratio = lum_rec / L_blob_rest
-    print(lum_app_ratio) 
-    print(lum_rec_ratio)
-
     print(lum_app / lum_rec)
 
     D_app = 1.0 / (sim_args["Gamma"] * (1 - v_in_c * np.cos(theta)))
     D_rec = 1.0 / (sim_args["Gamma"] * (1 + v_in_c * np.cos(theta)))
     lum_app_ratio_true = np.power(D_app, 3.0 - 0.6)
     lum_rec_ratio_true = np.power(D_rec, 3.0 - 0.6)
-    print(lum_app_ratio_true)
-    print(lum_rec_ratio_true)
-
     print(lum_app_ratio_true / lum_rec_ratio_true)
 
     pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
