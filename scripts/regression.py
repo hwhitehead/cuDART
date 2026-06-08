@@ -500,9 +500,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
     t_obs_in_s = d_mid_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
-    print(t_obs_ar)
-    print(t_obs)
-    fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][0]
+    fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][-1]
     
     # calculate rest luminosity
     blob_emmisivity = 1.0
@@ -526,6 +524,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
     ax.set_facecolor("k")
+    ax.set_aspect("equal")
 
     png_str = os.path.join(save_dir, "summary.png")
     plt.subplots_adjust(hspace = 0, wspace= 0)
