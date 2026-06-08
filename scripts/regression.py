@@ -601,6 +601,7 @@ if __name__ == "__main__":
                         default=None,
                         help="path to input datasets")
     parser.add_argument("-s",
+                        action="store_true",
                         default=False,
                         help="generate physics summary")
 
