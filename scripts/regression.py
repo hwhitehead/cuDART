@@ -512,10 +512,10 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
 
     tilt = camera_args["template"].tilt
-    X_app = 0.5 - x_app * np.sin(tilt)
-    Y_app = 0.5 + x_app * np.cos(tilt)
-    X_rec = 0.5 + x_rec * np.sin(tilt)
-    Y_rec = 0.5 - x_rec * np.cos(tilt)
+    X_app = 0.5 + x_app * np.sin(tilt)
+    Y_app = 0.5 - x_app * np.cos(tilt)
+    X_rec = 0.5 - x_rec * np.sin(tilt)
+    Y_rec = 0.5 + x_rec * np.cos(tilt)
 
     # calculate deformation factor
     app_ratio = np.sqrt(1 - 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 - v_in_c * np.cos(theta))
@@ -550,13 +550,14 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 
     # plot ejecta bounding box
     L_box = r_blob_in_code
+    tilt_in_deg = tilt * 180 / np.pi
     app_box = patches.Rectangle((X_app - L_box * app_ratio, Y_app - L_box), 
                                 width = 2 * L_box * app_ratio, height = 2 * L_box,
-                                angle = tilt, rotation_point="center",
+                                angle = tilt_in_deg, rotation_point="center",
                                 edgecolor = "w", fill = False)
     rec_box = patches.Rectangle((X_rec - L_box * rec_ratio, Y_rec - L_box), 
                                 width = 2 * L_box * rec_ratio, height = 2 * L_box,
-                                angle = -tilt, rotation_point="center",
+                                angle = -tilt_in_deg, rotation_point="center",
                                 edgecolor = "w", fill = False)
     ax.add_patch(app_box)
     ax.add_patch(rec_box)
