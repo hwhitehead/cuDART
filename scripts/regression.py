@@ -542,7 +542,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     in_app = (r_app_sqr < r_blob_in_code ** 2)
     in_rec = (r_rec_sqr < r_blob_in_code ** 2)
     lum_app = np.sum(img[in_app])
-    lum_rec = np.sim(img[in_rec])
+    lum_rec = np.sum(img[in_rec])
     lum_app_ratio = lum_app / L_blob_rest
     lum_rec_ratio = lum_rec / L_blob_rest
     print(lum_app_ratio) 
