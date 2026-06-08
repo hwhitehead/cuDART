@@ -559,7 +559,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     print(lum_app_ratio_true)
     print(lum_rec_ratio_true)
 
-    print(lum_app_ratio_ratio / lum_rec_ratio_true)
+    print(lum_app_ratio_true / lum_rec_ratio_true)
 
     pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
     ax.set_xlim([0,1])
