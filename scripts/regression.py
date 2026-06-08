@@ -92,8 +92,8 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True, sphere
 
         in_lead = (rr_lead_sqr < 1)
         in_tail = (rr_tail_sqr < 1)
-        emm_lead = max_emm * (1.0 - rr_lead_sqr)                                # emission falls off quadratically from center
-        emm_tail = max_emm * (1.0 - rr_tail_sqr)
+        emm_lead = 1.0                                                          # constant emissivity within ejecta
+        emm_tail = 1.0
 
         lead_emm_mask = (in_lead) & (ii == 0)
         tail_emm_mask = (in_tail) & (ii == 0)
@@ -468,21 +468,65 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     if (verbose): print("finished penrose-terrell test, see {0} for output".format(png_str))
 
-def demo_load_times():
+def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 
-    load_dir = "/data/phys-dynamic-disc/wadh6663/cuDART_wdir/flexload/hr_data"
+    # define simulation parameters
+    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
+    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]                  # cast to code units (where L_domain = 1.0)
+    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
 
-    durations = []
-    for n in range(0,100,10):
-        start_time = time.time()
-        data = np.load(os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy"))
-        duration = time.time() - start_time
-        durations.append(duration)
+    # calculate start time (just before light from origin reaches camera)
+    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
+    t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
+    t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
+    t_min *= 0.95                                                                               # start render just before flight time 
 
-    durations = np.array(durations)
-    av_duration = np.average(durations)
-    print(durations)
-    print(av_duration)
+    # calculate stop time (when receding ejectum reaches maximal extent)
+    x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(camera_args["theta"]) * kpc_to_m                          # max obs blob displacement for given theta
+    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(camera_args["theta"])) / (v_in_c * np.sin(camera_args["theta"])) + D_in_m      # invert superluminal motion eq to calc flight time
+    t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
+    t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units  
+
+    # calculate render cadence
+    t_obs_ar = np.linspace(t_min, t_max, camera_args["num_img"])
+
+    # calculate fiducial snapshot index (approaching ejecta at half displacement)
+    L_projected_m = sim_args["L_domain"] * np.sin(camera_args["theta"]) * kpc_to_m
+    x_obs_mid = 0.25 * L_projected 
+    d_mid_m = x_obs_in_m * (1 - v_in_c * np.cos(camera_args["theta"])) / (v_in_c * np.sin(camera_args["theta"])) + D_in_m
+    t_obs_in_s = d_in_m / c_light
+    t_obs = t_obs_in_s / Myr_to_s
+    fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][0]
+    
+    # calculate rest luminosity
+    blob_emmisivity = 1.0
+    vol_blob = 4.0 / 3 * np.pi * r_blob_in_code ** 3
+    L_blob_rest = vol_blob * blob_emmisivity
+
+    set_plot_defaults()
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    fid_str = os.path.join(save_dir, "snapshot" + str(fid_snapshot_index).zfill(5) + ".npy")
+    img = np.load(fid_str)
+
+    X = np.linspace(0,camera_args["template"].length_X,camera_args["template"].num_pixels_X)
+    Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+
+    pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
+    ax.set_xlim([0,1])
+    ax.set_ylim([0,1])
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
+    ax.set_facecolor("k")
+
+    png_str = os.path.join(save_dir, "summary.png")
+    plt.subplots_adjust(hspace = 0, wspace= 0)
+    fig.savefig(png_str, dpi=300, bbox_inches="tight")
+    plt.close("all")
+
 
 if __name__ == "__main__":
 
@@ -556,9 +600,21 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir",
                         default=None,
                         help="path to input datasets")
+    parser.add_argument("-s",
+                        default=False,
+                        help="generate physics summary")
 
     args = vars(parser.parse_args())
     
+    # run summary function
+    if (args["s"]):
+        if (args["save_dir"] is None):
+            raise Exception("unable to run summary without save location (use --save_dir)")
+        summarise_physics(save_dir = args["save_dir"], 
+                            sim_args = sim_args,
+                            camera_args = camera_args,
+                            verbose = args["v"])
+
     # except multiple run-type flags
     if (args["r"] and args["rl"]):
         raise Exception("no-lookback and lookback share write space, please select only one")
