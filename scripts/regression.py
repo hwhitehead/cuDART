@@ -470,6 +470,9 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
 def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 
+    # collect orientation
+    theta = camera_args["template"].theta
+
     # define simulation parameters
     v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
@@ -483,8 +486,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     t_min *= 0.95                                                                               # start render just before flight time 
 
     # calculate stop time (when receding ejectum reaches maximal extent)
-    x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(camera_args["theta"]) * kpc_to_m                          # max obs blob displacement for given theta
-    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(camera_args["theta"])) / (v_in_c * np.sin(camera_args["theta"])) + D_in_m      # invert superluminal motion eq to calc flight time
+    x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
+    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
     t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
     t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units  
 
@@ -492,9 +495,9 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     t_obs_ar = np.linspace(t_min, t_max, camera_args["num_img"])
 
     # calculate fiducial snapshot index (approaching ejecta at half displacement)
-    L_projected_m = sim_args["L_domain"] * np.sin(camera_args["theta"]) * kpc_to_m
+    L_projected_m = sim_args["L_domain"] * np.sin(theta) * kpc_to_m
     x_obs_mid = 0.25 * L_projected 
-    d_mid_m = x_obs_in_m * (1 - v_in_c * np.cos(camera_args["theta"])) / (v_in_c * np.sin(camera_args["theta"])) + D_in_m
+    d_mid_m = x_obs_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
     t_obs_in_s = d_in_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
     fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][0]
