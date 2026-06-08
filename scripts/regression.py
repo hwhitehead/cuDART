@@ -512,10 +512,10 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
 
     tilt = camera_args["template"].tilt
-    X_app = 0.5 + x_app * np.sin(tilt)
-    Y_app = 0.5 - x_app * np.cos(tilt)
-    X_rec = 0.5 - x_rec * np.sin(tilt)
-    Y_rec = 0.5 + x_rec * np.cos(tilt)
+    X_app = 0.5 - x_app * np.sin(tilt)
+    Y_app = 0.5 + x_app * np.cos(tilt)
+    X_rec = 0.5 - x_rec * np.sin(tilt+np.pi)
+    Y_rec = 0.5 + x_rec * np.cos(tilt+np.pi)
 
     # calculate deformation factor
     app_ratio = np.sqrt(1 - 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 - v_in_c * np.cos(theta))
@@ -562,7 +562,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     ax.add_patch(app_box)
     ax.add_patch(rec_box)
 
-    domain = patches.Rectangle(xy = (0.5 - np.sin(theta), 0.5 - np.sin(theta)),
+    domain = patches.Rectangle(xy = (0.5 - 0.5 * np.sin(theta), 0.5 - 0.5 * np.sin(theta)),
                                 width = np.sin(theta), height = np.sin(theta),
                                 angle = -tilt_in_deg, rotation_point = "center",
                                 edgecolor = "w", fill = False)
