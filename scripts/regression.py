@@ -502,6 +502,22 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     t_obs = t_obs_in_s / Myr_to_s
     fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][-1]
     
+    # identify ejecta positions
+    t_obs = t_obs_ar[fid_snapshot_index]
+    x_app_m = v_in_c * np.sin(theta) * (c * t_obs * Myr_to_s - D_in_m) / (1 - v_in_c * np.cos(theta))
+    x_app = x_app_m / (sim_args["L_domain"] * kpc_to_m)
+    x_rec_m = v_in_c * np.sin(theta) * (c * t_obs * Myr_to_s - D_in_m) / (1 + v_in_c * np.cos(theta))
+    x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
+
+    x_app = 0.5 - x_app
+    x_rec = 0.5 + x_rec
+
+    tilt = camera_args["template"].tilt
+    X_app = x_app * np.sin(tilt)
+    Y_app = x_app * np.cos(tilt)
+    X_rec = x_rec * np.sin(tilt)
+    Y_rec = x_rec * np.cos(tilt)
+
     # calculate rest luminosity
     blob_emmisivity = 1.0
     vol_blob = 4.0 / 3 * np.pi * r_blob_in_code ** 3
@@ -525,6 +541,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     ax.yaxis.set_visible(False)
     ax.set_facecolor("k")
     ax.set_aspect("equal")
+
+    ax.scatter([X_app, X_rec], [Y_app, Y_rec], color='b', s=20, zorder=30)
 
     png_str = os.path.join(save_dir, "summary.png")
     plt.subplots_adjust(hspace = 0, wspace= 0)
