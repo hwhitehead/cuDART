@@ -500,6 +500,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
     t_obs_in_s = d_mid_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
+    print(t_obs_ar)
+    print(t_obs)
     fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][0]
     
     # calculate rest luminosity
@@ -511,7 +513,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     fig = plt.figure()
     ax = fig.add_subplot()
 
-    fid_str = os.path.join(save_dir, "snapshot" + str(fid_snapshot_index).zfill(5) + ".npy")
+    fid_str = os.path.join(save_dir, "raw" + str(fid_snapshot_index).zfill(5) + ".npy")
     img = np.load(fid_str)
 
     X = np.linspace(0,camera_args["template"].length_X,camera_args["template"].num_pixels_X)
