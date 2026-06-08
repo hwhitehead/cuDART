@@ -114,7 +114,7 @@ if __name__ == "__main__":
     # collect makefile options
     makefile_options = {}
     makefile_options["GENCODE_FLAGS"] = "-O3 -use_fast_math -Xcompiler -O3 -Wno-deprecated-gpu-targets"
-    makefile_options["CXX_FLAGS"] = "-O3 -std=c++23"
+    makefile_options["CXX_FLAGS"] = "-O3 --std=c++23"
 
     if args["arch"]:
         arch = str(args["arch"]).lower()
