@@ -524,7 +524,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     # calculate rest luminosity
     blob_emmisivity = 1.0
     vol_blob = 4.0 / 3 * np.pi * r_blob_in_code ** 3
-    inhomo_factor = 1.0 / 5 # adjust for non-constant emissivity
+    inhomo_factor = 2.0 / 5 # adjust for non-constant emissivity
     L_blob_rest = vol_blob * blob_emmisivity * inhomo_factor
 
     set_plot_defaults()
@@ -534,13 +534,13 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     fid_str = os.path.join(save_dir, "raw" + str(fid_snapshot_index).zfill(5) + ".npy")
     img = np.load(fid_str)
 
-    X = np.linspace(0,camera_args["template"].length_X,camera_args["template"].num_pixels_X)
-    Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
+    X = np.linspace(0,camera_args["template"].length_X, camera_args["template"].num_pixels_X)
+    Y = np.linspace(0,camera_args["template"].length_Y, camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
     r_app_sqr = (XX - X_app) ** 2 + (YY - Y_app) ** 2
     r_rec_sqr = (XX - X_rec) ** 2 + (YY - Y_rec) ** 2
-    in_app = (r_app_sqr < r_blob_in_code ** 2)
+    in_app = (r_app_sqr < (app_ratio * r_blob_in_code) ** 2)
     in_rec = (r_rec_sqr < r_blob_in_code ** 2)
     dA = (X[1] - X[0]) * (Y[1] - Y[0])
     lum_app = np.sum(img[in_app]) * dA
