@@ -503,6 +503,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     t_obs = t_obs_in_s / Myr_to_s
     fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][-1]
     
+    print(snapshot_index)
+
     # identify ejecta positions
     t_obs = t_obs_ar[fid_snapshot_index]
     D_av = v_in_c * c_light * t_obs * Myr_to_s - D_in_m
@@ -551,18 +553,18 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     # plot ejecta bounding box
     L_box = r_blob_in_code
     tilt_in_deg = tilt * 180 / np.pi
-    app_box = patches.Rectangle((X_app - L_box * app_ratio, Y_app - L_box), 
+    app_box = patches.Rectangle(xy = (X_app - L_box * app_ratio, Y_app - L_box), 
                                 width = 2 * L_box * app_ratio, height = 2 * L_box,
                                 angle = -tilt_in_deg, rotation_point="center",
                                 edgecolor = "w", fill = False)
-    rec_box = patches.Rectangle((X_rec - L_box * rec_ratio, Y_rec - L_box), 
+    rec_box = patches.Rectangle(xy = (X_rec - L_box * rec_ratio, Y_rec - L_box), 
                                 width = 2 * L_box * rec_ratio, height = 2 * L_box,
                                 angle = -tilt_in_deg, rotation_point="center",
                                 edgecolor = "w", fill = False)
     ax.add_patch(app_box)
     ax.add_patch(rec_box)
 
-    domain = patches.Rectangle(xy = (0.5,0.5),
+    domain = patches.Rectangle(xy = (0.0,0.0),
                                 width = np.sin(theta), height = np.sin(theta),
                                 angle = -tilt_in_deg, rotation_point = "center",
                                 edgecolor = "w", fill = False)
