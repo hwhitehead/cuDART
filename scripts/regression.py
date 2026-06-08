@@ -504,9 +504,10 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     
     # identify ejecta positions
     t_obs = t_obs_ar[fid_snapshot_index]
-    x_app_m = v_in_c * np.sin(theta) * (v_in_c * c_light * t_obs * Myr_to_s - D_in_m) / (1 - v_in_c * np.cos(theta))
+    D_av = v_in_c * c_light * t_obs * Myr_to_s - D_in_m
+    x_app_m = v_in_c * np.sin(theta) * D_av / (1 - v_in_c * np.cos(theta))
     x_app = x_app_m / (sim_args["L_domain"] * kpc_to_m)
-    x_rec_m = v_in_c * np.sin(theta) * (v_in_c * c_light * t_obs * Myr_to_s - D_in_m) / (1 + v_in_c * np.cos(theta))
+    x_rec_m = v_in_c * np.sin(theta) * D_av / (1 + v_in_c * np.cos(theta))
     x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
 
     tilt = camera_args["template"].tilt
@@ -516,8 +517,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     Y_rec = 0.5 - x_rec * np.cos(tilt)
 
     # calculate deformation factor
-    app_ratio = np.sqrt(1 - 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 - beta * np.cos(theta))
-    rec_ratio = np.sqrt(1 + 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 + beta * np.cos(theta))
+    app_ratio = np.sqrt(1 - 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 - v_in_c * np.cos(theta))
+    rec_ratio = np.sqrt(1 + 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 + v_in_c * np.cos(theta))
 
     # calculate rest luminosity
     blob_emmisivity = 1.0
