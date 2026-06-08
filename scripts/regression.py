@@ -524,7 +524,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     # calculate rest luminosity
     blob_emmisivity = 1.0
     vol_blob = 4.0 / 3 * np.pi * r_blob_in_code ** 3
-    L_blob_rest = vol_blob * blob_emmisivity
+    inhomo_factor = 1.0 / 5 # adjust for non-constant emissivity
+    L_blob_rest = vol_blob * blob_emmisivity * inhomo_factor
 
     set_plot_defaults()
     fig = plt.figure()
@@ -549,6 +550,12 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     print(lum_app_ratio) 
     print(lum_rec_ratio)
 
+    D_app = 1.0 / (sim_args["Gamma"] * (1 - v_in_c * np.cos(theta)))
+    D_rec = 1.0 / (sim_args["Gamma"] * (1 + v_in_c * np.cos(theta)))
+    lum_app_ratio_true = np.power(D_app, 3.0 - 0.6)
+    lum_rec_ratio_true = np.power(D_rec, 3.0 - 0.6)
+    print(lum_app_ratio_true)
+    print(lum_rec_ratio_true)
 
     pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
     ax.set_xlim([0,1])
