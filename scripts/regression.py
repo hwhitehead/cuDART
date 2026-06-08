@@ -509,14 +509,11 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     x_rec_m = v_in_c * np.sin(theta) * (v_in_c * c_light * t_obs * Myr_to_s - D_in_m) / (1 + v_in_c * np.cos(theta))
     x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
 
-    x_app = 0.5 - x_app
-    x_rec = 0.5 + x_rec
-
     tilt = camera_args["template"].tilt
-    X_app = x_app * np.sin(tilt)
-    Y_app = x_app * np.cos(tilt)
-    X_rec = x_rec * np.sin(tilt)
-    Y_rec = x_rec * np.cos(tilt)
+    X_app = 0.5 - x_app * np.sin(tilt)
+    Y_app = 0.5 + x_app * np.cos(tilt)
+    X_rec = 0.5 + x_rec * np.sin(tilt)
+    Y_rec = 0.5 - x_rec * np.cos(tilt)
 
     # calculate rest luminosity
     blob_emmisivity = 1.0
