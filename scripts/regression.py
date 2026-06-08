@@ -496,7 +496,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 
     # calculate fiducial snapshot index (approaching ejecta at half displacement)
     L_projected_m = sim_args["L_domain"] * np.sin(theta) * kpc_to_m
-    x_obs_mid = 0.25 * L_projected 
+    x_obs_mid = 0.25 * L_projected_m 
     d_mid_m = x_obs_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
     t_obs_in_s = d_in_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
