@@ -502,12 +502,10 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     t_obs_in_s = d_mid_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
     fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][-1]
-    
-    print(fid_snapshot_index)
 
     # identify ejecta positions
     t_obs = t_obs_ar[fid_snapshot_index]
-    D_av = v_in_c * c_light * t_obs * Myr_to_s - D_in_m
+    D_av = c_light * t_obs * Myr_to_s - D_in_m
     x_app_m = v_in_c * np.sin(theta) * D_av / (1 - v_in_c * np.cos(theta))
     x_app = x_app_m / (sim_args["L_domain"] * kpc_to_m)
     x_rec_m = v_in_c * np.sin(theta) * D_av / (1 + v_in_c * np.cos(theta))
@@ -548,7 +546,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     ax.set_aspect("equal")
 
     # plot ejecta center
-    ax.scatter([X_app, X_rec], [Y_app, Y_rec], color='b', s=20, zorder=30)
+    ax.scatter([0.5,X_app, X_rec], [0.5,Y_app, Y_rec], color='b', s=20, zorder=30)
 
     # plot ejecta bounding box
     L_box = r_blob_in_code
@@ -564,7 +562,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     ax.add_patch(app_box)
     ax.add_patch(rec_box)
 
-    domain = patches.Rectangle(xy = (0.0,0.0),
+    domain = patches.Rectangle(xy = (0.5 - np.sin(theta), 0.5 - np.sin(theta)),
                                 width = np.sin(theta), height = np.sin(theta),
                                 angle = -tilt_in_deg, rotation_point = "center",
                                 edgecolor = "w", fill = False)
