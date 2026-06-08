@@ -176,9 +176,8 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             err_msg << "Relativistic flagged, but did not find velocity data in " << npy_str << std::endl;
             CUDART_ERROR(err_msg);
         }        
-        int floats_in_mb  = data_shape.size();
-        size_t bytes_in_mb = floats_in_mb * sizeof(float);     
-        mem_offset += floats_in_mb;
+        // offset start of next meshblock by size of current meshblock
+        mem_offset += data_shape.size();;
     } // end mb loop
 
     if (verbose) {
