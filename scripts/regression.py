@@ -504,9 +504,9 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     
     # identify ejecta positions
     t_obs = t_obs_ar[fid_snapshot_index]
-    x_app_m = v_in_c * np.sin(theta) * (c * t_obs * Myr_to_s - D_in_m) / (1 - v_in_c * np.cos(theta))
+    x_app_m = v_in_c * np.sin(theta) * (v_in_c * c_light * t_obs * Myr_to_s - D_in_m) / (1 - v_in_c * np.cos(theta))
     x_app = x_app_m / (sim_args["L_domain"] * kpc_to_m)
-    x_rec_m = v_in_c * np.sin(theta) * (c * t_obs * Myr_to_s - D_in_m) / (1 + v_in_c * np.cos(theta))
+    x_rec_m = v_in_c * np.sin(theta) * (v_in_c * c_light * t_obs * Myr_to_s - D_in_m) / (1 + v_in_c * np.cos(theta))
     x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
 
     x_app = 0.5 - x_app
