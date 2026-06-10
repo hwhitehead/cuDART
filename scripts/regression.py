@@ -549,9 +549,9 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     lum_rec = np.sum(img[in_rec]) * dA
     print(lum_app / lum_rec)
 
-    cc = np.zeros_like(XX)
-    cc[in_app] = 0.5
-    cc[in_rec] = 1.0
+    # cc = np.zeros_like(XX)
+    # cc[in_app] = 0.5
+    # cc[in_rec] = 1.0
 
 
     D_app = 1.0 / (sim_args["Gamma"] * (1 - v_in_c * np.cos(theta)))
@@ -560,8 +560,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     lum_rec_ratio_true = np.power(D_rec, 3.0 - 0.6)
     print(lum_app_ratio_true / lum_rec_ratio_true)
 
-    #pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
-    pc = ax.pcolormesh(XX, YY, cc, vmin = 0, vmax = 1, cmap = "afmhot")
+    pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
+    #pc = ax.pcolormesh(XX, YY, cc, vmin = 0, vmax = 1, cmap = "afmhot")
     ax.set_xlim([0,1])
     ax.set_ylim([0,1])
     ax.xaxis.set_visible(False)
