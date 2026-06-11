@@ -302,7 +302,7 @@ class Scene:
                 i += 1
         print("\n")
 
-    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, 
+    def render(self, save_profile = False, verbose = False, check_make = True, force_make = False, 
                 max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
                 lookback = False, flexload = False, verbose_cpp = False):
 
@@ -363,9 +363,9 @@ class Scene:
         # prepare command line argument to invoke .cpp executable, with proper flags  
         command = [path_to_executable, "-i", self.load_str, "-s", self.save_dir,"-c",self.temp_camera_file]
         # run executable with nvprof
-        if save_profile is not None: 
-            #command = ["nsys", "profile", "--stats=true","--export=text","--output={0}".format(save_profile)] + command
-            command = ["nsys", "stats", "--report=osrt_sum", "--format=csv,column", "--output={0}".format(save_profile)] + command
+        if save_profile: 
+            profile_location = os.path.join(self.save_dir, "profiling")
+            command = ["nsys", "profile", "--stats=true","--export=text","--output={0}".format(profile_location)] + command
         # pass verbose flag 
         if verbose_cpp: 
             command = command + ["-v"]
@@ -404,6 +404,11 @@ class Scene:
             if os.path.exists(self.temp_camera_file):
                 os.remove(self.temp_camera_file)
                 if verbose: print("removed temporary camera file.")
+
+        # parse nsys output, cleanup
+        if save_profile:
+            nsys_comamnd = ["nsys", "profile", "--report=osrt_sum", "--format=column", profile_location + ".sqlite"]
+            subprocess.run(command, check = True)
 
     def plot(self, fig_save_dir = None, cmap = "afmhot", vmin = -6, vmax = 0, remove_raw_npy = False, verbose = False, log_data = True):
         
