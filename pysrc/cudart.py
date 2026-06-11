@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os, sys, subprocess, copy, pathlib
 import glob
 import pandas as pd
+import time
 
 # define global constants
 str_zfill = 5       # num zeros for zpadding strings
@@ -391,13 +392,20 @@ class Scene:
         # when saving raw images, add to existing files in save space
         if append:
             command = command + ["-a"]
-
         # invoke executable
         if (verbose):
             print("calling render executable...")
             self.print_command(command)
+        start_cpp_time = time.time()
         subprocess.run(command, check = True)
+        stop_cpp_time = time.time()
         if (verbose): print("executable finished.")
+
+        # log subproc duration
+        duration = stop_cpp_time - start_cpp_time
+        if save_profile:
+            wallclock_str = os.path.join(self.save_dir, "wallclock.txt")
+            np.savetxt(wallclock_str, np.array([duration]))
 
         # destroy temp camera file if not specified at Scene init
         if self.camera_file_name is None:
@@ -477,13 +485,16 @@ class Profiler:
         self.output_dir = output_dir
         self.sqlite_path = os.path.join(self.output_dir, "profiling.sqlite")
         self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
+        self.wallclock_path = os.path.joib(self.output_dir, "wallclock.txt")
+        self.wallclock_duration = np.loadtxt(self.wallclock_path)[0]
+        print(self.wallclock_duration)
 
         self.log_paths = [self.sqlite_path, self.nsys_rep_path]
         self.built_csv = False
 
     def print_tables(self):
 
-        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_api_sum", "--report=cuda_gpu_kern_sum",
+        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_gpu_sum",
                         "--format=column", self.sqlite_path]
         subprocess.run(nsys_command, check = True)
 
@@ -558,7 +569,7 @@ class Profiler:
             total_time = float(total_osrt_times.iloc[row])
             temp_osrt_times[i] = total_time
         total_osrt_time = total_osrt_times.sum()
-        hung_time = np.sum(temp_osrt_times[:2]) # add poll and wait times
+        hung_time = np.sum(temp_osrt_times[:2]) # do not track poll and wait times (absored by CUDA runtime)
         osrt_other_time = total_osrt_time - hung_time
         osrt_times = np.array([temp_osrt_times[2], temp_osrt_times[3], osrt_other_time])
 
