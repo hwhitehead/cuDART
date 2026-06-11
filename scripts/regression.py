@@ -612,7 +612,7 @@ if __name__ == "__main__":
 
     # construct template camera
     template_camera = Camera()
-    template_camera.tilt = (45.0 / 180) * np.pi     # default 45deg tilt from bias aligned with z axis 
+    template_camera.tilt = (90.0 / 180) * np.pi     # tilt from bias vector (aligned with z axis)
     template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                   # small value, system axisymmetric in phi
     template_camera.theta = 0.25 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
