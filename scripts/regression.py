@@ -600,7 +600,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 def report_profiling(save_dir):
 
     profiler = Profiler(save_dir)
-    profiler.collect_data()
+    profiler.print_df()
     # profiler.plot(os.path.join(save_dir, "profiling.png"))
 
 if __name__ == "__main__":
