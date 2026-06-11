@@ -516,7 +516,7 @@ class Profiler:
         cuda_kern_labels = ["render_from_mesh", "wipe_img"]
 
         # load API data
-        cuda_api_times = np.array(np.size(cuda_api_tasks)+1)
+        cuda_api_times = np.zeros(np.size(cuda_api_tasks)+1)
         cuda_api_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_api_sum.csv")
         cuda_api_df = pd.read_csv(cuda_api_csv_path)
         cuda_api_task_names = cuda_api_df["Name"]
@@ -529,7 +529,7 @@ class Profiler:
         api_other_time = total_api_time - np.sum(np.array(cuda_api_times))
         cuda_api_times[-1] = api_other_time
 
-        cuda_kernel_times = np.array(np.size(cuda_kern_tasks)+1)
+        cuda_kernel_times = np.zeros(np.size(cuda_kern_tasks)+1)
         cuda_kernel_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_kern_sum.csv")
         cuda_kernel_df = pd.read_csv(cuda_kernel_csv_path)
         cuda_kernel_task_names = cuda_kernel_df["Name"]
