@@ -510,11 +510,13 @@ class Profiler:
         axr = fig.add_subplot(gs[:,1])
 
         cuda_api_tasks = ["cudaMemcpy", "cudaDeviceSynchronize"]
-        cuda_kern_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
+        cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
+        osrt_tasks = ["poll", "pthread_cond_timedwait", "read", "writev"]
 
-        cuda_api_labels = cuda_api_tasks
-        cuda_kern_labels = ["render_from_mesh", "wipe_img"]
-
+        cuda_api_labels = cuda_api_tasks + ["other"]
+        cuda_kernel_labels = ["render_from_mesh", "wipe_img", "other"]
+        osrt_labels = ["read", "write", "other"]
+    
         # load API data
         cuda_api_times = np.zeros(np.size(cuda_api_tasks)+1)
         cuda_api_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_api_sum.csv")
@@ -529,12 +531,13 @@ class Profiler:
         api_other_time = total_api_time - np.sum(np.array(cuda_api_times))
         cuda_api_times[-1] = api_other_time
 
-        cuda_kernel_times = np.zeros(np.size(cuda_kern_tasks)+1)
+        # load kernel data
+        cuda_kernel_times = np.zeros(np.size(cuda_kernel_tasks)+1)
         cuda_kernel_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_kern_sum.csv")
         cuda_kernel_df = pd.read_csv(cuda_kernel_csv_path)
         cuda_kernel_task_names = cuda_kernel_df["Name"]
         total_kernel_times = cuda_kernel_df["Total Time (ns)"]
-        for i, task in enumerate(cuda_kern_tasks):
+        for i, task in enumerate(cuda_kernel_tasks):
             row = np.where(cuda_kernel_task_names == task)[0][0]
             total_time = float(total_kernel_times.iloc[row])
             cuda_kernel_times[i] = total_time
@@ -542,10 +545,28 @@ class Profiler:
         kernel_other_time = total_kernel_time - np.sum(np.array(cuda_api_times))
         cuda_kernel_times[-1] = kernel_other_time
 
+        # load os runtime summary
+        temp_osrt_times = np.zeros(np.size(osrt_tasks))
+        osrt_csv_path = os.path.join(self.output_dir, "profiling.csv_osrt_sum.csv")
+        osrt_df = pd.read_csv(osrt_csv_path)
+        osrt_task_names = osrt_df["Name"]
+        total_osrt_times = osrt_df["Total Time (ns)"]
+        for i, task in enumerate(osrt_tasks):
+            row = np.where(osrt_task_names == task)[0][0]
+            total_time = float(total_osrt_times.iloc[row])
+            temp_osrt_times[i] = total_time
+        total_osrt_time = total_osrt_times.sum()
+        hung_time = np.sum(temp_osrt_times[:2]) # add poll and wait times
+        orst_other_time = total_orst_time - hung_time
+        orst_times = np.array([temp_orst_times[2], temp_orst_times[3], orst_other_time])
+
+
         print(cuda_api_labels)
         print(cuda_api_times)
         print(cuda_kernel_labels)
-        print(cuda_api_labels)
+        print(cuda_kernel_times)
+        print(osrt_labels)
+        print(osrt_times)
 
         # sizes_all = sizes_cuda + [1,1,1,1]
 
