@@ -485,12 +485,10 @@ class Profiler:
         self.output_dir = output_dir
         self.sqlite_path = os.path.join(self.output_dir, "profiling.sqlite")
         self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
-        self.wallclock_path = os.path.joib(self.output_dir, "wallclock.txt")
+        self.wallclock_path = os.path.join(self.output_dir, "wallclock.txt")
         self.wallclock_duration = np.loadtxt(self.wallclock_path)[0]
-        print(self.wallclock_duration)
 
         self.log_paths = [self.sqlite_path, self.nsys_rep_path]
-        self.built_csv = False
 
     def print_tables(self):
 
@@ -501,110 +499,126 @@ class Profiler:
     def build_csv(self):
 
         csv_str = os.path.join(self.output_dir, "profiling.csv")
-        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_api_sum", "--report=cuda_gpu_kern_sum",
+        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_gpu_sum",
                         "--format=csv", "--output={0}".format(csv_str), self.sqlite_path]
         subprocess.run(nsys_command, check = True)
-        self.built_csv = True
 
-    def plot(self, save_str):
+    def collect_data(self):
 
-        if not self.built_csv:
+        gpu_str = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_sum.csv")
+        ostr_str = os.path.join(self.output_dir, "profiling.csv_osrt_sum.csv")
+
+        if not os.path.exists(gpu_str) or not os.path.exists(ostr_str):
             self.build_csv()
 
-        set_plot_defaults()
-        height_ratios = np.array([1])
-        width_ratios = np.array([1,0.2,1])
-        h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
-        fig = plt.figure(figsize=(20.0 / 3, h_over_w * 20.0 / 3))
-        gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), width_ratios=width_ratios, height_ratios=height_ratios)
-        axl = fig.add_subplot(gs[:,0])
-        spacer = fig.add_subplot(gs[:,1])
-        spacer.axis("off")
-        axr = fig.add_subplot(gs[:,2])
+        gpu_df = pd.read_csv(gpu_str)
+        ostr_df = pd.read_csv(ostr_str)
 
-        cuda_api_tasks = ["cudaMemcpy", "cudaDeviceSynchronize"]
-        cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
-        osrt_tasks = ["poll", "pthread_cond_timedwait", "read", "writev"]
+        for df in [gpu_df, ostr_df]:
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None):  
+                print(df)
 
-        cuda_api_labels = cuda_api_tasks + ["other"]
-        cuda_kernel_labels = ["render_from_mesh", "wipe_img", "other"]
-        osrt_labels = ["read", "write", "other"]
+        print(self.wallclock_duration)
+
+    # def plot(self, save_str):
+
+    #     if not self.built_csv:
+    #         self.build_csv()
+
+    #     set_plot_defaults()
+    #     height_ratios = np.array([1])
+    #     width_ratios = np.array([1,0.2,1])
+    #     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    #     fig = plt.figure(figsize=(20.0 / 3, h_over_w * 20.0 / 3))
+    #     gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), width_ratios=width_ratios, height_ratios=height_ratios)
+    #     axl = fig.add_subplot(gs[:,0])
+    #     spacer = fig.add_subplot(gs[:,1])
+    #     spacer.axis("off")
+    #     axr = fig.add_subplot(gs[:,2])
+
+    #     cuda_api_tasks = ["cudaMemcpy", "cudaDeviceSynchronize"]
+    #     cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
+    #     osrt_tasks = ["poll", "pthread_cond_timedwait", "read", "writev"]
+
+    #     cuda_api_labels = cuda_api_tasks + ["other"]
+    #     cuda_kernel_labels = ["render_from_mesh", "wipe_img", "other"]
+    #     osrt_labels = ["read", "write", "other"]
     
-        # load API data
-        cuda_api_times = np.zeros(np.size(cuda_api_tasks)+1)
-        cuda_api_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_api_sum.csv")
-        cuda_api_df = pd.read_csv(cuda_api_csv_path)
-        cuda_api_task_names = cuda_api_df["Name"]
-        total_api_times = cuda_api_df["Total Time (ns)"]
-        for i, task in enumerate(cuda_api_tasks):
-            row = np.where(cuda_api_task_names == task)[0][0]
-            total_time = float(total_api_times.iloc[row])
-            cuda_api_times[i] = total_time
-        total_api_time = total_api_times.sum()
-        api_other_time = total_api_time - np.sum(np.array(cuda_api_times))
-        cuda_api_times[-1] = api_other_time
+    #     # load API data
+    #     cuda_api_times = np.zeros(np.size(cuda_api_tasks)+1)
+    #     cuda_api_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_api_sum.csv")
+    #     cuda_api_df = pd.read_csv(cuda_api_csv_path)
+    #     cuda_api_task_names = cuda_api_df["Name"]
+    #     total_api_times = cuda_api_df["Total Time (ns)"]
+    #     for i, task in enumerate(cuda_api_tasks):
+    #         row = np.where(cuda_api_task_names == task)[0][0]
+    #         total_time = float(total_api_times.iloc[row])
+    #         cuda_api_times[i] = total_time
+    #     total_api_time = total_api_times.sum()
+    #     api_other_time = total_api_time - np.sum(np.array(cuda_api_times))
+    #     cuda_api_times[-1] = api_other_time
 
-        # load kernel data
-        cuda_kernel_times = np.zeros(np.size(cuda_kernel_tasks)+1)
-        cuda_kernel_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_kern_sum.csv")
-        cuda_kernel_df = pd.read_csv(cuda_kernel_csv_path)
-        cuda_kernel_task_names = cuda_kernel_df["Name"]
-        total_kernel_times = cuda_kernel_df["Total Time (ns)"]
-        for i, task in enumerate(cuda_kernel_tasks):
-            row = np.where(cuda_kernel_task_names == task)[0][0]
-            total_time = float(total_kernel_times.iloc[row])
-            cuda_kernel_times[i] = total_time
-        total_kernel_time = total_kernel_times.sum()
-        kernel_other_time = total_kernel_time - np.sum(np.array(cuda_kernel_times))
-        cuda_kernel_times[-1] = kernel_other_time
+    #     # load kernel data
+    #     cuda_kernel_times = np.zeros(np.size(cuda_kernel_tasks)+1)
+    #     cuda_kernel_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_kern_sum.csv")
+    #     cuda_kernel_df = pd.read_csv(cuda_kernel_csv_path)
+    #     cuda_kernel_task_names = cuda_kernel_df["Name"]
+    #     total_kernel_times = cuda_kernel_df["Total Time (ns)"]
+    #     for i, task in enumerate(cuda_kernel_tasks):
+    #         row = np.where(cuda_kernel_task_names == task)[0][0]
+    #         total_time = float(total_kernel_times.iloc[row])
+    #         cuda_kernel_times[i] = total_time
+    #     total_kernel_time = total_kernel_times.sum()
+    #     kernel_other_time = total_kernel_time - np.sum(np.array(cuda_kernel_times))
+    #     cuda_kernel_times[-1] = kernel_other_time
 
-        # load os runtime summary
-        temp_osrt_times = np.zeros(np.size(osrt_tasks))
-        osrt_csv_path = os.path.join(self.output_dir, "profiling.csv_osrt_sum.csv")
-        osrt_df = pd.read_csv(osrt_csv_path)
-        osrt_task_names = osrt_df["Name"]
-        total_osrt_times = osrt_df["Total Time (ns)"]
-        for i, task in enumerate(osrt_tasks):
-            row = np.where(osrt_task_names == task)[0][0]
-            total_time = float(total_osrt_times.iloc[row])
-            temp_osrt_times[i] = total_time
-        total_osrt_time = total_osrt_times.sum()
-        hung_time = np.sum(temp_osrt_times[:2]) # do not track poll and wait times (absored by CUDA runtime)
-        osrt_other_time = total_osrt_time - hung_time
-        osrt_times = np.array([temp_osrt_times[2], temp_osrt_times[3], osrt_other_time])
+    #     # load os runtime summary
+    #     temp_osrt_times = np.zeros(np.size(osrt_tasks))
+    #     osrt_csv_path = os.path.join(self.output_dir, "profiling.csv_osrt_sum.csv")
+    #     osrt_df = pd.read_csv(osrt_csv_path)
+    #     osrt_task_names = osrt_df["Name"]
+    #     total_osrt_times = osrt_df["Total Time (ns)"]
+    #     for i, task in enumerate(osrt_tasks):
+    #         row = np.where(osrt_task_names == task)[0][0]
+    #         total_time = float(total_osrt_times.iloc[row])
+    #         temp_osrt_times[i] = total_time
+    #     total_osrt_time = total_osrt_times.sum()
+    #     hung_time = np.sum(temp_osrt_times[:2]) # do not track poll and wait times (absored by CUDA runtime)
+    #     osrt_other_time = total_osrt_time - hung_time
+    #     osrt_times = np.array([temp_osrt_times[2], temp_osrt_times[3], osrt_other_time])
 
-        print(cuda_api_labels)
-        print(cuda_api_times)
-        print(cuda_kernel_labels)
-        print(cuda_kernel_times)
-        print(osrt_labels)
-        print(osrt_times)
+    #     print(cuda_api_labels)
+    #     print(cuda_api_times)
+    #     print(cuda_kernel_labels)
+    #     print(cuda_kernel_times)
+    #     print(osrt_labels)
+    #     print(osrt_times)
 
-        all_cuda_runtimes = np.array([*cuda_api_times[:-1], *cuda_kernel_times[:-1], cuda_api_times[-1] + cuda_kernel_times[-1]])
-        all_cuda_labels = cuda_api_labels[:-1] + cuda_kernel_labels[:-1] + ["other"]
+    #     all_cuda_runtimes = np.array([*cuda_api_times[:-1], *cuda_kernel_times[:-1], cuda_api_times[-1] + cuda_kernel_times[-1]])
+    #     all_cuda_labels = cuda_api_labels[:-1] + cuda_kernel_labels[:-1] + ["other"]
 
-        all_runtimes = np.array([*all_cuda_runtimes[:-1], *osrt_times[:-1], all_cuda_runtimes[-1] + osrt_times[-1]])
-        all_labels = all_cuda_labels[:-1] + osrt_labels[:-1] + ["other"]
+    #     all_runtimes = np.array([*all_cuda_runtimes[:-1], *osrt_times[:-1], all_cuda_runtimes[-1] + osrt_times[-1]])
+    #     all_labels = all_cuda_labels[:-1] + osrt_labels[:-1] + ["other"]
 
-        print(all_cuda_labels)
-        print(all_cuda_runtimes)
+    #     print(all_cuda_labels)
+    #     print(all_cuda_runtimes)
 
-        axl.pie(all_cuda_runtimes, labels=all_cuda_labels)
-        axr.pie(all_runtimes, labels=all_labels)
+    #     axl.pie(all_cuda_runtimes, labels=all_cuda_labels)
+    #     axr.pie(all_runtimes, labels=all_labels)
 
-        # sizes_all = sizes_cuda + [1,1,1,1]
+    #     # sizes_all = sizes_cuda + [1,1,1,1]
 
-        # axl.pie(sizes_cuda, labels=labels_cuda)
-        # axr.pie(sizes_all, labeps=labels_all)
+    #     # axl.pie(sizes_cuda, labels=labels_cuda)
+    #     # axr.pie(sizes_all, labeps=labels_all)
         
-        # runtime_cuda = 10
-        # runtime_all = 15
-        axl.set_title("CUDA Runtime = {0:.2f}s".format(np.sum(all_cuda_runtimes * 1e-9)))
-        axr.set_title("Total Runtime = {0:.2f}s".format(np.sum(all_runtimes * 1e-9)))
+    #     # runtime_cuda = 10
+    #     # runtime_all = 15
+    #     axl.set_title("CUDA Runtime = {0:.2f}s".format(np.sum(all_cuda_runtimes * 1e-9)))
+    #     axr.set_title("Total Runtime = {0:.2f}s".format(np.sum(all_runtimes * 1e-9)))
 
-        plt.subplots_adjust(wspace=0.0)
-        fig.savefig(save_str, dpi=300, bbox_inches="tight")
-        plt.close("all")
+    #     plt.subplots_adjust(wspace=0.0)
+    #     fig.savefig(save_str, dpi=300, bbox_inches="tight")
+    #     plt.close("all")
 
     def cleanup(self):
 
