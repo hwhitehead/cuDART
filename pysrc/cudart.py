@@ -502,12 +502,14 @@ class Profiler:
 
         set_plot_defaults()
         height_ratios = np.array([1])
-        width_ratios = np.array([1,1])
+        width_ratios = np.array([1,0.2,1])
         h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
         fig = plt.figure(figsize=(20.0 / 3, h_over_w * 20.0 / 3))
         gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), width_ratios=width_ratios, height_ratios=height_ratios)
         axl = fig.add_subplot(gs[:,0])
-        axr = fig.add_subplot(gs[:,1])
+        spacer = fig.add_subplot(gs[:,1])
+        spacer.axis("off")
+        axr = fig.add_subplot(gs[:,2])
 
         cuda_api_tasks = ["cudaMemcpy", "cudaDeviceSynchronize"]
         cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
@@ -570,7 +572,7 @@ class Profiler:
         all_cuda_runtimes = np.array([*cuda_api_times[:-1], *cuda_kernel_times[:-1], cuda_api_times[-1] + cuda_kernel_times[-1]])
         all_cuda_labels = cuda_api_labels[:-1] + cuda_kernel_labels[:-1] + ["other"]
 
-        all_runtimes = np.array([*all_cuda_runtimes[:-1], osrt_times[:-1], all_cuda_runtimes[-1] + osrt_times[-1]])
+        all_runtimes = np.array([*all_cuda_runtimes[:-1], *osrt_times[:-1], all_cuda_runtimes[-1] + osrt_times[-1]])
         all_labels = all_cuda_labels[:-1] + osrt_labels[:-1] + ["other"]
 
         print(all_cuda_labels)
@@ -589,7 +591,7 @@ class Profiler:
         axl.set_title("CUDA Runtime = {0:.2f}s".format(np.sum(all_cuda_runtimes * 1e-9)))
         axr.set_title("Total Runtime = {0:.2f}s".format(np.sum(all_runtimes * 1e-9)))
 
-        plt.subplots_adjust(wspace=0)
+        plt.subplots_adjust(wspace=0.0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
         plt.close("all")
 
