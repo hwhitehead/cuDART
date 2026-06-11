@@ -512,8 +512,34 @@ class Profiler:
         labels_cuda = ["cudaMemcpy", "cudaDeviceSynchronize", "render_from_mesh", "wipe_img", "other"]
         labels_all = labels_cuda + ["read", "writev", "icotl", "other"]
 
-        sizes_cuda = [1,1,1,1,1]
-        sizes_all = size_cuda + [1,1,1,1]
+        sizes_cuda = []
+
+        # load API data
+        cuda_api_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_api_sum.csv")
+        cuda_api_df = pd.read_csv(cuda_api_csv_path)
+        cuda_api_task_names = cuda_api_df["Name"]
+        cuda_api_tasks = ["cudaMemcpy", "cudaDeviceSynchronize"]
+        for task in cuda_api_tasks:
+            row = np.where(cuda_api_task_names == task)[0][0]
+            total_time = float(df["Total Time (ns)"]).iloc[row]
+            sizes_cuda.append(total_time)
+        total_api_times = cuda_api_df["Total Time (ns)"]
+        total_api_time = total_api_times.sum()
+        print(total_api_time)
+
+        cuda_kernel_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_kern_sum.csv")
+        cuda_kernel_df = pd.read_csv(cuda_api_csv_path)
+        cuda_kernel_task_names = cuda_kernel_df["Name"]
+        cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
+        for task in cuda_kernel_tasks:
+            row = np.where(cuda_kernel_task_names == task)[0][0]
+            total_time = float(df["Total Time (ns)"]).iloc[row]
+            sizes_cuda.append(total_time)
+        total_kernel_times = cuda_kernel_df["Total Time (ns)"]
+        total_kernel_time = total_kernel_times.sum()
+        print(total_kernel_time)
+
+        sizes_all = sizes_cuda + [1,1,1,1]
 
         axl.pie(sizes_cuda, labels=labels_cuda)
         axr.pie(sizes_all, labeps=labels_all)
