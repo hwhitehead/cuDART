@@ -407,7 +407,8 @@ class Scene:
 
         # parse nsys output, cleanup
         if save_profile:
-            nsys_comamnd = ["nsys", "profile", "--report=osrt_sum", "--format=column", profile_location + ".sqlite"]
+            profile_csv = os.path.join(self.save_dir, "profiling.csv")
+            nsys_comamnd = ["nsys", "stats", "--report=osrt_sum", "--format=csv", "--output={0}".format(profile_csv), profile_location + ".sqlite"]
             subprocess.run(nsys_comamnd, check = True)
 
     def plot(self, fig_save_dir = None, cmap = "afmhot", vmin = -6, vmax = 0, remove_raw_npy = False, verbose = False, log_data = True):
