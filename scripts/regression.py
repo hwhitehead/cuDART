@@ -602,6 +602,7 @@ def report_profiling(save_dir):
     profiler = Profiler(save_dir)
     profiler.print_tables()
     profiler.build_csv()
+    profiler.plot(os.path.join(save_dir, "profiling.png"))
 
 if __name__ == "__main__":
 

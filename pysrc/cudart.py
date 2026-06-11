@@ -479,6 +479,7 @@ class Profiler:
         self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
 
         self.log_paths = [self.sqlite_path, self.nsys_rep_path]
+        self.build_csv = False
 
     def print_tables(self):
 
@@ -492,6 +493,39 @@ class Profiler:
         nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_api_sum", "--report=cuda_gpu_kern_sum",
                         "--format=csv", "--output={0}".format(csv_str), self.sqlite_path]
         subprocess.run(nsys_command, check = True)
+        self.built_csv = True
+
+    def plot(self, save_str):
+
+        if not self.built_csv:
+            self.build_csv()
+
+        set_plot_defaults()
+        height_ratios = np.array([1])
+        width_ratios = np.array([1,1])
+        h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+        fig = plt.figure(figsize=(20.0 / 3, h_over_w * 20.0 / 3))
+        gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), width_ratios=width_ratios, height_ratios=height_ratios)
+        axl = fig.add_subplot(gs[:,0])
+        axr = fig.add_subplot(gs[:,1])
+
+        labels_cuda = ["cudaMemcpy", "cudaDeviceSynchronize", "render_from_mesh", "wipe_img", "other"]
+        labels_all = labels_cuda + ["read", "writev", "icotl", "other"]
+
+        sizes_cuda = [1,1,1,1,1]
+        sizes_all = size_cuda + [1,1,1,1]
+
+        axl.pie(sizes_cuda, labels=labels_cuda)
+        axr.pie(sizes_all, labeps=labels_all)
+        
+        runtime_cuda = 10
+        runtime_all = 15
+        axl.set_title("CUDA Runtime = {0:.2f}s".format(cuda_runtime))
+        axr.set_title("Total Runtime = {0:.2f}s".format(runtime_all))
+
+        plt.subplots_adjust(wspace=0)
+        fig.savefig(save_str, dpi=300, bbox_inches="tight")
+        plt.close("all")
 
     def cleanup(self):
 
