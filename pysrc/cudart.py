@@ -557,7 +557,7 @@ class Profiler:
             temp_osrt_times[i] = total_time
         total_osrt_time = total_osrt_times.sum()
         hung_time = np.sum(temp_osrt_times[:2]) # add poll and wait times
-        orst_other_time = total_orst_time - hung_time
+        orst_other_time = total_osrt_time - hung_time
         orst_times = np.array([temp_orst_times[2], temp_orst_times[3], orst_other_time])
 
 
@@ -567,6 +567,9 @@ class Profiler:
         print(cuda_kernel_times)
         print(osrt_labels)
         print(osrt_times)
+
+        axl.pie(cuda_api_times, labels=cuda_api_labels)
+        axr.pie(cuda_kernel_times, labels=cuda_kernel_labels)
 
         # sizes_all = sizes_cuda + [1,1,1,1]
 
@@ -578,9 +581,9 @@ class Profiler:
         # axl.set_title("CUDA Runtime = {0:.2f}s".format(cuda_runtime))
         # axr.set_title("Total Runtime = {0:.2f}s".format(runtime_all))
 
-        # plt.subplots_adjust(wspace=0)
-        # fig.savefig(save_str, dpi=300, bbox_inches="tight")
-        # plt.close("all")
+        plt.subplots_adjust(wspace=0)
+        fig.savefig(save_str, dpi=300, bbox_inches="tight")
+        plt.close("all")
 
     def cleanup(self):
 
