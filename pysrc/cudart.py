@@ -479,7 +479,7 @@ class Profiler:
         self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
 
         self.log_paths = [self.sqlite_path, self.nsys_rep_path]
-        self.build_csv = False
+        self.built_csv = False
 
     def print_tables(self):
 
