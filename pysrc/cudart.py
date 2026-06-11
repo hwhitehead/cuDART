@@ -478,10 +478,19 @@ class Profiler:
         self.sqlite_path = os.path.join(self.output_dir, "profiling.sqlite")
         self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
 
+        self.log_paths = [self.sqlite_path, self.nsys_rep_path]
+
     def print_tables(self):
 
         nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_api_sum", "--report=cuda_gpu_kern_sum",
-                        "--format=column", "--output={0}".format(self.sqlite_path)]
+                        "--format=column", self.sqlite_path]
+        subprocess.run(nsys_command, check = True)
+
+    def build_csv(self):
+
+        csv_str = os.path.join(self.output_dir, "profiling.csv")
+        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_api_sum", "--report=cuda_gpu_kern_sum",
+                        "--format=csv", "--output={0}".format(csv_str), self.sqlite_path]
         subprocess.run(nsys_command, check = True)
 
     def cleanup(self):

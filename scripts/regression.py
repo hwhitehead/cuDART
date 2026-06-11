@@ -601,6 +601,7 @@ def report_profiling(save_dir):
 
     profiler = Profiler(save_dir)
     profiler.print_tables()
+    profiler.build_csv()
 
 if __name__ == "__main__":
 
