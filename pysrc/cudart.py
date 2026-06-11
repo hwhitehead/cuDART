@@ -568,7 +568,7 @@ class Profiler:
         print(osrt_times)
 
         all_cuda_runtimes = np.array([*cuda_api_times[:-1], *cuda_kernel_times[:-1], cuda_api_times[-1] + cuda_kernel_times[-1]])
-        all_cuda_labels = cuda_api_labels[:-1] + cuda_kernel_labels[-1] + ["other"]
+        all_cuda_labels = cuda_api_labels[:-1] + cuda_kernel_labels[:-1] + ["other"]
 
         axl.pie(all_cuda_runtimes, labels=all_cuda_labels)
         axr.pie(osrt_times, labels=osrt_labels)
