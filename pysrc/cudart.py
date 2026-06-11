@@ -503,7 +503,7 @@ class Profiler:
                         "--format=csv", "--output={0}".format(csv_str), self.sqlite_path]
         subprocess.run(nsys_command, check = True)
 
-    def collect_data(self):
+    def print_df(self):
 
         gpu_str = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_sum.csv")
         ostr_str = os.path.join(self.output_dir, "profiling.csv_osrt_sum.csv")
@@ -514,11 +514,13 @@ class Profiler:
         gpu_df = pd.read_csv(gpu_str)
         ostr_df = pd.read_csv(ostr_str)
 
-        for df in [gpu_df, ostr_df]:
-            with pd.option_context('display.max_rows', None, 'display.max_columns', None):  
-                print(df)
+        print("total wallclock duration = {0:.3f}s".format(self.wallclock_duration))
 
-        print(self.wallclock_duration)
+        print("GPU CSV")
+        print(gpu_df.to_string())
+
+        print("OSTR CSV")
+        print(ostr_df.to_string())
 
     # def plot(self, save_str):
 
