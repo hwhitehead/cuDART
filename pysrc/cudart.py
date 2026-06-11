@@ -407,9 +407,9 @@ class Scene:
 
         # parse nsys output, cleanup
         if save_profile:
-            profile_csv = os.path.join(self.save_dir, "profiling.csv")
-            nsys_comamnd = ["nsys", "stats", "--report=osrt_sum", "--format=csv", "--output={0}".format(profile_csv), profile_location + ".sqlite"]
-            subprocess.run(nsys_comamnd, check = True)
+            profile = Profiler(self.save_dir, log_header="profiling")
+            profile.print_tables()
+            profile.cleanup()
 
     def plot(self, fig_save_dir = None, cmap = "afmhot", vmin = -6, vmax = 0, remove_raw_npy = False, verbose = False, log_data = True):
         
@@ -475,6 +475,25 @@ class Scene:
                 if (verbose): print("removed data file at {0}".format(load_str))
 
         plt.close("all")
+
+class Profiler:
+
+    def __init__(self, output_dir, log_header = "profiling"):
+
+        self.output_dir = output_dir
+        self.sqlite_path = os.path.join(self.output_dir, "profiling.sqlite")
+        self.nsys-rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
+
+    def print_tables(self):
+
+        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_api_sum", "--report=cuda_gpu_kern_sum",
+                        "--format=column", "--output={0}".format(self.sqlite_path)]
+        subprocess.run(nsys_commmand, check = True)
+
+    def cleanup(self):
+
+        os.remove(self.sqlite_path)
+        os.remove(self.nsys-rep_path)
 
 class Mesh:
 
