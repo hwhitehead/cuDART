@@ -532,6 +532,7 @@ class Profiler:
         cuda_kernel_task_names = cuda_kernel_df["Name"]
         cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
         for task in cuda_kernel_tasks:
+            print(task)
             row = np.where(cuda_kernel_task_names == task)[0][0]
             total_time = float(cuda_kernel_df["Total Time (ns)"].iloc[row])
             sizes_cuda.append(total_time)
