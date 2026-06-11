@@ -486,7 +486,7 @@ class Profiler:
         self.sqlite_path = os.path.join(self.output_dir, "profiling.sqlite")
         self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
         self.wallclock_path = os.path.join(self.output_dir, "wallclock.txt")
-        self.wallclock_duration = np.loadtxt(self.wallclock_path)[0]
+        self.wallclock_duration = np.loadtxt(self.wallclock_path)
 
         self.log_paths = [self.sqlite_path, self.nsys_rep_path]
 
