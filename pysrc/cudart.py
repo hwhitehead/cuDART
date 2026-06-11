@@ -365,7 +365,7 @@ class Scene:
         # run executable with nvprof
         if save_profile is not None: 
             #command = ["nsys", "profile", "--stats=true","--export=text","--output={0}".format(save_profile)] + command
-            coomand = ["nsys", "stats", "--report=osrt_sum", "--format=csv,column", "--output={0}".format(save_profile)]
+            command = ["nsys", "stats", "--report=osrt_sum", "--format=csv,column", "--output={0}".format(save_profile)]
         # pass verbose flag 
         if verbose_cpp: 
             command = command + ["-v"]
