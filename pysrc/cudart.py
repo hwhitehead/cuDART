@@ -542,7 +542,7 @@ class Profiler:
             total_time = float(total_kernel_times.iloc[row])
             cuda_kernel_times[i] = total_time
         total_kernel_time = total_kernel_times.sum()
-        kernel_other_time = total_kernel_time - np.sum(np.array(cuda_api_times))
+        kernel_other_time = total_kernel_time - np.sum(np.array(cuda_kernel_times))
         cuda_kernel_times[-1] = kernel_other_time
 
         # load os runtime summary
@@ -569,6 +569,9 @@ class Profiler:
 
         all_cuda_runtimes = np.array([*cuda_api_times[:-1], *cuda_kernel_times[:-1], cuda_api_times[-1] + cuda_kernel_times[-1]])
         all_cuda_labels = cuda_api_labels[:-1] + cuda_kernel_labels[:-1] + ["other"]
+
+        print(all_cuda_labels)
+        print(all_cuda_runtimes)
 
         axl.pie(all_cuda_runtimes, labels=all_cuda_labels)
         axr.pie(osrt_times, labels=osrt_labels)
