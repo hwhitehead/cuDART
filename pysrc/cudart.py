@@ -509,50 +509,57 @@ class Profiler:
         axl = fig.add_subplot(gs[:,0])
         axr = fig.add_subplot(gs[:,1])
 
-        labels_cuda = ["cudaMemcpy", "cudaDeviceSynchronize", "render_from_mesh", "wipe_img", "other"]
-        labels_all = labels_cuda + ["read", "writev", "icotl", "other"]
+        cuda_api_tasks = ["cudaMemcpy", "cudaDeviceSynchronize"]
+        cuda_kern_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
 
-        sizes_cuda = []
+        cuda_api_labels = cuda_api_tasks
+        cuda_kern_labels = ["render_from_mesh", "wipe_img"]
 
         # load API data
+        cuda_api_times = np.array(np.size(cuda_api_tasks)+1)
         cuda_api_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_api_sum.csv")
         cuda_api_df = pd.read_csv(cuda_api_csv_path)
         cuda_api_task_names = cuda_api_df["Name"]
-        cuda_api_tasks = ["cudaMemcpy", "cudaDeviceSynchronize"]
-        for task in cuda_api_tasks:
-            row = np.where(cuda_api_task_names == task)[0][0]
-            total_time = float(cuda_api_df["Total Time (ns)"].iloc[row])
-            sizes_cuda.append(total_time)
         total_api_times = cuda_api_df["Total Time (ns)"]
+        for i, task in enumerate(cuda_api_tasks):
+            row = np.where(cuda_api_task_names == task)[0][0]
+            total_time = float(total_api_times.iloc[row])
+            cuda_api_times[i] = total_time
         total_api_time = total_api_times.sum()
-        print(total_api_time)
+        api_other_time = total_api_time - np.sum(np.array(cuda_api_times))
+        cuda_api_times[-1] = api_other_time
 
+        cuda_kernel_times = np.array(np.size(cuda_kern_tasks)+1)
         cuda_kernel_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_kern_sum.csv")
         cuda_kernel_df = pd.read_csv(cuda_kernel_csv_path)
         cuda_kernel_task_names = cuda_kernel_df["Name"]
-        cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
-        for task in cuda_kernel_tasks:
-            print(task)
-            row = np.where(cuda_kernel_task_names == task)[0][0]
-            total_time = float(cuda_kernel_df["Total Time (ns)"].iloc[row])
-            sizes_cuda.append(total_time)
         total_kernel_times = cuda_kernel_df["Total Time (ns)"]
+        for task in cuda_kernel_tasks:
+            row = np.where(cuda_kernel_task_names == task)[0][0]
+            total_time = float(total_kernel_times.iloc[row])
+            sizes_cuda.append(total_time)
         total_kernel_time = total_kernel_times.sum()
-        print(total_kernel_time)
+        kernel_other_time = total_kernel_time - np.sum(np.array(cuda_api_times))
+        cuda_kernel_times[-1] = kernel_other_time
 
-        sizes_all = sizes_cuda + [1,1,1,1]
+        print(cuda_api_labels)
+        print(cuda_api_times)
+        print(cuda_kernel_labels)
+        print(cuda_api_labels)
 
-        axl.pie(sizes_cuda, labels=labels_cuda)
-        axr.pie(sizes_all, labeps=labels_all)
+        # sizes_all = sizes_cuda + [1,1,1,1]
+
+        # axl.pie(sizes_cuda, labels=labels_cuda)
+        # axr.pie(sizes_all, labeps=labels_all)
         
-        runtime_cuda = 10
-        runtime_all = 15
-        axl.set_title("CUDA Runtime = {0:.2f}s".format(cuda_runtime))
-        axr.set_title("Total Runtime = {0:.2f}s".format(runtime_all))
+        # runtime_cuda = 10
+        # runtime_all = 15
+        # axl.set_title("CUDA Runtime = {0:.2f}s".format(cuda_runtime))
+        # axr.set_title("Total Runtime = {0:.2f}s".format(runtime_all))
 
-        plt.subplots_adjust(wspace=0)
-        fig.savefig(save_str, dpi=300, bbox_inches="tight")
-        plt.close("all")
+        # plt.subplots_adjust(wspace=0)
+        # fig.savefig(save_str, dpi=300, bbox_inches="tight")
+        # plt.close("all")
 
     def cleanup(self):
 
