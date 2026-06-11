@@ -503,7 +503,7 @@ class Profiler:
                         "--format=csv", "--output={0}".format(csv_str), self.sqlite_path]
         subprocess.run(nsys_command, check = True)
 
-    def print_df(self):
+    def print_df(self, verbose=False):
 
         gpu_str = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_sum.csv")
         ostr_str = os.path.join(self.output_dir, "profiling.csv_osrt_sum.csv")
@@ -514,13 +514,27 @@ class Profiler:
         gpu_df = pd.read_csv(gpu_str)
         ostr_df = pd.read_csv(ostr_str)
 
-        print("total wallclock duration = {0:.3f}s".format(self.wallclock_duration))
+        gpu_csv_labels = ["[CUDA memcpy Host-to-Device]", "[CUDA memcpy Device-to-Host]",
+                        "render_from_mesh(Camera, float *, Mesh **, TraceArgs)",
+                        "wipe_img(Camera, float *)"]
 
-        print("GPU CSV")
-        print(gpu_df.to_string())
+        print("Total Wallclock Duration = {0:.3f}s".format(self.wallclock_duration))
+        print("GPU Summary:")
+        gpu_duration_sum = 0
+        for task in gpu_csv_labels:
+            row = np.where(gpu_df["Operation"] == task)[0][0]         
+            num_calls = int(gpu_df["Instances"].iloc[row])
+            duration = float(gpu_df["Total Time (ns)"].iloc[row]) * 1e-9
+            gpu_duration_sum += duration
+            print("{0} ({1} calls): {2:.3f}s".format(gpu_csv_label, num_calls, duration))
+        print("other: {0:.3f}s".format(gpu_df["Total Time (ns)"].sum() - gpu_duration_sum))
 
-        print("OSTR CSV")
-        print(ostr_df.to_string())
+        if verbose:
+            print("GPU CSV")
+            print(gpu_df.to_string())
+
+            print("OSTR CSV")
+            print(ostr_df.to_string())
 
     # def plot(self, save_str):
 
