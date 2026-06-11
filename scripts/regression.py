@@ -597,6 +597,10 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     fig.savefig(png_str, dpi=300, bbox_inches="tight")
     plt.close("all")
 
+def report_profiling(save_dir):
+
+    profiler = Profiler(save_dir)
+    profiler.print_tables()
 
 if __name__ == "__main__":
 
@@ -674,6 +678,10 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="generate physics summary")
+    parser.add_argument("-p",
+                        action="store_true",
+                        default=False,
+                        help="generate profiling report from output")
 
     args = vars(parser.parse_args())
     
@@ -685,6 +693,11 @@ if __name__ == "__main__":
                             sim_args = sim_args,
                             camera_args = camera_args,
                             verbose = args["v"])
+
+    if (args["p"]):
+        if (args["save_dir"] is None):
+            raise Exception("unable to run profiler summary without save location (use --save_dir)")
+        report_profiling(save_dir = args["save_dir"])
 
     # except multiple run-type flags
     if (args["r"] and args["rl"]):

@@ -405,12 +405,6 @@ class Scene:
                 os.remove(self.temp_camera_file)
                 if verbose: print("removed temporary camera file.")
 
-        # parse nsys output, cleanup
-        if save_profile:
-            profile = Profiler(self.save_dir, log_header="profiling")
-            profile.print_tables()
-            profile.cleanup()
-
     def plot(self, fig_save_dir = None, cmap = "afmhot", vmin = -6, vmax = 0, remove_raw_npy = False, verbose = False, log_data = True):
         
         """
@@ -488,7 +482,7 @@ class Profiler:
 
         nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_api_sum", "--report=cuda_gpu_kern_sum",
                         "--format=column", "--output={0}".format(self.sqlite_path)]
-        subprocess.run(nsys_commmand, check = True)
+        subprocess.run(nsys_command, check = True)
 
     def cleanup(self):
 
