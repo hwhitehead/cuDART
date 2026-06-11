@@ -534,7 +534,7 @@ class Profiler:
         print("\n")
         print("OSRT Summary:")
         osrt_duration_sum = 0
-        for task in gpu_csv_labels:
+        for task in osrt_csv_labels:
             row = np.where(ostr_df["Name"] == task)[0][0]         
             num_calls = int(ostr_df["Num Calls"].iloc[row])
             duration = float(ostr_df["Total Time (ns)"].iloc[row]) * 1e-9
