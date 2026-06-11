@@ -570,11 +570,14 @@ class Profiler:
         all_cuda_runtimes = np.array([*cuda_api_times[:-1], *cuda_kernel_times[:-1], cuda_api_times[-1] + cuda_kernel_times[-1]])
         all_cuda_labels = cuda_api_labels[:-1] + cuda_kernel_labels[:-1] + ["other"]
 
+        all_runtimes = np.array([*all_cuda_runtimes[:-1], osrt_times[:-1], all_cuda_runtimes[-1] + osrt_times[-1]])
+        all_labels = all_cuda_labels[:-1] + osrt_labels[:-1] + ["other"]
+
         print(all_cuda_labels)
         print(all_cuda_runtimes)
 
         axl.pie(all_cuda_runtimes, labels=all_cuda_labels)
-        axr.pie(osrt_times, labels=osrt_labels)
+        axr.pie(all_runtimes, labels=all_labels)
 
         # sizes_all = sizes_cuda + [1,1,1,1]
 
@@ -583,8 +586,8 @@ class Profiler:
         
         # runtime_cuda = 10
         # runtime_all = 15
-        # axl.set_title("CUDA Runtime = {0:.2f}s".format(cuda_runtime))
-        # axr.set_title("Total Runtime = {0:.2f}s".format(runtime_all))
+        axl.set_title("CUDA Runtime = {0:.2f}s".format(np.sum(all_cuda_runtimes * 1e-9)))
+        axr.set_title("Total Runtime = {0:.2f}s".format(np.sum(all_runtimes * 1e-9)))
 
         plt.subplots_adjust(wspace=0)
         fig.savefig(save_str, dpi=300, bbox_inches="tight")
