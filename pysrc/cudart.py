@@ -482,7 +482,7 @@ class Profiler:
 
         self.output_dir = output_dir
         self.sqlite_path = os.path.join(self.output_dir, "profiling.sqlite")
-        self.nsys-rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
+        self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
 
     def print_tables(self):
 
@@ -493,7 +493,7 @@ class Profiler:
     def cleanup(self):
 
         os.remove(self.sqlite_path)
-        os.remove(self.nsys-rep_path)
+        os.remove(self.nsys_rep_path)
 
 class Mesh:
 
