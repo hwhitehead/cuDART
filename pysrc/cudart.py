@@ -528,7 +528,7 @@ class Profiler:
         print(total_api_time)
 
         cuda_kernel_csv_path = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_kern_sum.csv")
-        cuda_kernel_df = pd.read_csv(cuda_api_csv_path)
+        cuda_kernel_df = pd.read_csv(cuda_kernel_csv_path)
         cuda_kernel_task_names = cuda_kernel_df["Name"]
         cuda_kernel_tasks = ["render_from_mesh(Camera, float *, Mesh **, TraceArgs)", "wipe_img(Camera, float *)"]
         for task in cuda_kernel_tasks:
