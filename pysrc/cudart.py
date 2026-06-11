@@ -534,10 +534,10 @@ class Profiler:
         cuda_kernel_df = pd.read_csv(cuda_kernel_csv_path)
         cuda_kernel_task_names = cuda_kernel_df["Name"]
         total_kernel_times = cuda_kernel_df["Total Time (ns)"]
-        for task in cuda_kernel_tasks:
+        for i, task in enumerate(cuda_kern_tasks):
             row = np.where(cuda_kernel_task_names == task)[0][0]
             total_time = float(total_kernel_times.iloc[row])
-            sizes_cuda.append(total_time)
+            cuda_kernel_times[i] = total_time
         total_kernel_time = total_kernel_times.sum()
         kernel_other_time = total_kernel_time - np.sum(np.array(cuda_api_times))
         cuda_kernel_times[-1] = kernel_other_time
