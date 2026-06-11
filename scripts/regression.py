@@ -100,8 +100,8 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True, sphere
         tail_emm_mask = (in_tail) & (ii == 0)
         lead_vel_mask = (in_lead) & (ii == 3)
         tail_vel_mask = (in_tail) & (ii == 3)
-        save_data[lead_emm_mask] = emm_lead[lead_emm_mask]                      # match emission in lead/tail
-        save_data[tail_emm_mask] = emm_tail[tail_emm_mask]  
+        save_data[lead_emm_mask] = emm_lead                                     # match emission in lead/tail
+        save_data[tail_emm_mask] = emm_tail 
         save_data[lead_vel_mask] = v_in_c                                       # invert velocity in lead/tail
         save_data[tail_vel_mask] = -v_in_c
         save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
