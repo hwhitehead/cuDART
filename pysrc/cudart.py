@@ -558,7 +558,7 @@ class Profiler:
         total_osrt_time = total_osrt_times.sum()
         hung_time = np.sum(temp_osrt_times[:2]) # add poll and wait times
         orst_other_time = total_osrt_time - hung_time
-        orst_times = np.array([temp_orst_times[2], temp_orst_times[3], orst_other_time])
+        orst_times = np.array([temp_osrt_times[2], temp_osrt_times[3], orst_other_time])
 
 
         print(cuda_api_labels)
