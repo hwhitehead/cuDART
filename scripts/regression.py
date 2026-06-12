@@ -383,7 +383,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     theta = camera_args["template"].theta                      
 
     # first render at midpoint time for emitter
-    nolookback_load_str = os.path.join(load_dir, "snapshot" + str(0.5 * sim_args["num_snapshots"]).zfill(5) + ".npy")
+    nolookback_load_str = os.path.join(load_dir, "snapshot" + str(int(0.5 * sim_args["num_snapshots"])).zfill(5) + ".npy")
 
     # second render at midpoint displacement for observer
     x_obs_mid_m = 0.25 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                        # cast to astro units    
