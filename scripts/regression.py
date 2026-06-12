@@ -397,7 +397,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
     camera_args["template"].t_obs = t_obs # only used with the lookback render
-    cameras = [camera_args["template"]]
+    cameras = [camera_args["template"]] * 2
 
     # build scene and call render, with and without lookback
     labels = ["nolookback", "lookback"]
@@ -453,7 +453,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         axes[i].xaxis.set_visible(False)
         axes[i].yaxis.set_visible(False)
         axes[i].text(0.5,0.95,s=subplot_labels[i], color='w', va="top", ha="center")
-        axes[i].text(0,0.05,s=math_label + " = {0:.3f}".format(L_ratio), color='w', va="bottom", ha="left")
+        axes[i].text(0.5,0.05,s=math_label + " = {0:.3f}".format(L_ratio), color='w', va="bottom", ha="center")
         axes[i].set_facecolor("k")
 
     true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
