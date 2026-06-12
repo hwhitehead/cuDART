@@ -402,7 +402,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     nolookback_load_str = os.path.join(load_dir, "snapshot" + str(nolookback_snapshot).zfill(5) + ".npy")
 
     # second render at midpoint displacement for observer
-    x_obs_mid_m = 0.5 * x_max_in_m 
+    x_obs_mid_m = 0.25 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m
     d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
     t_obs_in_s = d_mid_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
