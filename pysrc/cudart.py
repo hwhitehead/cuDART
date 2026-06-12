@@ -526,8 +526,9 @@ class Profiler:
             row = np.where(gpu_df["Operation"] == task)[0][0]         
             num_calls = int(gpu_df["Instances"].iloc[row])
             duration = float(gpu_df["Total Time (ns)"].iloc[row]) * 1e-9
+            average = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
             gpu_duration_sum += duration
-            print("{0} ({1} calls): {2:.3f}s".format(task, num_calls, duration))
+            print("{0}: {1} calls in {2:.3f}s (average {3:.3f}ms)".format(task, num_calls, duration, average_ms))
         total_gpu_duration = gpu_df["Total Time (ns)"].sum()
         print("GPU (other): {0:.3f}s".format(total_gpu_duration - gpu_duration_sum))
         print("Total GPU Duration = {0:.3f}s".format(total_gpu_duration))
@@ -538,8 +539,9 @@ class Profiler:
             row = np.where(ostr_df["Name"] == task)[0][0]         
             num_calls = int(ostr_df["Num Calls"].iloc[row])
             duration = float(ostr_df["Total Time (ns)"].iloc[row]) * 1e-9
+            average = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
             osrt_duration_sum += duration
-            print("{0} ({1} calls): {2:.3f}s".format(task, num_calls, duration))
+            print("{0}: {1} calls in {2:.3f}s (average {3:.3f})".format(task, num_calls, duration, average_ms))
         print("Total OSRT Duration = {0:.3f}s".format(osrt_duraiton_sum))
         print("OSRT (other): {0:.3f}s".format(self.wallclock_duration - osrt_duration_sum - total_gpu_duration))
 
