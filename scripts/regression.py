@@ -439,28 +439,29 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
     dA = (X[1] - X[0]) * (Y[1] - Y[0])
-    r_mask = 3 * r_blob_in_code
-    
+
     subplot_labels = ["Rendered without Lookback", "Rendered with Lookback"]
     math_label = r"$\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$"
     png_str = os.path.join(save_dir, "penrose-terrel.png")
     for i, save_dir in enumerate(save_dirs):
         raw_str = os.path.join(save_dir, "raw00001.npy")
         img = np.load(raw_str)
-        L_adv = np.sum(img[in_adv]) * dA
-        L_rec = np.sum(img[in_rec]) * dA
-        L_ratio = L_adv / L_rec
+        
 
         # build masks
         r_adv_sqr = (XX - x_positions[i][0]) ** 2 + (YY - 0.5) ** 2
         r_rec_sqr = (XX - x_positions[i][1]) ** 2 + (YY - 0.5) ** 2
         
-        in_adv = (r_adv_sqr < r_mask ** 2)
-        in_rec = (r_rec_sqr < r_mask ** 2)
+        in_adv = (r_adv_sqr < r_blob_in_code ** 2)
+        in_rec = (r_rec_sqr < r_blob_in_code ** 2)
 
         CC = np.zeros_like(XX)
         CC[in_adv] = 0.5
         CC[in_rec] = 1.0
+
+        L_adv = np.sum(img[in_adv]) * dA
+        L_rec = np.sum(img[in_rec]) * dA
+        L_ratio = L_adv / L_rec
 
         pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
         pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot")
