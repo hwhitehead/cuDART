@@ -406,7 +406,6 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
-    camera_args["template"].tilt = tilt
     camera_args["template"].t_obs = t_obs # only used with the lookback render
     cameras = [camera_args["template"]]
 
