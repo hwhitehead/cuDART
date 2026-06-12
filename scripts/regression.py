@@ -556,8 +556,8 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 
     D_app = 1.0 / (sim_args["Gamma"] * (1 - v_in_c * np.cos(theta)))
     D_rec = 1.0 / (sim_args["Gamma"] * (1 + v_in_c * np.cos(theta)))
-    lum_app_ratio_true = np.power(D_app, 3.0 - 0.6)
-    lum_rec_ratio_true = np.power(D_rec, 3.0 - 0.6)
+    lum_app_ratio_true = np.power(D_app, 2.0 + 0.6)
+    lum_rec_ratio_true = np.power(D_rec, 2.0 + 0.6)
     print(lum_app_ratio_true / lum_rec_ratio_true)
 
     pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
@@ -600,8 +600,7 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
 def report_profiling(save_dir, verbose = True):
 
     profiler = Profiler(save_dir)
-    profiler.print_df(verbose)
-    # profiler.plot(os.path.join(save_dir, "profiling.png"))
+    profiler.report(verbose)
 
 if __name__ == "__main__":
 
