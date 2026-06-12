@@ -402,10 +402,10 @@ class Scene:
         if (verbose): print("executable finished.")
 
         # log subproc duration
-        duration = stop_cpp_time - start_cpp_time
-        if save_profile:
-            wallclock_str = os.path.join(self.save_dir, "wallclock.txt")
-            np.savetxt(wallclock_str, np.array([duration]))
+        # duration = stop_cpp_time - start_cpp_time
+        # if save_profile:
+        #     wallclock_str = os.path.join(self.save_dir, "wallclock.txt")
+        #     np.savetxt(wallclock_str, np.array([duration]))
 
         # destroy temp camera file if not specified at Scene init
         if self.camera_file_name is None:
