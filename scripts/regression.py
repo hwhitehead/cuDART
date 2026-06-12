@@ -420,7 +420,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     load_strs = [nolookback_load_str, load_dir]
     lookbacks = [False, True]
     for i, label in enumerate(labels):
-        #scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+        scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
         #scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
         #scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
     if (verbose): print("finished raw image generation")
