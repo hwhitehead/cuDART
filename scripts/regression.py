@@ -430,8 +430,8 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
-    r_adv_sqr = (XX + 0.25) ** 2 + YY ** 2
-    r_rec_sqr = (XX - 0.25) ** 2 + YY ** 2
+    r_adv_sqr = (XX - 0.25) ** 2 + YY ** 2
+    r_rec_sqr = (XX - 0.75) ** 2 + YY ** 2
     r_mask = 0.25
     in_adv = (r_adv_sqr < r_mask ** 2)
     in_rec = (r_rec_sqr < r_mask ** 2)
@@ -443,6 +443,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     for i, save_dir in enumerate(save_dirs):
         raw_str = os.path.join(save_dir, "raw00000.npy")
         img = np.load(raw_str)
+        print(np.max(img))
         L_adv = np.sum(img[in_adv]) * dA
         L_rec = np.sum(img[in_rec]) * dA
         L_ratio = L_adv / L_rec
@@ -456,7 +457,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         axes[i].set_facecolor("k")
 
     true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
-    fig.suptitle(r"$\theta = \frac{\pi}{2}$, $\Gamma = 2 \implies \frac{F_\mathrm{adv}}{F_\mathrm{rec}}$" + " = {0:.3f}".format(true_ratio))
+    fig.suptitle(r"$\theta = \frac{\pi}{2}$, $\Gamma = 2 \implies \frac{F_\mathrm{adv}}{F_\mathrm{rec}} = \left(\frac{1+\beta \cos(\theta)}{1-\beta \cos(\theta)}\right)^{3-\alpha}$" + " = {0:.3f}".format(true_ratio))
 
     sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
     fig.colorbar(sm, cax=cax, orientation="vertical")
