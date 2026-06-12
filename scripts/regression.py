@@ -631,7 +631,7 @@ if __name__ == "__main__":
                     "relativistic": True,
                     "template": template_camera,
                     "camera_file_name": None,
-                    "save_fig": False,
+                    "save_fig": True,
                     "snapshot_index": None}
 
     # handle command line arguments for regression tests
