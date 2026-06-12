@@ -380,6 +380,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
+    theta = camera_args["template"].theta
 
     # calculate start time (just before light from origin reaches camera)
     D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
