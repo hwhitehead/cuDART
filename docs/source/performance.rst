@@ -113,3 +113,7 @@ summing along these cells takes only 7 seconds, across 10,000 render calls each 
 :code:`cuDART` performance will largely be dependent on the sizes of files rendered, and the quality of the I/O environment rather than the GPU architecture itself. 
 As I/O can represent a large fraction of the runtime, :code:`cuDART` is structured to perform as few reads as possible, and render as many images as possible for 
 each load.
+
+
+When :code:`Scene.render` is called with :code:`verbose_cpp = True`, the C++ executable will print a series of timestamps to the command line;
+these times track the CPU clock, a more accurate wallclock duration is output as :code:`wallclock.txt` in the output directory.

@@ -441,7 +441,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
-    titles = ["Rendered without Lookback", "Rendered with Lookback"]
+    subplot_labels = ["Rendered without Lookback", "Rendered with Lookback"]
     png_str = os.path.join(save_dir, "penrose-terrel.png")
     for i, save_dir in enumerate(save_dirs):
         raw_str = os.path.join(save_dir, "raw00000.npy")
@@ -451,7 +451,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         axes[i].set_ylim([0,1])
         axes[i].xaxis.set_visible(False)
         axes[i].yaxis.set_visible(False)
-        axes[i].set_title(titles[i])
+        axes[i].text(0,0.95,text=subplot_labels[i], color='w', va="top", ha="center")
         axes[i].set_facecolor("k")
 
     sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
@@ -575,22 +575,25 @@ def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
     # plot ejecta bounding box
     L_box = r_blob_in_code
     tilt_in_deg = tilt * 180 / np.pi
-    app_box = patches.Rectangle(xy = (X_app - L_box * app_ratio, Y_app - L_box), 
-                                width = 2 * L_box * app_ratio, height = 2 * L_box,
-                                angle = -tilt_in_deg, rotation_point="center",
-                                edgecolor = "w", fill = False)
-    rec_box = patches.Rectangle(xy = (X_rec - L_box * rec_ratio, Y_rec - L_box), 
-                                width = 2 * L_box * rec_ratio, height = 2 * L_box,
-                                angle = -tilt_in_deg, rotation_point="center",
-                                edgecolor = "w", fill = False)
-    ax.add_patch(app_box)
-    ax.add_patch(rec_box)
+    # app_box = patches.Rectangle(xy = (X_app - L_box * app_ratio, Y_app - L_box), 
+    #                             width = 2 * L_box * app_ratio, height = 2 * L_box,
+    #                             angle = -tilt_in_deg, rotation_point="center",
+    #                             edgecolor = "w", fill = False)
+    # rec_box = patches.Rectangle(xy = (X_rec - L_box * rec_ratio, Y_rec - L_box), 
+    #                             width = 2 * L_box * rec_ratio, height = 2 * L_box,
+    #                             angle = -tilt_in_deg, rotation_point="center",
+    #                             edgecolor = "w", fill = False)
+    # ax.add_patch(app_box)
+    # ax.add_patch(rec_box)
 
-    domain = patches.Rectangle(xy = (0.5 - 0.5 * np.sin(theta), 0.5 - 0.5 * np.sin(theta)),
-                                width = np.sin(theta), height = np.sin(theta),
-                                angle = -tilt_in_deg, rotation_point = "center",
-                                edgecolor = "w", fill = False)
-    ax.add_patch(domain)
+    # domain = patches.Rectangle(xy = (0.5 - 0.5 * np.sin(theta), 0.5 - 0.5 * np.sin(theta)),
+    #                             width = np.sin(theta), height = np.sin(theta),
+    #                             angle = -tilt_in_deg, rotation_point = "center",
+    #                             edgecolor = "w", fill = False)
+    # ax.add_patch(domain)
+
+    ax.set_title(r"$\theta = \frac{\pi}{4}$, $\Gamma = 2$")
+
 
     png_str = os.path.join(save_dir, "summary.png")
     plt.subplots_adjust(hspace = 0, wspace= 0)
@@ -609,14 +612,14 @@ if __name__ == "__main__":
     # dict for simulation args (all lengths in kpc)
     sim_args = {"Gamma": 2.0,
                 "L_domain": 120.0,
-                "r_blob": 2.5,
+                "r_blob": 7.5,
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
                 "target_theta": None}
 
     # construct template camera
     template_camera = Camera()
-    template_camera.tilt = (90.0 / 180) * np.pi     # tilt from bias vector (aligned with z axis)
+    template_camera.tilt = (90.0 / 180) * np.pi      # tilt from bias vector (aligned with z axis)
     template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                   # small value, system axisymmetric in phi
     template_camera.theta = 0.25 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
@@ -627,7 +630,7 @@ if __name__ == "__main__":
 
     # dict for camera args
     camera_args = {"num_img": 100,
-                    "resize_img": False,
+                    "resize_img": True,
                     "relativistic": True,
                     "template": template_camera,
                     "camera_file_name": None,
