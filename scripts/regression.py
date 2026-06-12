@@ -380,37 +380,19 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
-    theta = camera_args["template"].theta
-
-    # calculate start time (just before light from origin reaches camera)
-    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
-    t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
-    t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
-    t_min *= 0.95                                                                               # start render just before flight time 
-
-    # calculate stop time (when approaching ejectum reaches maximal extent)
-    x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
-    d_in_m = x_max_in_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
-    t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
-    t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units    
+    theta = camera_args["template"].theta                      
 
     # first render at midpoint time for emitter
-    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                                 # cast to astro units
-    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                                    # calc duration for blob to reach domain edge
-    t_emitter = 0.5 * T_in_Myr
-    nolookback_snapshot = int(sim_args["num_snapshots"] * t_emitter / T_in_Myr)
-    nolookback_load_str = os.path.join(load_dir, "snapshot" + str(nolookback_snapshot).zfill(5) + ".npy")
+    nolookback_load_str = os.path.join(load_dir, "snapshot" + str(0.5 * sim_args["num_snapshots"]).zfill(5) + ".npy")
 
     # second render at midpoint displacement for observer
-    x_obs_mid_m = 0.25 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m
+    x_obs_mid_m = 0.25 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                        # cast to astro units    
+    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation    
     d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
     t_obs_in_s = d_mid_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
-    
-    nominal_snapshot_index = int((t_obs - t_min) / (t_max - t_min) * sim_args["num_snapshots"])
-    print(nominal_snapshot_index)
 
-    return
+    print(t_obs)
 
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
