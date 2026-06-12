@@ -74,7 +74,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True, sphere
 
     # build snapshots
     for n, t_in_Myr in enumerate(t_span):
-        if n < 48: continue
+        if n < 48: continue # TEMP
         # unlabelled data is a single .npy file, without a header
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         
@@ -420,8 +420,8 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     load_strs = [nolookback_load_str, load_dir]
     lookbacks = [False, True]
     for i, label in enumerate(labels):
-        scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
+        #scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+        #scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
         #scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
     if (verbose): print("finished raw image generation")
 
@@ -442,18 +442,33 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
+    r_adv_sqr = (XX - 0.25) ** 2 + YY ** 2
+    r_rec_sqr = (XX - 0.75) ** 2 + YY ** 2
+    r_mask = 0.25
+    in_adv = (r_adv_sqr < r_mask ** 2)
+    in_rec = (r_rec_sqr < r_mask ** 2)
+    dA = (X[1] - X[0]) * (Y[1] - Y[0])
+
     subplot_labels = ["Rendered without Lookback", "Rendered with Lookback"]
+    math_label = r"$\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$"
     png_str = os.path.join(save_dir, "penrose-terrel.png")
     for i, save_dir in enumerate(save_dirs):
         raw_str = os.path.join(save_dir, "raw00000.npy")
         img = np.load(raw_str)
+        L_adv = np.sum(img[in_adv]) * dA
+        L_rec = np.sum(img[in_rec]) * dA
+        L_ratio = L_adv / L_rec
         pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
         axes[i].set_xlim([0,1])
         axes[i].set_ylim([0,1])
         axes[i].xaxis.set_visible(False)
         axes[i].yaxis.set_visible(False)
         axes[i].text(0,0.95,text=subplot_labels[i], color='w', va="top", ha="center")
+        axes[i].text(0,0.05,text=math_label + " = {0:.3f}".format(L_ratio))
         axes[i].set_facecolor("k")
+
+    true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
+    fig.suptitle("$\theta = \pi / 2, \; \Gamma = 2 \implies \frac{F_\mathrm{adv}}{F_\mathrm{rec}}$" + " = {0:.3f}".format(true_ratio))
 
     sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
     fig.colorbar(sm, cax=cax, orientation="vertical")
