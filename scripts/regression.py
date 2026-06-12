@@ -74,6 +74,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True, sphere
 
     # build snapshots
     for n, t_in_Myr in enumerate(t_span):
+        if n < 48: continue
         # unlabelled data is a single .npy file, without a header
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         
