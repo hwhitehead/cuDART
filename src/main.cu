@@ -710,6 +710,12 @@ int main(int argc, char *argv[]) {
         printf("cuDART terminated.\n");
     }
 
+    // write total duration to text file
+    std::string wallclock_file_str = save_str_header + "/wallclock.txt";
+    std::ofstream wallclock_file(wallclock_file_str);
+    wallclock_file << main_dur;
+    wallclock_file.close();
+
     // print start time
     auto end_time_clock = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end_time_clock);

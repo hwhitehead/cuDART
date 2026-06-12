@@ -554,9 +554,10 @@ class Profiler:
         print("Fractional OSRT Duration = {0:.3f}%".format(100.0 * osrt_total / self.wallclock_duration))
 
         if verbose:
+            print("\n")
             print("GPU CSV")
             print(gpu_df.to_string())
-
+            print("\n")
             print("OSTR CSV")
             print(ostr_df.to_string())
 
