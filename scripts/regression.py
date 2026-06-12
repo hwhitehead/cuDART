@@ -401,8 +401,11 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     nolookback_snapshot = int(sim_args["num_snapshots"] * t_emitter / T_in_Myr)
     nolookback_load_str = os.path.join(load_dir, "snapshot" + str(nolookback_snapshot).zfill(5) + ".npy")
 
-    # second render at midpoint time for observer
-    t_obs = 0.5 * (t_min + t_max)
+    # second render at midpoint displacement for observer
+    x_obs_mid_m = 0.5 * x_max_in_m 
+    d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
+    t_obs_in_s = d_mid_m / c_light
+    t_obs = t_obs_in_s / Myr_to_s
     
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
@@ -419,7 +422,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     lookbacks = [False, True]
     for i, label in enumerate(labels):
         scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-        #scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
+        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
         #scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
     if (verbose): print("finished raw image generation")
 
@@ -475,11 +478,6 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     plt.subplots_adjust(hspace = 0, wspace= 0)
     fig.savefig(png_str, dpi=300, bbox_inches="tight")
     plt.close("all")
-
-    # cleanup scratch dirs
-    for local_save_dir in save_dirs:
-        os.remove(os.path.join(local_save_dir, "raw00000.npy"))
-        os.rmdir(local_save_dir)
 
     if (verbose): print("finished penrose-terrell test, see {0} for output".format(png_str))
 
@@ -644,11 +642,11 @@ if __name__ == "__main__":
 
     # dict for camera args
     camera_args = {"num_img": 100,
-                    "resize_img": True,
+                    "resize_img": False,
                     "relativistic": True,
                     "template": template_camera,
                     "camera_file_name": None,
-                    "save_fig": True,
+                    "save_fig": False,
                     "snapshot_index": None}
 
     # handle command line arguments for regression tests
