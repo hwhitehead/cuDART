@@ -74,7 +74,6 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True, sphere
 
     # build snapshots
     for n, t_in_Myr in enumerate(t_span):
-        if n < 48: continue # TEMP
         # unlabelled data is a single .npy file, without a header
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         
@@ -397,7 +396,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
     camera_args["template"].t_obs = t_obs # only used with the lookback render
-    cameras = [camera_args["template"]] * 2
+    cameras = [camera_args["template"]] * 2 # TEMP
 
     # build scene and call render, with and without lookback
     labels = ["nolookback", "lookback"]
@@ -441,7 +440,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     math_label = r"$\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$"
     png_str = os.path.join(save_dir, "penrose-terrel.png")
     for i, save_dir in enumerate(save_dirs):
-        raw_str = os.path.join(save_dir, "raw00000.npy")
+        raw_str = os.path.join(save_dir, "raw00001.npy")
         img = np.load(raw_str)
         print(np.max(img))
         L_adv = np.sum(img[in_adv]) * dA
