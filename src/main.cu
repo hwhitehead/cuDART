@@ -703,8 +703,8 @@ int main(int argc, char *argv[]) {
     } // end if lookback
 
     // terminate
+    float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
     if (verbose) {
-        float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
         printf("total runtime                                 %.6fs\n",main_dur);
         std::cout << "=============================================================\n";
         printf("cuDART terminated.\n");
@@ -719,7 +719,7 @@ int main(int argc, char *argv[]) {
     // print start time
     auto end_time_clock = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end_time_clock);
-    std::cout << "Ending cuDART backend at " << std::ctime(&end_time) << std::endl;
+    std::cout << "Ended cuDART backend at " << std::ctime(&end_time) << "." << std::endl;
 
     return 0;
 }
