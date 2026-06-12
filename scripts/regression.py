@@ -407,6 +407,11 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     t_obs_in_s = d_mid_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
     
+    nominal_snapshot_index = int((t_obs - t_min) / (t_max - t_min) * sim_args["num_snapshots"])
+    print(nominal_snapshot_index)
+
+    return
+
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
     camera_args["template"].t_obs = t_obs # only used with the lookback render
@@ -443,8 +448,8 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
-    r_adv_sqr = (XX - 0.25) ** 2 + YY ** 2
-    r_rec_sqr = (XX - 0.75) ** 2 + YY ** 2
+    r_adv_sqr = (XX + 0.25) ** 2 + YY ** 2
+    r_rec_sqr = (XX - 0.25) ** 2 + YY ** 2
     r_mask = 0.25
     in_adv = (r_adv_sqr < r_mask ** 2)
     in_rec = (r_rec_sqr < r_mask ** 2)
@@ -465,7 +470,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         axes[i].xaxis.set_visible(False)
         axes[i].yaxis.set_visible(False)
         axes[i].text(0.5,0.95,s=subplot_labels[i], color='w', va="top", ha="center")
-        axes[i].text(0,0.05,s=math_label + " = {0:.3f}".format(L_ratio), color='w', va="bottom", ha="center")
+        axes[i].text(0,0.05,s=math_label + " = {0:.3f}".format(L_ratio), color='w', va="bottom", ha="left")
         axes[i].set_facecolor("k")
 
     true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
