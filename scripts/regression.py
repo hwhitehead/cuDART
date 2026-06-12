@@ -401,7 +401,8 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     x_adv_pos = (x_adv + 0.5) # shift to image space
     x_rec_pos = (x_rec + 0.5)
-
+    x_positions = [[-0.25, 0.25], [x_adv_pos, x_rec_pos]]
+    
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
     camera_args["template"].t_obs = t_obs # only used with the lookback render
@@ -437,18 +438,9 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     X = np.linspace(0,camera_args["template"].length_X,camera_args["template"].num_pixels_X)
     Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
-    CC = np.zeros_like(XX)
-
-    r_adv_sqr = (XX - x_adv_pos) ** 2 + (YY - 0.5) ** 2
-    r_rec_sqr = (XX - x_rec_pos) ** 2 + (YY - 0.5) ** 2
-    r_mask = 3 * r_blob_in_code
-    in_adv = (r_adv_sqr < r_mask ** 2)
-    in_rec = (r_rec_sqr < r_mask ** 2)
     dA = (X[1] - X[0]) * (Y[1] - Y[0])
-
-    CC[in_adv] = 0.5
-    CC[in_rec] = 1.0
-
+    r_mask = 3 * r_blob_in_code
+    
     subplot_labels = ["Rendered without Lookback", "Rendered with Lookback"]
     math_label = r"$\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$"
     png_str = os.path.join(save_dir, "penrose-terrel.png")
@@ -458,7 +450,19 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         L_adv = np.sum(img[in_adv]) * dA
         L_rec = np.sum(img[in_rec]) * dA
         L_ratio = L_adv / L_rec
-        #pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
+
+        # build masks
+        r_adv_sqr = (XX - x_positions[i][0]) ** 2 + (YY - 0.5) ** 2
+        r_rec_sqr = (XX - x_positions[i][1]) ** 2 + (YY - 0.5) ** 2
+        
+        in_adv = (r_adv_sqr < r_mask ** 2)
+        in_rec = (r_rec_sqr < r_mask ** 2)
+
+        CC = np.zeros_like(XX)
+        CC[in_adv] = 0.5
+        CC[in_rec] = 1.0
+
+        pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
         pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot")
         axes[i].set_xlim([0,1])
         axes[i].set_ylim([0,1])
