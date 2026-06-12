@@ -380,8 +380,6 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
-    theta = 0.5 * np.pi + epsilon                                                           # fixed orientation for this example
-    tilt = 0.5 * np.pi
 
     # calculate start time (just before light from origin reaches camera)
     D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
@@ -463,12 +461,12 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         axes[i].set_ylim([0,1])
         axes[i].xaxis.set_visible(False)
         axes[i].yaxis.set_visible(False)
-        axes[i].text(0,0.95,s=subplot_labels[i], color='w', va="top", ha="center")
-        axes[i].text(0,0.05,s=math_label + " = {0:.3f}".format(L_ratio))
+        axes[i].text(0.5,0.95,s=subplot_labels[i], color='w', va="top", ha="center")
+        axes[i].text(0,0.05,s=math_label + " = {0:.3f}".format(L_ratio), color='w', va="bottom", ha="center")
         axes[i].set_facecolor("k")
 
     true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
-    fig.suptitle(r"$\theta = \frac{\pi}{2}$, $\Gamma = 2$, $\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$" + " = {0:.3f}".format(true_ratio))
+    fig.suptitle(r"$\theta = \frac{\pi}{2}$, $\Gamma = 2 \implies \frac{F_\mathrm{adv}}{F_\mathrm{rec}}$" + " = {0:.3f}".format(true_ratio))
 
     sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
     fig.colorbar(sm, cax=cax, orientation="vertical")
