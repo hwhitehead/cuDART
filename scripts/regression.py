@@ -380,6 +380,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
     theta = camera_args["template"].theta                      
+    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]
 
     # first render at midpoint time for emitter
     nolookback_load_str = os.path.join(load_dir, "snapshot" + str(int(0.5 * sim_args["num_snapshots"])).zfill(5) + ".npy")
@@ -438,10 +439,9 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     XX, YY = np.meshgrid(X, Y, indexing="ij")
     CC = np.zeros_like(XX)
 
-
-    r_adv_sqr = (XX - x_adv_pos) ** 2 + YY ** 2
-    r_rec_sqr = (XX - x_rec_pos) ** 2 + YY ** 2
-    r_mask = 0.25
+    r_adv_sqr = (XX - x_adv_pos) ** 2 + (YY - 0.5) ** 2
+    r_rec_sqr = (XX - x_rec_pos) ** 2 + (YY - 0.5) ** 2
+    r_mask = 3 * r_blob_in_code
     in_adv = (r_adv_sqr < r_mask ** 2)
     in_rec = (r_rec_sqr < r_mask ** 2)
     dA = (X[1] - X[0]) * (Y[1] - Y[0])
