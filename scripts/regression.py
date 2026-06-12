@@ -463,8 +463,8 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         axes[i].set_ylim([0,1])
         axes[i].xaxis.set_visible(False)
         axes[i].yaxis.set_visible(False)
-        axes[i].text(0,0.95,text=subplot_labels[i], color='w', va="top", ha="center")
-        axes[i].text(0,0.05,text=math_label + " = {0:.3f}".format(L_ratio))
+        axes[i].text(0,0.95,s=subplot_labels[i], color='w', va="top", ha="center")
+        axes[i].text(0,0.05,s=math_label + " = {0:.3f}".format(L_ratio))
         axes[i].set_facecolor("k")
 
     true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
