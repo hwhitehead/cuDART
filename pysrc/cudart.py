@@ -514,22 +514,25 @@ class Profiler:
         gpu_df = pd.read_csv(gpu_str)
         ostr_df = pd.read_csv(ostr_str)
 
-        gpu_csv_labels = ["[CUDA memcpy Host-to-Device]", "[CUDA memcpy Device-to-Host]",
+        gpu_csv_tasks = ["[CUDA memcpy Host-to-Device]", "[CUDA memcpy Device-to-Host]",
                         "render_from_mesh(Camera, float *, Mesh **, TraceArgs)",
                         "wipe_img(Camera, float *)"]
-        osrt_csv_labels = ["read", "writev", "ioctl"]
+        osrt_csv_tasks = ["read", "writev", "ioctl"]
+
+        gpu_labels = ["memcpy host-to-device", "memcpy device-to-host", "render", "wipe"]
+        osrt_labels = osrt_csv_tasks
 
         print("Total Wallclock Duration = {0:.3f}s".format(self.wallclock_duration))
         print("\n")
         print("GPU Summary:")
         gpu_duration_sum = 0
-        for task in gpu_csv_labels:
+        for task, label in zip(gpu_csv_tasks, gpu_csv_labels):
             row = np.where(gpu_df["Operation"] == task)[0][0]         
             num_calls = int(gpu_df["Instances"].iloc[row])
             duration_s = float(gpu_df["Total Time (ns)"].iloc[row]) * 1e-9
             average_ms = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
             gpu_duration_sum += duration_s
-            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f}ms)".format(task, num_calls, duration_s, average_ms))
+            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f}ms)".format(label, num_calls, duration_s, average_ms))
         total_gpu_duration = gpu_df["Total Time (ns)"].sum() * 1e-9
         print("GPU (other) = {0:.3f}s".format(total_gpu_duration - gpu_duration_sum))
         print("Total GPU Duration = {0:.3f}s".format(total_gpu_duration))
@@ -537,13 +540,13 @@ class Profiler:
         print("\n")
         print("OSRT Summary:")
         osrt_duration_sum = 0
-        for task in osrt_csv_labels:
+        for task, label in zip(osrt_csv_tasks, osrt_csv_labels):
             row = np.where(ostr_df["Name"] == task)[0][0]         
             num_calls = int(ostr_df["Num Calls"].iloc[row])
             duration_s = float(ostr_df["Total Time (ns)"].iloc[row]) * 1e-9
             average_ms = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
             osrt_duration_sum += duration_s
-            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f})".format(task, num_calls, duration_s, average_ms))
+            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f}ms)".format(label, num_calls, duration_s, average_ms))
         osrt_total = self.wallclock_duration - total_gpu_duration
         osrt_other = osrt_total - osrt_duration_sum 
         print("OSRT (other) = {0:.3f}s".format(osrt_other))
