@@ -456,22 +456,21 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         in_adv = (r_adv_sqr < r_mask ** 2)
         in_rec = (r_rec_sqr < r_mask ** 2)
 
-        r_adv_sqr_offset = (XX - x_positions[i][0]) ** 2 + (YY - 0.25) ** 2
-        r_rec_sqr_offset = (XX - x_positions[i][1]) ** 2 + (YY - 0.25) ** 2
-        in_adv_offset = (r_adv_sqr_offset < r_mask ** 2)
-        in_rec_offset = (r_rec_sqr_offset < r_mask ** 2)
-
-        CC = np.zeros_like(XX)
-        CC[:] = np.nan
-        CC[in_adv_offset] = 0.8
-        CC[in_rec_offset] = 0.5
+        # r_adv_sqr_offset = (XX - x_positions[i][0]) ** 2 + (YY - 0.25) ** 2
+        # r_rec_sqr_offset = (XX - x_positions[i][1]) ** 2 + (YY - 0.25) ** 2
+        # in_adv_offset = (r_adv_sqr_offset < r_mask ** 2)
+        # in_rec_offset = (r_rec_sqr_offset < r_mask ** 2)
+        # CC = np.zeros_like(XX)
+        # CC[:] = np.nan
+        # CC[in_adv_offset] = 0.8
+        # CC[in_rec_offset] = 0.5
+        #pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot")
 
         L_adv = np.sum(img[in_adv]) * dA
         L_rec = np.sum(img[in_rec]) * dA
         L_ratio = L_adv / L_rec
 
         pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
-        pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot")
         axes[i].set_xlim([0,1])
         axes[i].set_ylim([0,1])
         axes[i].xaxis.set_visible(False)
