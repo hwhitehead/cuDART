@@ -112,7 +112,7 @@ scale :math:`R` and velocity :math:`v` is the *observed* self-crossing time of t
 
     \Delta t < \Delta t_\mathrm{crit} \equiv \frac{1 - \beta \cos(\theta)}{\sin(\theta)} \frac{R}{v}
 
-Alternatively, for a given cadence of simulation data $\Delta t$, the user can predict the smallest possible length scale resolvable as a function of :math:`v` and :math:`\theta`:
+Alternatively, for a given cadence of simulation data :math:`\Delta t`, the user can predict the smallest possible length scale resolvable as a function of :math:`v` and :math:`\theta`:
 
 .. math::
 

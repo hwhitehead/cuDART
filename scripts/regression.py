@@ -480,7 +480,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         axes[i].set_facecolor("k")
 
     true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
-    fig.suptitle(r"$\theta = \frac{\pi}{2}$, $\Gamma = 2 \implies \frac{F_\mathrm{adv}}{F_\mathrm{rec}} = \left(\frac{1+\beta \cos(\theta)}{1-\beta \cos(\theta)}\right)^{3-\alpha}$" + " = {0:.3f}".format(true_ratio))
+    fig.suptitle(r"$\theta = \frac{\pi}{4}$, $\Gamma = 2 \implies \frac{F_\mathrm{adv}}{F_\mathrm{rec}} = \left(\frac{1+\beta \cos(\theta)}{1-\beta \cos(\theta)}\right)^{3-\alpha}$" + " = {0:.3f}".format(true_ratio))
 
     sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
     fig.colorbar(sm, cax=cax, orientation="vertical")
@@ -491,137 +491,6 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     plt.close("all")
 
     if (verbose): print("finished penrose-terrell test, see {0} for output".format(png_str))
-
-def summarise_physics(save_dir, sim_args, camera_args, verbose = True):
-
-    # collect orientation
-    theta = camera_args["template"].theta
-
-    # define simulation parameters
-    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
-    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
-    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]                  # cast to code units (where L_domain = 1.0)
-    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
-
-    # calculate start time (just before light from origin reaches camera)
-    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
-    t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
-    t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
-    t_min *= 0.95                                                                               # start render just before flight time 
-
-    # calculate stop time (when receding ejectum reaches maximal extent)
-    x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
-    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
-    t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
-    t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units  
-
-    # calculate render cadence
-    t_obs_ar = np.linspace(t_min, t_max, camera_args["num_img"])
-
-    # calculate fiducial snapshot index (approaching ejecta at half displacement)
-    L_projected_m = sim_args["L_domain"] * np.sin(theta) * kpc_to_m
-    x_obs_mid_m = 0.25 * L_projected_m 
-    d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
-    t_obs_in_s = d_mid_m / c_light
-    t_obs = t_obs_in_s / Myr_to_s
-    fid_snapshot_index = np.where(t_obs > t_obs_ar)[0][-1]
-
-    # identify ejecta positions
-    t_obs = t_obs_ar[fid_snapshot_index]
-    D_av = c_light * t_obs * Myr_to_s - D_in_m
-    x_app_m = v_in_c * np.sin(theta) * D_av / (1 - v_in_c * np.cos(theta))
-    x_app = x_app_m / (sim_args["L_domain"] * kpc_to_m)
-    x_rec_m = v_in_c * np.sin(theta) * D_av / (1 + v_in_c * np.cos(theta))
-    x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
-
-    tilt = camera_args["template"].tilt
-    X_app = 0.5 - x_app * np.sin(tilt)
-    Y_app = 0.5 + x_app * np.cos(tilt)
-    X_rec = 0.5 - x_rec * np.sin(tilt+np.pi)
-    Y_rec = 0.5 + x_rec * np.cos(tilt+np.pi)
-
-    # calculate deformation factor
-    app_ratio = np.sqrt(1 - 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 - v_in_c * np.cos(theta))
-    rec_ratio = np.sqrt(1 + 2 * v_in_c * np.cos(theta) + v_in_c ** 2) / (1 + v_in_c * np.cos(theta))
-
-    # calculate rest luminosity
-    blob_emmisivity = 1.0
-    vol_blob = 4.0 / 3 * np.pi * r_blob_in_code ** 3
-    inhomo_factor = 2.0 / 5 # adjust for non-constant emissivity
-    L_blob_rest = vol_blob * blob_emmisivity * inhomo_factor
-
-    set_plot_defaults()
-    fig = plt.figure()
-    ax = fig.add_subplot()
-
-    fid_str = os.path.join(save_dir, "raw" + str(fid_snapshot_index).zfill(5) + ".npy")
-    img = np.load(fid_str)
-
-    X = np.linspace(0,camera_args["template"].length_X, camera_args["template"].num_pixels_X)
-    Y = np.linspace(0,camera_args["template"].length_Y, camera_args["template"].num_pixels_Y)
-    XX, YY = np.meshgrid(X, Y, indexing="ij")
-
-    r_app_sqr = (XX - X_app) ** 2 + (YY - Y_app) ** 2
-    r_rec_sqr = (XX - X_rec) ** 2 + (YY - Y_rec) ** 2
-    r_app_sqr /= (app_ratio * r_blob_in_code) ** 2
-    r_rec_sqr /= r_blob_in_code ** 2
-    in_app = (r_app_sqr < 1)
-    in_rec = (r_rec_sqr < 1)
-    dA = (X[1] - X[0]) * (Y[1] - Y[0])
-    lum_app = np.sum(img[in_app]) * dA
-    lum_rec = np.sum(img[in_rec]) * dA
-    print(lum_app / lum_rec)
-
-    # cc = np.zeros_like(XX)
-    # cc[in_app] = 0.5
-    # cc[in_rec] = 1.0
-
-
-    D_app = 1.0 / (sim_args["Gamma"] * (1 - v_in_c * np.cos(theta)))
-    D_rec = 1.0 / (sim_args["Gamma"] * (1 + v_in_c * np.cos(theta)))
-    lum_app_ratio_true = np.power(D_app, 2.0 + 0.6)
-    lum_rec_ratio_true = np.power(D_rec, 2.0 + 0.6)
-    print(lum_app_ratio_true / lum_rec_ratio_true)
-
-    pc = ax.pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
-    #pc = ax.pcolormesh(XX, YY, cc, vmin = 0, vmax = 1, cmap = "afmhot")
-    ax.set_xlim([0,1])
-    ax.set_ylim([0,1])
-    ax.xaxis.set_visible(False)
-    ax.yaxis.set_visible(False)
-    ax.set_facecolor("k")
-    ax.set_aspect("equal")
-
-    # plot ejecta center
-    ax.scatter([0.5,X_app, X_rec], [0.5,Y_app, Y_rec], color='b', s=20, zorder=30)
-
-    # plot ejecta bounding box
-    L_box = r_blob_in_code
-    tilt_in_deg = tilt * 180 / np.pi
-    # app_box = patches.Rectangle(xy = (X_app - L_box * app_ratio, Y_app - L_box), 
-    #                             width = 2 * L_box * app_ratio, height = 2 * L_box,
-    #                             angle = -tilt_in_deg, rotation_point="center",
-    #                             edgecolor = "w", fill = False)
-    # rec_box = patches.Rectangle(xy = (X_rec - L_box * rec_ratio, Y_rec - L_box), 
-    #                             width = 2 * L_box * rec_ratio, height = 2 * L_box,
-    #                             angle = -tilt_in_deg, rotation_point="center",
-    #                             edgecolor = "w", fill = False)
-    # ax.add_patch(app_box)
-    # ax.add_patch(rec_box)
-
-    # domain = patches.Rectangle(xy = (0.5 - 0.5 * np.sin(theta), 0.5 - 0.5 * np.sin(theta)),
-    #                             width = np.sin(theta), height = np.sin(theta),
-    #                             angle = -tilt_in_deg, rotation_point = "center",
-    #                             edgecolor = "w", fill = False)
-    # ax.add_patch(domain)
-
-    ax.set_title(r"$\theta = \frac{\pi}{4}$, $\Gamma = 2$")
-
-
-    png_str = os.path.join(save_dir, "summary.png")
-    plt.subplots_adjust(hspace = 0, wspace= 0)
-    fig.savefig(png_str, dpi=300, bbox_inches="tight")
-    plt.close("all")
 
 def report_profiling(save_dir, verbose = True):
 
@@ -645,7 +514,7 @@ if __name__ == "__main__":
     template_camera.tilt = (90.0 / 180) * np.pi      # tilt from bias vector (aligned with z axis)
     template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                   # small value, system axisymmetric in phi
-    template_camera.theta = 0.125 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
+    template_camera.theta = 0.25 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
     template_camera.length_X = 1.0                  # longest simulation size 1.0 in code units
     template_camera.length_Y = 1.0                  # square domain
     template_camera.num_pixels_X = 2048             # ensure square pixels
