@@ -470,7 +470,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         L_ratio = L_adv / L_rec
 
         pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
-        #pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot")
+        pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot")
         axes[i].set_xlim([0,1])
         axes[i].set_ylim([0,1])
         axes[i].xaxis.set_visible(False)
