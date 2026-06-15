@@ -359,7 +359,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
-def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose = True, flexload = False):
+def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose = True, flexload = False, show_masks = False):
 
     if (verbose): 
         print("starting lookback render test...")
@@ -418,8 +418,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     lookbacks = [False, True]
     for i, label in enumerate(labels):
         scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-        #scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
-        #scene.plot(fig_save_dir = save_dirs[i], cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
+        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
     if (verbose): print("finished raw image generation")
 
     # plot composite
@@ -456,21 +455,22 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         in_adv = (r_adv_sqr < r_mask ** 2)
         in_rec = (r_rec_sqr < r_mask ** 2)
 
-        # r_adv_sqr_offset = (XX - x_positions[i][0]) ** 2 + (YY - 0.25) ** 2
-        # r_rec_sqr_offset = (XX - x_positions[i][1]) ** 2 + (YY - 0.25) ** 2
-        # in_adv_offset = (r_adv_sqr_offset < r_mask ** 2)
-        # in_rec_offset = (r_rec_sqr_offset < r_mask ** 2)
-        # CC = np.zeros_like(XX)
-        # CC[:] = np.nan
-        # CC[in_adv_offset] = 0.8
-        # CC[in_rec_offset] = 0.5
-        #pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot")
+        if show_masks:
+            r_adv_sqr_offset = (XX - x_positions[i][0]) ** 2 + (YY - 0.25) ** 2
+            r_rec_sqr_offset = (XX - x_positions[i][1]) ** 2 + (YY - 0.25) ** 2
+            in_adv_offset = (r_adv_sqr_offset < r_mask ** 2)
+            in_rec_offset = (r_rec_sqr_offset < r_mask ** 2)
+            CC = np.zeros_like(XX)
+            CC[:] = np.nan
+            CC[in_adv_offset] = 0.8
+            CC[in_rec_offset] = 0.5
+            pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot", zorder=10)
 
         L_adv = np.sum(img[in_adv]) * dA
         L_rec = np.sum(img[in_rec]) * dA
         L_ratio = L_adv / L_rec
 
-        pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot")
+        pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot", zorder=-5)
         axes[i].set_xlim([0,1])
         axes[i].set_ylim([0,1])
         axes[i].xaxis.set_visible(False)
@@ -645,7 +645,7 @@ if __name__ == "__main__":
     template_camera.tilt = (90.0 / 180) * np.pi      # tilt from bias vector (aligned with z axis)
     template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                   # small value, system axisymmetric in phi
-    template_camera.theta = 0.25 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
+    template_camera.theta = 0.125 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
     template_camera.length_X = 1.0                  # longest simulation size 1.0 in code units
     template_camera.length_Y = 1.0                  # square domain
     template_camera.num_pixels_X = 2048             # ensure square pixels
