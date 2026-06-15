@@ -399,9 +399,9 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     x_rec_m = v_in_c * np.sin(theta) * D_av / (1 + v_in_c * np.cos(theta))
     x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
 
-    x_adv_pos = (x_adv + 0.5) # shift to image space
-    x_rec_pos = (x_rec + 0.5)
-    x_positions = [[-0.25, 0.25], [x_adv_pos, x_rec_pos]]
+    x_adv_pos = (0.5 - x_adv) # shift to image space
+    x_rec_pos = (0.5 + x_rec)
+    x_positions = [[0.25 * np.sin(theta), 0.75 * np.sin(theta)], [x_adv_pos, x_rec_pos]]
     
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
@@ -443,6 +443,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     subplot_labels = ["Rendered without Lookback", "Rendered with Lookback"]
     math_label = r"$\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$"
     png_str = os.path.join(save_dir, "penrose-terrel.png")
+    r_mask = r_blob_in_code * 1.25
     for i, save_dir in enumerate(save_dirs):
         raw_str = os.path.join(save_dir, "raw00001.npy")
         img = np.load(raw_str)
@@ -452,13 +453,13 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         r_adv_sqr = (XX - x_positions[i][0]) ** 2 + (YY - 0.5) ** 2
         r_rec_sqr = (XX - x_positions[i][1]) ** 2 + (YY - 0.5) ** 2
         
-        in_adv = (r_adv_sqr < r_blob_in_code ** 2)
-        in_rec = (r_rec_sqr < r_blob_in_code ** 2)
+        in_adv = (r_adv_sqr < r_mask ** 2)
+        in_rec = (r_rec_sqr < r_mask ** 2)
 
         r_adv_sqr_offset = (XX - x_positions[i][0]) ** 2 + (YY - 0.25) ** 2
         r_rec_sqr_offset = (XX - x_positions[i][1]) ** 2 + (YY - 0.25) ** 2
-        in_adv_offset = (r_adv_sqr_offset < r_blob_in_code ** 2)
-        in_rec_offset = (r_rec_sqr_offset < r_blob_in_code ** 2)
+        in_adv_offset = (r_adv_sqr_offset < r_mask ** 2)
+        in_rec_offset = (r_rec_sqr_offset < r_mask ** 2)
 
         CC = np.zeros_like(XX)
         CC[:] = np.nan
