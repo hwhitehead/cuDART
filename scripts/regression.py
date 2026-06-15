@@ -455,9 +455,15 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
         in_adv = (r_adv_sqr < r_blob_in_code ** 2)
         in_rec = (r_rec_sqr < r_blob_in_code ** 2)
 
+        r_adv_sqr_offset = (XX - x_positions[i][0]) ** 2 + (YY - 0.25) ** 2
+        r_rec_sqr_offset = (XX - x_positions[i][1]) ** 2 + (YY - 0.25) ** 2
+        in_adv_offset = (r_adv_sqr_offset < r_blob_in_code ** 2)
+        in_rec_offset = (r_rec_sqr_offset < r_blob_in_code ** 2)
+
         CC = np.zeros_like(XX)
-        CC[in_adv] = 0.5
-        CC[in_rec] = 1.0
+        CC[:] = np.nan
+        CC[in_adv_offset] = 0.5
+        CC[in_rec_offset] = 1.0
 
         L_adv = np.sum(img[in_adv]) * dA
         L_rec = np.sum(img[in_rec]) * dA
