@@ -401,7 +401,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     x_adv_pos = (0.5 - x_adv) # shift to image space
     x_rec_pos = (0.5 + x_rec)
-    x_positions = [[0.25 * np.sin(theta), 0.75 * np.sin(theta)], [x_adv_pos, x_rec_pos]]
+    x_positions = [[0.5 - 0.25 * np.sin(theta), 0.5 + 0.25 * np.sin(theta)], [x_adv_pos, x_rec_pos]]
     
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
@@ -463,8 +463,8 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
         CC = np.zeros_like(XX)
         CC[:] = np.nan
-        CC[in_adv_offset] = 0.5
-        CC[in_rec_offset] = 1.0
+        CC[in_adv_offset] = 0.8
+        CC[in_rec_offset] = 0.5
 
         L_adv = np.sum(img[in_adv]) * dA
         L_rec = np.sum(img[in_rec]) * dA
