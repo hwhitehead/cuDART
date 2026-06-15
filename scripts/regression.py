@@ -441,7 +441,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
 
     subplot_labels = ["Rendered without Lookback", "Rendered with Lookback"]
     math_label = r"$\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$"
-    png_str = os.path.join(save_dir, "penrose-terrel.png")
+    png_str = os.path.join(save_dir, "penrose-terrell.png")
     r_mask = r_blob_in_code * 1.25
     for i, save_dir in enumerate(save_dirs):
         raw_str = os.path.join(save_dir, "raw00001.npy")

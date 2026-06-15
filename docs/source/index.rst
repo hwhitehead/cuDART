@@ -66,6 +66,7 @@ Much of the formatting for this documentation page is taken from the superior do
     :caption: Documentation
 
     calculation
+    lookback
     phenomena
     install
     inputs
