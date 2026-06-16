@@ -87,7 +87,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         emm_adv = 1.0
         emm_rec = 1.0
         if sim_args["build_mode"] == "jet":                                                 
-            in_radius = (xy_sqr < r_in_code)
+            in_radius = (xy_sqr < r_in_code ** 2)
             in_adv = in_radius & (zz > 0) & (zz < offset)
             in_rec = in_radius & (zz < 0) & (zz > -offset)
         else:
