@@ -123,7 +123,10 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         print("saving data at {0}".format(save_dir))
 
     if not os.path.isdir(save_dir):
-        raise Exception("{0} does not exist".format(save_dir))
+        try: 
+            os.mkdir(save_dir)
+        except:
+            raise Exception("unable to build dir at {0}".format(save_dir))
 
     # define simulation parameters
     v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
@@ -683,7 +686,7 @@ if __name__ == "__main__":
     if args["build_mode"] not in ["blob", "blob-pt", "jet"]:
         raise Exception("build_mode option must be one of [blob, blob-pt, jet]")
     else:
-        sim_args.build_mode = args["build_mode"]
+        sim_args["build_mode"] = args["build_mode"]
 
     # run summary function
     if (args["s"]):
