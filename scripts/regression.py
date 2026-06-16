@@ -131,8 +131,8 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
     # define simulation parameters
     v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
-    r_in_code = sim_args["emitter_scale"] / sim_args["L_domain"]                # cast to code units (where L_domain = 1.0)          
-    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
+    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                # cast to code units (where L_domain = 1.0)          
+    T_in_Myr = 0.5 * sim_args["L_in_kpc"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
     
     # build empty domain 
     max_emm = 1.0
@@ -151,7 +151,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
     # determine cadence, if critical timing routine flagged
     if sim_args["target_theta"] is not None:
         crit_fac = (1 - v_in_c * np.cos(sim_args["target_theta"])) / np.sin(sim_args["target_theta"])
-        dt_crit_in_s = crit_fac * sim_args["emitter_scale"] * kpc_to_m / (v_in_c * c_light)
+        dt_crit_in_s = crit_fac * sim_args["r_in_kpc"] * kpc_to_m / (v_in_c * c_light)
         dt_crit = dt_crit_in_s / Myr_to_s
         num_snapshots_crit = int(T_in_Myr / dt_crit)
         num_snapshots = num_snapshots_crit if (num_snapshots_crit > sim_args["num_snapshots"]) else sim_args["num_snapshots"]
@@ -163,7 +163,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
     header_str = os.path.join(save_dir, "header.txt")
     
     with open(header_str, "w") as f:
-        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_domain"]))
+        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_in_kpc"]))
     if (verbose): print("built header.")
 
     if sim_args["build_mode"] == "blob-pt":
@@ -179,7 +179,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         # build data array for this snapshot in time
         save_data = np.zeros_like(xx)
         offset_in_kpc = t_in_Myr * v_in_kpc_per_Myr                         # calculate current offset in kpc]
-        offset = offset_in_kpc / sim_args["L_domain"]                       # cast to code units
+        offset = offset_in_kpc / sim_args["L_in_kpc"]                       # cast to code units
         emm_adv = 1.0
         emm_rec = 1.0
         if sim_args["build_mode"] == "jet":                                                 
@@ -602,8 +602,8 @@ if __name__ == "__main__":
 
     # dict for simulation args (all lengths in kpc)
     sim_args = {"Gamma": 2.0,
-                "L_domain": 120.0,
-                "r_blob": 7.5,
+                "L_in_kpc": 120.0,
+                "r_in_kpc": 7.5,
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
                 "target_theta": None,
