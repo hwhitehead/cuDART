@@ -14,102 +14,6 @@ pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
 sys.path.append(pysrc)
 from cudart import *
 
-def build_unlabelled_regression_suite_old(save_dir, sim_args, verbose = True, sphere_in_rest = False):
-
-    # construct template data for regression suite, without labels
-    # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
-    # the emitting regions are spheres in the observer frame
-    # the emission in the spheres falls off quadratically with radius, out to a fixed, finite radius
-    # if given specific theta, ensure sampling occurs at unaliased frequency
-
-    if (verbose): 
-        print("starting regression suite data construction...")
-        print("saving data at {0}".format(save_dir))
-
-    if not os.path.isdir(save_dir):
-        raise Exception("{0} does not exist".format(save_dir))
-
-    # define simulation parameters
-    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
-    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
-    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]                  # cast to code units (where L_domain = 1.0)
-    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
-    
-    # build empty domain 
-    max_emm = 1.0
-    Lz = 1.0                                                                    # set domain length in z to unity in code units
-    Ly = Lz * sim_args["domain_dims"][1] / sim_args["domain_dims"][2]           # auto scale x, y directions
-    Lx = Lz * sim_args["domain_dims"][0] / sim_args["domain_dims"][2] 
-    xspan = np.linspace(-0.5 * Lx, 0.5 * Lx, sim_args["domain_dims"][0])        # build domain centered on (0,0,0)
-    yspan = np.linspace(-0.5 * Ly, 0.5 * Ly, sim_args["domain_dims"][1])
-    zspan = np.linspace(-0.5 * Lz, 0.5 * Lz, sim_args["domain_dims"][2])
-    ispan = np.array([0,1,2,3])                                                 # dummy indices for spatial, velocity axes
-    xx, yy, zz, ii = np.meshgrid(xspan, yspan, zspan, ispan, indexing="ij")     # construct mesh as (x,y,z,i)
-    xy_sqr = xx ** 2 + yy ** 2
-    snapshot_size = np.size(xx)
-    if (verbose): print("built empty mesh.")
-
-    # determine cadence, if critical timing routine flagged
-    if sim_args["target_theta"] is not None:
-        crit_fac = (1 - v_in_c * np.cos(sim_args["target_theta"])) / np.sin(sim_args["target_theta"])
-        dt_crit_in_s = crit_fac * sim_args["r_blob"] * kpc_to_m / (v_in_c * c_light)
-        dt_crit = dt_crit_in_s / Myr_to_s
-        num_snapshots_crit = int(T_in_Myr / dt_crit)
-        num_snapshots = num_snapshots_crit if (num_snapshots_crit > sim_args["num_snapshots"]) else sim_args["num_snapshots"]
-    else:
-        num_snapshots = sim_args["num_snapshots"]    
-    t_span = np.linspace(0, T_in_Myr, num_snapshots)                # evenly snapshot times over duration
-
-    # build header data
-    header_str = os.path.join(save_dir, "header.txt")
-    
-    with open(header_str, "w") as f:
-        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_domain"]))
-    if (verbose): print("built header.")
-
-    if sphere_in_rest:
-        z_scale = 1.0 / sim_args["Gamma"]
-    else:
-        z_scale = 1.0
-
-    # build snapshots
-    for n, t_in_Myr in enumerate(t_span):
-        # unlabelled data is a single .npy file, without a header
-        save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
-        
-        # build data array for this snapshot in time
-        save_data = np.zeros_like(xx)
-        lead_center_in_kpc = t_in_Myr * v_in_kpc_per_Myr                        # calculate ejecta position in kpc
-        lead_center = lead_center_in_kpc / sim_args["L_domain"]                 # cast to code units
-        tail_center = -lead_center                                              # tailing ejecta symmetric in x-y
-        lead_ZZ = zz - lead_center
-        tail_ZZ = zz - tail_center
-
-        dz_lead = (zz - lead_center) / z_scale
-        dz_tail = (zz - tail_center) / z_scale
-
-        rr_lead_sqr = (dz_lead ** 2 + xy_sqr) / r_blob_in_code ** 2             # sph radius from leading/tailing ejecta
-        rr_tail_sqr = (dz_tail ** 2 + xy_sqr) / r_blob_in_code ** 2
-
-        in_lead = (rr_lead_sqr < 1)
-        in_tail = (rr_tail_sqr < 1)
-        emm_lead = 1.0                                                          # constant emissivity within ejecta
-        emm_tail = 1.0
-
-        lead_emm_mask = (in_lead) & (ii == 0)
-        tail_emm_mask = (in_tail) & (ii == 0)
-        lead_vel_mask = (in_lead) & (ii == 3)
-        tail_vel_mask = (in_tail) & (ii == 3)
-        save_data[lead_emm_mask] = emm_lead                                     # match emission in lead/tail
-        save_data[tail_emm_mask] = emm_tail 
-        save_data[lead_vel_mask] = v_in_c                                       # invert velocity in lead/tail
-        save_data[tail_vel_mask] = -v_in_c
-        save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
-        np.save(save_str, save_data)                                            # save snapshot data
-        if (verbose): print("built dataset for snapshot {0}/{1}".format(n,num_snapshots))
-
-    if (verbose): print("finished dataset construction.")
-
 def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
     # construct template data for regression suite, without labels
@@ -208,10 +112,9 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
     if (verbose): print("finished dataset construction.")
 
-
 def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_rest = False):
 
-    # TODO: test this deployment
+    # TODO: function currently not complete
 
     # construct template data for regression suite, with labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
@@ -416,13 +319,13 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
     theta = camera_args["template"].theta                                                       # collect orientation from template
 
     # calculate start time (just before light from origin reaches camera)
-    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation 
+    D_in_m = 2.0 * sim_args["L_in_kpc"] * kpc_to_m                                              # origin-camera seperation 
     t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
     t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
     t_min *= 0.95                                                                               # start render just before flight time 
 
     # calculate stop time (when receding ejectum reaches maximal extent)
-    x_max_in_m = 0.5 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
+    x_max_in_m = 0.5 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
     d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
     t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
     t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units    
@@ -479,14 +382,14 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
     theta = camera_args["template"].theta                      
-    r_blob_in_code = sim_args["r_blob"] / sim_args["L_domain"]
+    r_blob_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]
 
     # first render at midpoint time for emitter
     nolookback_load_str = os.path.join(load_dir, "snapshot" + str(int(0.5 * sim_args["num_snapshots"])).zfill(5) + ".npy")
 
     # second render at midpoint displacement for observer
-    x_obs_mid_m = 0.25 * sim_args["L_domain"] * np.sin(theta) * kpc_to_m                        # cast to astro units    
-    D_in_m = 2.0 * sim_args["L_domain"] * kpc_to_m                                              # origin-camera seperation    
+    x_obs_mid_m = 0.25 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                        # cast to astro units    
+    D_in_m = 2.0 * sim_args["L_in_kpc"] * kpc_to_m                                              # origin-camera seperation    
     d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
     t_obs_in_s = d_mid_m / c_light
     t_obs = t_obs_in_s / Myr_to_s
@@ -494,9 +397,9 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     # identify ejecta positions
     D_av = c_light * t_obs * Myr_to_s - D_in_m
     x_adv_m = v_in_c * np.sin(theta) * D_av / (1 - v_in_c * np.cos(theta))
-    x_adv = x_adv_m / (sim_args["L_domain"] * kpc_to_m)
+    x_adv = x_adv_m / (sim_args["L_in_kpc"] * kpc_to_m)
     x_rec_m = v_in_c * np.sin(theta) * D_av / (1 + v_in_c * np.cos(theta))
-    x_rec = x_rec_m / (sim_args["L_domain"] * kpc_to_m)
+    x_rec = x_rec_m / (sim_args["L_in_kpc"] * kpc_to_m)
 
     x_adv_pos = (0.5 - x_adv) # shift to image space
     x_rec_pos = (0.5 + x_rec)
@@ -685,7 +588,7 @@ if __name__ == "__main__":
     args["build_mode"] = args["build_mode"].lower()
     if args["build_mode"] not in ["blob", "blob-pt", "jet"]:
         raise Exception("build_mode option must be one of [blob, blob-pt, jet]")
-    else:
+    elif args["build_mode"] is not None:
         sim_args["build_mode"] = args["build_mode"]
 
     # run summary function
