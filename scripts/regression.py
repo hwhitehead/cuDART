@@ -585,11 +585,13 @@ if __name__ == "__main__":
                         help="build mode for simulation data (blob, blob-pt, jet)")
     args = vars(parser.parse_args())
 
-    args["build_mode"] = args["build_mode"].lower()
-    if args["build_mode"] not in ["blob", "blob-pt", "jet"]:
-        raise Exception("build_mode option must be one of [blob, blob-pt, jet]")
-    elif args["build_mode"] is not None:
-        sim_args["build_mode"] = args["build_mode"]
+    
+    if args["build_mode"] is not None:
+        build_mode = args["build_mode"].lower()
+        if build_mode not in ["blob", "blob-pt", "jet"]:
+            raise Exception("build_mode option must be one of [blob, blob-pt, jet]")
+        else:
+            sim_args["build_mode"] = build_mode
 
     # run summary function
     if (args["s"]):
