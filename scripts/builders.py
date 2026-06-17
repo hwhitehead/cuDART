@@ -179,6 +179,10 @@ def plot_lum_evo():
     tax.set_xlim([0,100])
     tax.set_xlabel("Snapshot Number")
 
+    sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.set_ylabel(r"$\log_{10}(I_\nu / I_{\nu,0})$")
+
     X = np.linspace(0, 1, 2048)
     Y = np.linspace(0, 1, 2048)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
@@ -189,7 +193,7 @@ def plot_lum_evo():
     ax.yaxis.set_visible(False)
     ax.set_facecolor("k")
     plt.subplots_adjust(hspace=0,wspace=0)
-    for n in range(0, 100, 10):
+    for n in range(0, 100):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), cmap="afmhot", vmin=-6, vmax=1)
@@ -199,9 +203,7 @@ def plot_lum_evo():
         pc.remove()
         axline.remove()
     
-    sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
-    fig.colorbar(sm, cax=cax, orientation="vertical")
-    cax.set_ylabel(r"$\log_{10}(I_\nu / I_{\nu,0})$")
+    
 
     plt.close("all")
 
