@@ -25,7 +25,7 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
     # setup sim properties
     r_fac = 2                                               # radius of helix is this factor of the ejectum radius
     R_in_kpc = sim_args["r_in_kpc"] * r_fac
-    phi = np.pi / 4                                         # helix pitch angle at outer helical edge (R + r)
+    phi = np.pi / 8                                         # helix pitch angle at outer helical edge (R + r)
     beta_total = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)  # lorentz factor of fastest moving component (outer edge)
     beta_xy = beta_total * np.cos(phi)                      # azimuthal velocity projection
     beta_z = beta_total * np.sin(phi)                       # velocity projection along rotation axis
@@ -202,8 +202,6 @@ def plot_lum_evo():
         fig.savefig(save_str, dpi=300)
         pc.remove()
         axline.remove()
-    
-    
 
     plt.close("all")
 
@@ -211,12 +209,12 @@ if __name__ == "__main__":
 
     sim_args = {"Gamma": 7.0,
                 "L_in_kpc": 120.0,
-                "r_in_kpc": 2.5,
+                "r_in_kpc": 1.25,
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
                 "target_theta": None}
 
-    save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_data"
-    #build_helical_snapshots(save_dir, sim_args)
+    save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_data"
+    build_helical_snapshots(save_dir, sim_args)
     # save_lum()
-    plot_lum_evo()
+    # plot_lum_evo()
