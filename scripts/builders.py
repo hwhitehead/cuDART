@@ -134,10 +134,10 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
 
     if (verbose): print("finished dataset construction.")
 
-def plot_lum():
+def save_lum():
 
     load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output"
-    save_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum.png"
+    save_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum.npy"
 
     lum_ar = []
     n_ar = []
@@ -148,10 +148,53 @@ def plot_lum():
         n_ar.append(n)
         lum_ar.append(lum)
 
-    fig = plt.figure()
-    ax = fig.add_subplot()
-    ax.plot(n_ar, lum_ar)
-    fig.savefig(save_str, dpi=300)
+    lum_ar = np.array(lum_ar)
+    n_ar = np.array(n_ar)
+    data_to_save = np.colum_stack((n_ar, lum_ar))
+    np.save(save_str, data_to_save)
+
+def plot_lum_evo():
+
+    load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output"
+    save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum"
+
+    lum_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum.npy"
+
+    height_ratios = np.array([0.25, 1])
+    width_ratios = np.array([1,0.05])
+    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
+    fig = plt.figure(figsize=(10.0 / 3, h_over_w * 10.0 / 3))
+    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), width_ratios=width_ratios, height_ratios=height_ratios)
+    ax = fig.add_subplot(gs[1,0])
+    tax = fig.add_subplot(gs[0,:])
+    cax = fig.add_subplot(gs[1,1])
+
+    lum_data = np.load(lum_str)
+    n_ar = lum_data[:,0]
+    lum_ar = lum_data[:,1]
+    tax.plot(n_ar, np.log10(lum_ar), color='k')
+    tax.set_ylabel("$\log_{10}$(Luminosity [arb.])")
+    tax.xaxis.tick_top()
+    tax.xaxis.set_label_position("top")
+    tax.set_xlim([0,100])
+    tax.set_xlabel("Snapshot Number")
+
+    X = np.linspace(0, 1, 250)
+    Y = np.linspace(0, 1, 500)
+    XX, YY = np.meshgrid(X, Y, indexing="ij")
+
+    ax.set_xlim([0,1])
+    ax.set_ylim([0,1])
+    plt.subplots_adjust(hspace=0,wspace=0)
+    for n in range(0, 100, 10):
+        load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
+        data = np.load(load_str)
+        lum = np.sum(data)
+        pc = ax.pcolormesh(XX, YY, np.log10(lum), cmap="afmhot", vmin=-6, vmax=1)
+        save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".npy")
+        fig.savefig(save_str, dpi=300)
+        pc.remove()
+    
     plt.close("all")
 
 if __name__ == "__main__":
