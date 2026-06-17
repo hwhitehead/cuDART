@@ -158,7 +158,7 @@ def plot_lum_evo():
     load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_output"
     save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_output/lum"
 
-    lum_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum.npy"
+    lum_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_output/lum.npy"
 
     height_ratios = np.array([0.25, 1])
     width_ratios = np.array([1,0.05])
