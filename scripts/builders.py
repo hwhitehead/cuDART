@@ -142,7 +142,7 @@ def plot_lum():
     lum_ar = []
     n_ar = []
     for n in range(0, 100):
-        load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         data = np.load(load_str)
         lum = np.sum(data)
         n_ar.append(n)
