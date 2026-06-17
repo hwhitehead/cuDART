@@ -1,5 +1,5 @@
 """
-This file contains a collection of functions to build mock data sets, and render images with or without the lookback routine
+This file contains a collection of functions test basic cuDART functionality, supporting build mock data set construction, and rendering with or without the lookback routine
 """
 
 # external imports
