@@ -40,7 +40,8 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
     
     # cast to code units
     r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                     # spatial length unit L_domain         
-    R_in_code = R_in_kpc / sim_args["L_in_kpc"]                                 # spatial length unit L_domain               
+    R_in_code = R_in_kpc / sim_args["L_in_kpc"]                                 # spatial length unit L_domain
+    vz_in_code = vz_in_kpc_per_Myr / sim_args["L_in_kpc"]                       # velocity scale L_domain/Myr               
     omega_in_code = omega * Myr_to_s                                            # temporal time unit Myr
     emm_adv = 1.0
     emm_rec = 1.0
@@ -86,17 +87,17 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
         # build data array for this snapshot in time
         save_data = np.zeros_like(xx)
         
-        # identify position of blob center
-        adv_phase = omega_in_code * t_in_Myr
+        # identify position of blob centers
+        adv_phase = omega_in_code * t_in_Myr                            # prograde rotation at omega
         rec_phase = np.pi + adv_phase                                   # offset rec phase by pi
         
         x_adv_c = R_in_code * np.cos(adv_phase)
         y_adv_c = R_in_code * np.sin(adv_phase)
-        z_adv_c = vz_in_kpc_per_Myr * t_in_Myr / sim_args["L_in_kpc"]                
+        z_adv_c = vz_in_code * t_in_Myr            
         
         x_rec_c = R_in_code * np.cos(rec_phase)  
         y_rec_c = R_in_code * np.sin(rec_phase)
-        z_rec_c = -vz_in_kpc_per_Myr * t_in_Myr / sim_args["L_in_kpc"]  # rec travels in opposite direction
+        z_rec_c = -vz_in_code * t_in_Myr                                # rec travels in opposite direction
 
         dr_adv_sqr = (xx - x_adv_c) ** 2 + (yy - y_adv_c) ** 2 + (zz - z_adv_c) ** 2
         dr_rec_sqr = (xx - x_rec_c) ** 2 + (yy - y_rec_c) ** 2 + (zz - z_rec_c) ** 2
@@ -117,11 +118,11 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
         save_data[adv_emm_mask] = emm_adv
         save_data[rec_emm_mask] = emm_rec
 
-        save_data[adv_vx_mask] = -omega_in_code * R_cyl * np.sin(adv_phase)
-        save_data[rec_vx_mask] = -omega_in_code * R_cyl * np.sin(rec_phase)
+        save_data[adv_vx_mask] = -omega_in_code * R_cyl[adv_vx_mask] * np.sin(adv_phase)
+        save_data[rec_vx_mask] = -omega_in_code * R_cyl[rec_vx_mask]* np.sin(rec_phase)
 
-        save_data[adv_vy_mask] = omega_in_code * R_cyl * np.cos(adv_phase)
-        save_data[rec_vy_mask] = omega_in_code * R_cyl * np.cos(rec_phase)
+        save_data[adv_vy_mask] = omega_in_code * R_cyl[adv_vy_mask] * np.cos(adv_phase)
+        save_data[rec_vy_mask] = omega_in_code * R_cyl[rec_vy_mask] * np.cos(rec_phase)
 
         save_data[adv_vz_mask] = beta_z
         save_data[rec_vz_mask] = -beta_z
