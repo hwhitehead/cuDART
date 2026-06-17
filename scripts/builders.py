@@ -164,4 +164,5 @@ if __name__ == "__main__":
                 "target_theta": None}
 
     save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_data"
-    build_helical_snapshots(save_dir, sim_args)
+    #build_helical_snapshots(save_dir, sim_args)
+    plot_lum()
