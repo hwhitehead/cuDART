@@ -188,9 +188,8 @@ def plot_lum_evo():
     plt.subplots_adjust(hspace=0,wspace=0)
     for n in range(0, 100, 10):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
-        data = np.load(load_str)
-        lum = np.sum(data)
-        pc = ax.pcolormesh(XX, YY, np.log10(lum), cmap="afmhot", vmin=-6, vmax=1)
+        img = np.load(load_str)
+        pc = ax.pcolormesh(XX, YY, np.log10(img), cmap="afmhot", vmin=-6, vmax=1)
         axline = ax.axvline(x=n, color='k', alpha=0.25)
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".npy")
         fig.savefig(save_str, dpi=300)
@@ -210,5 +209,5 @@ if __name__ == "__main__":
 
     save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_data"
     #build_helical_snapshots(save_dir, sim_args)
-    save_lum()
+    # save_lum()
     plot_lum_evo()
