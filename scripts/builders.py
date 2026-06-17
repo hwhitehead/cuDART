@@ -150,7 +150,7 @@ def save_lum():
 
     lum_ar = np.array(lum_ar)
     n_ar = np.array(n_ar)
-    data_to_save = np.colum_stack((n_ar, lum_ar))
+    data_to_save = np.column_stack((n_ar, lum_ar))
     np.save(save_str, data_to_save)
 
 def plot_lum_evo():
