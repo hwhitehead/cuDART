@@ -146,7 +146,7 @@ def plot_lum():
         data = np.load(load_str)
         lum = np.sum(data)
         n_ar.append(n)
-        lum_ar.append(data)
+        lum_ar.append(lum)
 
     fig = plt.figure()
     ax = fig.add_subplot()
