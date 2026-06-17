@@ -191,7 +191,7 @@ def plot_lum_evo():
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), cmap="afmhot", vmin=-6, vmax=1)
         axline = ax.axvline(x=n, color='k', alpha=0.25)
-        save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".npy")
+        save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         fig.savefig(save_str, dpi=300)
         pc.remove()
         axline.remove()
