@@ -80,7 +80,7 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
     if (verbose): print("built header.")
 
     # build snapshots
-    v_code_to_beta = Myrs_to_s / (sim_args["L_in_kpc"] * kpc_to_m * c_light)
+    v_code_to_beta = Myr_to_s / (sim_args["L_in_kpc"] * kpc_to_m * c_light)
     for n, t_in_Myr in enumerate(t_span):
         # unlabelled data is a single .npy file, without a header
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
