@@ -173,7 +173,7 @@ def plot_lum_evo():
     n_ar = lum_data[:,0]
     lum_ar = lum_data[:,1]
     tax.plot(n_ar, np.log10(lum_ar), color='k')
-    tax.set_ylabel("$\log_{10}$(Luminosity [arb.])")
+    tax.set_ylabel("$\log_{10}(L)$")
     tax.xaxis.tick_top()
     tax.xaxis.set_label_position("top")
     tax.set_xlim([0,100])
@@ -185,17 +185,24 @@ def plot_lum_evo():
 
     ax.set_xlim([0,1])
     ax.set_ylim([0,1])
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
+    ax.set_facecolor("k")
     plt.subplots_adjust(hspace=0,wspace=0)
     for n in range(0, 100, 10):
         load_str = os.path.join(load_dir, "raw" + str(n).zfill(5) + ".npy")
         img = np.load(load_str)
         pc = ax.pcolormesh(XX, YY, np.log10(img), cmap="afmhot", vmin=-6, vmax=1)
-        axline = ax.axvline(x=n, color='k', alpha=0.25)
+        axline = tax.axvline(x=n, color='k', alpha=0.25)
         save_str = os.path.join(save_dir, "img" + str(n).zfill(5) + ".png")
         fig.savefig(save_str, dpi=300)
         pc.remove()
         axline.remove()
     
+    sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
+    fig.colorbar(sm, cax=cax, orientation="vertical")
+    cax.set_ylabel(r"$\log_{10}(I_\nu / I_{\nu,0})$")
+
     plt.close("all")
 
 if __name__ == "__main__":
