@@ -81,6 +81,7 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
 
     # build snapshots
     for n, t_in_Myr in enumerate(t_span):
+        if n < 32: continue
         # unlabelled data is a single .npy file, without a header
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         
