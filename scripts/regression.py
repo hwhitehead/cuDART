@@ -504,7 +504,7 @@ if __name__ == "__main__":
     # demo_load_times()
 
     # dict for simulation args (all lengths in kpc)
-    sim_args = {"Gamma": 2.0,
+    sim_args = {"Gamma": 7.0,
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
                 "domain_dims": [250,250,500],
@@ -514,7 +514,7 @@ if __name__ == "__main__":
 
     # construct template camera
     template_camera = Camera()
-    template_camera.tilt = (90.0 / 180) * np.pi      # tilt from bias vector (aligned with z axis)
+    template_camera.tilt = (90.0 / 180) * np.pi     # tilt from bias vector (aligned with z axis)
     template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                   # small value, system axisymmetric in phi
     template_camera.theta = 0.25 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
