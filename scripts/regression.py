@@ -82,15 +82,19 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         
         # build data array for this snapshot in time
         save_data = np.zeros_like(xx)
-        offset_in_kpc = t_in_Myr * v_in_kpc_per_Myr                         # calculate current offset in kpc]
-        offset = offset_in_kpc / sim_args["L_in_kpc"]                       # cast to code units
+        
         emm_adv = 1.0
         emm_rec = 1.0
-        if sim_args["build_mode"] == "jet":                                                 
+        if sim_args["build_mode"] == "jet":
+            start_offset = 2 * r_in_code                                                 
+            offset_in_kpc = start_offset + t_in_Myr * v_in_kpc_per_Myr          # calculate current offset in kpc
+            offset = offset_in_kpc / sim_args["L_in_kpc"]                       # cast to code units
             in_radius = (xy_sqr < r_in_code ** 2)
-            in_adv = in_radius & (zz > 2 * r_in_code) & (zz < offset)
-            in_rec = in_radius & (zz < -2 * r_in_code) & (zz > -offset)
+            in_adv = in_radius & (zz > start_offset) & (zz < offset)
+            in_rec = in_radius & (zz < -start_offset) & (zz > -offset)
         else:
+            offset_in_kpc = t_in_Myr * v_in_kpc_per_Myr          # calculate current offset in kpc
+            offset = offset_in_kpc / sim_args["L_in_kpc"]                       # cast to code units
             dz_adv = (zz - offset) / z_scale
             dz_rec = (zz + offset) / z_scale
             rr_adv_sqr = (dz_adv ** 2 + xy_sqr)
