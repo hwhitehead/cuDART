@@ -14,7 +14,7 @@ pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
 sys.path.append(pysrc)
 from cudart import *
 
-def build_helical_snapshots(save_dir, sim_args):
+def build_helical_snapshots(save_dir, sim_args, verbose = True):
 
     """
     Generate a dataset featuring twin ejecta moving in opposite directions
