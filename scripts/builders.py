@@ -134,7 +134,25 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
 
     if (verbose): print("finished dataset construction.")
 
+def plot_lum():
 
+    load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output"
+    save_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum.png"
+
+    lum_ar = []
+    n_ar = []
+    for n in range(0, 100):
+        load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        data = np.load(load_str)
+        lum = np.sum(data)
+        n_ar.append(n)
+        lum_ar.append(data)
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.plot(n_ar, lum_ar)
+    fig.savefig(save_str, dpi=300)
+    plt.close("all")
 
 if __name__ == "__main__":
 
