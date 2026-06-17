@@ -33,10 +33,10 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
             raise Exception("unable to build dir at {0}".format(save_dir))
 
     # define simulation parameters
-    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
-    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
-    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                # cast to code units (where L_domain = 1.0)          
-    T_in_Myr = 0.5 * sim_args["L_in_kpc"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
+    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                                  # calculate ejecta velocity
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                         # cast to astro units
+    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                             # cast to code units (where L_domain = 1.0)          
+    T_in_Myr = 0.5 * (sim_args["L_in_kpc"] + sim_args["r_in_kpc"]) / v_in_kpc_per_Myr   # calc duration to reach domain edge
     
     # build empty domain 
     max_emm = 1.0
@@ -82,20 +82,15 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         
         # build data array for this snapshot in time
         save_data = np.zeros_like(xx)
-        
+        offset_in_kpc = t_in_Myr * v_in_kpc_per_Myr             # calculate current offset in kpc
+        offset = offset_in_kpc / sim_args["L_in_kpc"]           # cast to code units
         emm_adv = 1.0
         emm_rec = 1.0
-        if sim_args["build_mode"] == "jet":
-            start_offset_in_kpc = 2 * sim_args["r_in_kpc"]                              # offset jet start to avoid overlap in core                                            
-            offset_in_kpc = start_offset_in_kpc + t_in_Myr * v_in_kpc_per_Myr           # calculate current offset in kpc
-            start_offset = start_offset_in_kpc / sim_args["L_in_kpc"]                   # cast to code units
-            offset = offset_in_kpc / sim_args["L_in_kpc"]                               # cast to code units
+        if sim_args["build_mode"] == "jet":                     # test occupancy in cylinder with moving front
             in_radius = (xy_sqr < r_in_code ** 2)
-            in_adv = in_radius & (zz > start_offset) & (zz < offset)
-            in_rec = in_radius & (zz < -start_offset) & (zz > -offset)
-        else:
-            offset_in_kpc = t_in_Myr * v_in_kpc_per_Myr          # calculate current offset in kpc
-            offset = offset_in_kpc / sim_args["L_in_kpc"]                       # cast to code units
+            in_adv = in_radius & (zz > 0) & (zz < offset)
+            in_rec = in_radius & (zz < 0) & (zz > -offset)
+        else:                                                   # test occupancy in blob with moving center
             dz_adv = (zz - offset) / z_scale
             dz_rec = (zz + offset) / z_scale
             rr_adv_sqr = (dz_adv ** 2 + xy_sqr)
