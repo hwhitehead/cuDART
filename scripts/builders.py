@@ -80,8 +80,8 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
     if (verbose): print("built header.")
 
     # build snapshots
+    v_code_to_beta = Myrs_to_s / (sim_args["L_in_kpc"] * kpc_to_m * c_light)
     for n, t_in_Myr in enumerate(t_span):
-        if n < 32: continue
         # unlabelled data is a single .npy file, without a header
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
         
@@ -119,11 +119,11 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
         save_data[adv_emm_mask] = emm_adv
         save_data[rec_emm_mask] = emm_rec
 
-        save_data[adv_vx_mask] = -omega_in_code * R_cyl[adv_vx_mask] * np.sin(adv_phase)
-        save_data[rec_vx_mask] = -omega_in_code * R_cyl[rec_vx_mask]* np.sin(rec_phase)
+        save_data[adv_vx_mask] = -omega_in_code * R_cyl[adv_vx_mask] * np.sin(adv_phase) * v_code_to_beta
+        save_data[rec_vx_mask] = -omega_in_code * R_cyl[rec_vx_mask]* np.sin(rec_phase) * v_code_to_beta
 
-        save_data[adv_vy_mask] = omega_in_code * R_cyl[adv_vy_mask] * np.cos(adv_phase)
-        save_data[rec_vy_mask] = omega_in_code * R_cyl[rec_vy_mask] * np.cos(rec_phase)
+        save_data[adv_vy_mask] = omega_in_code * R_cyl[adv_vy_mask] * np.cos(adv_phase) * v_code_to_beta
+        save_data[rec_vy_mask] = omega_in_code * R_cyl[rec_vy_mask] * np.cos(rec_phase) * v_code_to_beta
 
         save_data[adv_vz_mask] = beta_z
         save_data[rec_vz_mask] = -beta_z
