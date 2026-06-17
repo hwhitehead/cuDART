@@ -136,8 +136,8 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
 
 def save_lum():
 
-    load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output"
-    save_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum.npy"
+    load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_output"
+    save_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_output/lum.npy"
 
     lum_ar = []
     n_ar = []
@@ -155,8 +155,8 @@ def save_lum():
 
 def plot_lum_evo():
 
-    load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output"
-    save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum"
+    load_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_output"
+    save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_output/lum"
 
     lum_str = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_output/lum.npy"
 
@@ -215,6 +215,6 @@ if __name__ == "__main__":
                 "target_theta": None}
 
     save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_data"
-    build_helical_snapshots(save_dir, sim_args)
-    # save_lum()
-    # plot_lum_evo()
+    #build_helical_snapshots(save_dir, sim_args)
+    save_lum()
+    plot_lum_evo()
