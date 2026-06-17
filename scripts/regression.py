@@ -88,8 +88,8 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         emm_rec = 1.0
         if sim_args["build_mode"] == "jet":                                                 
             in_radius = (xy_sqr < r_in_code ** 2)
-            in_adv = in_radius & (zz > 0) & (zz < offset)
-            in_rec = in_radius & (zz < 0) & (zz > -offset)
+            in_adv = in_radius & (zz > 2 * r_in_code) & (zz < offset)
+            in_rec = in_radius & (zz < 2 * r_in_code) & (zz > -offset)
         else:
             dz_adv = (zz - offset) / z_scale
             dz_rec = (zz + offset) / z_scale
@@ -506,7 +506,7 @@ if __name__ == "__main__":
     # dict for simulation args (all lengths in kpc)
     sim_args = {"Gamma": 2.0,
                 "L_in_kpc": 120.0,
-                "r_in_kpc": 7.5,
+                "r_in_kpc": 2.5,
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
                 "target_theta": None,
