@@ -179,8 +179,8 @@ def plot_lum_evo():
     tax.set_xlim([0,100])
     tax.set_xlabel("Snapshot Number")
 
-    X = np.linspace(0, 1, 250)
-    Y = np.linspace(0, 1, 500)
+    X = np.linspace(0, 1, 2048)
+    Y = np.linspace(0, 1, 2048)
     XX, YY = np.meshgrid(X, Y, indexing="ij")
 
     ax.set_xlim([0,1])
