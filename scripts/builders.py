@@ -137,7 +137,7 @@ def build_helical_snapshots(save_dir, sim_args, verbose = True):
 
 if __name__ == "__main__":
 
-    sim_args = {"Gamma": 2.0,
+    sim_args = {"Gamma": 7.0,
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
                 "domain_dims": [250,250,500],
