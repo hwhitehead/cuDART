@@ -517,7 +517,7 @@ if __name__ == "__main__":
     template_camera.tilt = (90.0 / 180) * np.pi     # tilt from bias vector (aligned with z axis)
     template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                   # small value, system axisymmetric in phi
-    template_camera.theta = 0.25 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
+    template_camera.theta = 0.125 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
     template_camera.length_X = 1.0                  # longest simulation size 1.0 in code units
     template_camera.length_Y = 1.0                  # square domain
     template_camera.num_pixels_X = 2048             # ensure square pixels
