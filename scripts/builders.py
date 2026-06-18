@@ -214,7 +214,7 @@ if __name__ == "__main__":
                 "num_snapshots": 100,
                 "target_theta": None}
 
-    save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_tight_data"
+    save_dir = "/mnt/kocsis2/hww27/cuDART_wdir/regression/helical_flat_data"
     #build_helical_snapshots(save_dir, sim_args)
     save_lum()
     plot_lum_evo()
