@@ -65,11 +65,11 @@ Here we show how a user might package a series of subdomains for a single snapsh
     # construct Mesh object to hold sub-domains
     mesh = Mesh("path/to/data/dir")
 
-    # iterate over sub-domains, labelled MeshBlock
+    # iterate over sub-domains, labelled as MeshBlocks
     num_meshblocks = 10 
     for n in range(num_meshblocks):
 
-        # specify size of sub-domain
+        # specify size of sub-domain - need not be consistent across MeshBlocks
         nx, ny, nz = 100, 100, 200                              # spatial dimensions         
         data_dims = np.array([nx, ny, nz, 4])                   # data dimensions
 
@@ -87,9 +87,9 @@ Here we show how a user might package a series of subdomains for a single snapsh
         meshblock_data[..., 3] = vel_z
         meshblock_data = meshblock_data.astype(np.float32)      # enforce cast to float32
 
-        # add MeshBlock to Mesh, with spatial information
-        xl = np.array([0.0, 0.0, 0.0])                          # vector position of lower meshblock corner
-        xr = np.array([1.0, 1.0, 1.0])                          # vector position of upper meshblock corner
+        # add MeshBlock to Mesh, with spatial metadata
+        xl = np.array([x_min, y_min, z_min])                    # vector position of lower meshblock corner
+        xr = np.array([x_max, y_max, z_max])                    # vector position of upper meshblock corner
         mesh.add_meshblock(mb_data, xl, xr)
 
     # build header file for Mesh
@@ -142,14 +142,14 @@ Here we show how a user might use a single simulation snapshot in time to genera
     # convert raw .npy files into .png figures
     scene.plot(fig_save_dir = path_to_save_png)     
 
-Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see full documentation.
+Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_main>`.
 
 .. _example_section_D:
 
 D. Rendering from multiple pre-formatted snapshots
 --------------------------------------------------
 
-If the user wishes to account for a finite speed of light, then multiple snapshots must be read by :code:`cuDART`. 
+If the user wishes to account for a finite speed of light (e.g. using the lookback routine), then multiple snapshots must be read by :code:`cuDART`. 
 Multiple cameras (and hence images) can still be specified.
 
 .. code-block:: python
@@ -195,8 +195,11 @@ Multiple cameras (and hence images) can still be specified.
     # convert raw .npy files into .png figures
     scene.plot(fig_save_dir = path_to_save_png)     
 
-Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see full documentation.
+Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_main>`.
 The units for the origin-camera distance are inherited from the :code:`header.txt` file that should exist at :code:`path/to/all/snapshots/header.txt`.
-This header file should feature a single line of text in the form :code:`num_snapshots snapshot_size dt L_domain` where :code:`num_snapshots` is the total number 
-of snapshots within the data dir, :code:`snapshot_size` is the maximum snapshot size (by cells), :code:`dt` is the (fixed) time between snapshots in Myr and 
-:code:`L_domain` is the code unit for length (in kpc). 
+This header file should feature a single line of text in the form :code:`num_snapshots snapshot_size dt L_domain` where 
+
+- :code:`num_snapshots` is the total number of simulation snapshots within the data dir
+- :code:`snapshot_size` is the maximum snapshot size (by cells)
+- :code:`dt` is the time interval between simulations snapshots (in Myr)
+- :code:`L_domain` is the code unit for length (in kpc). 

@@ -47,6 +47,8 @@ Note here that on the RHS of the equations above, all quantities are functions o
 to travel from the emitter to the observer (e.g. :math:`\bar{t} \leq t`). The user can ignore this by setting :code:`lookback = False` at render, in which case 
 the speed of light will be modelled as infinite and the above equation simplifies to :math:`\bar{t}=t`.
 
+.. _calculation_lookback:
+
 Lookback Time
 -------------
 

@@ -24,7 +24,7 @@ such as superluminal motion to be recovered. :code:`cuDART` supports simulation 
 .. figure:: ../../gallery/magnetised_jets.png
     :width: 800px
 
-    Synthetic radio observations of hydrodynamic simulation data, highly magnetised, variable power jet launched from an Active Galactic Nucleus, viewed from three different orientations. 
+    Synthetic radio observations of hydrodynamic simulation data (featuring highly magnetised, variable power jet launched from an Active Galactic Nucleus) viewed from three different orientations. 
     Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. 
     Simulation data featured in Elley at al. 2026 (`NASA ADS <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_).
 
@@ -32,44 +32,56 @@ The workhorse of the :code:`cuDART` code is written in C++/CUDA, but the fronten
 Please report any issues and suggestions for improvement there. Development for :code:`cuDART` is use-case driven; if there are projects that you think may benefit from this code, but require additional features
 please get in touch with the developers.
 
----------------------------------------
+------------
 Publications
----------------------------------------
+------------
 
-Earlier iterations of this codebase have been use to generate synthetic observations for the following publications:
+Earlier iterations of this codebase (pre 1.0) have been use to generate synthetic observations for the following publications:
 
 * Gasealahwe et al. (2025): `A relativistic jet from a neutron star breaking out of its natal supernova remnant <https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract>`_,
 * Elley et al. (2026): `The impact of flickering variability and magnetisation on the dynamics, stability and morphology of radio-loud AGN jets <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_.
 
----------------------------------------
+-----------
 Development
----------------------------------------
+-----------
 
 Authors and contributors to the :code:`cuDART` code and their institutions are:
 
 Henry Whitehead
-    DPhil candidate, Department of Physics, Astrophysics, University of Oxford, Denys Wilkinson Building, Keble Road, Oxford, OX1 3RH, UK
+
+- ISTA Fellow, Institute of Science and Technology Austria 
+- Previously, DPhil candidate, University of Oxford
+- `Personal Website <https://hwhitehead.github.io/>`_
 
 ----------------
 Acknowledgements 
 ----------------
 
-:code:`cuDART` relies on the publically available (and internally included) `libnpy <https://github.com/llohse/libnpy>`_ library to read :code:`.npy` files into memory.
+:code:`cuDART` uses an adapted version of the publically available `libnpy <https://github.com/llohse/libnpy>`_ library to read :code:`.npy` files into memory.
 Development of this code was supported by `this <https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-acceleration-structure/grid.html>`_ excellent guide on 
 acceleration structures in C, and `this <https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/>`_ developer blog on constructing ray tracers with CUDA. 
 Much of the formatting for this documentation page is taken from the superior documentation for the `SIROCCO <https://sirocco-rt.readthedocs.io/en/latest/>`_ radiative transfer code.
 
 .. toctree::
     :titlesonly:
-    :glob:
     :hidden:
-    :caption: Documentation
+    :maxdepth: 2
+    :caption: Physics Documentation
 
     calculation
     lookback
     phenomena
+
+.. toctree::
+    :titlesonly:
+    :hidden:
+    :maxdepth: 2
+    :caption: Code Documentation
+
     install
-    inputs
     example
+    inputs
     api
     performance
+    structure
+

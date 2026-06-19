@@ -18,8 +18,11 @@ outputs/
 *~
 *.swp
 
+# venvs
+pysrc/cudart_venv
+docs/sphinx_venv
+
 # sphinx files
-docs/sphinx_venv/
 docs/build/doctrees/
 docs/build/html/
 !docs/Makefile

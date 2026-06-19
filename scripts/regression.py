@@ -18,9 +18,8 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
     # construct template data for regression suite, without labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
-    # the emitting regions are spheres in the observer frame
-    # the emission in the spheres falls off quadratically with radius, out to a fixed, finite radius
-    # if given specific theta, ensure sampling occurs at unaliased frequency
+    # the emitting regions are spheres, ellipsoids or jets dependeng on sim_args["build_mode"]
+    # if sim_args["target_theta"] not None, ensure snapshot sampling occurs at unaliased frequency
 
     if (verbose): 
         print("starting regression suite data construction...")
@@ -70,12 +69,14 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_in_kpc"]))
     if (verbose): print("built header.")
 
-    if sim_args["build_mode"] == "blob-pt":
+    if sim_args["build_mode"] == "sphere_rest":
         z_scale = 1.0 / sim_args["Gamma"]
     else:
         z_scale = 1.0
 
     # build snapshots
+    emm_adv = 1.0
+    emm_rec = 1.0
     for n, t_in_Myr in enumerate(t_span):
         # unlabelled data is a single .npy file, without a header
         save_str = os.path.join(save_dir, "snapshot" + str(n).zfill(5) + ".npy")
@@ -84,8 +85,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         save_data = np.zeros_like(xx)
         offset_in_kpc = t_in_Myr * v_in_kpc_per_Myr             # calculate current offset in kpc
         offset = offset_in_kpc / sim_args["L_in_kpc"]           # cast to code units
-        emm_adv = 1.0
-        emm_rec = 1.0
+        
         if sim_args["build_mode"] == "jet":                     # test occupancy in cylinder with moving front
             in_radius = (xy_sqr < r_in_code ** 2)
             in_adv = in_radius & (zz > 0) & (zz < offset)
@@ -102,19 +102,18 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
         tail_emm_mask = (in_rec) & (ii == 0)
         lead_vel_mask = (in_adv) & (ii == 3)
         tail_vel_mask = (in_rec) & (ii == 3)
-        save_data[lead_emm_mask] = emm_adv                                      # match emission in lead/tail
+        save_data[lead_emm_mask] = emm_adv                      # match emission in lead/tail
         save_data[tail_emm_mask] = emm_rec 
-        save_data[lead_vel_mask] = v_in_c                                       # invert velocity in lead/tail
+        save_data[lead_vel_mask] = v_in_c                       # invert velocity in lead/tail
         save_data[tail_vel_mask] = -v_in_c
-        save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
-        np.save(save_str, save_data)                                            # save snapshot data
+        save_data = save_data.astype(np.float32)                # ENSURE cast to float32!!!
+        np.save(save_str, save_data)                            # save snapshot data
         if (verbose): print("built dataset for snapshot {0}/{1}".format(n,num_snapshots))
 
     if (verbose): print("finished dataset construction.")
 
+# TODO: ensure labelled ctor is tested before v1.0
 def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_rest = False):
-
-    # TODO: function currently not complete
 
     # construct template data for regression suite, with labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
@@ -223,12 +222,12 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
 
     if (verbose): print("finished labelled dataset construction.")
 
-def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True):
+def render_without_lookback(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True):
 
     # run a rendering test on a single snapshot of data
-    # data should be loaded from suite built using build_regression_suite (-b flag)
+    # data should be loaded from suite built using build_regression_suite (-b or -bl flags)
     # render uses a set number of cameras evenly spanning the azimuthal axis 
-    # optional call included to render raws as figures (.npy -> .png)
+    # optional camera_args["save_fig"] to render raws as figures (.npy -> .png)
 
     if (verbose): 
         print("starting no-lookback render test...")
@@ -281,7 +280,8 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
     if (verbose): print("built scene.")
 
     # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose)
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
+                save_profile = True)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
@@ -290,7 +290,7 @@ def run_nolookback_test(load_dir, save_dir, camera_args, snapshot_index = None, 
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
-def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True, flexload = False):
+def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True):
 
     # run a rendering test using finite speed of light with multiple snapshots
     # data should be loaded from suite built using build_regression_suite (-b flag)
@@ -350,9 +350,8 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
     if (verbose): print("built scene.")
 
     # render and save images
-    save_profile = os.path.join(save_dir, "profiling.txt")
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose, flexload = flexload,
-                save_profile = save_profile)
+    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose,
+                save_profile = True)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
@@ -361,7 +360,7 @@ def run_lookback_test(load_dir, save_dir, sim_args, camera_args, verbose = True,
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
-def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose = True, flexload = False, show_masks = False):
+def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, show_masks = False):
 
     if (verbose): 
         print("starting lookback render test...")
@@ -420,7 +419,7 @@ def run_penrose_terrell_test(load_dir, save_dir, sim_args, camera_args, verbose 
     lookbacks = [False, True]
     for i, label in enumerate(labels):
         scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose, flexload = flexload)
+        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose)
     if (verbose): print("finished raw image generation")
 
     # plot composite
@@ -501,29 +500,52 @@ def report_profiling(save_dir, verbose = True):
 
 if __name__ == "__main__":
 
-    # demo_load_times()
+    """
+    sim_args 
+    Dictionary for simulation parameters
+    
+    Gamma           bulk Lorentz factor
+    L_in_kpc        length of longest simulation domain edge in kpc
+    r_in_kpc        length scale of emitting region in kpc
+    domain_dims     simulation dimensions as [nx, ny, nz]
+    num_snapshots   total number of saved snapshots
+    target_theta    if not None, builds snapshots at critical rate
+    build_mode      emitter geometry (sphere, sphere_rest or jet)
+    """
 
-    # dict for simulation args (all lengths in kpc)
-    sim_args = {"Gamma": 7.0,
+    sim_args = {"Gamma": 2.0,
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
                 "target_theta": None,
-                "build_mode": "jet"}
+                "build_mode": "sphere"}
 
     # construct template camera
-    template_camera = Camera()
-    template_camera.tilt = (90.0 / 180) * np.pi     # tilt from bias vector (aligned with z axis)
-    template_camera.t_obs = 0.5                     # overwritten to even spacing in t_obs for lookback            
-    template_camera.phi = epsilon                   # small value, system axisymmetric in phi
-    template_camera.theta = 0.125 * np.pi + epsilon  # overwritten to even spacing in theta for no-lookback
-    template_camera.length_X = 1.0                  # longest simulation size 1.0 in code units
-    template_camera.length_Y = 1.0                  # square domain
-    template_camera.num_pixels_X = 2048             # ensure square pixels
+    template_camera = Camera()                          # see pysrc/cudart.py for class documentation
+    template_camera.tilt = (90.0 / 180) * np.pi         # tilt from bias vector (aligned with z axis)
+    template_camera.t_obs = 0.5                         # overwritten to even spacing in t_obs for lookback            
+    template_camera.phi = epsilon                       # small value, system axisymmetric in phi
+    template_camera.theta = 0.125 * np.pi + epsilon     # overwritten to even spacing in theta for no-lookback
+    template_camera.length_X = 1.0                      # longest simulation size 1.0 in code units
+    template_camera.length_Y = 1.0                      # square domain
+    template_camera.num_pixels_X = 2048                 # ensure square pixels
     template_camera.num_pixels_Y = 2048
 
-    # dict for camera args
+    
+    """
+    camera_ags
+    Dictionary for render parameters
+
+    num_img             number of images to render
+    resize_img          adjust image dimensions to viewing orientation
+    relativistic        boolean to include relativistic boosting
+    template            template camera to copy properties from
+    camera_file_name    if not None, generate peristent text file with camera properties
+    save_fig            boolean to generate .png figures from raw .npy images
+    snapshot_index      index of simulation data to load (only for rendering without lookback, defaults to midpoint)
+    """
+
     camera_args = {"num_img": 100,
                     "resize_img": False,
                     "relativistic": True,
@@ -534,35 +556,27 @@ if __name__ == "__main__":
 
     # handle command line arguments for regression tests
     parser = argparse.ArgumentParser()
-    parser.add_argument("-b",
+    parser.add_argument("-b", "-build",
                         action="store_true",
                         default=False,
                         help="build regression suite data")
-    parser.add_argument("-bl",
+    parser.add_argument("-bl", "-build_labelled",
                         action="store_true",
                         default=False,
                         help="build labelled regression suite data")
-    parser.add_argument("-bpt",
-                        action="store_true",
-                        default=False,
-                        help="build as sphere in rest frame")
-    parser.add_argument("-r", 
+    parser.add_argument("-r", "-render"
                         action="store_true",
                         default=False,
                         help="run in no-lookback test")
-    parser.add_argument("-rl", 
+    parser.add_argument("-rl", "-render_lookback",
                         action="store_true",
                         default=False,
                         help="run in lookback mode")
-    parser.add_argument("-rpt",
+    parser.add_argument("-rc", "-render_comp"
                         action="store_true",
                         default=False,
                         help="run penrose-terrell test")
-    parser.add_argument("-f",
-                        action="store_true",
-                        default=False,
-                        help="run with flexload")
-    parser.add_argument("-v", 
+    parser.add_argument("-v", "-verbose",
                         action="store_true",
                         default=False,
                         help="run in verbose mode")
@@ -572,49 +586,31 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir",
                         default=None,
                         help="path to input datasets")
-    parser.add_argument("-s",
-                        action="store_true",
-                        default=False,
-                        help="generate physics summary")
-    parser.add_argument("-p",
+    parser.add_argument("-p", "-profile",
                         action="store_true",
                         default=False,
                         help="generate profiling report from output")
     parser.add_argument("--build_mode",
                         default=None,
-                        help="build mode for simulation data (blob, blob-pt, jet)")
+                        help="build mode for simulation data (sphere, sphere_rest, jet)")
     args = vars(parser.parse_args())
 
-    
+    # check valid build_mode
     if args["build_mode"] is not None:
         build_mode = args["build_mode"].lower()
-        if build_mode not in ["blob", "blob-pt", "jet"]:
-            raise Exception("build_mode option must be one of [blob, blob-pt, jet]")
+        if build_mode not in ["sphere", "sphere_rest", "jet"]:
+            raise Exception("build_mode option must be one of [sphere, sphere_rest, jet]")
         else:
             sim_args["build_mode"] = build_mode
 
-    # run summary function
-    if (args["s"]):
-        if (args["save_dir"] is None):
-            raise Exception("unable to run summary without save location (use --save_dir)")
-        summarise_physics(save_dir = args["save_dir"], 
-                            sim_args = sim_args,
-                            camera_args = camera_args,
-                            verbose = args["v"])
-
-    if (args["p"]):
-        if (args["save_dir"] is None):
-            raise Exception("unable to run profiler summary without save location (use --save_dir)")
-        report_profiling(save_dir = args["save_dir"], verbose = args["v"])
+    # except multiple build-type flags
+    if (args["b"] + args["bl"]):
+        raise Exception("build routines share write space (data_dir), please select only one at a time") 
 
     # except multiple run-type flags
-    if (args["r"] and args["rl"]):
-        raise Exception("no-lookback and lookback share write space, please select only one")
+    if (args["r"] + args["rl"] + args["rc"] > 1):
+        raise Exception("render routines share write space (save_dir), please select only one at a time")
     
-    # except multiple build-type flags
-    if (args["b"] and args["bl"]):
-        raise Exception("labelled and unlabelled builders share write space, please select only one") 
-
     # construct regression data suite with or without labels
     if (args["b"]):
         if (args["data_dir"] is None):
@@ -625,13 +621,13 @@ if __name__ == "__main__":
             raise Exception("unable to build labelled regression suite data without save location (use --data_dir)")
         build_labelled_regression_suite(args["data_dir"], sim_args, args["v"])
 
-    # run render routine with or without lookback
+    # run render routine with or without lookback, or by comparison
     if (args["r"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run no-lookback test without save location (use --save_dir)")
         if (args["data_dir"] is None):
             raise Exception("unable to run no-lookback test without load location (use --data_dir)")
-        run_nolookback_test(load_dir = args["data_dir"], 
+        render_without_lookback(load_dir = args["data_dir"], 
                             save_dir = args["save_dir"], 
                             camera_args = camera_args, 
                             verbose = args["v"])
@@ -640,20 +636,24 @@ if __name__ == "__main__":
             raise Exception("unable to run lookback test without save location (use --save_dir)")
         if (args["data_dir"] is None):
             raise Exception("unable to run lookback test without load location (use --data_dir)")
-        run_lookback_test(load_dir = args["data_dir"], 
+        render_with_lookback(load_dir = args["data_dir"], 
                             save_dir = args["save_dir"], 
                             sim_args = sim_args, 
                             camera_args = camera_args, 
-                            verbose = args["v"],
-                            flexload=args["f"])
-    elif (args["rpt"]):
+                            verbose = args["v"])
+    elif (args["rc"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run penrose-terrell test without save location (use --save_dir)")
         if (args["data_dir"] is None):
             raise Exception("unable to run penrose-terrell test without load location (use --data_dir)")
-        run_penrose_terrell_test(load_dir = args["data_dir"], 
+        compare_lookback(load_dir = args["data_dir"], 
                                 save_dir = args["save_dir"], 
                                 sim_args = sim_args, 
                                 camera_args = camera_args, 
-                                verbose = args["v"],
-                                flexload=args["f"])
+                                verbose = args["v"])
+
+    # report profiling for earlier run
+    if (args["p"]):
+        if (args["save_dir"] is None):
+            raise Exception("unable to run profiler summary without save location (use --save_dir)")
+        report_profiling(save_dir = args["save_dir"], verbose = args["v"])
