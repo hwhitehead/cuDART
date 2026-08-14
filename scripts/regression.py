@@ -608,7 +608,7 @@ if __name__ == "__main__":
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
                 "domain_dims": [250,250,500],
-                "num_snapshots": 100,
+                "num_snapshots": 500,
                 "target_theta": None,
                 "build_mode": "sphere"}
 
