@@ -409,13 +409,17 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
     D_in_m = 2.0 * sim_args["L_in_kpc"] * kpc_to_m                                              # origin-camera seperation 
     t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
     t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
-    t_min *= 0.95                                                                               # start render just before flight time 
+    #t_min *= 0.95                                                                               # start render just before flight time 
 
-    # calculate stop time (when receding ejectum reaches maximal extent)
-    x_max_in_m = 0.5 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
-    d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
-    t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
-    t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units    
+    # alternate timings to match no-lookback form
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                         # cast to astro units    
+    t_max = 0.5 * (sim_args["L_in_kpc"] + sim_args["r_in_kpc"]) / v_in_kpc_per_Myr      # calc duration to reach domain edge
+
+    # # calculate stop time (when receding ejectum reaches maximal extent)
+    # x_max_in_m = 0.5 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
+    # d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
+    # t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
+    # t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units    
 
     # generate array of cameras, evenly seperated in observer time
     if (verbose): print(r"building {0} cameras evenly spanning t_obs in [{1},{2}]Myr".format(camera_args["num_img"],t_min, t_max))
