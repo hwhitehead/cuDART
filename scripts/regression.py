@@ -564,7 +564,7 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="build labelled regression suite data")
-    parser.add_argument("-r", "-render"
+    parser.add_argument("-r", "-render",
                         action="store_true",
                         default=False,
                         help="run in no-lookback test")
@@ -572,7 +572,7 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="run in lookback mode")
-    parser.add_argument("-rc", "-render_comp"
+    parser.add_argument("-rc", "-render_comp",
                         action="store_true",
                         default=False,
                         help="run penrose-terrell test")
