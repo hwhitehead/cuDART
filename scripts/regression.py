@@ -328,6 +328,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
     for n in range(num_snapshots):
 
         # generate scene
+        load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
         scene = Scene(load_str = load_str, save_dir = scratch_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
         if (verbose): print("built scene for snapshot {0}.".format(n))
 
