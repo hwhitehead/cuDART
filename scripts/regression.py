@@ -604,7 +604,7 @@ if __name__ == "__main__":
             sim_args["build_mode"] = build_mode
 
     # except multiple build-type flags
-    if (args["b"] + args["bl"]):
+    if (args["b"] + args["bl"] > 1):
         raise Exception("build routines share write space (data_dir), please select only one at a time") 
 
     # except multiple run-type flags
