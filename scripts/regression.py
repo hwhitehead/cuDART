@@ -409,11 +409,11 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
     D_in_m = 2.0 * sim_args["L_in_kpc"] * kpc_to_m                                              # origin-camera seperation 
     t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
     t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
-    #t_min *= 0.95                                                                               # start render just before flight time 
+    #t_min *= 0.95                                                                              # start render just before flight time 
 
     # alternate timings to match no-lookback form
-    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                         # cast to astro units    
-    t_max = 0.5 * (sim_args["L_in_kpc"] + sim_args["r_in_kpc"]) / v_in_kpc_per_Myr      # calc duration to reach domain edge
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                                 # cast to astro units    
+    t_max = t_min + 0.5 * (sim_args["L_in_kpc"] + sim_args["r_in_kpc"]) / v_in_kpc_per_Myr      # calc duration to reach domain edge
 
     # # calculate stop time (when receding ejectum reaches maximal extent)
     # x_max_in_m = 0.5 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
