@@ -343,7 +343,6 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
         raw_file = os.path.join(save_dir, "raw" + str(n).zfill(5) + ".npy")
         shutil.move(scratch_file, raw_file)
         
-
     # render figures if flagged
     if (camera_args["save_fig"]):
         # define persistent figure to reuse for each image
@@ -367,7 +366,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
 
             # load image data
             img = np.load(load_str)
-            if log_data: img = np.log10(img) # if flagged, apply log10 to img data
+            img = np.log10(img)
             pc = ax.pcolormesh(XX, YY, img, vmin=-6, vmax=0, cmap="afmhot", shading="flat")
             
             # save figure, and cleanup
