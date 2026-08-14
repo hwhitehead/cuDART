@@ -572,7 +572,7 @@ def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, 
         axes[i].set_facecolor("k")
 
     true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
-    fig.suptitle(r"$\theta = \frac{\pi}{4}$, $\Gamma = 2 \implies \frac{F_\mathrm{adv}}{F_\mathrm{rec}} = \left(\frac{1+\beta \cos(\theta)}{1-\beta \cos(\theta)}\right)^{3-\alpha}$" + " = {0:.3f}".format(true_ratio))
+    fig.suptitle(r"$\theta = \frac{\pi}{4}$, $\Gamma = 2$ -> $\frac{F_\mathrm{adv}}{F_\mathrm{rec}} = \left(\frac{1+\beta \cos(\theta)}{1-\beta \cos(\theta)}\right)^{3-\alpha}$" + " = {0:.3f}".format(true_ratio))
 
     sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
     fig.colorbar(sm, cax=cax, orientation="vertical")
