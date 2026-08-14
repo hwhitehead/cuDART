@@ -346,7 +346,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
 
     # render figures if flagged
     if (camera_args["save_fig"]):
-        scene.plot(fig_save_dir = scratch_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin= -6, vmax = 0)
+        scene.plot(fig_save_dir = save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin= -6, vmax = 0)
         if (verbose): print("finished rendering figures.")
 
     # destroy scratch space
