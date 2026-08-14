@@ -325,22 +325,23 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
     scratch_dir = os.path.join(save_dir, "scratch")
 
     # iterate over snapshots
-    # for n in range(num_snapshots):
+    for n in range(num_snapshots):
 
-    #     # generate scene
-    #     load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
-    #     scene = Scene(load_str = load_str, save_dir = scratch_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-    #     if (verbose): print("built scene for snapshot {0}.".format(n))
+        # generate scene
+        load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        scene = Scene(load_str = load_str, save_dir = scratch_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+        if (verbose): print("built scene for snapshot {0}.".format(n))
+        continue # temp, render skip
 
-    #     # render raw images
-    #     scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
-    #                 save_profile = False)
-    #     if (verbose): print("finished rendering raw images.")
+        # render raw images
+        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
+                    save_profile = False)
+        if (verbose): print("finished rendering raw images.")
 
-    #     # copy raw to main save direction
-    #     scratch_file = os.path.join(scratch_dir, "raw00001.npy")
-    #     raw_file = os.path.join(save_dir, "raw" + str(n).zfill(5) + ".npy")
-    #     shutil.move(scratch_file, raw_file)
+        # copy raw to main save direction
+        scratch_file = os.path.join(scratch_dir, "raw00001.npy")
+        raw_file = os.path.join(save_dir, "raw" + str(n).zfill(5) + ".npy")
+        shutil.move(scratch_file, raw_file)
         
 
     # render figures if flagged
