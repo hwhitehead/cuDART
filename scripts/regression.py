@@ -281,7 +281,7 @@ def render_single_snapshot(load_dir, save_dir, camera_args, snapshot_index = Non
 
     # render and save images
     scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
-                save_profile = True)
+                save_profile = False)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
@@ -334,7 +334,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
 
         # render raw images
         scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
-                    save_profile = True)
+                    save_profile = False)
         if (verbose): print("finished rendering raw images.")
 
         # copy raw to main save direction
@@ -414,7 +414,7 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
 
     # render and save images
     scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose,
-                save_profile = True)
+                save_profile = False)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
