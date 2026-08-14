@@ -315,8 +315,8 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
     # generate a single camera, reuse over renders
     if (verbose): print(r"building single camera")
     if (camera_args["resize_img"]): # apply resize by orientaiton if flagged
-            camera_args["template"].length_X *= np.sin(theta)
-            camera_args["template"].length_Y *= np.sin(theta)
+            camera_args["template"].length_X *= np.sin(camera_args["theta"])
+            camera_args["template"].length_Y *= np.sin(camera_args["theta"])
     camera_args["template"].set_sph_pos(r = 2.0, target_origin = True)
     cameras = [camera_args["template"]] * 2 # TEMP: camera dupe to bypass err in image0
     if (verbose): print("finished camera initialisation.")
@@ -588,7 +588,7 @@ if __name__ == "__main__":
     template_camera.tilt = (90.0 / 180) * np.pi         # tilt from bias vector (aligned with z axis)
     template_camera.t_obs = 0.5                         # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                       # small value, system axisymmetric in phi
-    template_camera.theta = 0.125 * np.pi + epsilon     # overwritten to even spacing in theta for no-lookback
+    template_camera.theta = 0.25 * np.pi + epsilon      # overwritten to even spacing in theta for no-lookback
     template_camera.length_X = 1.0                      # longest simulation side length is 1.0 in code units
     template_camera.length_Y = 1.0                      # square domain
     template_camera.num_pixels_X = 2048                 # ensure square pixels
