@@ -315,8 +315,8 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
     # generate a single camera, reuse over renders
     if (verbose): print(r"building single camera")
     if (camera_args["resize_img"]): # apply resize by orientaiton if flagged
-            camera_args["template"].length_X *= np.sin(camera_args["theta"])
-            camera_args["template"].length_Y *= np.sin(camera_args["theta"])
+            camera_args["template"].length_X *= np.sin(camera_args["template"].theta)
+            camera_args["template"].length_Y *= np.sin(camera_args["template"].theta)
     camera_args["template"].set_sph_pos(r = 2.0, target_origin = True)
     cameras = [camera_args["template"]] * 2 # TEMP: camera dupe to bypass err in image0
     if (verbose): print("finished camera initialisation.")
