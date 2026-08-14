@@ -346,11 +346,36 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
 
     # render figures if flagged
     if (camera_args["save_fig"]):
-        scene.plot(fig_save_dir = save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin= -6, vmax = 0)
-        if (verbose): print("finished rendering figures.")
+        # define persistent figure to reuse for each image
+        fig = plt.figure(figsize=(10.0/3,10.0/3))
+        ax = fig.add_subplot()
+        ax.set_facecolor("k")
+        plt.subplots_adjust(hspace=0, wspace=0)
+        X = np.linspace(0,1,camera_args["template"].num_pixels_X+1)
+        Y = np.linspace(0,1,camera_args["template"].num_pixels_Y+1)
+        XX, YY = np.meshgrid(X, Y, indexing="ij")
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
+        ax.set_xlim([0,1])
+        ax.set_ylim([0,1])
 
-    # destroy scratch space
-    os.rmdir(scratch_dir)
+        # iterate over raw images)
+        for i in range(num_snapshots):
+            # build load, save paths
+            load_str = os.path.join(save_dir, "raw{0}.npy".format(str(i).zfill(str_zfill)))
+            save_str = os.path.join(save_dir, "img{0}.png".format(str(i).zfill(str_zfill)))
+
+            # load image data
+            img = np.load(load_str)
+            if log_data: img = np.log10(img) # if flagged, apply log10 to img data
+            pc = ax.pcolormesh(XX, YY, img, vmin=-6, vmax=0, cmap="afmhot", shading="flat")
+            
+            # save figure, and cleanup
+            fig.savefig(save_str, dpi=300, bbox_inches="tight")
+            pc.remove()
+            if (verbose): print("saved png at {0}".format(save_str))
+
+        plt.close("all")
 
     if (verbose): print("finished no-lookback render, see {0} for output".format(save_dir))
 
