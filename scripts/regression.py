@@ -510,7 +510,7 @@ def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, 
     if (verbose): print("finished raw image generation")
 
     # plot composite
-    set_plot_defaults()
+    set_plot_defaults(use_tex=False)
     height_ratios = np.array([1])
     width_ratios = np.array([1,1,0.05])
     h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
