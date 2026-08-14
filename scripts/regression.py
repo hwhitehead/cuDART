@@ -3,7 +3,7 @@ This file contains a collection of functions test basic cuDART functionality, su
 """
 
 # external imports
-import sys, os
+import sys, os, shutil
 import numpy as np
 import argparse, re
 import time
@@ -222,7 +222,7 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
 
     if (verbose): print("finished labelled dataset construction.")
 
-def render_without_lookback(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True):
+def render_single_snapshot(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True):
 
     # run a rendering test on a single snapshot of data
     # data should be loaded from suite built using build_regression_suite (-b or -bl flags)
@@ -289,6 +289,68 @@ def render_without_lookback(load_dir, save_dir, camera_args, snapshot_index = No
         if (verbose): print("finished rendering figures.")
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
+
+def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
+
+    # run a rendering test without lookback, on all snapshots of data in load_dir
+    # data should be loaded from suite built using build_regression_suite (-b or -bl flags)
+    # render uses a set number of cameras evenly spanning the azimuthal axis 
+    # optional camera_args["save_fig"] to render raws as figures (.npy -> .png)
+
+    if (verbose): 
+        print("starting no-lookback render test...")
+        print("reading data from {0}".format(load_dir))
+        print("saving data at {0}".format(save_dir))
+
+    # check input, output directory existence
+    for path in [load_dir, save_dir]:
+        if not os.path.isdir(path):
+            raise Exception("{0} does not exist".format(path))
+
+    # determine total number of snapshots in load_dir
+    _, dirs, files = next(os.walk(load_dir))
+    num_snapshots = len([file for file in files if file.startswith("snapshot")])
+    if (verbose): print(r"Identified {0} snapshots in {1}".format(num_snapshots, load_dir))
+
+    # generate a single camera, reuse over renders
+    if (verbose): print(r"building single camera")
+    if (camera_args["resize_img"]): # apply resize by orientaiton if flagged
+            camera_args["template"].length_X *= np.sin(theta)
+            camera_args["template"].length_Y *= np.sin(theta)
+    camera_args["template"].set_sph_pos(r = 2.0, target_origin = True)
+    cameras = [camera_args["template"]] * 2 # TEMP: camera dupe to bypass err in image0
+    if (verbose): print("finished camera initialisation.")
+
+    # generate scratch space for raw
+    scratch_dir = os.path.join(save_dir, "scratch")
+
+    # iterate over snapshots
+    for n in range(num_snapshots):
+
+        # generate scene
+        scene = Scene(load_str = load_str, save_dir = scratch_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
+        if (verbose): print("built scene for snapshot {0}.".format(n))
+
+        # render raw images
+        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
+                    save_profile = True)
+        if (verbose): print("finished rendering raw images.")
+
+        # copy raw to main save direction
+        scratch_file = os.path.join(scratch_dir, "raw00001.npy")
+        raw_file = os.path.join(save_dir, "raw" + str(n).zfill(5) + ".npy")
+        shutil.move(scratch_file, raw_file)
+        
+
+    # render figures if flagged
+    if (camera_args["save_fig"]):
+        scene.plot(fig_save_dir = scratch_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin= -6, vmax = 0)
+        if (verbose): print("finished rendering figures.")
+
+    # destroy scratch space
+    os.rmdir(scratch_dir)
+
+    if (verbose): print("finished no-lookback render, see {0} for output".format(save_dir))
 
 def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True):
 
@@ -527,12 +589,11 @@ if __name__ == "__main__":
     template_camera.t_obs = 0.5                         # overwritten to even spacing in t_obs for lookback            
     template_camera.phi = epsilon                       # small value, system axisymmetric in phi
     template_camera.theta = 0.125 * np.pi + epsilon     # overwritten to even spacing in theta for no-lookback
-    template_camera.length_X = 1.0                      # longest simulation size 1.0 in code units
+    template_camera.length_X = 1.0                      # longest simulation side length is 1.0 in code units
     template_camera.length_Y = 1.0                      # square domain
     template_camera.num_pixels_X = 2048                 # ensure square pixels
     template_camera.num_pixels_Y = 2048
 
-    
     """
     camera_ags
     Dictionary for render parameters
@@ -547,7 +608,7 @@ if __name__ == "__main__":
     """
 
     camera_args = {"num_img": 100,
-                    "resize_img": False,
+                    "resize_img": True,
                     "relativistic": True,
                     "template": template_camera,
                     "camera_file_name": None,

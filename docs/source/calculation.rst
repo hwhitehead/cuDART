@@ -3,22 +3,23 @@ Intensity Calculation
 
 .. _calculation_header:
 
-:code:`cuDART` is designed to operate on simulation data with coordinates meshes defined in the observer frame (static Minkowski spacetime). 
-While the code can be used to calculate other line-of-sight properties such as surface density, its real strength comes from 
+:code:`cuDART` is designed to operate on simulation data with coordinates meshes defined in the observer/lab frame (static Minkowski spacetime). 
+While the code can be used to calculate other line-of-sight properties such as surface density, its real primary use case is
 calculating optically thin emergent intensities from domains populated with emissivity and velocity data.
 
-The code is designed to accept emissivity data that is isotropic and defined in the cell's rest frame. To compute the 
-emissivity in the observer frame, this emission must be beamed along the cell's direction of motion. Due to time dilation,
-the frequency in the observer and emitter frames will also be different. :code:`cuDART` is able to account for all of these effects 
-on the fly if it is provided with the monochromatic, isotropic rest-frame emissivity in each cell, the velocity in each cell, and the 
-exponent for the assumed power-law frequency slope in the rest-frame emission. For a line of sight described by an origin :math:`\boldsymbol{x}_0` and normal :math:`\hat{\boldsymbol{s}}`, 
-such that all points on the line of sight satisfy 
+The code is designed to accept emissivity data that is isotropic and defined in the cell's rest frame. The emission is then converted into the observer frame,
+accounting for beaming parallel to the local velocity and frequency changes due to time dilation.
+:code:`cuDART` is able to perform this calculation on the fly, provided it is passed the monochromatic, isotropic rest-frame emissivity in each cell, the velocity in each cell, and the 
+exponent for the assumed power-law frequency slope in the rest-frame emission. 
+
+For a line of sight described by an origin :math:`\boldsymbol{x}_0` and normal :math:`\hat{\boldsymbol{s}}`, 
+all points on the line of sight satisfy 
 
 .. math::
 
-    \boldsymbol{x} = \boldsymbol{x}_0 + s \hat{\boldsymbol{s}},
+    \boldsymbol{x} = \boldsymbol{x}_0 + s \hat{\boldsymbol{s}}.
 
-the emergent intensity :math:`I_{\nu}` measured at time :math:`t` can be computed as
+The monochromatic emergent intensity measured at time :math:`t` by an observer at :math:`\boldsymbol{x}_0` can be computed as
 
 .. math::
 
@@ -32,16 +33,16 @@ for the power-law slope in the rest-frame emissivity and :math:`D` is the Dopple
 
     D = \frac{1}{\gamma \left(1+\boldsymbol{\beta} \cdot \hat{s}\right)}, \quad \gamma = \frac{1}{\sqrt{1-\boldsymbol{\beta}\cdot \boldsymbol{\beta}}}
 
-dependent on :math:`\boldsymbol{\beta} \equiv \boldsymbol{v}/c`, the local velocity in units of the speed of light. For a domain discretised into a 3D Cartesian mesh, this integration 
+The Doppler factor is a function of :math:`\boldsymbol{\beta} \equiv \boldsymbol{v}/c`, the local velocity in units of the speed of light. For a domain discretised into a 3D Cartesian mesh, the intensity path integration 
 is calculated by summation 
 
 .. math::
 
     I(\nu,\boldsymbol{x}_0,\hat{\boldsymbol{s}},t) = \left(\frac{\nu}{\nu'_0}\right)^{\alpha}\sum_n w_n D_n^{2-\alpha} j'_n(\nu_0,\bar{t})
 
-where here the index :math:`n` labels cells on the line-of-sight with spatial indices :math:`\{i_n,j_n,k_n\}`. The weight factor
+where here the index :math:`n` labels cells intersecting with the line-of-sight with spatial indices :math:`\{i_n,j_n,k_n\}`. The weight factor
 :math:`w_n` describes the length element of the line-of-sight within cell :math:`n`. The principle action of the DDA algorithm is to identify 
-these cells on the line-of-sight, and their respective weights.
+the indices of intersecting cells, and their respective weights.
 
 Note here that on the RHS of the equations above, all quantities are functions of :math:`\bar{t}`, not the observer time :math:`t`. This is because light takes a finite time
 to travel from the emitter to the observer (e.g. :math:`\bar{t} \leq t`). The user can ignore this by setting :code:`lookback = False` at render, in which case 
