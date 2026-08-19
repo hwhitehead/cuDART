@@ -265,7 +265,9 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
                 trace_weight *= calc_boost_factor(beta_vec, r.normal, trace_args.doppler_index);
             }
             if (trace_args.lookback) {
-                trace_weight *= calc_lookback_factor(s_current, trace_args);
+                // apply temporal lerp and edge handling
+                float midpoint_s = s_current + 0.5 * dwell;
+                trace_weight *= calc_lookback_factor(midpoint_s, trace_args);
             }
             trace += trace_weight * all_data[data_index];    
             
