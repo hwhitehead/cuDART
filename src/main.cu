@@ -160,9 +160,9 @@ int main(int argc, char *argv[]) {
         CUDART_ERROR(err_msg);
     }
 
-    // package trace info (TEMP, consider importing within lookback header)
+    // package trace info 
     TraceArgs trace_args;
-    
+    // the following are user-defined values, set via command line arguments
     trace_args.relativistic = relativistic;
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     trace_args.last_snapshot = 0;
     trace_args.last_time = 0;
     trace_args.num_snapshots = 0;
-    trace_args.keep_edge = true; // TODO: add option in header for this
+    trace_args.keep_edge = true; 
 
     // print timing header
     if (verbose) {
@@ -252,8 +252,7 @@ int main(int argc, char *argv[]) {
         std::ifstream header_file(header_str);
         int num_snapshots, max_snapshot_size;
         float snapshot_dt; // in units of Myr
-        float L_domain; // if unlabelled data: length of longest side of domain in kpc
-                        // if labelled data: length of unity in mb_info
+        float L_domain; // in units of kpc, if unlabelled longest domain size is unity
         if (header_file.is_open()) {
             std::string line;
             int line_count = 0;
