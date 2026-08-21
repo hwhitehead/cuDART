@@ -14,7 +14,11 @@ __host__ void check_cuda(cudaError_t result, char const *const func, const char 
     }
 }
 
-size_t num_zero_pad = 5;
+// statics
+const size_t num_zero_pad = 5;
+const float kpc_to_m = 3.086e+19;                                     // in m
+const float Myr_to_s = 1e6 * 365 * 24 * 60 * 60;                      // in s
+const float c_light = 3e8;                                            // in m/s
 
 struct TraceArgs {
     // relativistic settings

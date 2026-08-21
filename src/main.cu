@@ -194,20 +194,6 @@ int main(int argc, char *argv[]) {
     std::vector<Camera> cameras = load_cameras(camera_char, verbose);
     int num_images = cameras.size();
 
-    // grab extremal camera properties for flexload (only important for lookback)
-    float camera_r_min = std::numeric_limits<float>::max();
-    float camera_r_max = std::numeric_limits<float>::min();
-    float camera_t_min = camera_r_min;
-    float camera_t_max = camera_r_max;
-    for (auto &camera : cameras) {
-        float camera_r = camera.origin.vector_mag();
-        camera_r_min = (camera_r < camera_r_min) ? camera_r : camera_r_min;
-        camera_r_max = (camera_r > camera_r_max) ? camera_r : camera_r_max;
-        float camera_t_obs = camera.t_obs;
-        camera_t_min = (camera_t_obs < camera_t_min) ? camera_t_obs : camera_t_min;
-        camera_t_max = (camera_t_obs > camera_t_max) ? camera_t_obs : camera_t_max;
-    } // end camera loop
-
     // inherit image dimensions from the first camera
     Camera standard_camera = cameras[0];
     int num_pixels = standard_camera.num_pixels;
@@ -228,7 +214,7 @@ int main(int argc, char *argv[]) {
         // run with lookback
         // 1. allocate space on device for data
         // 2. loop over snapshots, load data to host, copy to device
-        // 3. loop over cameras, save images to buffer on device
+        // 3. loop over cameras, save images to communal buffer on device
         // 4. return image buffer to host
 
         // allocate image space on host for ALL images
@@ -250,7 +236,7 @@ int main(int argc, char *argv[]) {
         std::ifstream header_file(header_str);
         int num_snapshots, max_snapshot_size;
         float snapshot_dt; // in units of Myr
-        float L_domain; // in units of kpc, if unlabelled longest domain size is unity
+        float L_domain; // code length in units of kpc, if unlabelled longest domain size automatically unity
         if (header_file.is_open()) {
             std::string line;
             int line_count = 0;
@@ -270,9 +256,6 @@ int main(int argc, char *argv[]) {
         // set trace args
         trace_args.snapshot_dt = snapshot_dt;                           // in Myr
         trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;      // in Myr^{-1}
-        float kpc_to_m = 3.086e+19;                                     // in m
-        float Myr_to_s = 1e6 * 365 * 24 * 60 * 60;                      // in s
-        float c_light = 3e8;                                            // in m/s
         float velocity_code_units = L_domain * kpc_to_m / Myr_to_s;     
         float c_in_code_units = c_light / velocity_code_units;
         float c_in_kpc_per_Myr = c_light * Myr_to_s / kpc_to_m;
@@ -281,20 +264,6 @@ int main(int argc, char *argv[]) {
         trace_args.num_snapshots = num_snapshots;
         trace_args.last_snapshot = num_snapshots - 1;
         trace_args.last_time = trace_args.last_snapshot * trace_args.snapshot_dt;
-
-        // float calc flexload limits
-        int m_lower = 0, m_upper = num_snapshots - 1; // if no flexload, use full time range
-        if (flexload) { // TODO: this can also be performed more simply in code units
-            float domain_r_max = 0.5 * std::sqrt(3.0); // TODO: load this as part of header (via mesh_xr, mesh_xl)
-            float d_min = camera_r_min - domain_r_max;
-            float d_max = camera_r_max + domain_r_max;
-            float t_min = camera_t_min - d_max * trace_args.inv_c;
-            float t_max = camera_t_max - d_min * trace_args.inv_c;
-            int m_min = std::floor(t_min * trace_args.inv_snapshot_dt);          // earliest contributing snapshot index for ANY camera
-            int m_max = std::ceil(t_max * trace_args.inv_snapshot_dt);           // latest contributing snapshot index for ANY camera
-            m_lower = (m_min > m_lower) ? m_min : m_lower;                       // start loop at earliest contributor
-            m_upper = (m_max < m_upper) ? m_max : m_upper;                       // end loop at latest contributor
-        }
 
         // allocate data on host
         clock_t h_alloc_start = clock();
@@ -347,25 +316,23 @@ int main(int argc, char *argv[]) {
             }
             std::cout << "-------------------------------------------------------------\n";
         }
-        int num_snapshots_loaded = 0;
-        int flexload_render_skip = 0;
-        for (int m = m_lower; m <= m_upper; m++) {
+        bool host_malloc = false;       // in lookback mode, host buffer is already allocated
+        int num_snapshots_loaded = 0;   // flexload reporting
+        int flexload_renders_skipped = 0;   // flexload reporting
+        for (int m = 0; m < num_snapshots; m++) {
 
             clock_t snapshot_start = clock();
 
-            // update trace_args
+            // stash snapshot index in trace_args
             trace_args.snapshot_index = m;
 
-            // import npy data to host
+            // prep containers for snapshot
             std::vector<MeshBlockInfo> all_mb_info;
-            bool host_malloc = false;
-            
-            // prep empty containers
             MeshBlock **mb_list;
             Mesh **mesh;
             int num_meshblocks = 0;
 
-            // load snapshot, auto detect label state
+            // load snapshot, auto detect labelled state
             const std::string snapshot_dir_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
             const std::filesystem::path snapshot_dir_path(snapshot_dir_str);
             if (std::filesystem::is_directory(snapshot_dir_path)) { // located sub directory, load as labelled data
@@ -382,7 +349,48 @@ int main(int argc, char *argv[]) {
                 }
             } // end mb load
             num_meshblocks = all_mb_info.size();
-        
+
+            // flexload: given camera and mb info, determine if snapshot can contribute to ANY camera
+            // if no temporal overlap, skip load
+            if (flexload) {
+                bool snapshot_contributes = false;
+                for (auto &camera : cameras) {
+                    float d_min_mesh = std::numeric_limits<float>::max();
+                    float d_max_mesh = std::numeric_limits<float>::min();
+                    float camera_radius = (camera.origin - camera.lower_left).vector_mag();     // size of binding sphere for camera plane
+                    for (auto &mb_info : all_mb_info) {                                         // loop over all MeshBlocks in snapshot
+                        // calculate extremal camera-domain seperations
+                        float center_sep = (mb_info.mb_origin - camera.origin).vector_mag();    // camera-domain origin seperation
+                        float d_min_mb = center_sep - camera_radius - mb_info.mb_radius;        // minimum camera-domain seperation
+                        float d_max_mb = center_sep + camera_radius + mb_info.mb_radius;        // maximum camera-domain seperation
+                        // store mesh extrema
+                        d_min_mesh = (d_min_mb < d_min_mesh) ? d_min_mb : d_min_mesh;
+                        d_max_mesh = (d_max_mb > d_max_mesh) ? d_max_mb : d_max_mesh;
+                    } // end mb loop
+
+                    // check if this camera has temporal overlap with this snapshot
+                    float t_min = camera.t_obs - d_max_mesh * trace_args.inv_c;                 // earliest contributing time for THIS camera
+                    float t_max = camera.t_obs - d_min_mesh * trace_args.inv_c;                 // latest contributing time for THIS camera
+                    int m_min = std::floor(t_min * trace_args.inv_snapshot_dt);                 // earliest contributing snapshot index for THIS camera
+                    int m_max = std::ceil(t_max * trace_args.inv_snapshot_dt);                  // latest contributing snapshot index for THIS camera
+                    if ((m >= m_min) && (m <= m_max)) {
+                        snapshot_contributes = true;
+                        camera.skip_render = false;
+                    } else {
+                        camera.skip_render = true;
+                    } 
+                }
+                if (!snapshot_contributes) {
+                    if (verbose) {
+                        std::cout << ".............................................................\n";
+                        std::cout << "no overlap of snapshot " << m << " and any camera, skippping load.";
+                        std::cout << ".............................................................\n";
+                    }
+                    continue; // skip loading this snapshot
+                }
+            }
+            num_snapshots_loaded++;
+
             // copy all data from host into device
             clock_t data_copy_start = clock();
             checkCudaErrors(cudaMemcpy(d_data_buffer, h_data_buffer, d_bytes, cudaMemcpyHostToDevice)); 
@@ -399,36 +407,16 @@ int main(int argc, char *argv[]) {
             int img_count = 0;
             for (auto &camera : cameras) {
                 
-                // perform flexload check against domain size
-                if (flexload) {
-                    float d_min_mesh = std::numeric_limits<float>::max();
-                    float d_max_mesh = std::numeric_limits<float>::min();
-                    float camera_radius = (camera.origin - camera.lower_left).vector_mag();     // size of binding sphere for camera plane
-                    for (auto &mb_info : all_mb_info) {                                         // loop over all MeshBlocks in snapshot
-                        // calculate extremal camera-domain seperations
-                        float center_sep = (mb_info.mb_origin - camera.origin).vector_mag();    // camera-domain origin seperation
-                        float d_min_mb = center_sep - camera_radius - mb_info.mb_radius;        // minimum camera-domain seperation
-                        float d_max_mb = center_sep + camera_radius + mb_info.mb_radius;        // maximum camera-domain seperation
-                        // store mesh extrema
-                        d_min_mesh = (d_min_mb < d_min_mesh) ? d_min_mb : d_min_mesh;
-                        d_max_mesh = (d_max_mb > d_max_mesh) ? d_max_mb : d_max_mesh;
-                    } // end mb loop
-
-                    // check if this camera can recieve contributions from this snapshot
-                    float t_min = camera.t_obs - d_max_mesh * trace_args.inv_c;                 // earliest contributing time for THIS camera
-                    float t_max = camera.t_obs - d_min_mesh * trace_args.inv_c;                 // latest contributing time for THIS camera
-                    int m_min = std::floor(t_min * trace_args.inv_snapshot_dt);                 // earliest contributing snapshot index for THIS camera
-                    int m_max = std::ceil(t_max * trace_args.inv_snapshot_dt);                  // latest contributing snapshot index for THIS camera
-                    if ((m < m_min) || (m > m_max)) {
-                        flexload_render_skip++;
-                        if (verbose) {
-                            std::cout << ".............................................................\n";
-                            std::cout << "no overlap of snapshot " << m << " and camera " << img_count << ", skippping render.";
-                            std::cout << ".............................................................\n";
-                        }
-                        continue;
+                // perform flexload check, given previous determination of temporal overlap between snapshot and camera
+                if (flexload && camera.skip_render) {
+                    flexload_renders_skipped++;
+                    if (verbose) {
+                        std::cout << ".............................................................\n";
+                        std::cout << "no overlap of snapshot " << m << " and camera " << img_count << ", skippping render.";
+                        std::cout << ".............................................................\n";
                     }
-                } // end flexload
+                    continue;
+                } // end flexload check
                 
                 // stash camera properties
                 trace_args.t_obs = camera.t_obs;
@@ -525,15 +513,18 @@ int main(int argc, char *argv[]) {
             float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
             printf("free all                  (device/host)       %.6fs\n",free_dur);
             if (flexload) {
-                int total_inflex_renders = num_snapshots * num_images;
-                int total_flex_renders = num_snapshots_loaded * num_images - flexload_render_skip;
-                int total_skipped_renders = total_inflex_renders - total_flex_renders;
-                float perc_reduction = 100.0 * total_skipped_renders / total_flex_renders;
+                int nominal_total_renders = num_snapshots * num_images;                             // total renders without flexload
+                int true_total_renders = num_snapshots_loaded * num_images - flexload_renders_skipped;  // true render count
+                int total_skipped_renders = nominal_total_renders - true_total_renders;             // render delta
+                int total_skipped_snapshots = num_snapshots - num_snapshots_loaded;                 // snapshot delta
+                float perc_snapshot_reduction = 100.0 * total_skipped_snapshots / num_snapshots;   
+                float perc_render_reduction = 100.0 * total_skipped_renders / nominal_total_renders;
                 std::cout << "=============================================================\n";
                 printf("Reporting flexload speedup....\n");
-                printf("total snapshots skipped                       %d\n",num_snapshots - num_snapshots_loaded);
+                printf("total snapshots skipped                       %d\n",total_skipped_snapshots);
                 printf("total renders skipped                         %d\n",total_skipped_renders);
-                printf("estimated runtime reduction                   %.3f%\n",perc_reduction);
+                printf("perc snapshot reduction                       %.3f%\n",perc_snapshot_reduction);
+                printf("perc render reduction                         %.3f%\n",perc_render_reduction);
                 std::cout << "=============================================================\n";
             }
         }
