@@ -31,14 +31,18 @@ __global__ void render_from_mesh(Camera camera, float *img, Mesh **mesh, TraceAr
     vec3 pixel_origin = camera.calc_pixel_origin(i, j);
     Ray pixel_ray(pixel_origin, camera.normal);
 
-    // determine stash address
-    int mem_position = pixel_index;
-    if (trace_args.save_to_buffer) {
-        mem_position += camera.num_pixels * trace_args.camera_index;
+    // determine pixel address in device buffer
+    if (trace_args.lookback) { 
+        // communal image buffer, offset by camera index
+        int mem_position = pixel_index + camera.num_pixels * trace_args.camera_index;
+        // additive write to buffer
+        img[mem_position] += (*mesh)->calc_trace(pixel_ray, trace_args);
+    } else {
+        // unique image buffer, no offset
+        int mem_position = pixel_index;
+        // explicit write to buffer
+        img[mem_position] = (*mesh)->calc_trace(pixel_ray, trace_args);
     }
-
-    // calculate pixel value from MeshBlock data
-    img[mem_position] += (*mesh)->calc_trace(pixel_ray, trace_args);
     return;
 }
 

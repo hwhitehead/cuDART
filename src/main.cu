@@ -227,9 +227,6 @@ int main(int argc, char *argv[]) {
         // 3. loop over cameras, save images to buffer on device
         // 4. return image buffer to host
 
-        // lookback uses communal device buffer for images
-        trace_args.save_to_buffer = true;
-
         // lookback uses fast-forward for meshblock traversal
         trace_args.fast_forward = true;
 
@@ -334,6 +331,10 @@ int main(int argc, char *argv[]) {
             float d_img_buffer_alloc_dur = (float)(clock() - d_img_buffer_alloc_start)/CLOCKS_PER_SEC;
             printf("malloc image buffer       (device)            %.6fs\n",d_img_buffer_alloc_dur);
         }
+
+        // device image buffer is treated as additive, require wipe before first render
+        wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img_buffer);
+        checkCudaErrors(cudaPeekAtLastError());
 
         // loop over snapshots
         if (verbose) {
@@ -540,9 +541,6 @@ int main(int argc, char *argv[]) {
         // 1. load data to host, allocate space on device, copy to device
         // 2. build containers on device
         // 3. loop over cameras, save to disc within loop
-
-        // no-lookback uses unique image buffer
-        trace_args.save_to_buffer = false;
 
         // allocate space for single image on device 
         clock_t d_img_alloc_start = clock();

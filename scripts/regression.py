@@ -318,7 +318,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
             camera_args["template"].length_X *= np.sin(camera_args["template"].theta)
             camera_args["template"].length_Y *= np.sin(camera_args["template"].theta)
     camera_args["template"].set_sph_pos(r = 2.0, target_origin = True)
-    cameras = [camera_args["template"]] * 2 # TEMP: camera dupe to bypass err in image0
+    cameras = [camera_args["template"]]
     if (verbose): print("finished camera initialisation.")
 
     # generate scratch space for raw
@@ -338,7 +338,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
         if (verbose): print("finished rendering raw images.")
 
         # copy raw to main save direction
-        scratch_file = os.path.join(scratch_dir, "raw00001.npy")
+        scratch_file = os.path.join(scratch_dir, "raw00000.npy")
         raw_file = os.path.join(save_dir, "raw" + str(n).zfill(5) + ".npy")
         shutil.move(scratch_file, raw_file)
         
@@ -498,7 +498,7 @@ def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, 
     # generate single camera
     camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
     camera_args["template"].t_obs = t_obs # only used with the lookback render
-    cameras = [camera_args["template"]] * 2 # TEMP
+    cameras = [camera_args["template"]]
 
     # build scene and call render, with and without lookback
     labels = ["nolookback", "lookback"]

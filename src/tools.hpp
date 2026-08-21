@@ -25,8 +25,7 @@ struct TraceArgs {
     float t_obs, snapshot_dt, c, last_time; 
     float inv_snapshot_dt, inv_c;
     int snapshot_index, num_snapshots, last_snapshot;
-    // buffer settings
-    bool save_to_buffer;
+    // image buffer settings
     int camera_index;
 };
 
