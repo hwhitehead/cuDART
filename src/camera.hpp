@@ -28,7 +28,7 @@ class Camera {
         int num_pixels_X, num_pixels_Y, num_pixels; // pixel dimensions 
         float length_X, length_Y, tilt;             // spatial dimensions and tilt
         float t_obs;                                // observer time
-        bool skip_render;                           // skip render if no temporal overlap with snapshot
+        bool skip_render;                           // flexload: skip render if no temporal overlap with snapshot
 };
 
 __global__ void wipe_img(Camera camera, float *img) {

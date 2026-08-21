@@ -379,7 +379,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         camera.skip_render = true;
                     } 
-                }
+                } // end camera loop
                 if (!snapshot_contributes) {
                     if (verbose) {
                         std::cout << ".............................................................\n";
@@ -388,7 +388,7 @@ int main(int argc, char *argv[]) {
                     }
                     continue; // skip loading this snapshot
                 }
-            }
+            } // end flexload
             num_snapshots_loaded++;
 
             // copy all data from host into device
@@ -507,16 +507,16 @@ int main(int argc, char *argv[]) {
         checkCudaErrors(cudaFree(d_data_buffer));   // device data buffer
         checkCudaErrors(cudaFree(d_img_buffer));    // device image buffer
         free(h_data_buffer);                        // host data buffer
-        free(h_img_buffer);                           // host image buffer
+        free(h_img_buffer);                         // host image buffer
         cudaDeviceReset();
         if (verbose) {
             float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
             printf("free all                  (device/host)       %.6fs\n",free_dur);
             if (flexload) {
-                int nominal_total_renders = num_snapshots * num_images;                             // total renders without flexload
+                int nominal_total_renders = num_snapshots * num_images;                                 // total renders without flexload
                 int true_total_renders = num_snapshots_loaded * num_images - flexload_renders_skipped;  // true render count
-                int total_skipped_renders = nominal_total_renders - true_total_renders;             // render delta
-                int total_skipped_snapshots = num_snapshots - num_snapshots_loaded;                 // snapshot delta
+                int total_skipped_renders = nominal_total_renders - true_total_renders;                 // render delta
+                int total_skipped_snapshots = num_snapshots - num_snapshots_loaded;                     // snapshot delta
                 float perc_snapshot_reduction = 100.0 * total_skipped_snapshots / num_snapshots;   
                 float perc_render_reduction = 100.0 * total_skipped_renders / nominal_total_renders;
                 std::cout << "=============================================================\n";
