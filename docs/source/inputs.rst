@@ -70,7 +70,7 @@ Converting Simulation Data
 --------------------------
 While useful for manipulation in Python, :code:`.npy` files are generally not the standard outputs from hydrodynamic simulation codes. To support conversion 
 between standard simulation file formats and the :code:`.npy` files required by :code:`cuDART`, additional functions are included in :code:`pysrc`.
-Currently conversion support is available for the :code:`.vtk` files output from :code:`PLUTO`, and the :code:`.hdf5` files output from :code:`Athena++`.
+Currently conversion support is available for the :code:`.vtk` files output from :code:`PLUTO`, for emissivities generated from lagrangian particles.
 We recommend the user develops their own routines for conversion between simulation output and :code:`.npy` file as approriate for their own use case.
 
 Units

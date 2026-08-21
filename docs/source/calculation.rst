@@ -23,8 +23,8 @@ The monochromatic emergent intensity measured at time :math:`t` by an observer a
 
 .. math::
 
-    I(\nu,\boldsymbol{x}_0,\hat{\boldsymbol{s}},t) &= \int j(\nu,\boldsymbol{x}) ds \\
-                         &= \left(\frac{\nu}{\nu'_0}\right)^{\alpha}\int D(\boldsymbol{x},\hat{\boldsymbol{s}},\bar{t})^{2-\alpha} j'(\nu'_0,\boldsymbol{x},\bar{t})ds. 
+    I_{\nu}(\boldsymbol{x}_0,\hat{\boldsymbol{s}},t) &= \int j_{\nu}(\boldsymbol{x}) ds \\
+                         &= \left(\frac{\nu}{\nu'_0}\right)^{\alpha}\int D(\boldsymbol{x},\hat{\boldsymbol{s}},\bar{t})^{2-\alpha} j'_{\nu'_0}(\boldsymbol{x},\bar{t})ds. 
 
 Here :math:`j'` is the isotropic rest-frame emissivity, :math:`\nu'_0` is the monochromatic reference frequency, :math:`\alpha` is the exponent
 for the power-law slope in the rest-frame emissivity and :math:`D` is the Doppler factor defined as 
@@ -38,34 +38,34 @@ is calculated by summation
 
 .. math::
 
-    I(\nu,\boldsymbol{x}_0,\hat{\boldsymbol{s}},t) = \left(\frac{\nu}{\nu'_0}\right)^{\alpha}\sum_n w_n D_n^{2-\alpha} j'_n(\nu_0,\bar{t})
+    I_{\nu}(\boldsymbol{x}_0,\hat{\boldsymbol{s}},t) = \left(\frac{\nu}{\nu'_0}\right)^{\alpha}\sum_n w_n D_n^{2-\alpha} j'_{\nu_0',n}(\bar{t})
 
 where here the index :math:`n` labels cells intersecting with the line-of-sight with spatial indices :math:`\{i_n,j_n,k_n\}`. The weight factor
 :math:`w_n` describes the length element of the line-of-sight within cell :math:`n`. The principle action of the DDA algorithm is to identify 
 the indices of intersecting cells, and their respective weights.
 
-Note here that on the RHS of the equations above, all quantities are functions of :math:`\bar{t}`, not the observer time :math:`t`. This is because light takes a finite time
-to travel from the emitter to the observer (e.g. :math:`\bar{t} \leq t`). The user can ignore this by setting :code:`lookback = False` at render, in which case 
-the speed of light will be modelled as infinite and the above equation simplifies to :math:`\bar{t}=t`.
+Note here that on the RHS of the equations above, all quantities are functions of :math:`\bar{t}`, not the observer time :math:`t_\mathrm{obs}`. This is because light takes a finite time
+to travel from the emitter to the observer (e.g. :math:`\bar{t} \leq t_\mathrm{obs}`). The user can ignore this by setting :code:`lookback = False` at render, in which case 
+the speed of light will be modelled as infinite and the above equation simplifies to :math:`\bar{t}=t_\mathrm{obs}`.
 
 .. _calculation_lookback:
 
 Lookback Time
 -------------
 
-If the speed of light is allowed to be finite, then the delay time between emission (at :math:`\bar{t}`) and observeration (at :math:`t`) 
+If the speed of light is allowed to be finite, then the delay time between emission (at :math:`\bar{t}`) and observation (at :math:`t_\mathrm{obs}`) 
 will depend on the seperation between the cell and the observer such that
 
 .. math::
 
-    \bar{t} = t - \frac{s}{c}.
+    \bar{t} = t_\mathrm{obs} - \frac{s}{c}.
 
 Suppose the simulation state is quantised in time at a fixed interval :math:`\Delta t`, and label successive physical state :math:`f` 
 with the index :math:`m` such that
 
 .. math::
 
-    f_{n,m} = f_n(\bar{t}_m), \quad \bar{t}_m = m \Delta t 
+    f_{n,m} = f_n(t_m), \quad t_m = m \Delta t 
 
 For :math:`\bar{t} \neq m \Delta t`, we must apply linear interpolation between adjacent physical states. 
 We define :math:`\bar{m} \equiv \text{floor}\left[\bar{t}/\Delta t\right]` as the index of the "early" timestep, and :math:`\delta_m(s,t)`
@@ -73,19 +73,19 @@ as the interpolation paramater between the true time :math:`\bar{t}` and the adj
 
 .. math::
 
-    \delta_m(s,t) = \frac{|\bar{t}-\bar{t}_m|}{\Delta t} = \frac{|t-\frac{s}{c}-m\Delta t|}{\Delta t}
+    \delta_{n,m}(t_\mathrm{obs}) = \frac{|\bar{t}_n-t_m|}{\Delta t} = \frac{|t_\mathrm{obs}-\frac{s}{c}-m\Delta t|}{\Delta t}
 
 We use this interpolation parameter to define the interpolation kernel :math:`W_{n,m} \in [0,1]`,
 
 .. math::
 
-    W_{n,m}(s,t) = \begin{cases}
-    1 - \delta_m(s,t), & \text{if } m \in \left[\bar{m},\bar{m}+1\right] \\
+    W_{n,m}(t_\mathrm{obs}) = \begin{cases}
+    1 - \delta_{n,m}(t_\mathrm{obs}), & \text{if } m \in \left[\bar{m},\bar{m}+1\right] \\
     0, & \text{if } m \notin \left[\bar{m},\bar{m}+1\right]
     \end{cases}
 
-The weighting kernel allows for an approximate sampling between intermediary states :math:`[\bar{m},\bar{m}+1]` for
-:math:`\bar{t} \in [m\Delta t, (m+1)\Delta t]`, such that 
+The weighting kernel allows for an approximate sampling between intermediary states :math:`[f_{n,\bar{m}},f_{n,\bar{m}+1}]` for
+:math:`\bar{t}_n \in [m\Delta t, (m+1)\Delta t]`, such that 
 
 .. math::
 
@@ -95,7 +95,7 @@ Hence, our full intensity calculation allowing for relativistic boosting and a f
 
 .. math::
 
-    I(\nu, \boldsymbol{x}_0, \hat{\boldsymbol{s}},t) = \left(\frac{\nu}{\nu'_0}\right)^{\alpha} \sum_m \sum_n w_n W_{n,m} D^{2-\alpha}_{n,m} j'_{n,m}(\nu'_0)
+    I_{\nu}(\boldsymbol{x}_0, \hat{\boldsymbol{s}},t) = \left(\frac{\nu}{\nu'_0}\right)^{\alpha} \sum_m \sum_n w_n W_{n,m} D^{2-\alpha}_{n,m} j'_{\nu_0',n,m}
 
 where the first summation over :math:`m` describes multiple calls to the principle render routine acting on different snapshots :math:`m`,
 and the second summation over :math:`n` describes the standard DDA integration routine, with an additional weighting :math:`W_{n,m}` that depends on both space and time.
