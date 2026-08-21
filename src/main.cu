@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     std::string cudart_version = "version 0.9 - April 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     char *doppler_char = nullptr, *power_law_char = nullptr;
-    bool verbose = false, relativistic = false, append_mode = false, lookback = false, flexload = false;
+    bool verbose = false, relativistic = false, append_mode = false, lookback = false, flexload = false, keep_edge = false;
 
     // process command line arguments
     for (int i = 1; i < argc; i++) {
@@ -57,6 +57,8 @@ int main(int argc, char *argv[]) {
                 case 'l':
                     break;
                 case 'f':
+                    break;
+                case 'k':
                     break;
                 case 'a':
                     break;
@@ -101,6 +103,9 @@ int main(int argc, char *argv[]) {
                     break;
                 case 'f':
                     flexload = true;
+                    break;
+                case 'k':
+                    keep_edge = true;
                     break;
                 case 'h':
                 default:
@@ -177,7 +182,7 @@ int main(int argc, char *argv[]) {
     trace_args.last_snapshot = 0;
     trace_args.last_time = 0;
     trace_args.num_snapshots = 0;
-    trace_args.keep_edge = true; 
+    trace_args.keep_edge = keep_edge; 
 
     // print timing header
     if (verbose) {
