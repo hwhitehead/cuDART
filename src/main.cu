@@ -172,7 +172,6 @@ int main(int argc, char *argv[]) {
     trace_args.doppler_index = doppler_index;
     trace_args.lookback = lookback;
     // the following are dummy values, overwritten in lookback/no-lookback routines
-    trace_args.fast_forward = false;
     trace_args.t_obs = 0.0;
     trace_args.snapshot_dt = 1.0; 
     trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;
@@ -231,9 +230,6 @@ int main(int argc, char *argv[]) {
         // 2. loop over snapshots, load data to host, copy to device
         // 3. loop over cameras, save images to buffer on device
         // 4. return image buffer to host
-
-        // lookback uses fast-forward for meshblock traversal
-        trace_args.fast_forward = true;
 
         // allocate image space on host for ALL images
         clock_t buffer_alloc_start = clock();

@@ -200,8 +200,8 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
         int exit_cond[3] = {0, 0, 0};
         int step_dir[3] = {0, 0, 0};
         
-        // use fast-forward, if flagged
-        if (trace_args.fast_forward) {
+        // if using lookback, automatically apply fast-forward along ray path
+        if (trace_args.lookback) {
             float t_min = trace_args.snapshot_dt * (trace_args.snapshot_index - 1); // earliest contributing field
             float t_max = trace_args.snapshot_dt * (trace_args.snapshot_index + 1); // latest contributing field
             float s_min = trace_args.c * (trace_args.t_obs - t_max);                // shallowest contributing field

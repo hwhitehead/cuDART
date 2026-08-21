@@ -21,7 +21,7 @@ struct TraceArgs {
     bool relativistic; 
     float doppler_index;
     // lookback settings 
-    bool lookback, keep_edge, fast_forward;
+    bool lookback, keep_edge;
     float t_obs, snapshot_dt, c, last_time; 
     float inv_snapshot_dt, inv_c;
     int snapshot_index, num_snapshots, last_snapshot;
