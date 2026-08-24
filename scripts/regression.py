@@ -179,7 +179,7 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
     emm_rec = 1.0
     for n, t_in_Myr in enumerate(t_span):
         # labelled data lives in its own folder, including a header text file
-        save_dir = os.path.join(save_dir, "snapshot" + str(n).zfill(5))
+        snapshot_save_dir = os.path.join(save_dir, "snapshot" + str(n).zfill(5))
         if not os.path.isdir(save_dir):
             os.mkdir(save_dir)
         
@@ -216,7 +216,7 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
         mask_b = np.s_[:,:,:split_index]
 
         # build Mesh to contain MeshBlock data
-        mesh = Mesh(save_dir)
+        mesh = Mesh(snapshot_save_dir)
 
         # partitioned data needs to have spatial labels
         mb_data_a = save_data[mask_a]                                           # select lower half of data 
