@@ -17,13 +17,23 @@ direction of motion. The scene is rendered under three different treatments, sho
 
 It is clear that the three treatments produce significantly different observations, we discuss the discrepancies and their origin in the sections below.
 
-.. figure:: ../../gallery/phenomena.gif
+.. _phenomena_figure:
+
+.. figure:: ../../gallery/phenomena_comp.gif
     :width: 800px
 
 .. _phenomena_beaming:
 
 Relativistic Beaming
 --------------------
+
+The left two images of the above :ref:`figure <phenomena_figure>` compare renders made using the rest frame emissivity or the emissivity beamed into the lab frame. 
+In their own rest frames, the advancing and receding are identical, so when beaming is neglected the two ejecta exhibit the same brightness. 
+Once beaming is included this symmetry is broken and the advancing ejectum is significant brighter due to the beaming of radiation toward the observer. 
+Similarly, the receding ejecta is dimmer than the beaming-less case, as the emission is beaming beamed away from the observer. 
+Comparing the flux (:math:`S_\nu \propto \int I_\nu dA`) emitted by the advancing and receding ejecta in the beamed case gives a ratio of :math:`\sim40`, 
+set by the :math:`D^{2-\alpha}` scaling that enters into the intensity integral (see :ref:`here <calculation_header>`). 
+This is actually still the incorrect flux ratio, the true value is only recovered when lookback is also included, see :ref:`below <phenomena_flux>`.
 
 .. _phenomena_superluminal:
 
@@ -50,7 +60,7 @@ Only by including this beaming and accounting for a finite communication time be
 The toy model used to demonstrate these discrepancies features an emitting region that is static in its own rest frame (the emissivity of the region does not change, the velocity is constant and the shape unchanged). In using this simple toy model, we can make direct comparison to known theoretical results for the expected motion, morphology and fluxes. 
 In a less idealised astrophysical setting, none of these static properties are assured and there may exist no tractable analytical expectations. Such cases require numerical calculation to generate observations. 
 It is important to note that in some systems it is reasonable to ignore the finite speed of light. If the morphology of a source (as defined in the lab frame), evolves slowly compared to its light self-crossing time, then the communication time between source and observer can be treated as effectively instantaneous and rendering can be performed on a snapshot-by-snapshot basis. 
-In the language of Lind et al. 1985, this is equivalent to treating the lab-frame as the pattern frame. This assumption is reasonable for some large-scale AGN jet structure, as the advance speeds of jets into the circum-galactic medium is usually much slower than the speed of light. 
+In the language of `Lind et al. 1985 <https://ui.adsabs.harvard.edu/abs/1985ApJ...295..358L/abstract>`_, this is equivalent to treating the lab-frame as the pattern frame. This assumption is reasonable for some large-scale AGN jet structure, as the advance speeds of jets into the circum-galactic medium is usually much slower than the speed of light. 
 However, caution is warranted when visualising rapidly evolving structures, such as knots in the jet beam, or comparing between the advancing and receding jets at late times as here the light time delay can become significant. Authentic visualisation of such structures will require schemes which account for a finite speed of light.
 
 .. _phenomena_aliasing: 
