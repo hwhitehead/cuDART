@@ -166,7 +166,7 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
     header_str = os.path.join(save_dir, "header.txt")
     
     with open(header_str, "w") as f:
-        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_domain"]))
+        f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_in_kpc"]))
     if (verbose): print("built header.")
 
     # build snapshots
