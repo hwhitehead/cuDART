@@ -258,7 +258,6 @@ int main(int argc, char *argv[]) {
         trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;      // in Myr^{-1}
         float velocity_code_units = L_domain * kpc_to_m / Myr_to_s;     
         float c_in_code_units = c_light / velocity_code_units;
-        float c_in_kpc_per_Myr = c_light * Myr_to_s / kpc_to_m;
         trace_args.c = c_in_code_units;
         trace_args.inv_c = 1.0 / trace_args.c; 
         trace_args.num_snapshots = num_snapshots;

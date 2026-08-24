@@ -126,7 +126,10 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
         print("saving data at {0}".format(save_dir))
 
     if not os.path.isdir(save_dir):
-        raise Exception("{0} does not exist".format(save_dir))
+        try: 
+            os.mkdir(save_dir)
+        except:
+            raise Exception("unable to build dir at {0}".format(save_dir))
 
     # define simulation parameters
     v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
@@ -175,29 +178,30 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
         
         # build data array for this snapshot in time
         save_data = np.zeros_like(xx)
-        lead_center_in_kpc = t_in_Myr * v_in_kpc_per_Myr                        # calculate ejecta position in kpc
-        lead_center = lead_center_in_kpc / sim_args["L_domain"]                 # cast to code units
-        tail_center = -lead_center                                              # tailing ejecta symmetric in x-y
-        lead_ZZ = zz - lead_center
-        tail_ZZ = zz - tail_center
+        offset_in_kpc = t_in_Myr * v_in_kpc_per_Myr             # calculate current offset in kpc
+        offset = offset_in_kpc / sim_args["L_in_kpc"]           # cast to code units
+        
+        if sim_args["build_mode"] == "jet":                     # test occupancy in cylinder with moving front
+            in_radius = (xy_sqr < r_in_code ** 2)
+            in_adv = in_radius & (zz > 0) & (zz < offset)
+            in_rec = in_radius & (zz < 0) & (zz > -offset)
+        else:                                                   # test occupancy in blob with moving center
+            dz_adv = (zz - offset) / z_scale
+            dz_rec = (zz + offset) / z_scale
+            rr_adv_sqr = (dz_adv ** 2 + xy_sqr)
+            rr_rec_sqr = (dz_rec ** 2 + xy_sqr)
+            in_adv = (rr_adv_sqr < r_in_code ** 2)
+            in_rec = (rr_rec_sqr < r_in_code ** 2)
 
-        rr_lead_sqr = ((zz - lead_center) ** 2 + xy_sqr) / r_blob_in_code ** 2  # sph radius from leading/tailing ejecta
-        rr_tail_sqr = ((zz - tail_center) ** 2 + xy_sqr) / r_blob_in_code ** 2
-
-        in_lead = (rr_lead_sqr < 1)
-        in_tail = (rr_tail_sqr < 1)
-        emm_lead = max_emm * (1.0 - rr_lead_sqr)                                # emission falls off quadratically from center
-        emm_tail = max_emm * (1.0 - rr_tail_sqr)
-
-        lead_emm_mask = (in_lead) & (ii == 0)
-        tail_emm_mask = (in_tail) & (ii == 0)
-        lead_vel_mask = (in_lead) & (ii == 3)
-        tail_vel_mask = (in_tail) & (ii == 3)
-        save_data[lead_emm_mask] = emm_lead[lead_emm_mask]                      # match emission in lead/tail
-        save_data[tail_emm_mask] = emm_tail[tail_emm_mask]  
-        save_data[lead_vel_mask] = v_in_c                                       # invert velocity in lead/tail
+        lead_emm_mask = (in_adv) & (ii == 0)
+        tail_emm_mask = (in_rec) & (ii == 0)
+        lead_vel_mask = (in_adv) & (ii == 3)
+        tail_vel_mask = (in_rec) & (ii == 3)
+        save_data[lead_emm_mask] = emm_adv                      # match emission in lead/tail
+        save_data[tail_emm_mask] = emm_rec 
+        save_data[lead_vel_mask] = v_in_c                       # invert velocity in lead/tail
         save_data[tail_vel_mask] = -v_in_c
-        save_data = save_data.astype(np.float32)                                # ENSURE cast to float32!!!
+        save_data = save_data.astype(np.float32)  
         
         # for demonstration, partition data into two MeshBlocks split along z = 0
         mask_a = (zz >= 0)                                          
