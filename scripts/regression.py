@@ -169,6 +169,11 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
         f.write("{0} {1} {2} {3}".format(num_snapshots, snapshot_size, t_span[1], sim_args["L_in_kpc"]))
     if (verbose): print("built header.")
 
+    if sim_args["build_mode"] == "sphere_rest":
+        z_scale = 1.0 / sim_args["Gamma"]
+    else:
+        z_scale = 1.0
+
     # build snapshots
     for n, t_in_Myr in enumerate(t_span):
         # labelled data lives in its own folder, including a header text file
