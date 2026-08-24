@@ -6,11 +6,15 @@
 #include "vec3.hpp"
 #include "ray.hpp"
 #include "tools.hpp"
+#include "npy.hpp"
 
 struct MeshBlockInfo {
     int mb_size, mem_start, mb_index;
     bool beta_in_data;
     vec3 mb_dims, xl, xr;
+    // flexload data
+    vec3 mb_origin;
+    float mb_radius;
 };
 
 class MeshBlock {
@@ -49,21 +53,24 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
         err_msg << "Unable to locate input file at " << input_str << std::endl;
         CUDART_ERROR(err_msg);
     }
-    npy::npy_data npy_data = npy::read_npy<float>(input_str);
-    std::vector<float> npy_vector = npy_data.data; 
-    std::vector<unsigned long> npy_shape = npy_data.shape;
-    vec3 mb_dims((float)npy_shape[0], (float)npy_shape[1], (float)npy_shape[2]);
-    int mb_size = npy_shape[0] * npy_shape[1] * npy_shape[2];
-    int data_size = mb_size;
-    bool beta_in_data = (npy_shape.size() > 3); // does data vector contain beta info?
-    if (beta_in_data) data_size *= npy_shape[3];
+    std::vector<unsigned long int> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, host_malloc);
+    vec3 mb_dims((float)data_shape[0], (float)data_shape[1], (float)data_shape[2]); // extract first three indices for spatial dims
+    int mb_size = data_shape[0] * data_shape[1] * data_shape[2]; // number of spatial cells (<= all cells)
+    bool beta_in_data = (data_shape.size() > 3); // if fourth axis, contains velocity data
+    // check dimensions
+    if ((data_shape.size() == 3) && (relativistic)) {
+        std::stringstream err_msg;
+        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "Relativistic flagged, but did not find velocity data in " << input_str << std::endl;
+        CUDART_ERROR(err_msg);
+    }  
     if (verbose) {
         float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
         printf("npy read                  (host)              %.6fs\n",npy_read_dur);
     }
-    
+
     //assume equal spacing in x, y, z and centering at origin
-    float longest_side = static_cast<float>(*std::max_element(npy_shape.begin(), npy_shape.end()));
+    float longest_side = static_cast<float>(*std::max_element(data_shape.begin(), data_shape.end()));
     vec3 mb_extent = mb_dims / longest_side;
     vec3 xl = -0.5 * mb_extent;
     vec3 xr = 0.5 * mb_extent;
@@ -77,26 +84,10 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     mb_info.beta_in_data = beta_in_data;
     mb_info.mem_start = 0;
     mb_info.mb_index = 0;
+    // flexload data
+    mb_info.mb_origin = 0.5 * (mb_info.xl + mb_info.xr);
+    mb_info.mb_radius = (mb_info.xl - mb_info.mb_origin).vector_mag();
     all_mb_info.push_back(mb_info);
-
-    // allocate space on host
-    if (host_malloc) {
-        h_bytes = data_size * sizeof(float);
-        clock_t h_alloc_start = clock();
-        h_all_data = (float*) malloc(h_bytes);
-        if (verbose) { 
-            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
-        } // end verbose
-    } // end host_malloc
-    
-    // load mb data into host memory
-    clock_t memcpy_start = clock();
-    std::memcpy(h_all_data, npy_vector.data(), data_size * sizeof(float));
-    if (verbose) { 
-        float memcpy_dur = (float)(clock() - memcpy_start)/CLOCKS_PER_SEC;
-        printf("memcpy data               (host)              %.6fs\n",memcpy_dur);
-    }
 
     return all_mb_info;
 }
@@ -128,6 +119,9 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
                 mb_info.xl = vec3(xl,yl,zl);
                 mb_info.xr = vec3(xr,yr,zr);
                 mb_info.mb_dims = vec3(nx,ny,nz);
+                // flexload data
+                mb_info.mb_origin = 0.5 * (mb_info.xl + mb_info.xr);
+                mb_info.mb_radius = (mb_info.xl - mb_info.mb_origin).vector_mag();
                 all_mb_info.push_back(mb_info);
                 npy_floats += mb_size;
             }
@@ -159,7 +153,6 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     // load mb data into host memory
     clock_t npy_read_start = clock();
     int mem_offset = 0;
-    size_t num_zero_pad = 5;
     for (int n = 0; n < all_mb_info.size(); n++) {
         // load meshblock data as (nx,ny,nz,p) where p = 1 or 4
         std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy";
@@ -170,26 +163,21 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             err_msg << "Unable to locate input file at " << input_str << std::endl;
             CUDART_ERROR(err_msg);
         }
-        npy::npy_data npy_data = npy::read_npy<float>(npy_str);
-        std::vector<float> npy_vector = npy_data.data; // populated
-        std::vector<unsigned long> npy_shape = npy_data.shape;
-        bool beta_in_data = (npy_shape.size() > 3);
+        std::vector<unsigned long int> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, host_malloc);
+        bool beta_in_data = (data_shape.size() > 3);
         all_mb_info[n].beta_in_data = beta_in_data;
         all_mb_info[n].mem_start = mem_offset;
         all_mb_info[n].mb_index = n;
         
         // check dimensions
-        if ((npy_shape.size() == 3) && (relativistic)) {
+        if ((data_shape.size() == 3) && (relativistic)) {
             std::stringstream err_msg;
             err_msg << "### FATAL ERROR in main\n";
-            err_msg << "missing velocity data in " << npy_str << std::endl;
+            err_msg << "Relativistic flagged, but did not find velocity data in " << npy_str << std::endl;
+            CUDART_ERROR(err_msg);
         }        
-        int floats_in_mb  = npy_vector.size();
-        size_t bytes_in_mb = floats_in_mb * sizeof(float);
-    
-        // copy emissivity data into host memory buffer
-        std::memcpy(h_all_data + mem_offset, npy_vector.data(), bytes_in_mb);        
-        mem_offset += floats_in_mb;
+        // offset start of next meshblock by size of current meshblock
+        mem_offset += data_shape.size();;
     } // end mb loop
 
     if (verbose) {
@@ -211,12 +199,29 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
         float s_next_intercept[3] = {0.0, 0.0, 0.0};
         int exit_cond[3] = {0, 0, 0};
         int step_dir[3] = {0, 0, 0};
-        vec3 mb_entrance = r.march(s_entry);
+        
+        // if using lookback, automatically apply fast-forward along ray path
+        if (trace_args.lookback) {
+            float t_min = trace_args.snapshot_dt * (trace_args.snapshot_index - 1); // earliest contributing field
+            float t_max = trace_args.snapshot_dt * (trace_args.snapshot_index + 1); // latest contributing field
+            float s_min = trace_args.c * (trace_args.t_obs - t_max);                // shallowest contributing field
+            float s_max = trace_args.c * (trace_args.t_obs - t_min);                // deepest contributing field
+            if (s_max < s_entry) { // meshblock intersection too deep for observer time
+                return 0.0; 
+            } else if (s_min > s_exit) { // meshblock interseciton too shallow for observer time
+                return 0.0;
+            }
+            s_entry = (s_min > s_entry) ? s_min : s_entry;
+            s_exit = (s_max < s_exit) ? s_max : s_exit;
+        } // end fast-forward
 
-        // orientate trace
+        // prepare for traversal
+        vec3 mb_entrance = r.march(s_entry);
         for (int i = 0; i <= 2; i++) {
+            // identify entry cell
             float ray_mb_orgin = mb_entrance[i] - xl[i];
             cell[i] = int_clamp(ray_mb_orgin / dx[i], 0, (int)mb_dims[i] - 1);
+            // identify trace orientation
             if (r.sign[i]) { 
                 step_dir[i] = -1; // traverse backwards
                 exit_cond[i] = -1; // stop walk when leading edge reached
@@ -227,8 +232,8 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
                 exit_cond[i] = (int)mb_dims[i]; // stop walk when tailing edge reached
                 ds[i] = dx[i] * r.inv_normal[i];
                 s_next_intercept[i] = s_entry + ((cell[i]+1) * dx[i] - ray_mb_orgin) * r.inv_normal[i];
-            } // end if
-        } // end for
+            } // end if sign
+        } // end for direction
 
         // perform traversal
         float s_current = s_entry;
@@ -260,7 +265,9 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
                 trace_weight *= calc_boost_factor(beta_vec, r.normal, trace_args.doppler_index);
             }
             if (trace_args.lookback) {
-                trace_weight *= calc_lookback_factor(s_current, trace_args);
+                // apply temporal lerp and edge handling
+                float midpoint_s = s_current + 0.5 * dwell;
+                trace_weight *= calc_lookback_factor(midpoint_s, trace_args);
             }
             trace += trace_weight * all_data[data_index];    
             
@@ -271,8 +278,8 @@ __device__ float MeshBlock::calc_trace(const Ray &r, TraceArgs trace_args) {
 
             // check for termination (necessary?)
             if (cell[axis] == exit_cond[axis]) break;
-        } // end while     
-    } // end if
+        } // end while traversall
+    } // end if hit
     return trace;
 }
 

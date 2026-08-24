@@ -1,0 +1,6 @@
+pyPLUTO @ git+https://gitlab.mpcdf.mpg.de/sdoetsch/pypluto.git
+scipy
+matplotlib
+pandas
+vtk
+h5py

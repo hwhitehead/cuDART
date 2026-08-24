@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os, sys, subprocess, copy, pathlib
 import glob
 import pandas as pd
+import time
 
 # define global constants
 str_zfill = 5       # num zeros for zpadding strings
@@ -302,9 +303,9 @@ class Scene:
                 i += 1
         print("\n")
 
-    def render(self, save_profile = None, verbose = False, check_make = True, force_make = False, 
+    def render(self, save_profile = False, verbose = False, check_make = True, force_make = False, 
                 max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
-                lookback = False, verbose_cpp = False):
+                lookback = False, flexload = False, verbose_cpp = False):
 
         """
             Given a constructed Scene, format a subprocess invokation of the main cpp executable with any 
@@ -316,6 +317,8 @@ class Scene:
                 Runs render using relativistic boosting (default False)
             lookback : bool
                 Runs render using finite speed of light implementation (default False)
+            flexload : bool
+                Attempts to skip out-of-bounds snapshots in when running with lookback (default False)
             power_law_index : None
                 Sets power law slope for rest frame emission (default None, autos to -0.6 in cpp)
             doppler_index : None
@@ -325,7 +328,7 @@ class Scene:
             verbose_cpp :  bool
                 Prints progress of cpp execution to terminal (default False)
             save_profile : bool
-                Runs cpp executable within nvprof for runtime profiling (default False)
+                Run executable with nsys profiling (default False)
             append : bool
                 Sums render output to existing .npy files (default False)
             check_make : bool 
@@ -361,8 +364,9 @@ class Scene:
         # prepare command line argument to invoke .cpp executable, with proper flags  
         command = [path_to_executable, "-i", self.load_str, "-s", self.save_dir,"-c",self.temp_camera_file]
         # run executable with nvprof
-        if save_profile is not None: 
-            command = ["nvprof", "--csv", "--log-file", save_profile] + command
+        if save_profile: 
+            profile_location = os.path.join(self.save_dir, "profiling")
+            command = ["nsys", "profile", "--stats=true","--export=text","--output={0}".format(profile_location)] + command
         # pass verbose flag 
         if verbose_cpp: 
             command = command + ["-v"]
@@ -377,6 +381,9 @@ class Scene:
             if not os.path.isdir(self.load_str):
                 raise Exception("if using lookback mode, input must be directory.")
             command = command + ["-l"]
+            # run using the flexload snapshot/camera skipping routine
+            if flexload:
+                command = command + ["-f"]
         # run using specific power-law for rest-frame emission
         if power_law_index is not None:
             command = command + ["-p", str(power_law_index)]
@@ -385,12 +392,13 @@ class Scene:
         # when saving raw images, add to existing files in save space
         if append:
             command = command + ["-a"]
-
         # invoke executable
         if (verbose):
             print("calling render executable...")
             self.print_command(command)
+        start_cpp_time = time.time()
         subprocess.run(command, check = True)
+        stop_cpp_time = time.time()
         if (verbose): print("executable finished.")
 
         # destroy temp camera file if not specified at Scene init
@@ -463,6 +471,118 @@ class Scene:
                 if (verbose): print("removed data file at {0}".format(load_str))
 
         plt.close("all")
+
+class Profiler:
+
+    """
+        The Profiler class is used to interpret profiling logs produced by NVIDIA Nsight system (nsys)
+        at runtime. These logfiles are produced if Scene.render is called with the save_profile = True (default False).
+    
+        Parameters
+        ----------
+        output_dir : str
+            Path to render output directory containing .sqlite and .nsys-rep files
+        log_header : str
+            File header for logfiles (default "profiling")
+
+        Methods
+        -------
+        print_tables()
+            Print tabulated profiling data direct to command line
+        build_csv()
+            Converted .sqlite logfiles in .csv files
+        report()
+            Summarise task duration, print to command line
+    """
+
+    def __init__(self, output_dir, log_header = "profiling"):
+
+        self.output_dir = output_dir
+        self.sqlite_path = os.path.join(self.output_dir, "profiling.sqlite")
+        self.nsys_rep_path = os.path.join(self.output_dir, "profiling.nsys-rep")
+        self.wallclock_path = os.path.join(self.output_dir, "wallclock.txt")
+        self.wallclock_duration = np.loadtxt(self.wallclock_path)
+
+        self.log_paths = [self.sqlite_path, self.nsys_rep_path]
+
+    def print_tables(self):
+
+        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_gpu_sum",
+                        "--format=column", self.sqlite_path]
+        subprocess.run(nsys_command, check = True)
+
+    def build_csv(self):
+
+        csv_str = os.path.join(self.output_dir, "profiling.csv")
+        nsys_command = ["nsys", "stats", "--report=osrt_sum", "--report=cuda_gpu_sum",
+                        "--format=csv", "--output={0}".format(csv_str), self.sqlite_path]
+        subprocess.run(nsys_command, check = True)
+
+    def report(self, verbose=False):
+
+        gpu_str = os.path.join(self.output_dir, "profiling.csv_cuda_gpu_sum.csv")
+        ostr_str = os.path.join(self.output_dir, "profiling.csv_osrt_sum.csv")
+
+        if not os.path.exists(gpu_str) or not os.path.exists(ostr_str):
+            self.build_csv()
+
+        gpu_df = pd.read_csv(gpu_str)
+        ostr_df = pd.read_csv(ostr_str)
+
+        gpu_csv_tasks = ["[CUDA memcpy Host-to-Device]", "[CUDA memcpy Device-to-Host]",
+                        "render_from_mesh(Camera, float *, Mesh **, TraceArgs)",
+                        "wipe_img(Camera, float *)"]
+        osrt_csv_tasks = ["poll", "pthread_cond_timedwait","read", "writev", "ioctl"]
+
+        gpu_labels = ["memcpy host-to-device", "memcpy device-to-host", "render", "wipe"]
+        osrt_labels = osrt_csv_tasks
+
+        print("Reporting Duraton Summary")
+        print("WARNING: execution is asynchronous, sum of task durations may exceed wallclock")
+        print("e.g. poll and pthread_cond_timedwait occur simultaneously")
+
+        print("True Wallclock Duration = {0:.3f}s".format(self.wallclock_duration))
+        print("\n")
+        print("GPU Summary:")
+        
+        gpu_duration_sum = 0
+        for task, label in zip(gpu_csv_tasks, gpu_labels):
+            row = np.where(gpu_df["Operation"] == task)[0][0]         
+            num_calls = int(gpu_df["Instances"].iloc[row])
+            duration_s = float(gpu_df["Total Time (ns)"].iloc[row]) * 1e-9
+            average_ms = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
+            gpu_duration_sum += duration_s
+            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f}ms)".format(label, num_calls, duration_s, average_ms))
+        total_gpu_duration = gpu_df["Total Time (ns)"].sum() * 1e-9
+        print("GPU (other) = {0:.3f}s".format(total_gpu_duration - gpu_duration_sum))
+        print("Total GPU Duration = {0:.3f}s".format(total_gpu_duration))
+        
+        print("\n")
+        print("OSRT Summary:")
+        osrt_duration_sum = 0
+        for task, label in zip(osrt_csv_tasks, osrt_labels):
+            row = np.where(ostr_df["Name"] == task)[0][0]         
+            num_calls = int(ostr_df["Num Calls"].iloc[row])
+            duration_s = float(ostr_df["Total Time (ns)"].iloc[row]) * 1e-9
+            average_ms = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
+            osrt_duration_sum += duration_s
+            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f}ms)".format(label, num_calls, duration_s, average_ms))
+        total_osrt_duration = ostr_df["Total Time (ns)"].sum() * 1e-9
+        print("OSRT (other) = {0:.3f}s".format(total_osrt_duration - osrt_duration_sum))
+        print("Total OSRT Duration = {0:.3f}s".format(total_osrt_duration))
+
+        if verbose:
+            print("\n")
+            print("GPU CSV")
+            print(gpu_df.to_string())
+            print("\n")
+            print("OSTR CSV")
+            print(ostr_df.to_string())
+
+    def cleanup(self):
+
+        os.remove(self.sqlite_path)
+        os.remove(self.nsys_rep_path)
 
 class Mesh:
 

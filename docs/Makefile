@@ -10,4 +10,4 @@ BUILD_DIR = build
 	@$(SPHINX_BUILD) -M $@ "$(SOURCE_DIR)" "$(BUILD_DIR)"
 
 clean:
-	rm -r doctrees/ html/
+	rm -r build/doctrees/ build/html/

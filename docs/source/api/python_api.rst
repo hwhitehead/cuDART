@@ -1,11 +1,14 @@
 Python API
 ##########
 
+.. _python_api_header:
+
 There are three primary frontend classes:
 
 1. The :ref:`Scene <python_api_scene>` class 
 2. The :ref:`Camera <python_api_camara>` class
 3. The :ref:`Mesh <python_api_mesh>` class
+4. The :ref:`Profiler <python_api_profiler>` class
 
 These classes are used to build input files to be read by the C++ backend, to invoke the backend as a subprocess and to process the outputs. 
 
@@ -39,3 +42,6 @@ Throughout this documentation ``3-vector`` refers to a Numpy array of length thr
 
     .. automethod:: Mesh.write_header
 
+.. _python_api_profiler:
+
+.. autoclass:: cudart.Profiler

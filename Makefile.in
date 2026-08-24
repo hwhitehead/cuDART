@@ -1,6 +1,6 @@
 CXX := nvcc
 CPPFLAGS := 
-CXXFLAGS := -O3
+CXXFLAGS := @CXX_FLAGS@
 LDFLAGS := 
 LDLIBS :=
 GCOV_CMD := gcov

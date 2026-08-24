@@ -14,6 +14,12 @@ __host__ void check_cuda(cudaError_t result, char const *const func, const char 
     }
 }
 
+// statics
+const size_t num_zero_pad = 5;
+const float kpc_to_m = 3.086e+19;                                     // in m
+const float Myr_to_s = 1e6 * 365 * 24 * 60 * 60;                      // in s
+const float c_light = 3e8;                                            // in m/s
+
 struct TraceArgs {
     // relativistic settings
     bool relativistic; 
@@ -23,6 +29,8 @@ struct TraceArgs {
     float t_obs, snapshot_dt, c, last_time; 
     float inv_snapshot_dt, inv_c;
     int snapshot_index, num_snapshots, last_snapshot;
+    // image buffer settings
+    int camera_index;
 };
 
 __host__ size_t calc_vram_limit(char *mem_char, float tolerance, size_t h_bytes) {
@@ -78,13 +86,69 @@ __device__ float calc_lookback_factor(float s, TraceArgs trace_args) {
     }
 
     // given membership in simulation duration, identify neighbours
-    int m_bar = round(t_bar * trace_args.inv_snapshot_dt); // leading snapshot s.t. t_bar \in [m_bar, m_bar+1]
+    int m_bar = floor(t_bar * trace_args.inv_snapshot_dt); // leading snapshot s.t. t_bar \in [m_bar, m_bar+1]
     if ((trace_args.snapshot_index >= m_bar) && (trace_args.snapshot_index <= m_bar + 1)) {
         float lerp_factor = abs(t_bar - trace_args.snapshot_index * trace_args.snapshot_dt) * trace_args.inv_snapshot_dt;
-        return 1 - lerp_factor; // snapshot is adjacent, lerp contribution
+        return 1.0 - lerp_factor; // snapshot is adjacent, lerp contribution
     } 
 
     return 0; // snapshot is not adjacent, no contribution
+}
+
+__host__ void host_to_npy(const std::string &filename, float* host_addr, std::vector<unsigned long int> data_shape) {
+
+    std::ofstream file_stream(filename, std::ofstream::binary);
+    if (!file_stream) {
+        throw std::runtime_error("I/O error, unable to save file at " + filename);
+    }
+
+    const npy::dtype_t dtype = npy::dtype_map.at(std::type_index(typeid(float)));
+
+    npy::header_t header{dtype, false, data_shape}; // always save with C-order indexing
+    npy::write_header(file_stream, header);
+
+    auto data_size = static_cast<size_t>(npy::comp_size(data_shape));
+
+    file_stream.write(reinterpret_cast<const char *>(host_addr), sizeof(float) * data_size);
+    return;
+}
+
+__host__ std::vector<unsigned long int> npy_to_host(const std::string &file_str, float* &host_addr, size_t &h_bytes, bool verbose, bool host_malloc) {
+    // cast to stream
+    std::ifstream file_stream(file_str, std::ifstream::binary);
+    if (!file_stream) {
+        throw std::runtime_error("I/O error: unable to load file at " + file_str);
+    }
+
+    // load header data
+    std::string header_str = npy::read_header(file_stream);
+    npy::header_t header = npy::parse_header(header_str);
+
+    // check if the typestring matches float32
+    const npy::dtype_t dtype = npy::dtype_map.at(std::type_index(typeid(float)));
+    if (header.dtype.tie() != dtype.tie()) {
+        throw std::runtime_error("formatting error: input data must be float32 dtype");
+    }
+
+    // compute data size based on shape
+    auto data_size = static_cast<size_t>(npy::comp_size(header.shape));
+
+    // if flagged, allocate data
+    if (host_malloc) {
+        h_bytes = data_size * sizeof(float);
+        clock_t h_alloc_start = clock();
+        host_addr = (float*) malloc(h_bytes);
+        if (verbose) { 
+            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+        } // end verbose
+    } // end host_malloc
+
+    // read data into host_addr
+    file_stream.read(reinterpret_cast<char *>(host_addr), sizeof(float) * data_size);
+
+    // return shape
+    return header.shape;
 }
 
 #endif

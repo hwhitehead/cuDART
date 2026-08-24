@@ -9,7 +9,7 @@ The formatting of these files depends on the intended operation mode. Each :code
 * :code:`(nx,ny,nz,4)`: if running with relativistic boosting
 
 where here :code:`nx`, :code:`ny` and :code:`nz` are the number of cells in each cardinal direction. If running without relativistic boosting, the array should
-contian the data that will be summed along the line-of-sight such as density, emissivity. If running with relativistic boosting, the fourth index spans the quantity
+contian the data that will be summed along the line-of-sight such as density or emissivity. If running with relativistic boosting, the fourth index spans the quantity
 to be traced (the rest-frame emissivity) and the velocity in each of the cardinal directions.
 
 The input data should have column-major ordering (C-style). It is worth noting that Python prefers to edit stride meta-data rather than explicitly rearrange its memory,
@@ -63,12 +63,20 @@ of each sub-domain (as well as meta-data concerning the number of cells in each 
 | │   ├── ...
 | ├── ...
 
-Header files can be automatically formatted using the :code:`Mesh` class (see `Example Usage <example>`). 
+Header files can be automatically formatted using the :code:`Mesh` class (see :ref:`Example Usage <example_section_B>`). 
 Note the additional header file at the top of the tree, this file contains information about time and length units. This file is only necessary if rendering with lookback.
 
 Converting Simulation Data
 --------------------------
 While useful for manipulation in Python, :code:`.npy` files are generally not the standard outputs from hydrodynamic simulation codes. To support conversion 
 between standard simulation file formats and the :code:`.npy` files required by :code:`cuDART`, additional functions are included in :code:`pysrc`.
-Currently conversion support is available for the :code:`.vtk` files output from :code:`PLUTO`, and the :code:`.hdf5` files output from :code:`Athena++`.
+Currently conversion support is available for the :code:`.vtk` files output from :code:`PLUTO`, for emissivities generated from lagrangian particles.
 We recommend the user develops their own routines for conversion between simulation output and :code:`.npy` file as approriate for their own use case.
+
+Units
+-----
+
+:code:`cuDART` generally runs without an explicit unit system, operating in code units. Without labelling, the input domain is automatically resized so that the longest domain side has a length of unity in code units.
+In labelled mode the user can must specify their own subdomain sizes in code units. Units are introduced when lookback is enabled, set in the header file. The header file requires specification of the time interval between simulation snapshots (in Myr), 
+and the conversion from length code units to kiloparsecs. No unit transforms are applied to the quantities to be traced, it is left to the user to rescale the output image field to their relevant physical units. When running with relativistic boosting, the 
+input velocity must already be in units of the speed of light, :code:`c`.

@@ -28,6 +28,7 @@ class Camera {
         int num_pixels_X, num_pixels_Y, num_pixels; // pixel dimensions 
         float length_X, length_Y, tilt;             // spatial dimensions and tilt
         float t_obs;                                // observer time
+        bool skip_render;                           // flexload: skip render if no temporal overlap with snapshot
 };
 
 __global__ void wipe_img(Camera camera, float *img) {
@@ -37,6 +38,20 @@ __global__ void wipe_img(Camera camera, float *img) {
     if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
   	int pixel_index = i * camera.num_pixels_Y + j; 
     img[pixel_index] = 0; // reset image
+    return;
+}
+
+__global__ void scratch_to_buffer(Camera camera, float *d_img, float *d_img_buffer, bool first_transfer) {
+    // sum img data from scratch into buffer space
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    if ((i >= camera.num_pixels_X) || (j >= camera.num_pixels_Y)) return; // skip oob
+  	int pixel_index = i * camera.num_pixels_Y + j; 
+    if (first_transfer) {
+        d_img_buffer[pixel_index] = d_img[pixel_index]; // set value
+    } else {
+        d_img_buffer[pixel_index] += d_img[pixel_index]; // append value
+    }
     return;
 }
 
