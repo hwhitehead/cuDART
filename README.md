@@ -6,11 +6,21 @@ The code is currently under developement, but available freely for use by others
 
 Documentation is hosted on ReadTheDocs. 
 
+Gallery
+-------
+
+<p align="center">
+  <img src=https://github.com/hwhitehead/cuDART/blob/main/gallery/phenomena_comp.gif width="800" alt=animated/>
+</p>
+<p align="center"">
+  <em> Comparison of renders of anti-parallel relativisitc ejecta, made using three different routines - without beaming/lookback, with beaming but no lookback and with both beaming and lookback. Here, lookback refers to accounting for the finite light time delay between emitter and observer. Each routine produces different observed behaviour, with only the last accurately recovering the expectation of relativistic and geometric theory. See the <a href="">documentation</a> for a full discussion of these routines and results.</em>
+</p>
+
 <p align="center">
   <img src=https://github.com/hwhitehead/cuDART/blob/main/gallery/magnetised_jets.png width = "600"/>
 </p>
 <p align="center"">
-  <em> Static images of a highly magnetised, variable power jet launched from an Active Galactic Nucleus, rendered from three different orientations by cuDART. Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. Figure taken <a href="https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract">from Elley et al. 2026</a>.</em>
+  <em> Static images of a highly magnetised, variable power jet launched from an Active Galactic Nucleus, rendered from three different orientations by cuDART. Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. Figure taken from <a href="https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract"> Elley et al. 2026</a>.</em>
 </p>
 
 Installation
