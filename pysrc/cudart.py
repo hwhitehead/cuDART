@@ -636,7 +636,6 @@ class Mesh:
         mb_shape = np.shape(mb_data)[:3]            # "shape" is spatial only, ignore 4th axis
         mb_size = np.size(mb_data)                  # "size" is for memory usage, include all axes
         mb_header = [mb_size,*mb_shape,*xl,*xr]     
-        print(mb_header)
         self.mb_headers.append(mb_header)           # stash header
         self.num_mb += 1                            # update MeshBlock count
 

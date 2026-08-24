@@ -112,14 +112,12 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
     if (verbose): print("finished dataset construction.")
 
-# TODO: ensure labelled ctor is tested before v1.0
-def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_rest = False):
+def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
 
     # construct template data for regression suite, with labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
-    # the emitting regions are spheres in the observer frame
-    # the emission in the spheres falls off quadratically with radius, out to a fixed, finite radius
-    # if given specific theta, ensure sampling occurs at unaliased frequency
+    # the emitting regions are spheres, ellipsoids or jets dependeng on sim_args["build_mode"]
+    # if sim_args["target_theta"] not None, ensure snapshot sampling occurs at unaliased frequency
 
     if (verbose): 
         print("starting regression suite data construction...")
