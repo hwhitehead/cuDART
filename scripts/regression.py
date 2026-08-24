@@ -638,7 +638,7 @@ if __name__ == "__main__":
 
     camera_args = {"num_img": 100,
                     "resize_img": True,
-                    "relativistic": True,
+                    "relativistic": False,
                     "template": template_camera,
                     "camera_file_name": None,
                     "save_fig": True,
