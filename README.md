@@ -17,9 +17,9 @@ Installation
 ------------
 
 The latest version of `cuDART` can be cloned directly from this repository as 
-
-  $ git clone https://github.com/hwhitehead/cuDART/git
-
+```
+$ git clone https://github.com/hwhitehead/cuDART/git
+```
 Specific versions of the codebase are availble on the Releases page. 
 
 Once a local version of the codebase is available, the code can be built and executed by interacting with the Pythonic frontend, or directly with the C++/CUDA backend. See the documentation on ReadTheDocs (available online and as source under `/docs/source`) for a full description of the API. 
