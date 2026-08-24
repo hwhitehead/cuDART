@@ -211,8 +211,9 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
         save_data = save_data.astype(np.float32)  
         
         # for demonstration, partition data into two MeshBlocks split along z = 0
-        mask_a = (zz >= 0)                                          
-        mask_b = (zz < 0)
+        split_index = np.where(zspan >= 0)[0][0]
+        mask_a = np.s_[:,:,split_index:]
+        mask_b = np.s_[:,:,:split_index]
 
         # build Mesh to contain MeshBlock data
         mesh = Mesh(save_dir)
