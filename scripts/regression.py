@@ -34,7 +34,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
     # define simulation parameters
     v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                                  # calculate ejecta velocity
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                         # cast to astro units
-    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                             # cast to code units (where L_domain = 1.0)          
+    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                             # cast to code units (where L = 1.0)          
     T_in_Myr = 0.5 * (sim_args["L_in_kpc"] + sim_args["r_in_kpc"]) / v_in_kpc_per_Myr   # calc duration to reach domain edge
     
     # build empty domain 
@@ -134,8 +134,8 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True, sphere_in_
     # define simulation parameters
     v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
-    r_blob_in_code = sim_args["r_in_kpc"] / sim_args["L_domain"]                  # cast to code units (where L_domain = 1.0)
-    T_in_Myr = 0.5 * sim_args["L_domain"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
+    r_blob_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                  # cast to code units (where L_domain = 1.0)
+    T_in_Myr = 0.5 * sim_args["L_in_kpc"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
     
     # build empty domain 
     max_emm = 1.0
