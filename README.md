@@ -2,7 +2,7 @@
 
 `cuDART` (CUDA + DDA Accelerated Ray Tracing) is a toolkit designed for producing synthetic observations of optically thin emission. The code is designed to automatically account for relativistic and geometric effects such as beaming and light time delay. Running on the GPU and accelerated by the 3D-DDA (3D digitial differential analyzer) algorithm, `cuDART` is able to generate high-resolution observations from large simulations in seconds, facilitating easy comparison between numeric theory and real observations.
 
-The code is currently under developement, but available freely for use by others. If you encounter any issues with the code or foresee avenues for improvement, please contribute to the Issues or Discussions sections, or get in contact with the development lead Henry Whitehead via henry[dot]whitehead[at]ist[dot]ac[dot]at.
+WARNING: the code is currently under developement, undergoing the last documentation and testing updates before a v1.0 release. We do not recommend using the codebase until v1.0 is available. If you encounter any issues with the code or foresee avenues for improvement, please contribute to the Issues or Discussions sections, or get in contact with the development lead Henry Whitehead via henry[dot]whitehead[at]ist[dot]ac[dot]at.
 
 Documentation is hosted on [ReadTheDocs](https://cudart.readthedocs.io/en/latest/). 
 
@@ -30,6 +30,6 @@ The latest version of `cuDART` can be cloned directly from this repository as
 ```
 $ git clone https://github.com/hwhitehead/cuDART/git
 ```
-Specific versions of the codebase are availble on the Releases page. 
+Specific versions of the codebase are availble on the [Releases](https://github.com/hwhitehead/cuDART/releases) page. 
 
 Once a local version of the codebase is available, the code can be built and executed by interacting with the Pythonic frontend, or directly with the C++/CUDA backend. See the documentation on ReadTheDocs (available online [here](https://cudart.readthedocs.io/en/latest/) and as source under `/docs/source`) for a full description of the API. 
