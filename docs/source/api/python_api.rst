@@ -1,7 +1,7 @@
+.. _python_api_header:
+
 Python API
 ##########
-
-.. _python_api_header:
 
 There are three primary frontend classes:
 

@@ -49,7 +49,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     bool file_exists = std::filesystem::is_regular_file(input_str);
     if (!file_exists) {
         std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "### FATAL ERROR in meshblock.hpp ###\n";
         err_msg << "Unable to locate input file at " << input_str << std::endl;
         CUDART_ERROR(err_msg);
     }
@@ -60,7 +60,7 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
     // check dimensions
     if ((data_shape.size() == 3) && (relativistic)) {
         std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "### FATAL ERROR in meshblock.hpp ###\n";
         err_msg << "Relativistic flagged, but did not find velocity data in " << input_str << std::endl;
         CUDART_ERROR(err_msg);
     }  
@@ -110,7 +110,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             std::istringstream iss(line);
             if (!(iss >> mb_size >> nx >> ny >> nz >> xl >> yl >> zl >> xr >> yr >> zr)) {
                 std::stringstream err_msg;
-                err_msg << "### FATAL ERROR in main ###\n";
+                err_msg << "### FATAL ERROR in meshblock.hpp ###\n";
                 err_msg << "Unable to parse line " << line_count << " of header file at " << header_str << std::endl;
                 CUDART_ERROR(err_msg);
             } else {
@@ -129,7 +129,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
         }
     } else {
         std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main ####\n";
+        err_msg << "### FATAL ERROR in meshblock.hpp ####\n";
         err_msg << "Unable to open header file at " << header_str << std::endl;
         CUDART_ERROR(err_msg);
     } // end header read
@@ -159,7 +159,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
         bool file_exists = std::filesystem::is_regular_file(npy_str);
         if (!file_exists) {
             std::stringstream err_msg;
-            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "### FATAL ERROR in meshblock.hpp ###\n";
             err_msg << "Unable to locate input file at " << input_str << std::endl;
             CUDART_ERROR(err_msg);
         }
@@ -172,7 +172,7 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
         // check dimensions
         if ((data_shape.size() == 3) && (relativistic)) {
             std::stringstream err_msg;
-            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "### FATAL ERROR in meshblock.hpp ###\n";
             err_msg << "Relativistic flagged, but did not find velocity data in " << npy_str << std::endl;
             CUDART_ERROR(err_msg);
         }        

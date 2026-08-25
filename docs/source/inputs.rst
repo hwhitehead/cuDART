@@ -1,8 +1,9 @@
-#############
+.. _inputs_header:
+
 Input Formats
 #############
 
-:code:`cuDART` reads simulation data in the form of :code:`.npy` files which MUST have :code:`dtype=np.float32`.
+cuDART reads simulation data in the form of :code:`.npy` files which MUST have :code:`dtype=np.float32`.
 The formatting of these files depends on the intended operation mode. Each :code:`.npy` file should have the shape
 
 * :code:`(nx,ny,nz)`: if running without relativisitc boosting
@@ -69,14 +70,14 @@ Note the additional header file at the top of the tree, this file contains infor
 Converting Simulation Data
 --------------------------
 While useful for manipulation in Python, :code:`.npy` files are generally not the standard outputs from hydrodynamic simulation codes. To support conversion 
-between standard simulation file formats and the :code:`.npy` files required by :code:`cuDART`, additional functions are included in :code:`pysrc`.
+between standard simulation file formats and the :code:`.npy` files required by cuDART, additional functions are included in :code:`pysrc`.
 Currently conversion support is available for the :code:`.vtk` files output from :code:`PLUTO`, for emissivities generated from lagrangian particles.
 We recommend the user develops their own routines for conversion between simulation output and :code:`.npy` file as approriate for their own use case.
 
 Units
 -----
 
-:code:`cuDART` generally runs without an explicit unit system, operating in code units. Without labelling, the input domain is automatically resized so that the longest domain side has a length of unity in code units.
+cuDART generally runs without an explicit unit system, operating in code units. Without labelling, the input domain is automatically resized so that the longest domain side has a length of unity in code units.
 In labelled mode the user can must specify their own subdomain sizes in code units. Units are introduced when lookback is enabled, set in the header file. The header file requires specification of the time interval between simulation snapshots (in Myr), 
 and the conversion from length code units to kiloparsecs. No unit transforms are applied to the quantities to be traced, it is left to the user to rescale the output image field to their relevant physical units. When running with relativistic boosting, the 
 input velocity must already be in units of the speed of light, :code:`c`.

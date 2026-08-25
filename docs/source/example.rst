@@ -1,17 +1,18 @@
-##################
+.. _example_header:
+
 Example Operation
 ##################
 
-This page contains code snippets intended to illustrate how a user might generate their own renders using :code:`cuDART`. 
+This page contains code snippets intended to illustrate how a user might generate their own renders using cuDART. 
 Example usage is given for
 
-A. Formatting an unlabelled simulation snapshot (:ref:`Example <example_section_A>`)
-B. Formatting a labelled simulation snapshot (:ref:`Example <example_section_B>`)
-C. Rendering a single pre-formatted simulation snapshot (:ref:`Example <example_section_C>`)
-D. Rendering multiple pre-formatted simulation snapshots with the lookback routine (:ref:`Example <example_section_D>`)
+| :ref:`A <example_section_A>`: Formatting an unlabelled simulation snapshot
+| :ref:`B <example_section_B>`: Formatting a labelled simulation snapshot 
+| :ref:`C <example_section_C>`: Rendering a single pre-formatted simulation snapshot
+| :ref:`D <example_section_D>`: Rendering multiple pre-formatted simulation snapshots with the lookback routine
 
 Additional example usage can be found within the regression testing suite, available at :code:`scripts/regression.py`.
-For a more detailed description of the functions and classes used here, see the :ref:`API documentation <api_main>`. 
+For a more detailed description of the functions and classes used here, see the :ref:`API documentation <api_header>`. 
 
 .. _example_section_A:
 
@@ -45,7 +46,7 @@ Here we show how a user might format a single homogenous simulation mesh, repres
     mesh_data = mesh_data.astype(np.float32)                        # enforce cast to float32
     np.save("/path/to/save/location.npy",mesh_data)
 
-Note that no spatial labels are saved; :code:`cuDART` will automatically center the data around the origin, scaling the domain so that its longest size has length unity in code units.
+Note that no spatial labels are saved; cuDART will automatically center the data around the origin, scaling the domain so that its longest size has length unity in code units.
 The code also assumes that the simulation cells are cubic. If this is not the case, the user should apply labels (see Example B).
 If the user is not running with relativisitc boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
 
@@ -142,14 +143,14 @@ Here we show how a user might use a single simulation snapshot in time to genera
     # convert raw .npy files into .png figures
     scene.plot(fig_save_dir = path_to_save_png)     
 
-Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_main>`.
+Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_header>`.
 
 .. _example_section_D:
 
 D. Rendering from multiple pre-formatted snapshots
 --------------------------------------------------
 
-If the user wishes to account for a finite speed of light (e.g. using the lookback routine), then multiple snapshots must be read by :code:`cuDART`. 
+If the user wishes to account for a finite speed of light (e.g. using the lookback routine), then multiple snapshots must be read by cuDART. 
 Multiple cameras (and hence images) can still be specified.
 
 .. code-block:: python
@@ -195,7 +196,7 @@ Multiple cameras (and hence images) can still be specified.
     # convert raw .npy files into .png figures
     scene.plot(fig_save_dir = path_to_save_png)     
 
-Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_main>`.
+Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_header>`.
 The units for the origin-camera distance are inherited from the :code:`header.txt` file that should exist at :code:`path/to/all/snapshots/header.txt`.
 This header file should feature a single line of text in the form :code:`num_snapshots snapshot_size dt L_domain` where 
 

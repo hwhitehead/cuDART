@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Starting cuDART backend at " << std::ctime(&start_time) << std::endl;
 
     // define space for user settings
-    std::string cudart_version = "version 0.9 - April 2026";
+    std::string cudart_version = "version 0.9 - August 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     char *doppler_char = nullptr, *power_law_char = nullptr;
     bool verbose = false, relativistic = false, append_mode = false, lookback = false, flexload = false, keep_edge = false;
@@ -129,38 +129,40 @@ int main(int argc, char *argv[]) {
         } // end 2 char check
     } // end cl parse
 
-    // handle fatal errors in input
+    // handle fatal errors in command line arguments
     if (input_char == nullptr || save_char == nullptr) {
         std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main\n";
-        err_msg << "No input file or output file specified.\n";
+        err_msg << "### FATAL ERROR in main ###\n";
+        err_msg << "No input path (-i) or output path (-s) specified.\n";
         CUDART_ERROR(err_msg);
     }
-    std::string save_str_header(save_char);
+    std::string save_str_header(save_char);             // cast save_char into string
 
-    float power_law_index = -0.6; // default value for synchrotron emission
-    float doppler_index = 2.0 - power_law_index;
-    if (doppler_char != nullptr) {
+    // process power law arguments
+    float power_law_index = -0.6;                       // default value for synchrotron emission
+    float doppler_index = 2.0 - power_law_index;        // two factors from Lorentz transform
+    if (doppler_char != nullptr) {                      // cast doppler_char into float
         doppler_index = static_cast<float>(std::atof(doppler_char));
     }
-    if (power_law_char != nullptr) { // priority over doppler specification
+    if (power_law_char != nullptr) {                    // cast power_law_char into float
         power_law_index = static_cast<float>(std::atof(power_law_char));
-        doppler_index = 2.0 - power_law_index;
+        doppler_index = 2.0 - power_law_index;          // power_law_char overrules doppler_char
     }
     
-    // check input existance, and compatibility with lookback flag
+    // check existence for input path
     const std::string input_str(input_char);
     const std::filesystem::path input_path(input_char);
     if (!std::filesystem::exists(input_path)) {
         std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "### FATAL ERROR in main ###\n";
         err_msg << "Unable to locate input path " << input_str << std::endl;
         CUDART_ERROR(err_msg);
     }
 
+    // check compatibility of lookback usage with input path
     if (lookback && !std::filesystem::is_directory(input_path)) {
         std::stringstream err_msg;
-        err_msg << "### FATAL ERROR in main\n";
+        err_msg << "### FATAL ERROR in main ###\n";
         err_msg << "Lookback mode requires directory of data to function\n";
         CUDART_ERROR(err_msg);
     }
@@ -190,7 +192,7 @@ int main(int argc, char *argv[]) {
         std::cout << "=============================================================\n";
     }
 
-    // load camera data and store in vector
+    // load camera data from .txt file into vector
     std::vector<Camera> cameras = load_cameras(camera_char, verbose);
     int num_images = cameras.size();
 
@@ -200,19 +202,19 @@ int main(int argc, char *argv[]) {
     const size_t bytes_in_img = num_pixels * sizeof(float);
 
     // define render shape    
-    int tx = 16, ty = 16; // must not exceed 1024 (max thread per block)
+    int tx = 16, ty = 16; 
     const dim3 threads_per_block(tx,ty); 
     const dim3 blocks_per_grid(std::ceil((float)standard_camera.num_pixels_X / tx), 
                                 std::ceil((float)standard_camera.num_pixels_Y / ty));
 
-    // declare output container
+    // declare container for libnpy write
     npy::npy_data_ptr<float> npy_img;
     npy_img.shape = {(unsigned long)standard_camera.num_pixels_X, (unsigned long)standard_camera.num_pixels_Y};
 
     // MAJOR CASE BREAK: w or w/o lookback
     if (lookback) {
-        // run with lookback
-        // 1. allocate space on device for data
+        // run with lookback (finite light delay)
+        // 1. allocate space for: image (host), data (host), data (device) and image (device)
         // 2. loop over snapshots, load data to host, copy to device
         // 3. loop over cameras, save images to communal buffer on device
         // 4. return image buffer to host
@@ -222,7 +224,7 @@ int main(int argc, char *argv[]) {
         size_t bytes_in_all_images = bytes_in_img * num_images;
         float *h_img_buffer = (float*) malloc(bytes_in_all_images);
         for (int i = 0; i < num_images * num_pixels; i++) {
-            h_img_buffer[i] = 0.0; // init as zero, in prep for summation over m
+            h_img_buffer[i] = 0.0; // init as zero, in prep for summation over snapshots (index m)
         }
         if (verbose) {
             float buffer_alloc_dur = (float)(clock() - buffer_alloc_start)/CLOCKS_PER_SEC;
@@ -235,8 +237,8 @@ int main(int argc, char *argv[]) {
         std::string header_str = input_str + "/header.txt";
         std::ifstream header_file(header_str);
         int num_snapshots, max_snapshot_size;
-        float snapshot_dt; // in units of Myr
-        float L_domain; // code length in units of kpc, if unlabelled longest domain size automatically unity
+        float snapshot_dt;  // code time in units of Myr
+        float L_domain;     // code length in units of kpc (if unlabelled longest domain size automatically unity)
         if (header_file.is_open()) {
             std::string line;
             int line_count = 0;
@@ -253,7 +255,7 @@ int main(int argc, char *argv[]) {
             } // end while line
         } // end file open
         
-        // set trace args
+        // save unit data in trace_args
         trace_args.snapshot_dt = snapshot_dt;                           // in Myr
         trace_args.inv_snapshot_dt = 1.0 / trace_args.snapshot_dt;      // in Myr^{-1}
         float velocity_code_units = L_domain * kpc_to_m / Myr_to_s;     
@@ -264,9 +266,9 @@ int main(int argc, char *argv[]) {
         trace_args.last_snapshot = num_snapshots - 1;
         trace_args.last_time = trace_args.last_snapshot * trace_args.snapshot_dt;
 
-        // allocate data on host
+        // allocate data space on host
         clock_t h_alloc_start = clock();
-        size_t h_bytes = max_snapshot_size * sizeof(float);
+        size_t h_bytes = max_snapshot_size * sizeof(float); // ensure space for largest snapshot
         float *h_data_buffer = (float*) malloc(h_bytes);
         if (verbose) { 
             float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
@@ -278,7 +280,7 @@ int main(int argc, char *argv[]) {
         size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
         if (h_bytes > d_bytes) {
             std::stringstream err_msg;
-            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "### FATAL ERROR in main ###\n";
             err_msg << "Requested memory in excess of space on device\n";
             CUDART_ERROR(err_msg);
         }
@@ -292,7 +294,7 @@ int main(int argc, char *argv[]) {
             printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
         }
 
-        // allocate image space on device (buffer, all images)
+        // allocate image space on device (communal buffer, all images)
         clock_t d_img_buffer_alloc_start = clock();
         float *d_img_buffer = nullptr;
         checkCudaErrors(cudaMalloc((void **)&d_img_buffer, bytes_in_img * num_images));
@@ -301,7 +303,7 @@ int main(int argc, char *argv[]) {
             printf("malloc image buffer       (device)            %.6fs\n",d_img_buffer_alloc_dur);
         }
 
-        // device image buffer is treated as additive, require wipe before first render
+        // device image buffer is treated as additive in lookback mode, require init before first render
         wipe_img<<<blocks_per_grid,threads_per_block>>>(standard_camera, d_img_buffer);
         checkCudaErrors(cudaPeekAtLastError());
 
@@ -315,11 +317,12 @@ int main(int argc, char *argv[]) {
             }
             std::cout << "-------------------------------------------------------------\n";
         }
-        bool host_malloc = false;       // in lookback mode, host buffer is already allocated
-        int num_snapshots_loaded = 0;   // flexload reporting
-        int flexload_renders_skipped = 0;   // flexload reporting
+        bool host_malloc = false;           // in lookback mode, host buffer is already allocated
+        int num_snapshots_loaded = 0;       // flexload metadata (verbose only)
+        int flexload_renders_skipped = 0;   // flexload metadata (verbose only)
         for (int m = 0; m < num_snapshots; m++) {
 
+            // start timer for this snapshot
             clock_t snapshot_start = clock();
 
             // stash snapshot index in trace_args
@@ -334,9 +337,9 @@ int main(int argc, char *argv[]) {
             // load snapshot, auto detect labelled state
             const std::string snapshot_dir_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad);
             const std::filesystem::path snapshot_dir_path(snapshot_dir_str);
-            if (std::filesystem::is_directory(snapshot_dir_path)) { // located sub directory, load as labelled data
+            if (std::filesystem::is_directory(snapshot_dir_path)) { // snapshot path is directory, load as labelled data
                 all_mb_info = load_labelled_meshblocks(snapshot_dir_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
-            } else {
+            } else { // snapshot path is file, load as unlabelled data
                 const std::string snapshot_npy_str = input_str + "/snapshot" + zero_pad_str(m, num_zero_pad) + ".npy";
                 if (std::filesystem::exists(snapshot_npy_str)) {
                     all_mb_info = load_unlabelled_meshblock(snapshot_npy_str, h_data_buffer, h_bytes, trace_args.relativistic, verbose, host_malloc);
@@ -349,7 +352,7 @@ int main(int argc, char *argv[]) {
             } // end mb load
             num_meshblocks = all_mb_info.size();
 
-            // flexload: given camera and mb info, determine if snapshot can contribute to ANY camera
+            // flexload: given camera and meshblock info, determine if snapshot can contribute to ANY camera
             // if no temporal overlap, skip load
             if (flexload) {
                 bool snapshot_contributes = false;
@@ -481,7 +484,7 @@ int main(int argc, char *argv[]) {
                     std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
                     if (existing_npy_shape != npy_img.shape) {
                         std::stringstream err_msg;
-                        err_msg << "### FATAL ERROR in main\n";
+                        err_msg << "### FATAL ERROR in main ###\n";
                         err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
                         CUDART_ERROR(err_msg);
                     }
@@ -567,7 +570,7 @@ int main(int argc, char *argv[]) {
         size_t d_bytes = calc_vram_limit(mem_char, tolerance, h_bytes);
         if (h_bytes > d_bytes) {
             std::stringstream err_msg;
-            err_msg << "### FATAL ERROR in main\n";
+            err_msg << "### FATAL ERROR in main ###\n";
             err_msg << "Requested memory in excess of space on device\n";
             CUDART_ERROR(err_msg);
         }
@@ -639,7 +642,7 @@ int main(int argc, char *argv[]) {
                     std::vector<unsigned long> existing_npy_shape = existing_npy_data.shape;
                     if (existing_npy_shape != npy_img.shape) {
                         std::stringstream err_msg;
-                        err_msg << "### FATAL ERROR in main\n";
+                        err_msg << "### FATAL ERROR in main ###\n";
                         err_msg << "Dimensions of existing npy data at " << save_str << " does not match standard camera.\n";
                         CUDART_ERROR(err_msg);
                     }

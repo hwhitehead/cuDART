@@ -1,9 +1,11 @@
+.. _cpp_api_header:
+
 C++ API
 #######
 
-While it is perfectly possible (and perhaps recommended) to interact with :code:`cuDART` entirely through its Pythonic frontend,
+While it is perfectly possible (and recommended) to interact with cuDART entirely through its Pythonic frontend,
 the user can also interface directly with the C++ executable through the command line. The C++ API can be found entirely within the :code:`src` directory.
-Here we describe the functionality of the main classes used within :code:`cuDART`.
+Here we describe the functionality of the main classes used within cuDART.
 
 1. The :ref:`vec3 <cpp_api_vec3>` class
 2. The :ref:`Ray <cpp_api_ray>` class
@@ -17,8 +19,9 @@ Outside of this class structure, the main code routines can be split into
 2. :ref:`Tools <cpp_api_tools>`
 
 Included within the C++ API is :code:`npy.hpp`, which provides functionality for reading and writing :code:`.npy` files with C++. 
-This library is imported verbatim from the `libnpy <https://github.com/llohse/libnpy>`_ repository created by Leon Merten Lohse (`github <https://github.com/llohse>`_) 
-under MIT `license <https://github.com/llohse/libnpy/blob/master/LICENSE>`_. We do not include documentation for this library here, please refer to the original libnpy repository.
+This library is imported near verbatim from the `libnpy <https://github.com/llohse/libnpy>`_ repository created by Leon Merten Lohse (`github <https://github.com/llohse>`_) 
+under MIT `license <https://github.com/llohse/libnpy/blob/master/LICENSE>`_. Minor additions have been made to bypass the need to load via a :code:`std::vector` object. 
+We do not include documentation for this library here, please refer to the original libnpy repository.
 
 
 For brevity, this page gives only simple descriptions of classes, member and non-member functions. For a full description of class attributes and function parameters, 

@@ -3,23 +3,38 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-cuDART
-======
+.. _index_header:
 
-:code:`cuDART` is a relativistic ray-tracing code designed to post-process simluation data into synthetic observations of optically thin emission. 
-Generating such visualisations, especially from arbitrary viewpoints and for large datasets, can prove very expensive due to the large 
-number of simulation cells that an image pixel's line-of-sight may intersect with. In :code:`cuDART` two acceleration structures are implemented to triviliase this computation: 
-GPU acceleration and DDA, the Digital Differential Analyzer. DDA allows for iterative low-cost propagation of rays through regular Cartesian meshes; together with the CUDA toolkit
-this allows for exceptionally fast line-of-sight summation. :code:`cuDART` supports rendering utilising relativistic boosting and a finite speed of light, allowing for geometric effects 
-such as superluminal motion to be recovered. :code:`cuDART` supports simulation data with a globally contant mesh resolution, and data that can be partitioned into subdomains of locally fixed resolution.
-
-.. figure:: ../../gallery/superluminal.gif
+.. figure:: ../../gallery/logo.png
     :width: 800px
 
-    Animation showing synthetic radio observations of mock data featuring relativistic anti-parallel twin ejecta launched at angles of 90 and 45 degrees to the line-of-sight 
-    (left and right panels respectively). In both panels, each of the ejecta has the same absolute velocity, but display different observed transverse velocities. 
-    :code:`cuDART` automatically accounts for relativistic effects (the ejectum pointed toward the observer is brigther by relativistic beaming), and geometric effects
-    (the approaching ejectrum exhibits a greater transverse velocity and is deformed along the line-of-sight).
+.. image:: https://img.shields.io/badge/Github-CUDART-4475A0.svg?style=for-the-badge&logo=github&logoColor=white
+   :target: https://github.com/hwhitehead/cuDART
+
+.. image:: https://img.shields.io/badge/arXiv-PENDING-b31b1b.svg?style=for-the-badge
+   :target: https://github.com/hwhitehead/cuDART
+
+|
+
+Synthetic Observations of Relativistic Sources
+----------------------------------------------
+
+cuDART is a relativistic ray-tracing code designed to post-process simluation data into synthetic observations of optically thin emission. 
+Generating such visualisations, especially from arbitrary viewpoints and for large datasets, can prove very expensive due to the large 
+number of simulation cells that an image pixel's line-of-sight may intersect with. In cuDART two acceleration structures are implemented to triviliase this computation: 
+GPU parallelisation and 3DDDA, the 3D Digital Differential Analyzer. 3DDDA allows for iterative low-cost propagation of rays through regular Cartesian meshes; together with the CUDA GPU toolkit
+this allows for exceptionally fast line-of-sight summation. cuDART automatically accounts for a range of relativistic and geometric effects
+such as Doppler boosting. Unlike previous visualisation schemes which generally consider a single snapshot in time, cuDART is
+capable of accounting for a finite time delay between emission and observation by rendering data from multiple epochs simultaneously. 
+Including this delay allows for the recovery of various relativistic phenomena normally absent from synthetic observations.
+
+.. figure:: ../../gallery/phenomena_comp.gif
+    :width: 800px
+
+    Figure comparing the observed properties of a simulation domain featuring twin anti-parallel relativistic ejecta, when imaged under three different schemes with increasing levels of complexity. 
+    Each scheme produces different observational features, notably reporting different transverse velocities :math:`\beta_\mathrm{T}`, emitter morphologies and flux ratios :math:`\mathcal{S}`. 
+    Only the most complex (and cuDART's default) scheme, accounting for relativistic beaming and finite time delay produces results that agree with relativistic and geometric theory. 
+    See :ref:`this <phenomena_header>` page for full discussion.
 
 .. figure:: ../../gallery/magnetised_jets.png
     :width: 800px
@@ -28,15 +43,15 @@ such as superluminal motion to be recovered. :code:`cuDART` supports simulation 
     Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. 
     Simulation data featured in Elley at al. 2026 (`NASA ADS <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_).
 
-The workhorse of the :code:`cuDART` code is written in C++/CUDA, but the frontend is built in Python. The full codebase is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
-Please report any issues and suggestions for improvement there. Development for :code:`cuDART` is use-case driven; if there are projects that you think may benefit from this code, but require additional features
-please get in touch with the developers.
+The bulk of cuDART is written in C++/CUDA, but the frontend is built in Python. The full codebase is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
+Please report any issues and suggestions for improvement there, or get in contact with the development lead (Henry Whitehead, henry[dot]whitehead[at]ist[dot]ac[dot]at). Development for cuDART is use-case driven; if there are projects that you think may benefit from this code, but require additional features
+please get in touch.
 
 ------------
 Publications
 ------------
 
-Earlier iterations of this codebase (pre 1.0) have been use to generate synthetic observations for the following publications:
+Earlier proprietary iterations of this codebase (pre v1.0) have been used to generate synthetic observations for the following publications:
 
 * Gasealahwe et al. (2025): `A relativistic jet from a neutron star breaking out of its natal supernova remnant <https://ui.adsabs.harvard.edu/abs/2025MNRAS.541.4011G/abstract>`_,
 * Elley et al. (2026): `The impact of flickering variability and magnetisation on the dynamics, stability and morphology of radio-loud AGN jets <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_.
@@ -45,7 +60,7 @@ Earlier iterations of this codebase (pre 1.0) have been use to generate syntheti
 Development
 -----------
 
-Authors and contributors to the :code:`cuDART` code and their institutions are:
+Developerment of cuDART is currently led by
 
 Henry Whitehead
 
@@ -53,14 +68,17 @@ Henry Whitehead
 - Previously, DPhil candidate, University of Oxford
 - `Personal Website <https://hwhitehead.github.io/>`_
 
+The developer would like to thank Emma Elley and Katie Savard for beta testing early iterations of the codebase,
+and thank Christopher Everett, Frasier Cowie, James Matthews and many others for insightful discussions during development.
+
 ----------------
 Acknowledgements 
 ----------------
 
-:code:`cuDART` uses an adapted version of the publically available `libnpy <https://github.com/llohse/libnpy>`_ library to read :code:`.npy` files into memory.
+cuDART uses an adapted version of the publically available `libnpy <https://github.com/llohse/libnpy>`_ library to read :code:`.npy` files from storage into memory.
 Development of this code was supported by `this <https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-acceleration-structure/grid.html>`_ excellent guide on 
 acceleration structures in C, and `this <https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/>`_ developer blog on constructing ray tracers with CUDA. 
-Much of the formatting for this documentation page is taken from the superior documentation for the `SIROCCO <https://sirocco-rt.readthedocs.io/en/latest/>`_ radiative transfer code.
+Much of the formatting for the cuDART documentation is taken from the vastly superior codebase for the `SIROCCO <https://sirocco-rt.readthedocs.io/en/latest/>`_ radiative transfer code.
 
 .. toctree::
     :titlesonly:
@@ -69,7 +87,6 @@ Much of the formatting for this documentation page is taken from the superior do
     :caption: Physics Documentation
 
     calculation
-    lookback
     phenomena
 
 .. toctree::

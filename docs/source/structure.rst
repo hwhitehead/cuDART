@@ -1,9 +1,10 @@
-##############
+.. _structure_header:
+
 Code Structure
 ##############
 
 As render duration generally represents a small fraction of the total C++ execution ovserhead, 
-:code:`cuDART` prioritises minimising the number of read/writes made from storage to memory, and the number of transfers between host RAM and device VRAM. 
+cuDART prioritises minimising the number of read/writes made from storage to memory, and the number of transfers between host RAM and device VRAM. 
 Below, we show the full execution chronology for a rendering call using the lookback routine to generate a series of images. We do not show the 
 optional Pythonic frontend (see :ref:`documentation <python_api_header>`). 
 

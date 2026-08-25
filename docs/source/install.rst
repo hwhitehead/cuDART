@@ -1,8 +1,10 @@
+.. _setup_header:
+
 ####################
 Setup and Quickstart
 ####################
 
-:code:`cuDART` is written in Python/C++, and runs on the GPU. As such, to function it requires
+cuDART is written in Python/C++, and runs on the GPU. As such, to function it requires
 
 * A CUDA-capable GPU (from Turing/Ampere onwards)
 * The :code:`nvcc` compiler (`documentation <https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/>`_)
@@ -13,7 +15,7 @@ Setup and Quickstart
 General Setup
 =============
 
-First, clone a local copy of the :code:`cuDART` codebase
+First, clone a local copy of the cuDART codebase
 
 .. code-block:: bash
 
@@ -24,7 +26,7 @@ First, clone a local copy of the :code:`cuDART` codebase
 C++ Setup
 ---------
 
-:code:`cuDART` is packaged with a template Makefile, you should configure a specific Makefile before building
+cuDART is packaged with a template Makefile, you should configure a specific Makefile before building
 
 .. code-block:: bash
 
@@ -35,8 +37,8 @@ C++ Setup
     $ make
 
 where here the :code:`--arch` and :code:`--gpu` flags can be used to target specific GPU architecture or models. 
-These flags allows :code:`cuDART` to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to :code:`configure.py`,
-:code:`cuDART` will pre-compile GPU-agnostic code valid for any NVIDIA GPU at least as modern as Ampere (`list of GPU architectures <https://en.wikipedia.org/wiki/Category:Nvidia_microarchitectures>`_).
+These flags allows cuDART to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to :code:`configure.py`,
+cuDART will pre-compile GPU-agnostic code valid for any NVIDIA GPU at least as modern as Ampere (`list of GPU architectures <https://en.wikipedia.org/wiki/Category:Nvidia_microarchitectures>`_).
 
 .. _setup_python:
 
@@ -44,7 +46,7 @@ Python Setup
 ------------
 
 If you wish to use the Python front end (as is recommended), the required modules can be found at :code:`pysrc/requirements.txt`.
-You can also build a virutal environment specifically for :code:`cuDART` usage and auto install these modules
+You can also build a virutal environment specifically for cuDART usage and auto install these modules
 
 .. code-block:: bash
 
@@ -56,7 +58,7 @@ You can also build a virutal environment specifically for :code:`cuDART` usage a
 Quickstart
 ==========
 
-:code:`cuDART` comes packaged with regression testing routines to construct mock data and peform a range of rendering operations. 
+cuDART comes packaged with regression testing routines to construct mock data and peform a range of rendering operations. 
 These routines can be found at :code:`scripts/regression.py`. These tests can be invoked from the command line as 
 
 .. code-block:: bash

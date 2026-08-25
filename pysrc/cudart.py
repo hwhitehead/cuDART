@@ -305,7 +305,7 @@ class Scene:
 
     def render(self, save_profile = False, verbose = False, check_make = True, force_make = False, 
                 max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
-                lookback = False, flexload = False, verbose_cpp = False):
+                lookback = False, flexload = False, verbose_cpp = False, srun = True):
 
         """
             Given a constructed Scene, format a subprocess invokation of the main cpp executable with any 
@@ -367,6 +367,9 @@ class Scene:
         if save_profile: 
             profile_location = os.path.join(self.save_dir, "profiling")
             command = ["nsys", "profile", "--stats=true","--export=text","--output={0}".format(profile_location)] + command
+        # prepend execution with call to srun
+        if srun:
+            command = ["srun", "--cpu_bind=verbose"] + command
         # pass verbose flag 
         if verbose_cpp: 
             command = command + ["-v"]

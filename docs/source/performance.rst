@@ -1,14 +1,16 @@
-Performance
-###########
+.. _performance_header:
 
-:code:`cuDART` comes packaged with a lightweight wrapper to the :code:`nsys` (NVIDIA Nsight System) profiling toolkit.
+Performance and Profiling
+#########################
+
+cuDART comes packaged with a lightweight wrapper to the :code:`nsys` (NVIDIA Nsight System) profiling toolkit.
 To profile the execution of the C++ backend, set :code:`save_profile = True` when calling :code:`Scene.render`, this will prepend
 the subprocess call to the C++ executable with a call to :code:`nsys profile`, generating a series of logfiles in the same output
 directory as the rendered data (set using :code:`save_dir` on :code:`Scene` init). Results from these logfiles can then be printed to
 the command line using the :code:`Profiler` class (see Pythonic API :ref:`here <python_api_header>`). Caution is warranted when interpreting 
 the timings produced, as much of the GPU/CPU execution is asynchronous and so the total task duration will be in excess of the true wallclock.
 
-The main contributors to runtime during the C++ execution of :code:`cuDART` are
+The main contributors to runtime during the C++ execution of cuDART are
 
 1. File read from storage to host (:code:`.npy` to RAM) 
 2. Data transfer from host to device (RAM to VRAM)
@@ -28,10 +30,10 @@ properties
 7. GPU Model = 2080Ti
 
 Running with lookback requires every camera to render every simulation snapshot; as a brute force calculation this requires testing a total of 
-:math:`\left(250\times250\times500\right)\times100\times\left(2048\times2048\right)\times100\sim10^{18}` ray-cell intersections! In practice, :code:`cuDART` discards intersections 
-that it knows cannot contribute to a specific observation time, bringing down the total number of relevant intersected cells to :math:`O(10^{11})`. Identifying and
+:math:`\left(250\times250\times500\right)\times100\times\left(2048\times2048\right)\times100\sim10^{18}` ray-cell intersections! In practice, cuDART discards intersections 
+that it knows cannot contribute to a specific observation time (termed "flexload"), bringing down the total number of relevant intersected cells to :math:`O(10^{11})`. Identifying and
 summing along these cells takes only 7 seconds, across 10,000 render calls each taking on average :math:`\sim750\mu s`. For comparison, loading the 100 simulation snapshots 
-(totally 50GB), takes substantially longer (11s of the total wallclock duration of 35s). 
+(totalling 50GB), takes longer than the actual render (11s of the total wallclock duration of 35s). 
 
 .. code-block:: bash
 
@@ -110,8 +112,8 @@ summing along these cells takes only 7 seconds, across 10,000 render calls each 
     50,000.000    100    500.000    500.000    500.000    500.000        0.000  [CUDA memcpy Host-to-Device]
     1,677.722      1  1,677.722  1,677.722  1,677.722  1,677.722        0.000  [CUDA memcpy Device-to-Host]
 
-:code:`cuDART` performance will largely be dependent on the sizes of files rendered, and the quality of the I/O environment rather than the GPU architecture itself. 
-As I/O can represent a large fraction of the runtime, :code:`cuDART` is structured to perform as few reads as possible, and render as many images as possible for 
+cuDART performance will largely be dependent on the sizes of files rendered, and the quality of the I/O environment rather than the GPU architecture itself. 
+As I/O can represent a large fraction of the runtime, cuDART is structured to perform as few reads as possible (see the :ref:`code structure <structure_header>` documentation), and render as many images as possible for 
 each load.
 
 
