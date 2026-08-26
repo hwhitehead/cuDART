@@ -543,8 +543,8 @@ class Profiler:
         print(gpu_df)
         print("\n")
         print("OSRT Summary:")
-        pd.options.display.max_columns = len(df.columns)
         ostr_df = pd.read_csv(ostr_str)
+        pd.options.display.max_columns = len(ostr_df.columns)
         print(ostr_df)
 
     def cleanup(self):
