@@ -337,6 +337,8 @@ class Scene:
                 Makes explicit call to the ``make clean``, ``make`` methods (default False)
             max_mem : int
                 Sets maximum allowed VRAM occupancy for execution (default None)
+            srun : bool
+                Prepends executable call with "srun" for use with slurm (default True)
         """
 
         # prepare camera space

@@ -300,7 +300,7 @@ def render_single_snapshot(load_dir, save_dir, camera_args, snapshot_index = Non
 
     if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
 
-def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
+def render_without_lookback(load_dir, save_dir, camera_args, verbose = True, save_profile = False):
 
     # run a rendering test without lookback, on all snapshots of data in load_dir
     # data should be loaded from suite built using build_regression_suite (-b or -bl flags)
@@ -344,7 +344,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
 
         # render raw images
         scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
-                    save_profile = False)
+                    save_profile = save_profile)
         if (verbose): print("finished rendering raw images.")
 
         # copy raw to main save direction
@@ -387,7 +387,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True):
 
     if (verbose): print("finished no-lookback render, see {0} for output".format(save_dir))
 
-def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True):
+def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, save_profile = False):
 
     # run a rendering test using finite speed of light with multiple snapshots
     # data should be loaded from suite built using build_regression_suite (-b flag)
@@ -452,7 +452,7 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
 
     # render and save images
     scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = True, verbose_cpp = verbose,
-                save_profile = False)
+                save_profile = save_profile)
     if (verbose): print("finished rendering raw images.")
 
     if (camera_args["save_fig"]):
@@ -648,7 +648,7 @@ if __name__ == "__main__":
 
     camera_args = {"num_img": 100,
                     "resize_img": True,
-                    "relativistic": False,
+                    "relativistic": True,
                     "template": template_camera,
                     "camera_file_name": None,
                     "save_fig": True,
@@ -730,7 +730,8 @@ if __name__ == "__main__":
         render_without_lookback(load_dir = args["data_dir"], 
                             save_dir = args["save_dir"], 
                             camera_args = camera_args, 
-                            verbose = args["v"])
+                            verbose = args["v"],
+                            save_profile = args["p"])
     elif (args["rl"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run lookback test without save location (use --save_dir)")
@@ -740,7 +741,8 @@ if __name__ == "__main__":
                             save_dir = args["save_dir"], 
                             sim_args = sim_args, 
                             camera_args = camera_args, 
-                            verbose = args["v"])
+                            verbose = args["v"],
+                            save_profile = args["p"])
     elif (args["rc"]):
         if (args["save_dir"] is None):
             raise Exception("unable to run penrose-terrell test without save location (use --save_dir)")
