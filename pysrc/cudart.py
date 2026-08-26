@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import os, sys, subprocess, copy, pathlib
 import glob
 import pandas as pd
@@ -531,58 +532,20 @@ class Profiler:
         if not os.path.exists(gpu_str) or not os.path.exists(ostr_str):
             self.build_csv()
 
-        gpu_df = pd.read_csv(gpu_str)
-        ostr_df = pd.read_csv(ostr_str)
-
-        gpu_csv_tasks = ["[CUDA memcpy Host-to-Device]", "[CUDA memcpy Device-to-Host]",
-                        "render_from_mesh(Camera, float *, Mesh **, TraceArgs)",
-                        "wipe_img(Camera, float *)"]
-        osrt_csv_tasks = ["poll", "pthread_cond_timedwait","read", "writev", "ioctl"]
-
-        gpu_labels = ["memcpy host-to-device", "memcpy device-to-host", "render", "wipe"]
-        osrt_labels = osrt_csv_tasks
-
         print("Reporting Duraton Summary")
         print("WARNING: execution is asynchronous, sum of task durations may exceed wallclock")
-        print("e.g. poll and pthread_cond_timedwait occur simultaneously")
 
-        print("True Wallclock Duration = {0:.3f}s".format(self.wallclock_duration))
+        print("Reported Wallclock Duration = {0:.3f}s".format(self.wallclock_duration))
         print("\n")
         print("GPU Summary:")
-        
-        gpu_duration_sum = 0
-        for task, label in zip(gpu_csv_tasks, gpu_labels):
-            row = np.where(gpu_df["Operation"] == task)[0][0]         
-            num_calls = int(gpu_df["Instances"].iloc[row])
-            duration_s = float(gpu_df["Total Time (ns)"].iloc[row]) * 1e-9
-            average_ms = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
-            gpu_duration_sum += duration_s
-            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f}ms)".format(label, num_calls, duration_s, average_ms))
-        total_gpu_duration = gpu_df["Total Time (ns)"].sum() * 1e-9
-        print("GPU (other) = {0:.3f}s".format(total_gpu_duration - gpu_duration_sum))
-        print("Total GPU Duration = {0:.3f}s".format(total_gpu_duration))
-        
+        gpu_df = pd.read_csv(gpu_str)
+        pd.options.display.max_columns = len(gpu_df.columns)
+        print(gpu_df)
         print("\n")
         print("OSRT Summary:")
-        osrt_duration_sum = 0
-        for task, label in zip(osrt_csv_tasks, osrt_labels):
-            row = np.where(ostr_df["Name"] == task)[0][0]         
-            num_calls = int(ostr_df["Num Calls"].iloc[row])
-            duration_s = float(ostr_df["Total Time (ns)"].iloc[row]) * 1e-9
-            average_ms = float(gpu_df["Avg (ns)"].iloc[row]) * 1e-6
-            osrt_duration_sum += duration_s
-            print("{0}: {1} call(s) in {2:.3f}s (average {3:.3f}ms)".format(label, num_calls, duration_s, average_ms))
-        total_osrt_duration = ostr_df["Total Time (ns)"].sum() * 1e-9
-        print("OSRT (other) = {0:.3f}s".format(total_osrt_duration - osrt_duration_sum))
-        print("Total OSRT Duration = {0:.3f}s".format(total_osrt_duration))
-
-        if verbose:
-            print("\n")
-            print("GPU CSV")
-            print(gpu_df.to_string())
-            print("\n")
-            print("OSTR CSV")
-            print(ostr_df.to_string())
+        pd.options.display.max_columns = len(df.columns)
+        ostr_df = pd.read_csv(ostr_str)
+        print(ostr_df)
 
     def cleanup(self):
 

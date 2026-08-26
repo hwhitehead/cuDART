@@ -459,7 +459,7 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
         scene.plot(fig_save_dir = save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin = -6, vmax = 0)
         print("finished rendering figures.")
 
-    if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
+    if (verbose): print("finished lookback test, see {0} for output".format(save_dir))
 
 def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, show_masks = False):
 
