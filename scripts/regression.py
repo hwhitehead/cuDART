@@ -694,6 +694,7 @@ if __name__ == "__main__":
                         default=None,
                         help="build mode for simulation data (sphere, sphere_rest, jet)")
     parser.add_argument("-nf", "-no_figure",
+                        action="store_true"
                         default = False,
                         help="skip conversion of .npy to .png by matplotlib")
     args = vars(parser.parse_args())
