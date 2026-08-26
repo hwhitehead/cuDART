@@ -693,7 +693,13 @@ if __name__ == "__main__":
     parser.add_argument("--build_mode",
                         default=None,
                         help="build mode for simulation data (sphere, sphere_rest, jet)")
+    parser.add_argument("-nf", "-no_figure",
+                        default = False,
+                        help="skip conversion of .npy to .png by matplotlib")
     args = vars(parser.parse_args())
+
+    # pass figure skip to camera args if flagged
+    camera_args["save_fig"] = not args["no_figure"]
 
     # check valid build_mode
     if args["build_mode"] is not None:
