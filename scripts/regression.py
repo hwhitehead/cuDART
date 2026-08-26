@@ -700,7 +700,7 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
 
     # pass figure skip to camera args if flagged
-    camera_args["save_fig"] = not args["no_figure"]
+    camera_args["save_fig"] = not args["nf"]
 
     # check valid build_mode
     if args["build_mode"] is not None:
