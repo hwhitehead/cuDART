@@ -58,7 +58,10 @@ __global__ void scratch_to_buffer(Camera camera, float *d_img, float *d_img_buff
 __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
     // load camera data into a vector from camera .txt file
 
-    clock_t camera_read_start = clock();
+    // log start time for camera load routine
+    auto camera_read_start = std::chrono::steady_clock::now();
+
+    // init emmpty vector for Camera objects
     std::vector<Camera> cameras = {};
 
     // handle null char
@@ -114,9 +117,11 @@ __host__ std::vector<Camera> load_cameras(char *camera_char, bool verbose) {
         err_msg << "Unable to open camera file at " << camera_str << std::endl;
         CUDART_ERROR(err_msg);
     }
+    
+    // report duration
     if (verbose) {
-        float camera_read_dur = (float)(clock() - camera_read_start)/CLOCKS_PER_SEC;
-        printf("camera read               (host)              %.6fs\n",camera_read_dur);
+        std::chrono::duration<float> camera_read_dur = (std::chrono::steady_clock::now() - camera_read_start);
+        printf("camera read               (host)              %.6fs\n",camera_read_dur.count());
     }
     return cameras;
 }
