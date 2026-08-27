@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
     // print start time
     auto start_time_clock = std::chrono::system_clock::now();
-    std::time_t start_time = std::chrono::system_clok::to_time_t(start_time_clock);
+    std::time_t start_time = std::chrono::system_clock::to_time_t(start_time_clock);
     std::cout << "Starting cuDART backend at " << std::ctime(&start_time) << std::endl;
 
     // define space for user settings
