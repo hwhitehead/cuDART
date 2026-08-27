@@ -27,11 +27,10 @@
 
 int main(int argc, char *argv[]) {
 
-    // start general timers
-    clock_t main_start = clock(); // measures elapsed CPU time
-    auto wallclock_start = std::chrono::steady_clock::now();
+    // start master wallclock timer (all durations calculated with steady_clock)
+    auto main_start = std::chrono::steady_clock::now();
 
-    // print start time
+    // print start time using system clock
     auto start_time_clock = std::chrono::system_clock::now();
     std::time_t start_time = std::chrono::system_clock::to_time_t(start_time_clock);
     std::cout << "Starting cuDART backend at " << std::ctime(&start_time) << std::endl;
@@ -221,15 +220,15 @@ int main(int argc, char *argv[]) {
         // 4. return image buffer to host
 
         // allocate image space on host for ALL images
-        clock_t buffer_alloc_start = clock();
+        auto buffer_alloc_start = std::chrono::steady_clock::now();
         size_t bytes_in_all_images = bytes_in_img * num_images;
         float *h_img_buffer = (float*) malloc(bytes_in_all_images);
         for (int i = 0; i < num_images * num_pixels; i++) {
             h_img_buffer[i] = 0.0; // init as zero, in prep for summation over snapshots (index m)
         }
         if (verbose) {
-            float buffer_alloc_dur = (float)(clock() - buffer_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc/init image buffer  (host)              %.6fs\n",buffer_alloc_dur);
+            std::chrono::duration<float> buffer_alloc_dur = (std::chrono::steady_clock::now() - buffer_alloc_start);
+            printf("malloc/init image buffer  (host)              %.6fs\n",buffer_alloc_dur.count());
         }
 
         // load header data for all snapshots from load dir
@@ -268,12 +267,12 @@ int main(int argc, char *argv[]) {
         trace_args.last_time = trace_args.last_snapshot * trace_args.snapshot_dt;
 
         // allocate data space on host
-        clock_t h_alloc_start = clock();
+        auto h_alloc_start = std::chrono::steady_clock::now();
         size_t h_bytes = max_snapshot_size * sizeof(float); // ensure space for largest snapshot
         float *h_data_buffer = (float*) malloc(h_bytes);
         if (verbose) { 
-            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+            std::chrono::duration<float> h_alloc_dur = (std::chrono::steady_clock::now() - h_alloc_start);
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur.count());
         }
 
         // determine VRAM limitations and handle excess
@@ -287,21 +286,21 @@ int main(int argc, char *argv[]) {
         }
 
         // allocate data space on device
-        clock_t d_data_alloc_start = clock();
+        auto d_data_alloc_start = std::chrono::steady_clock::now();
         float *d_data_buffer = nullptr;
         checkCudaErrors(cudaMalloc(&d_data_buffer, d_bytes));
         if (verbose) {
-            float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
+            std::chrono::duration<float> d_data_alloc_dur = (std::chrono::steady_clock::now() - d_data_alloc_start);
+            printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur.count());
         }
 
         // allocate image space on device (communal buffer, all images)
-        clock_t d_img_buffer_alloc_start = clock();
+        auto d_img_buffer_alloc_start = std::chrono::steady_clock::now();
         float *d_img_buffer = nullptr;
         checkCudaErrors(cudaMalloc((void **)&d_img_buffer, bytes_in_img * num_images));
         if (verbose) {
-            float d_img_buffer_alloc_dur = (float)(clock() - d_img_buffer_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc image buffer       (device)            %.6fs\n",d_img_buffer_alloc_dur);
+            std::chrono::duration<float> d_img_buffer_alloc_dur = (std::chrono::steady_clock::now() - d_img_buffer_alloc_start);
+            printf("malloc image buffer       (device)            %.6fs\n",d_img_buffer_alloc_dur.count());
         }
 
         // device image buffer is treated as additive in lookback mode, require init before first render
@@ -324,7 +323,7 @@ int main(int argc, char *argv[]) {
         for (int m = 0; m < num_snapshots; m++) {
 
             // start timer for this snapshot
-            clock_t snapshot_start = clock();
+            auto snapshot_start = std::chrono::steady_clock::now();
 
             // stash snapshot index in trace_args
             trace_args.snapshot_index = m;
@@ -395,12 +394,12 @@ int main(int argc, char *argv[]) {
             num_snapshots_loaded++;
 
             // copy all data from host into device
-            clock_t data_copy_start = clock();
+            auto data_copy_start = std::chrono::steady_clock::now();
             checkCudaErrors(cudaMemcpy(d_data_buffer, h_data_buffer, d_bytes, cudaMemcpyHostToDevice)); 
             checkCudaErrors(cudaPeekAtLastError());
             if (verbose) {
-                float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-                printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
+                std::chrono::duration<float> data_copy_dur = (std::chrono::steady_clock::now() - data_copy_start);
+                printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur.count());
             }
 
             // initialise MeshBlock list on device
@@ -429,16 +428,16 @@ int main(int argc, char *argv[]) {
                     std::cout << ".............................................................\n";
                 }
 
-                clock_t this_img_start = clock();
+                auto this_img_start = std::chrono::steady_clock::now();
 
                 // call render
-                clock_t render_start = clock();
+                auto render_start = std::chrono::steady_clock::now();
                 render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img_buffer, mesh, trace_args);
                 checkCudaErrors(cudaPeekAtLastError());
                 checkCudaErrors(cudaDeviceSynchronize());
                 if (verbose) {
-                    float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-                    printf("render kernel             (device)            %.6fs\n",render_dur);
+                    std::chrono::duration<float> render_dur = (std::chrono::steady_clock::now() - render_start);
+                    printf("render kernel             (device)            %.6fs\n",render_dur.count());
                 }
 
                 // clear d_img as prep for next render call
@@ -450,9 +449,9 @@ int main(int argc, char *argv[]) {
 
             // report snapshot total duration
             if (verbose) {
-                float snapshot_dur = (float)(clock() - snapshot_start)/CLOCKS_PER_SEC;
+                std::chrono::duration<float> snapshot_dur = (std::chrono::steady_clock::now() - snapshot_start);
                 std::cout << ".............................................................\n";
-                printf("snapshot total            (host/device)       %.6fs\n",snapshot_dur);
+                printf("snapshot total            (host/device)       %.6fs\n",snapshot_dur.count());
                 std::cout << "=============================================================\n";
             }
 
@@ -466,15 +465,15 @@ int main(int argc, char *argv[]) {
         } // end snapshot loop
 
         // copy image data from device buffer to image buffer
-        clock_t img_copy_start = clock();
+        auto img_copy_start = std::chrono::steady_clock::now();
         checkCudaErrors(cudaMemcpy(h_img_buffer, d_img_buffer, num_images * bytes_in_img, cudaMemcpyDeviceToHost));
         if (verbose) {
-            float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-            printf("memcpy all images         (device->host)      %.6fs\n",img_copy_dur);
+            std::chrono::duration<float> img_copy_dur = (std::chrono::steady_clock::now() - img_copy_start);
+            printf("memcpy all images         (device->host)      %.6fs\n",img_copy_dur.count());
         }
 
         // image buffer populated, save render data as npy
-        clock_t npy_write_start = clock();
+        auto npy_write_start = std::chrono::steady_clock::now();
         for (int n = 0; n < num_images; n++) {
             std::string save_str = save_str_header + "/raw" + zero_pad_str(n, num_zero_pad) + ".npy";
             if (append_mode) {
@@ -501,20 +500,20 @@ int main(int argc, char *argv[]) {
         }
 
         if (verbose) {
-            float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-            printf("write all raw image       (host->npy)         %.6fs\n",npy_write_dur);
+            std::chrono::duration<float> npy_write_dur = (std::chrono::steady_clock::now() - npy_write_start);
+            printf("write all raw image       (host->npy)         %.6fs\n",npy_write_dur.count());
         }
 
         // perform cleanup of device/host data
-        clock_t free_start = clock();
+        auto free_start = std::chrono::steady_clock::now();
         checkCudaErrors(cudaFree(d_data_buffer));   // device data buffer
         checkCudaErrors(cudaFree(d_img_buffer));    // device image buffer
         free(h_data_buffer);                        // host data buffer
         free(h_img_buffer);                         // host image buffer
         cudaDeviceReset();
         if (verbose) {
-            float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
-            printf("free all                  (device/host)       %.6fs\n",free_dur);
+            std::chrono::duration<float> free_dur = (std::chrono::steady_clock::now() - free_start);
+            printf("free all                  (device/host)       %.6fs\n",free_dur.count());
             if (flexload) {
                 int nominal_total_renders = num_snapshots * num_images;                                 // total renders without flexload
                 int true_total_renders = num_snapshots_loaded * num_images - flexload_renders_skipped;  // true render count
@@ -538,20 +537,20 @@ int main(int argc, char *argv[]) {
         // 3. loop over cameras, save to disc within loop
 
         // allocate space for single image on device 
-        clock_t d_img_alloc_start = clock();
+        auto d_img_alloc_start = std::chrono::steady_clock::now();
         float *d_img = nullptr;
         checkCudaErrors(cudaMalloc((void **)&d_img, bytes_in_img));
         if (verbose) {
-            float d_img_alloc_dur = (float)(clock() - d_img_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur);
+            std::chrono::duration<float> d_img_alloc_dur = (std::chrono::steady_clock::now() - d_img_alloc_start);
+            printf("malloc image              (device)            %.6fs\n",d_img_alloc_dur.count());
         }
 
         // allocate image space on host
-        clock_t img_alloc_start = clock();
+        auto h_img_alloc_start = std::chrono::steady_clock::now();
         float *img = (float*) malloc(bytes_in_img);
         if (verbose) {
-            float img_alloc_dur = (float)(clock() - img_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc image              (host)              %.6fs\n",img_alloc_dur);
+            std::chrono::duration<float> h_img_alloc_dur = (std::chrono::steady_clock::now() - h_img_alloc_start);
+            printf("malloc image              (host)              %.6fs\n",h_img_alloc_dur.count());
         }
 
         // import npy data to host, auto detect labelled state
@@ -577,21 +576,21 @@ int main(int argc, char *argv[]) {
         }
 
         // allocate space on device
-        clock_t d_data_alloc_start = clock();
+        auto d_data_alloc_start = std::chrono::steady_clock::now();
         float *d_data = nullptr;
         checkCudaErrors(cudaMalloc(&d_data, d_bytes));
         if (verbose) {
-            float d_data_alloc_dur = (float)(clock() - d_data_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur);
+            std::chrono::duration<float> d_data_alloc_dur = (std::chrono::steady_clock::now() - d_data_alloc_start);
+            printf("malloc data               (device)            %.6fs\n",d_data_alloc_dur.count());
         }
 
         // copy ALL data from host into device
-        clock_t data_copy_start = clock();
+        auto data_copy_start = std::chrono::steady_clock::now();
         checkCudaErrors(cudaMemcpy(d_data, h_all_data, d_bytes, cudaMemcpyHostToDevice)); 
         checkCudaErrors(cudaPeekAtLastError());
         if (verbose) {
-            float data_copy_dur = (float)(clock() - data_copy_start)/CLOCKS_PER_SEC;
-            printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur);
+            std::chrono::duration<float> data_copy_dur = (std::chrono::steady_clock::now() - data_copy_start);
+            printf("memcpy data               (host->device)      %.6fs\n",data_copy_dur.count());
         }
 
         // initialise MeshBlock list on device
@@ -612,28 +611,28 @@ int main(int argc, char *argv[]) {
         }
         for (auto &camera : cameras) {
             
-            clock_t this_img_start = clock();
+            auto this_img_start = std::chrono::steady_clock::now();
 
             // call render
-            clock_t render_start = clock();
+            auto render_start = std::chrono::steady_clock::now();
             render_from_mesh<<<blocks_per_grid,threads_per_block>>>(camera, d_img, mesh, trace_args);
             checkCudaErrors(cudaPeekAtLastError());
             checkCudaErrors(cudaDeviceSynchronize());
             if (verbose) {
-                float render_dur = (float)(clock() - render_start)/CLOCKS_PER_SEC;
-                printf("render kernel             (device)            %.6fs\n",render_dur);
+                std::chrono::duration<float> render_dur = (std::chrono::steady_clock::now() - render_start);
+                printf("render kernel             (device)            %.6fs\n",render_dur.count());
             }
 
             // copy image data to host
-            clock_t img_copy_start = clock();
+            auto img_copy_start = std::chrono::steady_clock::now();
             checkCudaErrors(cudaMemcpy(img, d_img, bytes_in_img, cudaMemcpyDeviceToHost));
             if (verbose) {
-                float img_copy_dur = (float)(clock() - img_copy_start)/CLOCKS_PER_SEC;
-                printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur);
+                std::chrono::duration<float> img_copy_dur = (std::chrono::steady_clock::now() - img_copy_start);
+                printf("memcpy image              (device->host)      %.6fs\n",img_copy_dur.count());
             }
 
             // save data
-            clock_t npy_write_start = clock();
+            auto npy_write_start = std::chrono::steady_clock::now();
             std::string save_str = save_str_header + "/raw" + zero_pad_str(img_count, num_zero_pad) + ".npy";
             if (append_mode) {
                 // attempt to add values to existing file (if it exists)
@@ -656,10 +655,10 @@ int main(int argc, char *argv[]) {
             npy_img.data_ptr = img;
             npy::write_npy(save_str, npy_img);
             if (verbose) {
-                float npy_write_dur = (float)(clock() - npy_write_start)/CLOCKS_PER_SEC;
-                printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur);
-                float this_img_dur = (float)(clock() - this_img_start)/CLOCKS_PER_SEC;
-                printf("img total                 (host/device)       %.6fs\n",this_img_dur);
+                std::chrono::duration<float> npy_write_dur = (std::chrono::steady_clock::now() - npy_write_start);
+                printf("write raw image           (host->npy)         %.6fs\n",npy_write_dur.count());
+                std::chrono::duration<float> this_img_dur = (std::chrono::steady_clock::now() - this_img_start);
+                printf("img total                 (host/device)       %.6fs\n",this_img_dur.count());
                 if (img_count == num_images - 1) {
                     std::cout << "=============================================================\n";
                 } else {
@@ -677,7 +676,7 @@ int main(int argc, char *argv[]) {
         } // end camera loop
 
         // perform cleanup of device/host data
-        clock_t free_start = clock();
+        auto free_start = std::chrono::steady_clock::now();
         free_mesh<<<1,1>>>(mesh, num_meshblocks);
         checkCudaErrors(cudaPeekAtLastError());
         checkCudaErrors(cudaDeviceSynchronize());
@@ -689,27 +688,25 @@ int main(int argc, char *argv[]) {
         free(img);
         cudaDeviceReset();
         if (verbose) {
-            float free_dur = (float)(clock() - free_start)/CLOCKS_PER_SEC;
-            printf("free all                  (device/host)       %.6fs\n",free_dur);
+            std::chrono::duration<float> free_dur = (std::chrono::steady_clock::now() - free_start);
+            printf("free all                  (device/host)       %.6fs\n",free_dur.count());
         }
     } // end if lookback
 
-    // terminate
-    float main_dur = (float)(clock() - main_start)/CLOCKS_PER_SEC;
+    
+    // write total duration to text file
+    std::chrono::duration<float> main_dur = (std::chrono::steady_clock::now() - main_start);
+    std::string wallclock_file_str = save_str_header + "/wallclock.txt";
+    std::ofstream wallclock_file(wallclock_file_str);
+    wallclock_file << main_dur.count(); // save elapsed wallclock in seconds
+    wallclock_file.close();
+
+    // report system time and exit
     if (verbose) {
-        printf("total runtime                                 %.6fs\n",main_dur);
+        printf("total runtime                                 %.6fs\n",main_dur.count());
         std::cout << "=============================================================\n";
         printf("cuDART terminated.\n");
     }
-
-    // write total duration to text file
-    std::string wallclock_file_str = save_str_header + "/wallclock.txt";
-    std::ofstream wallclock_file(wallclock_file_str);
-    std::chrono::duration<double> wallclock_duration = (std::chrono::steady_clock::now() - wallclock_start);
-    wallclock_file << wallclock_duration.count(); // save elapsed wallclock in seconds
-    wallclock_file.close();
-
-    // print end time
     auto end_time_clock = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end_time_clock);
     std::cout << "Ended cuDART backend at " << std::ctime(&end_time) << "." << std::endl;

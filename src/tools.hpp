@@ -114,6 +114,7 @@ __host__ void host_to_npy(const std::string &filename, float* host_addr, std::ve
 }
 
 __host__ std::vector<unsigned long int> npy_to_host(const std::string &file_str, float* &host_addr, size_t &h_bytes, bool verbose, bool host_malloc) {
+    
     // cast to stream
     std::ifstream file_stream(file_str, std::ifstream::binary);
     if (!file_stream) {
@@ -136,11 +137,11 @@ __host__ std::vector<unsigned long int> npy_to_host(const std::string &file_str,
     // if flagged, allocate data
     if (host_malloc) {
         h_bytes = data_size * sizeof(float);
-        clock_t h_alloc_start = clock();
+        auto h_alloc_start = std::chrono::steady_clock::now();
         host_addr = (float*) malloc(h_bytes);
         if (verbose) { 
-            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+            std::chrono::duration<float> h_alloc_dur = (std::chrono::steady_clock::now() - h_alloc_start);
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur.count());
         } // end verbose
     } // end host_malloc
 

@@ -78,7 +78,8 @@ __device__ float Mesh::calc_trace(const Ray &r, TraceArgs trace_args) {
 __host__ void build_containers(std::vector<MeshBlockInfo> all_mb_info, float* &d_data, MeshBlock** &mb_list, Mesh** &mesh, bool verbose) {
     // allocate and initalise data containers (meshblock, meshblock list, mesh)
 
-    clock_t container_alloc_start = clock();
+    // start timer for containerisation duration
+    auto container_start = std::chrono::steady_clock::now();
 
     // allocate memory on device for meshblock list
     int num_meshblocks = all_mb_info.size();
@@ -100,8 +101,8 @@ __host__ void build_containers(std::vector<MeshBlockInfo> all_mb_info, float* &d
     checkCudaErrors(cudaDeviceSynchronize());
 
     if (verbose) {
-        float container_alloc_dur = (float)(clock() - container_alloc_start)/CLOCKS_PER_SEC;
-        printf("malloc/init containers    (device)            %.6fs\n",container_alloc_dur);
+        std::chrono::duration<float> container_dur = (std::chrono::steady_clock::now() - container_start);
+        printf("malloc/init containers    (device)            %.6fs\n",container_dur.count());
     }
     
     return;

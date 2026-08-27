@@ -44,7 +44,9 @@ class MeshBlock {
 __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose, bool host_malloc) {
     // load single homgenous meshblock info, allocate host memory and load data
 
-    clock_t npy_read_start = clock();
+    // start timer for load
+    auto npy_read_start = std::chrono::steady_clock::now();
+
     std::vector<MeshBlockInfo> all_mb_info = {};
     bool file_exists = std::filesystem::is_regular_file(input_str);
     if (!file_exists) {
@@ -65,8 +67,8 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
         CUDART_ERROR(err_msg);
     }  
     if (verbose) {
-        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("npy read                  (host)              %.6fs\n",npy_read_dur);
+        std::chrono::duration<float> npy_read_dur = (std::chrono::steady_clock::now() - npy_read_start);
+        printf("npy read                  (host)              %.6fs\n",npy_read_dur.count());
     }
 
     //assume equal spacing in x, y, z and centering at origin
@@ -95,8 +97,10 @@ __host__ std::vector<MeshBlockInfo> load_unlabelled_meshblock(std::string input_
 __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_str, float* &h_all_data, size_t &h_bytes, bool relativistic, bool verbose, bool host_malloc) {
     // load heterogeneous meshblock info, allocate host memory and load data
 
+    // start timer for header read
+    auto header_init_start = std::chrono::steady_clock::now();
+
     // read header data
-    clock_t header_init_start = clock();
     std::vector<MeshBlockInfo> all_mb_info = {};
     std::string header_str = input_str + "/header.txt";
     std::ifstream header_file(header_str);
@@ -135,23 +139,23 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     } // end header read
 
     if (verbose) { 
-        float header_init_dur = (float)(clock() - header_init_start)/CLOCKS_PER_SEC;
-        printf("parsed header             (device)            %.6fs\n",header_init_dur);
+        std::chrono::duration<float> header_init_dur = (std::chrono::steady_clock::now() - header_init_start);
+        printf("parsed header             (device)            %.6fs\n",header_init_dur.count());
     }
 
     // allocate space on host
     if (host_malloc) {
         h_bytes = npy_floats * sizeof(float);
-        clock_t h_alloc_start = clock();
+        auto h_alloc_start = std::chrono::steady_clock::now();
         h_all_data = (float*) malloc(h_bytes);
         if (verbose) { 
-            float h_alloc_dur = (float)(clock() - h_alloc_start)/CLOCKS_PER_SEC;
-            printf("malloc data               (host)              %.6fs\n",h_alloc_dur);
+            std::chrono::duration<float> h_alloc_dur = (std::chrono::steady_clock::now() - h_alloc_start);
+            printf("malloc data               (host)              %.6fs\n",h_alloc_dur.count());
         }
     }
     
     // load mb data into host memory
-    clock_t npy_read_start = clock();
+    auto npy_read_start = std::chrono::steady_clock::now();
     int mem_offset = 0;
     for (int n = 0; n < all_mb_info.size(); n++) {
         // load meshblock data as (nx,ny,nz,p) where p = 1 or 4
@@ -181,8 +185,8 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     } // end mb loop
 
     if (verbose) {
-        float npy_read_dur = (float)(clock() - npy_read_start)/CLOCKS_PER_SEC;
-        printf("npy read/memcpy           (host)              %.6fs\n",npy_read_dur);
+        std::chrono::duration<float> npy_read_dur = (std::chrono::steady_clock::now() - npy_read_start);
+        printf("npy read/memcpy           (host)              %.6fs\n",npy_read_dur.count());
     }
 
     return all_mb_info;
