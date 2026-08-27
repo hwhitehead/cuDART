@@ -21,11 +21,20 @@ First, clone a local copy of the cuDART codebase
 
     $ git clone git@github.com:hwhitehead/cuDART.git
 
-Then set the save the location of this repository as a environment variable.
+Then save the location of the cuDART repository as a environment variable. 
 
 .. code-block:: bash
 
-    $ export CUDART_DIR=/path/to/cuDART
+    $ export CUDART_DIR="/path/to/cuDART"
+
+When writing Python scripts, you can import cuDART's Pythonic API as
+
+.. code-block:: python
+
+    import os, sys
+    pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
+    sys.path.append(pysrc)
+    from cudart import *
 
 .. _setup_cpp:
 

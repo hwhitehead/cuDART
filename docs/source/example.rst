@@ -23,7 +23,9 @@ Here we show how a user might format a single homogenous simulation mesh, repres
 
 .. code-block:: python 
 
-    pysrc = os.path.join("path/to/pysrc")
+    import os, sys
+    pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
+    sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
@@ -59,7 +61,9 @@ Here we show how a user might package a series of subdomains for a single snapsh
 
 .. code-block:: python 
 
-    pysrc = os.path.join("path/to/pysrc")
+    import os, sys
+    pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
+    sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
@@ -107,7 +111,9 @@ Here we show how a user might use a single simulation snapshot in time to genera
 
 .. code-block:: python
 
-    pysrc = os.path.join("path/to/pysrc")
+    import os, sys
+    pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
+    sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
@@ -155,7 +161,9 @@ Multiple cameras (and hence images) can still be specified.
 
 .. code-block:: python
 
-    pysrc = os.path.join("path/to/pysrc")
+    import os, sys
+    pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
+    sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
