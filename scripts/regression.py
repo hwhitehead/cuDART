@@ -10,7 +10,7 @@ import time
 import matplotlib.patches as patches
 
 # local import
-pysrc = os.path.join(os.path.dirname(__file__), "..", "pysrc")
+pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
 sys.path.append(pysrc)
 from cudart import *
 

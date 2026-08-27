@@ -282,11 +282,17 @@ class Scene:
 
     def make_clean(self):
         """Calls the 'make clean' routine from the main Makefile"""
+        cwd = os.getcwd()
+        os.chdir(os.environ["CUDART_DIR"])
         subprocess.run(["make","clean"], check = True)       
+        os.chdir(cwd)
 
     def make(self):
         """Calls the 'make' routine from the main Makefile"""
+        cwd = os.getcwd()
+        os.chdir(os.environ["CUDART_DIR"])
         subprocess.run(["make"], check = True)
+        os.chdir(cwd)
 
     def print_command(self, command):
         """Prints full command line invokation of cpp executable to terminal"""
@@ -348,8 +354,7 @@ class Scene:
             print("generated camera file at {0}.".format(self.temp_camera_file))
 
         # check executable exists, or build
-        pysrc_dir = pathlib.Path(__file__).parent.resolve()
-        path_to_executable = os.path.join(pysrc_dir, "..", "bin","cudart")
+        path_to_executable = os.path.join(os.environ["CUDART_DIR"], "bin","cudart")
         if not os.path.isfile(path_to_executable):
             if (verbose):
                 print("unable to located executable, forcing remake...")

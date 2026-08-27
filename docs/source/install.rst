@@ -21,6 +21,12 @@ First, clone a local copy of the cuDART codebase
 
     $ git clone git@github.com:hwhitehead/cuDART.git
 
+Then set the save the location of this repository as a environment variable.
+
+.. code-block:: bash
+
+    $ export CUDART_DIR=/path/to/cuDART
+
 .. _setup_cpp:
 
 C++ Setup
@@ -30,7 +36,6 @@ cuDART is packaged with a template Makefile, you should configure a specific Mak
 
 .. code-block:: bash
 
-    $ export CUDART_DIR=/path/to/cuDART
     $ cd $CUDART_DIR
     $ python3 configure.py --arch=GPU_ARCH --gpu=GPU_MODEL
     $ make clean
