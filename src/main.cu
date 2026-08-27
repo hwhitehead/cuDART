@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
     auto wallclock_start = std::chrono::steady_clock::now();
 
     // print start time
-    auto start_time_clock = std::chrono::steady_clock::now();
-    std::time_t start_time = std::chrono::steady_clock::to_time_t(start_time_clock);
+    auto start_time_clock = std::chrono::system_clock::now();
+    std::time_t start_time = std::chrono::system_clok::to_time_t(start_time_clock);
     std::cout << "Starting cuDART backend at " << std::ctime(&start_time) << std::endl;
 
     // define space for user settings
@@ -710,8 +710,8 @@ int main(int argc, char *argv[]) {
     wallclock_file.close();
 
     // print end time
-    auto end_time_clock = std::chrono::steady_clock::now();
-    std::time_t end_time = std::chrono::steady_clock::to_time_t(end_time_clock);
+    auto end_time_clock = std::chrono::system_clock::now();
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end_time_clock);
     std::cout << "Ended cuDART backend at " << std::ctime(&end_time) << "." << std::endl;
 
     return 0;
