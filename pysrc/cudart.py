@@ -252,7 +252,7 @@ class Scene:
         
         # handle None pass to camera_file_name
         if self.camera_file_name is None:
-            self.temp_camera_file = "temp_camera_file.txt"
+            self.temp_camera_file = os.path.join(save_dir,"temp_camera_file.txt")
         else:
             self.temp_camera_file = self.camera_file_name
 
