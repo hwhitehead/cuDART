@@ -514,7 +514,7 @@ int main(int argc, char *argv[]) {
         if (verbose) {
             std::chrono::duration<float> free_dur = (std::chrono::steady_clock::now() - free_start);
             printf("free all                  (device/host)       %.6fs\n",free_dur.count());
-            if (flexload) {
+            if (flexload) { // WIP: flexload rarely activates and reporting is inaccurate, do not use
                 int nominal_total_renders = num_snapshots * num_images;                                 // total renders without flexload
                 int true_total_renders = num_snapshots_loaded * num_images - flexload_renders_skipped;  // true render count
                 int total_skipped_renders = nominal_total_renders - true_total_renders;                 // render delta
