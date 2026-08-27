@@ -27,8 +27,9 @@
 
 int main(int argc, char *argv[]) {
 
-    // start general timer
-    clock_t main_start = clock();
+    // start general timers
+    clock_t main_start = clock(); // measures elapsed CPU time
+    auto wallclock_start = std::chrono::system_clock::now();
 
     // print start time
     auto start_time_clock = std::chrono::system_clock::now();
@@ -704,10 +705,11 @@ int main(int argc, char *argv[]) {
     // write total duration to text file
     std::string wallclock_file_str = save_str_header + "/wallclock.txt";
     std::ofstream wallclock_file(wallclock_file_str);
-    wallclock_file << main_dur;
+    std::chrono::duration<double> wallclock_duration = (std::chrono::system_clock::now() - wallclock_start);
+    wallclock_file << wallclock_duration.count(); // save elapsed wallclock in seconds
     wallclock_file.close();
 
-    // print start time
+    // print end time
     auto end_time_clock = std::chrono::system_clock::now();
     std::time_t end_time = std::chrono::system_clock::to_time_t(end_time_clock);
     std::cout << "Ended cuDART backend at " << std::ctime(&end_time) << "." << std::endl;

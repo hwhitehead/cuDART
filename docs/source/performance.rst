@@ -17,23 +17,21 @@ The main contributors to runtime during the C++ execution of cuDART are
 3. Rendering the data on the device 
 4. Writing the data to storage
 
-Generally, the cost of reading files from storage are in substantial excess of the cost of the actual render. This is dependent on the 
-user's I/O environment, and can vary significantly between systems. Below is the profiling summary for render execution with the following 
-properties
+Depending on the quality of the local storage, the cost of reading files can represent a significant fraction of the total runtime, making the user's
+I/O environment source of performance discrepancy between systems. Given this uncertainty, on this page we report a series of performance metrics yielded 
+renders produced using various GPUs on the Institute of Science and Techonology Austria's Scientific Computing Cluster. Each test was run using a single CPU/GPU, 
+using mock simulation data with :math:`M` snapshots each containing :math:`D^3` cells, and :math:`N` renders composed of :math:`P^2` pixels. 
 
-1. Total Simulation Snapshots = 100
-2. Simulation Domain Size = [250,250,500]
-3. Relativistic Boosting = True
-4. Lookback = True
-5. Total Images = 100
-6. Image Size = [2048,2048]
-7. GPU Model = 2080Ti
+Brute Force Summation
+---------------------
 
-Running with lookback requires every camera to render every simulation snapshot; as a brute force calculation this requires testing a total of 
-:math:`\left(250\times250\times500\right)\times100\times\left(2048\times2048\right)\times100\sim10^{18}` ray-cell intersections! In practice, cuDART discards intersections 
-that it knows cannot contribute to a specific observation time (termed "flexload"), bringing down the total number of relevant intersected cells to :math:`O(10^{11})`. Identifying and
-summing along these cells takes only 7 seconds, across 10,000 render calls each taking on average :math:`\sim750\mu s`. For comparison, loading the 100 simulation snapshots 
-(totalling 50GB), takes longer than the actual render (11s of the total wallclock duration of 35s). 
+In the worst case scenario, where the render routine has no prior knowledge of the intersections between cells and pixel rays, a computation of the type used 
+for performance testing here scales as :math:`O(D^3P^2NM)`. For a relatively modest input dimension of :math:`\{D,M,P.N\}=\{512,100,100,512\}` this amounts to a 
+staggering :math:`O(10^{17})` potentially cell-ray intersections. In practice, cuDART massively reduces complexity by
+
+1. Using DDA to iteratively progresss along each ray, considering only cells with spatial intersection. This reduces the intersection scaling from :math:`O(D^3)\rightarrow O(D)`.
+2. Using the GPU to compute pixel values simultaneosuly, resulting in very weak scaling with :math:`P` when there are sufficient threads to cover all pixels
+3. Using flexible laoding and traversal routines to skip calculations that cannot contribute to the path summation.
 
 .. code-block:: bash
 

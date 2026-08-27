@@ -21,20 +21,11 @@ First, clone a local copy of the cuDART codebase
 
     $ git clone git@github.com:hwhitehead/cuDART.git
 
-Then save the location of the cuDART repository as a environment variable. 
+Then save the location of the cuDART repository as a environment variable. You can also add this line to your shell startup to ensure it persists between sessions e.g. in :code:`~/.bashrc` for bash.
 
 .. code-block:: bash
 
     $ export CUDART_DIR="/path/to/cuDART"
-
-When writing Python scripts, you can import cuDART's Pythonic API as
-
-.. code-block:: python
-
-    import os, sys
-    pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
-    sys.path.append(pysrc)
-    from cudart import *
 
 .. _setup_cpp:
 
@@ -53,6 +44,7 @@ cuDART is packaged with a template Makefile, you should configure a specific Mak
 where here the :code:`--arch` and :code:`--gpu` flags can be used to target specific GPU architecture or models. 
 These flags allows cuDART to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to :code:`configure.py`,
 cuDART will pre-compile GPU-agnostic code valid for any NVIDIA GPU at least as modern as Ampere (`list of GPU architectures <https://en.wikipedia.org/wiki/Category:Nvidia_microarchitectures>`_).
+The :code:`Scene` class within the Python API is also able to make and clean the C++ code as a subprocess call, but generally recompilation is only required if editing the C++ code or moving to a different architecture.
 
 .. _setup_python:
 
@@ -68,6 +60,15 @@ You can also build a virutal environment specifically for cuDART usage and auto 
     $ python3 -m venv cudart_venv
     $ source cudart_venv/bin/activate
     $ (cudart_venv) python3 -m pip install -r requirements.txt
+
+When writing Python scripts, you can import cuDART's :ref:`Pythonic API <python_api_header>` as
+
+.. code-block:: python
+
+    import os, sys
+    pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
+    sys.path.append(pysrc)
+    from cudart import *
 
 Quickstart
 ==========
