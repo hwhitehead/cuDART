@@ -621,8 +621,8 @@ if __name__ == "__main__":
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
                 "domain_dims": [250,250,500],
-                "num_snapshots": 100,
-                "target_theta": 0.25 * np.pi,
+                "num_snapshots": 25,
+                "target_theta": None,
                 "build_mode": "sphere_rest"}
 
     # construct template camera
