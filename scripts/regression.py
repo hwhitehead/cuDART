@@ -53,13 +53,16 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
     # determine cadence, if critical timing routine flagged
     if sim_args["target_theta"] is not None:
+        if (verbose): print("targeting theta = {0:.2f}").format(sim_args["target_theta"])
         crit_fac = (1 - v_in_c * np.cos(sim_args["target_theta"])) / np.sin(sim_args["target_theta"])
         dt_crit_in_s = crit_fac * sim_args["r_in_kpc"] * kpc_to_m / (v_in_c * c_light)
         dt_crit = dt_crit_in_s / Myr_to_s
         num_snapshots_crit = int(T_in_Myr / dt_crit)
+        print("critical snapshot count = {0}".format(num_snapshots_crit))
         num_snapshots = num_snapshots_crit if (num_snapshots_crit > sim_args["num_snapshots"]) else sim_args["num_snapshots"]
     else:
-        num_snapshots = sim_args["num_snapshots"]    
+        num_snapshots = sim_args["num_snapshots"]
+    if (verbose): print("Building {0} snapshots.".format(num_snapshots)) 
     t_span = np.linspace(0, T_in_Myr, num_snapshots)                # evenly snapshot times over duration
 
     # build header data
@@ -619,7 +622,7 @@ if __name__ == "__main__":
                 "r_in_kpc": 2.5,
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
-                "target_theta": None,
+                "target_theta": 0.25 * np.pi,
                 "build_mode": "sphere"}
 
     # construct template camera
