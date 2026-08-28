@@ -16,6 +16,8 @@ from cudart import *
 
 def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
+    print(sim_args["target_theta"])
+
     # construct template data for regression suite, without labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
     # the emitting regions are spheres, ellipsoids or jets dependeng on sim_args["build_mode"]
@@ -623,7 +625,9 @@ if __name__ == "__main__":
                 "domain_dims": [250,250,500],
                 "num_snapshots": 100,
                 "target_theta": 0.25 * np.pi,
-                "build_mode": "sphere"}
+                "build_mode": "sphere_rest"}
+
+    print(sim_args["target_theta"])
 
     # construct template camera
     template_camera = Camera()                          # see pysrc/cudart.py for class documentation
