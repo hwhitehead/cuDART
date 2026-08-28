@@ -16,8 +16,6 @@ from cudart import *
 
 def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
-    print(sim_args["target_theta"])
-
     # construct template data for regression suite, without labels
     # the template data features twin emitting regions travelling at a fixed velocity in opposite directions
     # the emitting regions are spheres, ellipsoids or jets dependeng on sim_args["build_mode"]
@@ -55,7 +53,7 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
 
     # determine cadence, if critical timing routine flagged
     if sim_args["target_theta"] is not None:
-        if (verbose): print("targeting theta = {0:.2f}").format(sim_args["target_theta"])
+        if (verbose): print("targeting theta = {0:.2f}".format(sim_args["target_theta"]))
         crit_fac = (1 - v_in_c * np.cos(sim_args["target_theta"])) / np.sin(sim_args["target_theta"])
         dt_crit_in_s = crit_fac * sim_args["r_in_kpc"] * kpc_to_m / (v_in_c * c_light)
         dt_crit = dt_crit_in_s / Myr_to_s
@@ -626,8 +624,6 @@ if __name__ == "__main__":
                 "num_snapshots": 100,
                 "target_theta": 0.25 * np.pi,
                 "build_mode": "sphere_rest"}
-
-    print(sim_args["target_theta"])
 
     # construct template camera
     template_camera = Camera()                          # see pysrc/cudart.py for class documentation
