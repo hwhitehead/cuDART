@@ -256,6 +256,7 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True, sav
     _, dirs, files = next(os.walk(load_dir))
     num_unlabelled_snapshots = len([file for file in files if file.startswith("snapshot")])
     num_labelled_snapshots = len([directory for directory in dirs if directory.startswith("snapshot")])
+    num_snapshots = num_unlabelled_snapshots + num_labelled_snapshots
     if (verbose): print(r"Identified {0} snapshots in {1}".format(num_snapshots, load_dir))
 
     # generate a single camera, reuse over renders
