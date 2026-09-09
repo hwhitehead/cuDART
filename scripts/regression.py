@@ -275,9 +275,8 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True, sav
     for n in range(num_snapshots):
 
         # generate scene
-        try: # test unlabelled 
-            load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
-        except: # alternate labelled 
+        load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy") # try load as unlabelled
+        if not os.path.exists(load_str):
             load_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5))
         scene = Scene(load_str = load_str, save_dir = scratch_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
         if (verbose): print("built scene for snapshot {0}.".format(n))
@@ -361,7 +360,6 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
     D_in_m = 2.0 * sim_args["L_in_kpc"] * kpc_to_m                                              # origin-camera seperation 
     t_min_in_s = D_in_m / c_light                                                               # light flight time from origin to camera
     t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
-    #t_min *= 0.95                                                                              # start render just before flight time 
 
     # calculate stop time (after an interval matching the travel time of ejecta to domain edge)
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                                 # cast to astro units    
