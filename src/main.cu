@@ -563,8 +563,6 @@ int main(int argc, char *argv[]) {
         } else {
             all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
         }
-        std::cout << "finished file load" << std::endl;
-        return;
         int num_meshblocks = all_mb_info.size();
 
         // determine VRAM limitations and handle excess

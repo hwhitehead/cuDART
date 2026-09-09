@@ -220,12 +220,12 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
         mesh = Mesh(snapshot_save_dir)
 
         # partitioned data needs to have spatial labels
-        mb_data_a = save_data[mask_a]                                           # select lower half of data 
+        mb_data_a = np.array(save_data[mask_a], order="C")                      # select lower half of data 
         xl_a = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                      # lower corner of data_a
         xr_a = np.array([0.5 * Lx, 0.5 * Ly, 0.0])                              # upper corner of data_a
         mesh.add_meshblock(mb_data_a, xl_a, xr_a)                               # add MeshBlock to Mesh
 
-        mb_data_b = save_data[mask_b]                                           # select upper half of data
+        mb_data_b = np.array(save_data[mask_b], order="C")                      # select upper half of data
         xl_b = np.array([-0.5 * Lx, -0.5 * Ly, 0.0])                            # lower corner of data_b
         xr_b = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                         # upper corner of data_b
         mesh.add_meshblock(mb_data_b, xl_b, xr_b)                               # add MeshBlock to Mesh
