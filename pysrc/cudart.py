@@ -537,8 +537,8 @@ class Profiler:
         if not os.path.exists(gpu_str) or not os.path.exists(ostr_str):
             self.build_csv()
 
-        print("Reporting Duraton Summary")
-        print("WARNING: execution is asynchronous, sum of task durations may exceed wallclock")
+        print("Reporting Duration Summary")
+        print("WARNING: host/device execution is asynchronous, sum of task durations may exceed wallclock")
 
         print("Reported Wallclock Duration = {0:.3f}s".format(self.wallclock_duration))
         print("\n")

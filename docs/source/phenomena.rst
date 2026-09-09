@@ -3,19 +3,17 @@
 Captured Phenomena
 ##################
 
-In supporting realtivistic beaming and a finite speed of light, cuDART is able to 
+In supporting relativistic beaming and a finite speed of light, cuDART is able to 
 capture a wide range of relativstic and geometric effects that are crucial for comparing simulation
-data with real observations. To demonstrate these effects, we utilise a mock simulation dataset consisting of two
-homogenous emitters travelling at :math:`\Gamma=2` (equivalent to :math:`v \sim 0.9c`) in opposite directions (antiparallel). 
+data with real observations. To demonstrate these effects, we consider a mock simulation dataset consisting of two
+homogenous emitters travelling at :math:`\Gamma=2` (equivalent to :math:`v \sim 0.9c`) in opposite directions (anti-parallel motion). 
 The emitters are spherical in their own rest frames, so in the lab-frame they are oblate spheroids with an axial ratio of :math:`1/\Gamma`.
 In the figure below, we compare renders taken of this system when it is viewed at an angle :math:`\theta = \pi/4` to the advancing ejectum's 
-direction of motion. The scene is rendered under three different treatments, showin the the three right panels:
+direction of motion. The scene is rendered under three different treatments, shown in the right three panels:
 
-1. Rendered without relativistic beaming, and without lookback
-2. Rendered with relativistic beaming, but without lookback
-3. Rendered with relativistic beaming and lookback
-
-It is clear that the three treatments produce significantly different observations, we discuss the discrepancies and their origin in the sections below.
+A. Rendered without relativistic beaming, and without lookback
+B. Rendered with relativistic beaming, but without lookback
+C. Rendered with relativistic beaming and lookback
 
 .. _phenomena_figure:
 
@@ -23,25 +21,28 @@ It is clear that the three treatments produce significantly different observatio
     :width: 800px
 
     Comparison of images rendered from mock data featuring relativistic anti-parallel ejecta imaged with/without relativistic beaming and with/without the lookback implementation. 
-    Without lookback, rendering is performed using a single simulation snapshot. With lookback, multiple snapshots are scanned to account for a finite communication time between source and observer.
-    In the left panel, the observed transverse motion for systems with/without lookback. In the right panels, the synthetic observations generated under different routines at an observer time given by the grey dashed line in the left panel. 
-    Without beaming, the advancing and receding ejecta have the same brightness; when beaming is included the advancing ejecta is substantially brighter (shown by the flux ratio :math:`S^\mathrm{adv}_\nu/S^\mathrm{rec}_\nu`). 
-    Without lookback, the ejecta exhibit symmetric transverse motion (:math:`\beta_\mathrm{T}\sim0.6`) and are imaged as oblate spheroids, coherent with their lab-frame morphology. 
+    Without lookback, rendering is performed using a single simulation snapshot. With lookback, multiple snapshots are scanned to account for a finite communication time between emission and observation.
+    In the left panel, we show the observed transverse motion for systems with/without lookback. In the right panels, we show the synthetic observations generated under different routines at a time given by the grey dashed line in the left panel. 
+    Without beaming, the advancing and receding ejecta have the same brightness; when beaming is included the advancing ejecta is substantially brighter (shown by the flux ratio :math:`\mathcal{S}\equiv S^\mathrm{adv}_\nu/S^\mathrm{rec}_\nu`). 
+    Without lookback, the ejecta exhibit symmetric transverse motion (:math:`\beta_\mathrm{T}\sim0.6`) and are imaged as ellipses, coherent with their oblate spheroid lab-frame morphology. 
     When lookback is included, the proper asymmetric transverse motion is captured, with the advancing ejectum appearing to move faster (:math:`\beta_\mathrm{T}\sim 1.6`) than the receding ejectum (:math:`\beta_\mathrm{T}\sim0.4`). 
-    Further, the ejecta are observered as spheres, consistent with the relativistic/geometric predictions of the Penrose-Terrell effect (see :ref:`below <phenomena_deformation>`), and exhibit the proper flux ratio (see :ref:`below <phenomena_flux>`).
+    Further, the ejecta are observered as circular, consistent with the relativistic/geometric predictions of the Penrose-Terrell effect (see :ref:`below <phenomena_deformation>`), and exhibit the proper flux ratio (see :ref:`below <phenomena_flux>`).
+
+It should be immediately clear that the three treatments produce very different observations; we discuss these discrepancies and their origin in the sections below.
+
 
 .. _phenomena_beaming:
 
 Relativistic Beaming
 --------------------
 
-The left two images of the above :ref:`figure <phenomena_figure>` compare renders made using the rest frame emissivity or the emissivity beamed into the lab frame. 
+Routine :math:`A` and :math:`B` in the above :ref:`figure <phenomena_figure>` compare renders made using the rest frame emissivity or the emissivity beamed into the lab frame. 
 In their own rest frames, the advancing and receding are identical, so when beaming is neglected the two ejecta exhibit the same brightness. 
 Once beaming is included this symmetry is broken and the advancing ejectum is significant brighter due to the beaming of radiation toward the observer. 
-Similarly, the receding ejecta is dimmer than the beaming-less case, as the emission is beaming beamed away from the observer. 
-Comparing the flux (:math:`S_\nu \propto \int I_\nu dA`) emitted by the advancing and receding ejecta in the beamed case gives a ratio of :math:`\mathcal{S}\equiv S^\mathrm{adv}_\nu / S^\mathrm{rec}_\nu \sim40`, 
+Similarly, the receding ejecta is dimmer than the beaming-less case, as the emission is being beamed away from the observer. 
+Comparing the flux (:math:`S_\nu \propto \int I_\nu dA`) emitted by the advancing and receding ejecta in the beamed case :math:`B` gives a ratio of :math:`\mathcal{S}\equiv S^\mathrm{adv}_\nu / S^\mathrm{rec}_\nu \sim40`, 
 set by the :math:`D^{2-\alpha}` scaling that enters into the intensity integral (see :ref:`here <calculation_header>`). 
-This is actually still the incorrect flux ratio, the true value is only recovered when lookback is also included, see :ref:`below <phenomena_flux>`.
+This is actually still the incorrect flux ratio, the true value is only recovered by routine :math:`C` which also includes lookback, see :ref:`below <phenomena_flux>`.
 
 .. _phenomena_superluminal:
 
@@ -59,7 +60,7 @@ While the true velocity is constrained to :math:`\beta \in [0,1]` by relativity,
 Hence, for :math:`\beta > 1/\sqrt{2}`, there exist orientations :math:`\theta \sim \theta_\mathrm{crit}` where :math:`\beta_\mathrm{T} > 1`. In this scenario, the object appears to be moving faster than the speed of light (termed superluminal motion). 
 This result is only recoverable when a finite time delay is accounted for, hence synthetic observations which assume infinitesimal communication time between source and observer fail to report the proper transverse motion. 
 The left panel of the above :ref:`figure <phenomena_figure>` shows the observed displacement of twin-ejecta moving at fixed velocity, with the right panels comparing renders made with and without lookback. 
-Without lookback, both ejecta are observed to have the same transverse speed (dashed lines in left panel), but with lookback they exhibit the proper asymmetric motion with the approaching ejecta appearing to travel faster than the receding (solid lines in left panel). 
+Without lookback (:math:`A` and :math:`B`), both ejecta are observed to have the same transverse speed (dashed lines in left panel), but with lookback (:math:`C`), they exhibit the proper asymmetric motion with the approaching ejecta appearing to travel faster than the receding (solid lines in left panel). 
 
 .. _phenomena_deformation:
 
@@ -73,7 +74,7 @@ As first discussed by `Penrose 1959 <https://ui.adsabs.harvard.edu/abs/1959PCPS.
 this deformation opposes the size change imparted by Lorentz contraction, resulting in the observed size of the region matching the measurement made in the emitter's rest frame. 
 In the scenario discussed by Penrose and Terrell, an emitter that is spherical in its own rest frame, while Lorentz contracted in the lab frame, is observerd to be spherical due to the differential lag time between near and far surfaces of the sphere. 
 An image of the sphere would appear to be rotated: in the limit of :math:`\beta \rightarrow 1`, the closest point on the sphere would appear to be the the most displaced along the sphere's direction of motion. 
-In the above :ref:`figure <phenomena_figure>` we can see that rendering without lookback results in an image depicting (incorrectly), the lab-frame oblate spheroid structure. When lookback is included, the proper spherical observation is recovered.
+In the above :ref:`figure <phenomena_figure>` we can see that rendering without lookback (:math:`A` and :math:`B`) results in an image depicting (incorrectly), the lab-frame oblate spheroid structure. When lookback is included (:math:`C`), the proper spherical observation is recovered.
 
 .. _phenomena_flux:
 
@@ -86,17 +87,16 @@ Each render in the above :ref:`figure <phenomena_figure>` also compares the rati
 
     S_\nu = \int I_\nu d\Omega = \frac{D^{3-\alpha}}{L^2}\int j'_{\nu'}dV' \propto D^{3-\alpha}
 
-where we have used the Lorentz invariance of :math:`I_\nu / \nu^3` and :math:`d\Omega=dA'/L^2` (the solid angle for a source at a distance :math:`L` to the observer): see `Lind et al. 1985 <https://ui.adsabs.harvard.edu/abs/1985ApJ...295..358L/abstract>`_ for a more detailed discussion. 
+where we have used the Lorentz invariance of :math:`I_\nu / \nu^3` and :math:`d\Omega=dA'/L^2` (the solid angle for a source at a distance :math:`L` to the observer): see `Lind et al. 1985 <https://ui.adsabs.harvard.edu/abs/1985ApJ...295..358L/abstract>`_ for a full derivation. 
 The ejecta travelling towards/away from the observer have identical structure in their own rest frames (labelled with primes), so the ratio of fluxes :math:`S_\nu` between advancing and receding ejecta should take the form
 
 .. math::
 
     \mathcal{S}\equiv\frac{S_\nu^\mathrm{adv}}{S_\nu^\mathrm{rec}} = \left(\frac{D^\mathrm{adv}}{D^\mathrm{rec}} \right)^{3-\alpha} = \left(\frac{1+\beta \cos(\theta)}{1-\beta \cos(\theta)}\right)^{3-\alpha}
 
-The flux ratio for all three cases is calculated by integrating over the pixels for the advancing and receding ejecta. When beaming is neglected, the ratio is simply unity as both ejecta are identical in the lab-frame. 
-When beaming is included, but lookback is neglected the improper flux ratio is still incorrect; while on a cell-by-cell basis the emissivity has been properly boosted into the observer frame, by failing to track the proper emission morphology the total emergent flux has also been miscalculated. 
-In contrast, when lookback is included, the ratio of fluxes matches the theoretical result to within :math:`0.2\%`. Note that it is also technically incorrect to apply :math:`D^{3-\alpha}` Doppler factors when integrating in the lab-frame, this scaling only holds if integration is performed in fluid rest frame. 
-For a source of homogenous velocity, this introduces an erroneous overestimation for the emitter volume by a factor :math:`\gamma`. For more general relativistic fields, in which the velocity is unlikely to be homogeneous, there will not exist a coherant Doppler factor to convert between fluid and observer frames.
+The flux ratio for all three cases is calculated by integrating over the pixels for the advancing and receding ejecta. When beaming is neglected (:math:`A`), the ratio is simply unity as both ejecta are identical in the lab-frame. 
+When beaming is included, but lookback is neglected (:math:`B`), the improper flux ratio is still incorrect; while on a cell-by-cell basis the emissivity has been properly boosted into the observer frame, by failing to track the proper emission morphology the total emergent flux has also been miscalculated. 
+In contrast, when lookback is included (:math:`C`), the ratio of fluxes matches the theoretical result to within :math:`0.2\%`. 
 
 .. _phenomena_summary:
 
@@ -142,5 +142,5 @@ Above the critical frequency, the proper observed shape of the emitting region i
 
 .. _phenomena_alias:
 
-.. figure:: ../../gallery/alias.png
+.. figure:: ../../gallery/aliasing.png
     :width: 800px

@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Starting cuDART backend at " << std::ctime(&start_time) << std::endl;
 
     // define space for user settings
-    std::string cudart_version = "version 0.9 - August 2026";
+    std::string cudart_version = "version 1.0 - September 2026";
     char *input_char = nullptr, *save_char = nullptr, *camera_char = nullptr, *mem_char = nullptr;
     char *doppler_char = nullptr, *power_law_char = nullptr;
     bool verbose = false, relativistic = false, append_mode = false, lookback = false, flexload = false, keep_edge = false;

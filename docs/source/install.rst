@@ -15,13 +15,16 @@ cuDART is written in Python/C++, and runs on the GPU. As such, to function it re
 General Setup
 =============
 
-First, clone a local copy of the cuDART codebase
+As cuDART is under active development, we recommend users download a stable release from the 
+GitHub `Releases <https://github.com/hwhitehead/cuDART/releases>`_ page. Alternatively, a 
+copy of the current develpoment version can be cloned as 
 
 .. code-block:: bash
 
     $ git clone git@github.com:hwhitehead/cuDART.git
 
-Then save the location of the cuDART repository as a environment variable. You can also add this line to your shell startup to ensure it persists between sessions e.g. in :code:`~/.bashrc` for bash.
+Once a local copy of the codebase exists, save the location of the cuDART repository as a environment variable. 
+You can also add this line to your shell startup to ensure it persists between sessions e.g. in :code:`~/.bashrc` for bash.
 
 .. code-block:: bash
 

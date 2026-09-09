@@ -620,7 +620,7 @@ if __name__ == "__main__":
     sim_args = {"Gamma": 2.0,
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
-                "domain_dims": [250,250,500],
+                "domain_dims": [256,256,512],
                 "num_snapshots": 100,
                 "target_theta": None,
                 "build_mode": "sphere_rest"}

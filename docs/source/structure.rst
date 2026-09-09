@@ -19,7 +19,7 @@ and the additional iteration over each snapshot.
 Chronology without Lookback
 ---------------------------
 
-Initialisation: memory is allocated on host and device for a single simulation snapshot, and a single image (not depicted).
+Initialisation: memory is allocated on host and device for a single simulation snapshot, and a single image.
 
 A. The code utilises the :code:`libnpy` library to read a single snapshot of the simulation state into memory from a :code:`.npy` file. This is generally the slowest step, with duration largely dependent on the file system
 B. The simulation snapshot is copied from the host memory to the device, and containerised into a :code:`Mesh` with child :code:`MeshBlocks`
@@ -34,12 +34,14 @@ F. Optionally, the raw :code:`.npy` images are converted into :code:`.png` figur
 Chronology with Lookback
 ------------------------
 
+Initialisation: memory is allocated on host and device for a single simulation snapshot, and a persistent image buffer for *all* images.
+
 A. The code utilises the :code:`libnpy` library to read a single snapshot of the simulation state into memory from a :code:`.npy` file. This is generally the slowest step, with execution largely dependent on the file system
 B. The simulation snapshot is copied from the host memory to the device, and containerised into a :code:`Mesh` with child :code:`MeshBlocks`
 C. The render kernel is executed on the simulation snapshot, for a single observation/image 
 
     * Repeat render kernel for all observers
-    * Once observations complete, load next simulation snapshot and repeat (A,B,C)
+    * Once all kernels complete, load next simulation snapshot and repeat steps A-C until all snapshots have been processed
     
 D. Once all simulation snapshots have been processed, copy image data from device to host
 E. Write image data as :code:`.npy` files to storage
