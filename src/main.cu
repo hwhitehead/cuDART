@@ -558,7 +558,7 @@ int main(int argc, char *argv[]) {
         float *h_all_data = nullptr;
         size_t h_bytes = 0;
         bool host_malloc = true;
-        std::cout << "cutting program pre-data load" << std::endl;
+        std::cout << "cutting program pre-data load with input_str: " input_str << ", input_path: " << input_path << std::endl;
         return;
         if (std::filesystem::is_directory(input_path)) {
             all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
