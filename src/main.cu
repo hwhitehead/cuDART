@@ -564,6 +564,8 @@ int main(int argc, char *argv[]) {
             all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
         }
         int num_meshblocks = all_mb_info.size();
+        std::cout << "finished mb_load" << std::endl; // IO DEBUG
+        return;
 
         // determine VRAM limitations and handle excess
         float tolerance = 0.95; // use this fraction of available vram
