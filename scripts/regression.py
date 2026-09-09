@@ -32,10 +32,10 @@ def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):
             raise Exception("unable to build dir at {0}".format(save_dir))
 
     # define simulation parameters
-    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                                  # calculate ejecta velocity
-    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                         # cast to astro units
-    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                             # cast to code units (where L = 1.0)          
-    T_in_Myr = 0.5 * (sim_args["L_in_kpc"] + sim_args["r_in_kpc"]) / v_in_kpc_per_Myr   # calc duration to reach domain edge
+    v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
+    v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
+    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                     # cast to code units (where L = 1.0)          
+    T_in_Myr = 0.5 * sim_args["L_in_kpc"] / v_in_kpc_per_Myr                    # calc duration to reach domain edge
     
     # build empty domain 
     max_emm = 1.0
@@ -135,7 +135,7 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
     # define simulation parameters
     v_in_c = np.sqrt(1 - 1.0 / sim_args["Gamma"] ** 2)                          # calculate ejecta velocity
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                 # cast to astro units
-    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                  # cast to code units (where L_domain = 1.0)
+    r_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]                     # cast to code units (where L_domain = 1.0)
     T_in_Myr = 0.5 * sim_args["L_in_kpc"] / v_in_kpc_per_Myr                    # calc duration for blob to reach domain edge
     
     # build empty domain 
@@ -235,74 +235,6 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
 
     if (verbose): print("finished labelled dataset construction.")
 
-def render_single_snapshot(load_dir, save_dir, camera_args, snapshot_index = None, num_snapshots = None, verbose = True):
-
-    # run a rendering test on a single snapshot of data
-    # data should be loaded from suite built using build_regression_suite (-b or -bl flags)
-    # render uses a set number of cameras evenly spanning the azimuthal axis 
-    # optional camera_args["save_fig"] to render raws as figures (.npy -> .png)
-
-    if (verbose): 
-        print("starting no-lookback render test...")
-        print("reading data from {0}".format(load_dir))
-        print("saving data at {0}".format(save_dir))
-
-    # calculate snapshot_index if not specified
-    if snapshot_index is None:
-        if num_snapshots is None:
-            # calculate number of snapshots in load_dir 
-            _, dirs, files = next(os.walk(load_dir))
-            num_dirs = len(dirs)
-            if num_dirs > 0: # assume data is labelled
-                num_snapshots = num_dirs
-            else:
-                file_array = np.array(files)
-                npy_files = [file for file in files if file.startswith("snapshot")]
-                num_snapshots = len(npy_files)
-                if num_snapshots is None:
-                    raise Exception("unable to locate .npy files at {0}".format(load_dir))
-        snapshot_index = np.floor(0.5 * (num_snapshots-1))
-
-    # check input, output directory existence
-    for path in [load_dir, save_dir]:
-        if not os.path.isdir(path):
-            raise Exception("{0} does not exist".format(path))
-
-    # check for specific snapshot input file
-    load_str = os.path.join(load_dir, "snapshot" + str(int(snapshot_index)).zfill(str_zfill) + ".npy")
-    if not os.path.exists(load_str):
-        raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(load_str))
-
-    # prepare array of cameras (cycle evenly over theta in [0,pi])
-    if (verbose): print(r"building {0} cameras evenly spanning theta in [0,pi]".format(camera_args["num_img"]))
-    theta_ar = np.linspace(epsilon, np.pi - epsilon, camera_args["num_img"])
-    cameras = []
-    for i, theta in enumerate(theta_ar):
-        camera = copy.deepcopy(camera_args["template"])
-        camera.theta = theta
-        if (camera_args["resize_img"]):
-            camera.length_X = camera_args["template"].length_X * np.sin(theta)
-            camera.length_Y = camera_args["template"].length_Y * np.sin(theta)
-        camera.set_sph_pos(r = 2.0, target_origin = True)
-        cameras.append(camera)    
-        if (verbose): print("built camera {0}/{1} at theta = {2:.2f}deg...".format(i+1, camera_args["num_img"], theta*180.0/np.pi))
-    if (verbose): print("finished camera initialisation.")
-
-    # generate scene
-    scene = Scene(load_str = load_str, save_dir = save_dir, cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-    if (verbose): print("built scene.")
-
-    # render and save images
-    scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = False, verbose_cpp = verbose,
-                save_profile = False)
-    if (verbose): print("finished rendering raw images.")
-
-    if (camera_args["save_fig"]):
-        scene.plot(fig_save_dir = save_dir, cmap = "afmhot", verbose = verbose, remove_raw_npy = False, vmin= -6, vmax = 0)
-        if (verbose): print("finished rendering figures.")
-
-    if (verbose): print("finished no-lookback test, see {0} for output".format(save_dir))
-
 def render_without_lookback(load_dir, save_dir, camera_args, verbose = True, save_profile = False):
 
     # run a rendering test without lookback, on all snapshots of data in load_dir
@@ -322,7 +254,8 @@ def render_without_lookback(load_dir, save_dir, camera_args, verbose = True, sav
 
     # determine total number of snapshots in load_dir
     _, dirs, files = next(os.walk(load_dir))
-    num_snapshots = len([file for file in files if file.startswith("snapshot")])
+    num_unlabelled_snapshots = len([file for file in files if file.startswith("snapshot")])
+    num_labelled_snapshots = len([directory for directory in dirs if directory.startswith("snapshot")])
     if (verbose): print(r"Identified {0} snapshots in {1}".format(num_snapshots, load_dir))
 
     # generate a single camera, reuse over renders
@@ -410,9 +343,11 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
 
     # check for ALL snapshot input files
     for n in range(0, sim_args["num_snapshots"]):
-        snapshot_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
-        if not os.path.exists(snapshot_str):
-            raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(snapshot_str))
+        # check for both labelled and unlabelled datasets
+        unlabelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        labelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5))
+        if not os.path.exists(unlabelled_str) or not os.path.isdir(labelled_str):
+            raise Exception("no file found at {0}, or directory at {1}, did you forget to build dataset with -b before?".format(unlabelled_str, labelled_str))
 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
@@ -424,15 +359,15 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
     t_min = t_min_in_s / Myr_to_s                                                               # cast to astro/code units                 
     #t_min *= 0.95                                                                              # start render just before flight time 
 
-    # alternate timings to match no-lookback form
+    # calculate stop time (after an interval matching the travel time of ejecta to domain edge)
     v_in_kpc_per_Myr = v_in_c * c_light / (kpc_to_m / Myr_to_s)                                 # cast to astro units    
-    t_max = t_min + 0.5 * (sim_args["L_in_kpc"] + sim_args["r_in_kpc"]) / v_in_kpc_per_Myr      # calc duration to reach domain edge
+    t_max = t_min + 0.5 * sim_args["L_in_kpc"] / v_in_kpc_per_Myr                               # calc duration to reach domain edge
 
-    # # calculate stop time (when receding ejectum reaches maximal extent)
-    # x_max_in_m = 0.5 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                          # max obs blob displacement for given theta
-    # d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m      # invert superluminal motion eq to calc flight time
-    # t_max_in_s = d_in_m / c_light                                                               # observer time when RECEDING blob reaches domain edge
-    # t_max = t_max_in_s / Myr_to_s                                                               # cast to astro/code units    
+    # alternatively, calculate stop time (when receding ejectum appears to reache maximal extent)
+    # x_max_in_m = 0.5 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                        # max obs blob displacement for given theta
+    # d_in_m = x_max_in_m * (1 + v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m    # invert superluminal motion eq to calc flight time
+    # t_max_in_s = d_in_m / c_light                                                             # observer time when RECEDING blob reaches domain edge
+    # t_max = t_max_in_s / Myr_to_s                                                             # cast to astro/code units    
 
     # generate array of cameras, evenly seperated in observer time
     if (verbose): print(r"building {0} cameras evenly spanning t_obs in [{1},{2}]Myr".format(camera_args["num_img"],t_min, t_max))
@@ -478,9 +413,11 @@ def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, 
 
     # check for ALL snapshot input files
     for n in range(0, sim_args["num_snapshots"]):
-        snapshot_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
-        if not os.path.exists(snapshot_str):
-            raise Exception("no file found at {0}, did you forget to build dataset with -b before?".format(snapshot_str))
+        # check for both labelled and unlabelled datasets
+        unlabelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
+        labelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5))
+        if not os.path.exists(unlabelled_str) or not os.path.isdir(labelled_str):
+            raise Exception("no file found at {0}, or directory at {1}, did you forget to build dataset with -b before?".format(unlabelled_str, labelled_str))
 
     # collect data from args
     v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
@@ -489,6 +426,8 @@ def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, 
 
     # first render at midpoint time for emitter
     nolookback_load_str = os.path.join(load_dir, "snapshot" + str(int(0.5 * sim_args["num_snapshots"])).zfill(5) + ".npy")
+    if not os.path.exists(nolookback_load_str): # alternate, load as labelled
+        nolookback_load_str = os.path.join(load_dir, "snapshot" + str(int(0.5 * sim_args["num_snapshots"])).zfill(5))
 
     # second render at midpoint displacement for observer
     x_obs_mid_m = 0.25 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                        # cast to astro units    

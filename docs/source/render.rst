@@ -10,8 +10,8 @@ When using the Pythonic frontend, the execution chronology can be split up into 
 
 1. Convert simulation data into a cuDART legible format (see :ref:`Input Formats<inputs_header>` page).
     
-    a. If using a **single** homogenous domain for each snapshot, data requires no additional labelling (see :ref:`unlabelled formatting<inputs_unlabelled>`).
-    b. If using **multiple** sub-domains for each snapshot, data must be labelled, with a header file for each snapshot containing spatial metadata (see :ref:`labelled formatting<inputs_labelled>`).
+    a. If using a **single** homogenous domain for each snapshot, data requires no additional labelling (see :ref:`unlabelled formatting<inputs_unlabelled>` and :ref:`example <example_unlabelled>`).
+    b. If using **multiple** sub-domains for each snapshot, data must be labelled, with a header file for each snapshot containing spatial metadata (see :ref:`labelled formatting<inputs_labelled>` and :ref:`example <example_labelled>`).
 
 2. Determine if you require the render to account for light time delay (termed "lookback", see :ref:`methodology<calculation_lookback>`). 
 
