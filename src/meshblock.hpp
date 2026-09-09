@@ -167,9 +167,6 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
             err_msg << "Unable to locate input file at " << input_str << std::endl;
             CUDART_ERROR(err_msg);
         }
-        
-        std::cout << "break pre npy_to_host parse" << std::endl;
-        return all_mb_info;
 
         std::vector<unsigned long int> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, false);
 
