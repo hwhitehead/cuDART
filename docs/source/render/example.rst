@@ -6,15 +6,16 @@ Example Operation
 This page contains code snippets intended to illustrate how a user might generate their own renders using cuDART. 
 Example usage is given for
 
-| :ref:`A <example_section_A>`: Formatting an unlabelled simulation snapshot
-| :ref:`B <example_section_B>`: Formatting a labelled simulation snapshot 
-| :ref:`C <example_section_C>`: Rendering a single pre-formatted simulation snapshot
-| :ref:`D <example_section_D>`: Rendering multiple pre-formatted simulation snapshots with the lookback routine
+| :ref:`A <example_unlabelled>`: Formatting an unlabelled simulation snapshot
+| :ref:`B <example_labelled>`: Formatting a labelled simulation snapshot 
+| :ref:`C <example_lookback_init>`: Preparing a master header for lookback rendering
+| :ref:`D <example_no_lookback_render>`: Rendering without lookback
+| :ref:`E <example_lookback_render>`: Rendering with lookback
 
 Additional example usage can be found within the regression testing suite, available at :code:`scripts/regression.py`.
 For a more detailed description of the functions and classes used here, see the :ref:`API documentation <api_header>`. 
 
-.. _example_section_A:
+.. _example_unlabelled:
 
 A: Formatting an unlabelled data set
 ------------------------------------
@@ -25,7 +26,7 @@ Here we show how a user might format a single homogenous simulation mesh, repres
 
     import os, sys
     pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
-    sys.path.append(pysrc)
+    if pysrc not in sys.path: sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
@@ -49,10 +50,13 @@ Here we show how a user might format a single homogenous simulation mesh, repres
     np.save("/path/to/save/location.npy",mesh_data)
 
 Note that no spatial labels are saved; cuDART will automatically center the data around the origin, scaling the domain so that its longest size has length unity in code units.
-The code also assumes that the simulation cells are cubic. If this is not the case, the user should apply labels (see Example B).
-If the user is not running with relativisitc boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
+The code also assumes that the simulation cells are cubic. If this is not the case, the user should apply labels (see Example :ref:`B <example_labelled>`).
+If the user is not running with relativistic boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
 
-.. _example_section_B:
+The :ref:`regression suite<setup_regression>` contains a routine :code:`build_unlabelled_regression_suite()` which implements the above process self-consistently using a mock dataset.
+See :code:`scripts/regression.py` for the specific form.
+
+.. _example_labelled:
 
 B: Formatting a labelled data set
 ---------------------------------
@@ -63,7 +67,7 @@ Here we show how a user might package a series of subdomains for a single snapsh
 
     import os, sys
     pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
-    sys.path.append(pysrc)
+    if pysrc not in sys.path: sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
@@ -100,11 +104,40 @@ Here we show how a user might package a series of subdomains for a single snapsh
     # build header file for Mesh
     mesh.write_header()
 
-If the user is not running with relativisitc boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
+If the user is not running with relativistic boosting, the velocity data does not need to be included. In this case, :code:`data_dims=np.array([nx,ny,nz])`.
 
-.. _example_section_C:
+The :ref:`regression suite<setup_regression>` contains a routine :code:`build_labelled_regression_suite()` which implements the above process self-consistently using a mock dataset.
+See :code:`scripts/regression.py` for the specific form.
 
-C. Rendering from a single pre-formatted snapshot
+.. _example_lookback_init:
+
+C. Generating a master header for lookback rendering
+----------------------------------------------------
+
+If the user wishes to render with lookback, the finite time delay routine that requires reading in multiple simulation snapshots, then an additional master header file
+must be provided that provides information about the simulation snapshot cadence and length units. The master header file should be placed in the directory containing all simulation snapshots,
+for more information on the required formatting of the simulation snapshots, see :ref:`Input Formats <inputs_header>`.
+
+.. code-block:: python
+
+    # build header data
+    master_header_str = os.path.join("path/to/all/snapshots", "header.txt")
+    with open(master_header_str, "w") as f:
+        f.write("{0} {1} {2} {3}".format(num_snapshots, max_snapshot_size, dt_in_Myr, L_in_kpc))
+
+The master header file is a plain text file containing a single line with four space-seperated values, which are:
+
+- :code:`num_snapshots`: the total number of simulation snapshots within the data directory
+- :code:`max_snapshot_size`: the total number of floats in the largest simulation snapshot
+- :code:`dt_in_Myr`: the time interval between simulation snapshots (in Myr)
+- :code:`L_in_kpc`: the conversion factor from code units to real length units (in kpc)
+
+The :ref:`regression suite<setup_regression>` contains routines :code:`build_unlabelled_regression_suite()` and :code:`build_labelled_regression_suite()` which implements the above process self-consistently using mock datasets.
+See :code:`scripts/regression.py` for the specific form.
+
+.. _example_no_lookback_render:
+
+D. Rendering from a single pre-formatted snapshot
 -------------------------------------------------
 
 Here we show how a user might use a single simulation snapshot in time to generate multiple rendered images using a list of cameras.
@@ -113,12 +146,12 @@ Here we show how a user might use a single simulation snapshot in time to genera
 
     import os, sys
     pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
-    sys.path.append(pysrc)
+    if pysrc not in sys.path: sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
     # specify load/save string
-    path_to_snapshot = "path/to/single/snapshot"                # single file, or directory (unlabelled/labelled)
+    path_to_single_snapshot = "path/to/single/snapshot"         # single file, or directory (for unlabelled/labelled data)
     path_to_save_npy = "path/to/npy/dir"                        # directory for raw image outputs (.npy)
     path_to_save_png = "path/to/png/dir"                        # directory for figure image outputs (.png)
 
@@ -141,19 +174,22 @@ Here we show how a user might use a single simulation snapshot in time to genera
         cameras.append(camera)
 
     # generate Scene, the main class for rendering
-    scene = Scene(load_str = path_to_snapshot, save_dir = path_to_save_npy, cameras = cameras)
+    scene = Scene(load_str = path_to_single_snapshot, save_dir = path_to_save_npy, cameras = cameras)
 
-    # use Scene to call the .cpp executable 
+    # use Scene to call the backend executable 
     scene.render(lookback = False)                  
 
     # convert raw .npy files into .png figures
     scene.plot(fig_save_dir = path_to_save_png)     
 
-Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_header>`.
+Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <python_api_scene>`.
 
-.. _example_section_D:
+The :ref:`regression suite<setup_regression>` contains routines :code:`render_single_snapshot()` and :code:`render_without_lookback()` which implements the above process self-consistently using a mock dataset.
+See :code:`scripts/regression.py` for the specific form.
 
-D. Rendering from multiple pre-formatted snapshots
+.. _example_lookback_render:
+
+E. Rendering from multiple pre-formatted snapshots
 --------------------------------------------------
 
 If the user wishes to account for a finite speed of light (e.g. using the lookback routine), then multiple snapshots must be read by cuDART. 
@@ -163,12 +199,12 @@ Multiple cameras (and hence images) can still be specified.
 
     import os, sys
     pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
-    sys.path.append(pysrc)
+    if pysrc not in sys.path: sys.path.append(pysrc)
     from cudart import *
     import numpy as np
 
     # specify load/save string
-    path_to_snapshots = "path/to/all/snapshots"                 # directory, containing all snapshots + header file
+    path_to_all_snapshots = "path/to/all/snapshots"             # directory, containing all snapshots + master header file
     path_to_save_npy = "path/to/npy/dir"                        # directory for raw image outputs (.npy)
     path_to_save_png = "path/to/png/dir"                        # directory for figure image outputs (.png)
 
@@ -196,19 +232,16 @@ Multiple cameras (and hence images) can still be specified.
         cameras.append(camera)
 
     # generate Scene, the main class for rendering
-    scene = Scene(load_str = path_to_snapshots, save_dir = path_to_save_npy, cameras = cameras)
+    scene = Scene(load_str = path_to_all_snapshots, save_dir = path_to_save_npy, cameras = cameras)
 
-    # use Scene to call the .cpp executable 
+    # use Scene to call the backend executable 
     scene.render(lookback = True)                  
 
     # convert raw .npy files into .png figures
     scene.plot(fig_save_dir = path_to_save_png)     
 
-Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <api_header>`.
-The units for the origin-camera distance are inherited from the :code:`header.txt` file that should exist at :code:`path/to/all/snapshots/header.txt`.
-This header file should feature a single line of text in the form :code:`num_snapshots snapshot_size dt L_domain` where 
+Note that both the :code:`Scene.render` and :code:`Scene.plot` routines have many other possible arguments, see the full API :ref:`here <python_api_scene>`.
+The time and length units for the system are inherited from the :code:`header.txt` file that should exist at :code:`path_to_all_snapshots/header.txt` (see Example :ref:`C <example_lookback_init>`).
 
-- :code:`num_snapshots` is the total number of simulation snapshots within the data dir
-- :code:`snapshot_size` is the maximum snapshot size (by cells)
-- :code:`dt` is the time interval between simulations snapshots (in Myr)
-- :code:`L_domain` is the code unit for length (in kpc). 
+The :ref:`regression suite<setup_regression>` contains a routine :code:`render_with_lookback()` and which implements the above process self-consistently using a mock dataset.
+See :code:`scripts/regression.py` for the specific form.

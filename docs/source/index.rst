@@ -14,6 +14,9 @@
 .. image:: https://img.shields.io/badge/arXiv-PENDING-b31b1b.svg?style=for-the-badge
    :target: https://github.com/hwhitehead/cuDART
 
+.. image:: https://img.shields.io/badge/RASTI-SUBMITTED-273994.svg?style=for-the-badge
+   :target: https://github.com/hwhitehead/cuDART
+
 |
 
 Synthetic Observations of Relativistic Sources
@@ -22,7 +25,7 @@ Synthetic Observations of Relativistic Sources
 cuDART is a relativistic ray-tracing code designed to post-process simulation data into synthetic observations of optically thin emission. 
 Generating such visualisations, especially from arbitrary viewpoints and for large datasets, can prove very expensive due to the large 
 number of simulation cells that an image pixel's line-of-sight may intersect with. In cuDART two acceleration structures are implemented to triviliase this computation: 
-GPU parallelisation and 3DDDA, the 3D Digital Differential Analyzer. 3DDDA allows for iterative low-cost propagation of rays through regular Cartesian meshes; together with the CUDA GPU toolkit
+GPU parallelisation and 3DDDA, the 3D Digital Differential Analyzer. 3DDDA allows for iterative low-cost propagation of rays through regular Cartesian meshes; together with the NVIDIA's CUDA GPU toolkit
 this allows for exceptionally fast line-of-sight summation. cuDART automatically accounts for a range of relativistic and geometric effects
 such as Doppler boosting. Unlike previous visualisation schemes which generally consider a single snapshot in time, cuDART is
 capable of accounting for a finite time delay between emission and observation by rendering data from multiple epochs simultaneously. 
@@ -33,17 +36,17 @@ Including this delay allows for the recovery of various relativistic phenomena n
 
     Animation comparing the observed properties of a mock simulation domain featuring twin anti-parallel relativistic ejecta, when imaged under three different routines with increasing levels of complexity. 
     Each scheme produces different observational features, notably reporting different transverse velocities :math:`\beta_\mathrm{T}`, emitter morphologies and flux ratios :math:`\mathcal{S}`. 
-    Only the most complex (Routine C, cuDART's default) scheme, accounting for relativistic beaming and finite time delay produces results that agree with relativistic and geometric theory. 
+    Only the most complex (Routine C, cuDART's default) scheme, accounting for both relativistic beaming and finite time delay produces results that agree with relativistic and geometric theory. 
     See :ref:`this <phenomena_header>` page for full discussion.
 
 .. figure:: ../../gallery/magnetised_jets.png
     :width: 800px
 
-    Synthetic radio observations of hydrodynamic simulation data (featuring a highly magnetised, variable power jet launched from an Active Galactic Nucleus) viewed from three different orientations. 
+    Synthetic radio observations of hydrodynamic simulation data (featuring a highly magnetised, variable power jet launched from an Active Galactic Nucleus) viewed from three different orientations using cuDART. 
     Relativistic beaming results in a brighter advancing jet and dimmer receding jet; this effect is strongest when the jet is more closely aligned with the line-of-sight. 
     Simulation data generated and featured in Elley at al. 2026 (`NASA ADS <https://ui.adsabs.harvard.edu/abs/2026arXiv260513469E/abstract>`_).
 
-The bulk of cuDART is written in C++/CUDA, but the frontend is built in Python. The full codebase is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
+The workhorse of cuDART is written in C++/CUDA and wrapped in a Python frontend. The full codebase is available on `GitHub <https://github.com/hwhitehead/cuDART>`_. 
 Please report any issues and suggestions for improvement there, or get in contact with the development lead (Henry Whitehead, henry[dot]whitehead[at]ist[dot]ac[dot]at). 
 Development for cuDART is use-case driven; if there are projects that you think may benefit from this code, but require additional features
 please get in touch.
@@ -71,13 +74,13 @@ Henry Whitehead
 
 The developer would like to thank Emma Elley and Katie Savard for beta testing early iterations of the codebase and providing 
 astrophysical simulation data used for testing (and featured in the documentation),
-and thank Christopher Everett, Frasier Cowie, James Matthews and many others for insightful discussions during development.
+and thank Christopher Everett, Frasier Cowie, James Matthews, Alex Cooper and many others for insightful discussions during development.
 
 ----------------
 Acknowledgements 
 ----------------
 
-cuDART uses an adapted version of the publically available `libnpy <https://github.com/llohse/libnpy>`_ library to read :code:`.npy` files from storage into memory.
+cuDART uses the publically available `libnpy <https://github.com/llohse/libnpy>`_ library to read :code:`.npy` files from storage into memory.
 Development of this code was supported by `this <https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-acceleration-structure/grid.html>`_ excellent guide on 
 acceleration structures in C, and `this <https://developer.nvidia.com/blog/accelerated-ray-tracing-cuda/>`_ developer blog on constructing ray tracers with CUDA. 
 Much of the formatting for the cuDART documentation is taken from the vastly superior codebase for the `SIROCCO <https://sirocco-rt.readthedocs.io/en/latest/>`_ radiative transfer code.
@@ -98,8 +101,7 @@ Much of the formatting for the cuDART documentation is taken from the vastly sup
     :caption: Code Documentation
 
     install
-    example
-    inputs
+    render
     api
     structure
     performance

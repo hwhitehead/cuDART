@@ -5,14 +5,14 @@ Performance and Profiling
 
 The main contributors to runtime during the C++ execution of cuDART are (in order of execution):
 
-1. Reading simulation datafrom storage to host (.npy to RAM) 
+1. Reading simulation data from storage to host (.npy to RAM) 
 2. Data transfer from host to device (RAM to VRAM)
 3. Rendering the data on the device (GPU execution)
 4. Data transfer from host to device (VRAM to RAM)
 5. Writing the image data to storage (RAM to .npy)
 
 The cost of reading files usually represents a significant fraction of the total runtime, making the user's
-I/O environment a significnantsource of performance discrepancy. We recommend the user performs profiling tests 
+I/O environment a significnant source of performance discrepancy. We recommend the user performs profiling tests 
 relevant to their own environment using the automated tools proviedd (see :ref:`below <performance_tools>`).
 
 Here we report a series of performance metrics for renders produced using various GPUs on the Institute of Science and Techonology Austria's Scientific Computing Cluster. 
@@ -31,8 +31,8 @@ staggering :math:`O(10^{17})` potentially cell-ray intersections. In practice, c
 
 In combination, these acceleration structures reduce the complexity of the *render* operation to simply :math:`O(D)`. 
 In practice, the cost of the render operation represents only a small fraction of the total runtime, with the majority of the wallclock duration occupied with reading 
-large simulation datasets from storage into host memory. As serial file read cost scales directly with file size, this results in 
-"file-read bottlenecked" for most reasonably sized datasets, scaling with :math:`O(D^3)`. As a consequence, the wallclock duration
+large simulation datasets from storage into host memory. As serial file read cost scales directly with file size, this results in performance becoming
+"file-read bottlenecked" for most reasonably sized datasets, with duration scaling as :math:`O(D^3)`. As a consequence, the wallclock duration
 for most problems shows little to no dependence on the number of pixels in the image, or the GPU model used (see figures below).
 
 Performance Scaling
@@ -42,8 +42,8 @@ Performance Scaling
     :width: 800px
 
     Durations for the C++ render routine when running with lookback generating :math:`N=100` images each sampling :math:`M=100` snapshots. 
-    Performance shows little dependence on both the number of pixels in the image and the GPU model used, despite a wide range of theoretical performance ceilings considered (as measured in TFLOPS). 
-    The size of simulation dataset :math:`D` has the most effect on the runtime, with duration scaling as :math:`O(D)` for small datasets, and :math:`O(D^3)` for large datasets (as the system becomes more read bottlenecked, see figure below.) 
+    Performance shows little dependence on either the number of pixels in the image or the GPU model used, despite a wide range of theoretical performance ceilings considered (as measured in TFLOPS). 
+    The size of the simulation dataset :math:`D` has the most effect on the runtime, with duration scaling as :math:`O(D)` for small datasets, and :math:`O(D^3)` for large datasets (as the system becomes more read bottlenecked, see figure below.) 
 
 .. figure:: ../../gallery/fractional.png
     :width: 800px
@@ -64,7 +64,7 @@ To profile the execution of the C++ backend, set :code:`save_profile = True` whe
 the subprocess call to the C++ executable with a call to :code:`nsys profile`, generating a series of logfiles in the same output
 directory as the rendered data (set using :code:`save_dir` on :code:`Scene` init). Results from these logfiles can then be printed to
 the command line using the :code:`Profiler` class (see Pythonic API :ref:`here <python_api_header>`). Caution is warranted when interpreting 
-the timings produced, as much of the GPU/CPU execution is asynchronous and so the total task duration will be in excess of the true wallclock. 
+the timings produced, as much of the GPU/CPU execution is asynchronous and so the total task duration may be in excess of the true wallclock. 
 When :code:`Scene.render` is called with :code:`verbose_cpp = True`, the C++ executable will print a series of timestamps to the command line;
 these times track the system clock, a cumulative wallclock duration is output as :code:`wallclock.txt` in the output directory. Below we show 
 an example of the output written to the command when when :code:`Profiler.report()` is called on the output directory. 

@@ -27,7 +27,7 @@ within the current framework. Including magnetic field information could also be
 
 .. math::
 
-    j'_{\nu'}(\boldsymbol{x},\hat{\boldsymbol{s}})= S(j'_{\nu'}(\boldsymbol{x}) ,\hat{\boldsymbol{s}},\boldsymbol{B}(\boldsymbol{x}) )
+    j'_{\nu'}(\boldsymbol{x},\hat{\boldsymbol{s}})= S(j'_{\nu'}(\boldsymbol{x}) ,\hat{\boldsymbol{s}},\boldsymbol{B}'(\boldsymbol{x}) )
 
 Currently, all emission is assumed to be isotropic in the rest frame of the bulk flow, this asssumption could be relaxed if directional dependence can be informed from the local magnetic field structure.
 
@@ -68,6 +68,6 @@ Concurrent Rendering
 Imaging rapidly evolving sources, especially when the viewing angle is closely aligned to the direction of motion, requires a very high cadence of simulation snapshots
 in order to produce accurate synthetic observations. Retaining a large number of simulation snapshots in storage represents a significant burden. 
 One method to avoid this overhead is to write high cadence snapshots, perform renders on the fly and then delete the majority of snapshots, leaving only 
-low cadence writes to other analysis. Given the complexity of relativistic hydrodynamic simulations and the efficiency of the render process, there are no concievable situations where
-the render would be unable to keep up with the simulation, provided GPU resources are consistently available. In principle the user can construct their own tools to enact this routine, but it would be useful to build generic routines
+low cadence writes for other analysis routines. Given the complexity of relativistic hydrodynamic simulations and the efficiency of the render process, it is very unlikely
+that the render would be unable to keep up with the simulation, provided GPU resources are consistently available. In principle the user can construct their own tools to enact this routine, but it would be useful to build generic routines
 to tail simulation programmes and concurrently render the high cadence data. 

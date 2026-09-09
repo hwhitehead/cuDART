@@ -312,7 +312,7 @@ class Scene:
 
     def render(self, save_profile = False, verbose = False, check_make = True, force_make = False, 
                 max_mem = None, relativistic = False, doppler_index = None, power_law_index = None, append = False,
-                lookback = False, flexload = False, verbose_cpp = False, srun = True):
+                lookback = False, flexload = False, verbose_cpp = False, srun = False):
 
         """
             Given a constructed Scene, format a subprocess invokation of the main cpp executable with any 
@@ -345,7 +345,7 @@ class Scene:
             max_mem : int
                 Sets maximum allowed VRAM occupancy for execution (default None)
             srun : bool
-                Prepends executable call with "srun" for use with slurm (default True)
+                Prepends executable call with "srun" for use with slurm (default False)
         """
 
         # prepare camera space

@@ -11,7 +11,7 @@ import matplotlib.patches as patches
 
 # local import
 pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
-sys.path.append(pysrc)
+if pysrc not in sys.path: sys.path.append(pysrc)
 from cudart import *
 
 def build_unlabelled_regression_suite(save_dir, sim_args, verbose = True):

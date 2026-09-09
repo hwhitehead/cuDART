@@ -4,11 +4,11 @@
 Setup and Quickstart
 ####################
 
-cuDART is written in Python/C++, and runs on the GPU. As such, to function it requires
+cuDART is written in Python/C++, and is hybridised across CPU and GPU architectures. As such, to function it requires
 
-* A CUDA-capable GPU (from Turing/Ampere onwards)
+* A CUDA-capable GPU (from `Turing/Ampere <https://en.wikipedia.org/wiki/Category:Nvidia_microarchitectures>`_ onwards)
 * The :code:`nvcc` compiler (`documentation <https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/>`_)
-* Python: optional, but highly recommended for front-end
+* Python: technically optional, but **highly** recommended for user ease
 
 .. _setup_general:
 
@@ -23,7 +23,7 @@ copy of the current develpoment version can be cloned as
 
     $ git clone git@github.com:hwhitehead/cuDART.git
 
-Once a local copy of the codebase exists, save the location of the cuDART repository as a environment variable. 
+Once you have a local copy of the codebase, we recommend saving the location of the cuDART repository as a environment variable. 
 You can also add this line to your shell startup to ensure it persists between sessions e.g. in :code:`~/.bashrc` for bash.
 
 .. code-block:: bash
@@ -35,7 +35,7 @@ You can also add this line to your shell startup to ensure it persists between s
 C++ Setup
 ---------
 
-cuDART is packaged with a template Makefile, you should configure a specific Makefile before building
+cuDART is packaged with a template Makefile, you should use the :code:`configure.py` script to generate a complete Makefile before building
 
 .. code-block:: bash
 
@@ -44,10 +44,10 @@ cuDART is packaged with a template Makefile, you should configure a specific Mak
     $ make clean
     $ make
 
-where here the :code:`--arch` and :code:`--gpu` flags can be used to target specific GPU architecture or models. 
-These flags allows cuDART to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to :code:`configure.py`,
+where here the **optional** :code:`--arch` and :code:`--gpu` flags can be used to target specific GPU architectures or models (see :code:`configure.py` for options).
+These flags allow cuDART to build machine-specific code and avoid just-in-time compilation on deployment. If no arguments are passed to :code:`configure.py`,
 cuDART will pre-compile GPU-agnostic code valid for any NVIDIA GPU at least as modern as Ampere (`list of GPU architectures <https://en.wikipedia.org/wiki/Category:Nvidia_microarchitectures>`_).
-The :code:`Scene` class within the Python API is also able to make and clean the C++ code as a subprocess call, but generally recompilation is only required if editing the C++ code or moving to a different architecture.
+The :code:`Scene` class within the Python API is also able to make and clean the C++ code as a subprocess call, but generally recompilation is only required if editing the C++ code or bulding for a specific and different GPU architecture.
 
 .. _setup_python:
 
@@ -55,7 +55,7 @@ Python Setup
 ------------
 
 If you wish to use the Python front end (as is recommended), the required modules can be found at :code:`pysrc/requirements.txt`.
-You can also build a virutal environment specifically for cuDART usage and auto install these modules
+You can also build a virtual environment specifically for cuDART usage and auto install these modules
 
 .. code-block:: bash
 
@@ -70,11 +70,13 @@ When writing Python scripts, you can import cuDART's :ref:`Pythonic API <python_
 
     import os, sys
     pysrc = os.path.join(os.environ["CUDART_DIR"], "pysrc")
-    sys.path.append(pysrc)
+    if pysrc not in sys.path: sys.path.append(pysrc)
     from cudart import *
 
-Quickstart
-==========
+.. _setup_regression:
+
+Regression Suite
+================
 
 cuDART comes packaged with regression testing routines to construct mock data and peform a range of rendering operations. 
 These routines can be found at :code:`scripts/regression.py`. These tests can be invoked from the command line as 
