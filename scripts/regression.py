@@ -219,16 +219,22 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
         # build Mesh to contain MeshBlock data
         mesh = Mesh(snapshot_save_dir)
 
-        # partitioned data needs to have spatial labels
-        mb_data_a = np.array(save_data[mask_a], order="C")                      # select lower half of data 
-        xl_a = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                      # lower corner of data_a
-        xr_a = np.array([0.5 * Lx, 0.5 * Ly, 0.0])                              # upper corner of data_a
-        mesh.add_meshblock(mb_data_a, xl_a, xr_a)                               # add MeshBlock to Mesh
+        # TEMP: save as homogenoues block to probe formatting error
+        xl = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                        # lower corner of data
+        xr = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                           # upper corner of data
+        mesh.add_meshblock(save_data, xl, xr)
 
-        mb_data_b = np.array(save_data[mask_b], order="C")                      # select upper half of data
-        xl_b = np.array([-0.5 * Lx, -0.5 * Ly, 0.0])                            # lower corner of data_b
-        xr_b = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                         # upper corner of data_b
-        mesh.add_meshblock(mb_data_b, xl_b, xr_b)                               # add MeshBlock to Mesh
+
+        # # partitioned data needs to have spatial labels
+        # mb_data_a = np.array(save_data[mask_a], order="C")                      # select lower half of data 
+        # xl_a = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                      # lower corner of data_a
+        # xr_a = np.array([0.5 * Lx, 0.5 * Ly, 0.0])                              # upper corner of data_a
+        # mesh.add_meshblock(mb_data_a, xl_a, xr_a)                               # add MeshBlock to Mesh
+
+        # mb_data_b = np.array(save_data[mask_b], order="C")                      # select upper half of data
+        # xl_b = np.array([-0.5 * Lx, -0.5 * Ly, 0.0])                            # lower corner of data_b
+        # xr_b = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                         # upper corner of data_b
+        # mesh.add_meshblock(mb_data_b, xl_b, xr_b)                               # add MeshBlock to Mesh
 
         mesh.write_header()                                                     # save header for Mesh directory
         if (verbose): print("built labelled dataset for snapshot {0}/{1}".format(n,num_snapshots))
@@ -561,7 +567,7 @@ if __name__ == "__main__":
     sim_args = {"Gamma": 2.0,
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
-                "domain_dims": [256,256,512],
+                "domain_dims": [128,128,256],
                 "num_snapshots": 100,
                 "target_theta": None,
                 "build_mode": "sphere_rest"}
