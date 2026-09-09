@@ -558,14 +558,9 @@ int main(int argc, char *argv[]) {
         float *h_all_data = nullptr;
         size_t h_bytes = 0;
         bool host_malloc = true;
-        std::cout << "cutting program pre-data load with input_str: " << input_str << ", input_path: " << input_path << std::endl;
         if (std::filesystem::is_directory(input_path)) {
-            std::cout << "caught labelled branch" << std::endl;
-            return;
             all_mb_info = load_labelled_meshblocks(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
         } else {
-            std::cout << "caught unlabelled branch" << std::endl;
-            return;
             all_mb_info = load_unlabelled_meshblock(input_str, h_all_data, h_bytes, trace_args.relativistic, verbose, host_malloc);
         }
         int num_meshblocks = all_mb_info.size();
