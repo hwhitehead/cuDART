@@ -346,7 +346,7 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
         # check for both labelled and unlabelled datasets
         unlabelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
         labelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5))
-        if not os.path.exists(unlabelled_str) or not os.path.isdir(labelled_str):
+        if (not os.path.exists(unlabelled_str)) and (not os.path.isdir(labelled_str)):
             raise Exception("no file found at {0}, or directory at {1}, did you forget to build dataset with -b before?".format(unlabelled_str, labelled_str))
 
     # collect data from args
@@ -416,7 +416,7 @@ def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, 
         # check for both labelled and unlabelled datasets
         unlabelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
         labelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5))
-        if not os.path.exists(unlabelled_str) or not os.path.isdir(labelled_str):
+        if (not os.path.exists(unlabelled_str)) and (not os.path.isdir(labelled_str)):
             raise Exception("no file found at {0}, or directory at {1}, did you forget to build dataset with -b before?".format(unlabelled_str, labelled_str))
 
     # collect data from args
