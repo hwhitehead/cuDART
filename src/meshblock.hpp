@@ -160,8 +160,6 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
     for (int n = 0; n < all_mb_info.size(); n++) {
         // load meshblock data as (nx,ny,nz,p) where p = 1 or 4
         std::string npy_str = input_str + "/meshblock" + zero_pad_str(n, num_zero_pad) + ".npy";
-        std::cout << "attempted file load for " << npy_str << std::endl;
-        return all_mb_info;
         bool file_exists = std::filesystem::is_regular_file(npy_str);
         if (!file_exists) {
             std::stringstream err_msg;
