@@ -1,8 +1,11 @@
 # cuDART: CUDA + DDA Accelerated Ray Tracing (v1.0)
 
+[![arXiv](https://img.shields.io/badge/arXiv-2609.09322-b31b1b.svg)](https://arxiv.org/abs/2609.09322)
+
+
 `cuDART` (CUDA + DDA Accelerated Ray Tracing) is a toolkit designed for producing synthetic observations of optically thin emission. The code is designed to automatically account for relativistic and geometric effects such as beaming and light time delay. Running on the GPU and accelerated by the 3D-DDA (3D digitial differential analyzer) algorithm, `cuDART` is able to generate high-resolution observations from large simulations in seconds, facilitating easy comparison between numeric theory and real observations.
 
-Documentation is hosted on [ReadTheDocs](https://cudart.readthedocs.io/en/latest/). 
+Documentation is hosted on [ReadTheDocs](https://cudart.readthedocs.io/en/latest/). You can also check out the code release paper on [arXiv](https://arxiv.org/abs/2609.09322), currently under review at [RAS Techinques and Instruments](https://academic.oup.com/rasti) journal.
 
 This code is under active development, we recommend users obtain a stable release from the [Releases](https://github.com/hwhitehead/cuDART/releases). 
 

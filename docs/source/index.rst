@@ -11,7 +11,7 @@
 .. image:: https://img.shields.io/badge/Github-CUDART-4475A0.svg?style=for-the-badge&logo=github&logoColor=white
    :target: https://github.com/hwhitehead/cuDART
 
-.. image:: https://img.shields.io/badge/arXiv-PENDING-b31b1b.svg?style=for-the-badge
+.. image:: https://img.shields.io/badge/arXiv-2609.09322-b31b1b.svg?style=for-the-badge
    :target: https://arxiv.org/abs/2609.09322
 
 .. image:: https://img.shields.io/badge/RASTI-SUBMITTED-273994.svg?style=for-the-badge
