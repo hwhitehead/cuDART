@@ -12,10 +12,10 @@
    :target: https://github.com/hwhitehead/cuDART
 
 .. image:: https://img.shields.io/badge/arXiv-PENDING-b31b1b.svg?style=for-the-badge
-   :target: https://github.com/hwhitehead/cuDART
+   :target: https://arxiv.org/abs/2609.09322
 
 .. image:: https://img.shields.io/badge/RASTI-SUBMITTED-273994.svg?style=for-the-badge
-   :target: https://github.com/hwhitehead/cuDART
+   :target: https://academic.oup.com/rasti
 
 |
 
