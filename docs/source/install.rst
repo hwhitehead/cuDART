@@ -93,7 +93,6 @@ where the choices for flags are
 * :code:`--build_mode=<sphere, sphere_rest, jet>` specifies the simulation type (sphere in lab frame, sphere in rest frame or jet)
 * :code:`-render` calls the render routine without lookacbk, rendering a series of images from a single snapshot, varying the camera position
 * :code:`-render_lookback` calls the render routine with lookback, rendering a series of images from multiple snapshots, varying the camera time
-* :code:`-render_comp` calls the render routine both with and without lookback, generating a :code:`.png` figure to compare the result
 * :code:`--data_dir=<data_dir>` accepts a path to specify the directory in which to generate mock snapshots, and to read from for rendering
 * :code:`--save_dir=<save_dir>` accepts a path to specificy the directory in which to save raw :code:`.npy` renders, and :code:`.png` figures
 * :code:`-profile` generates a profiling report for a previously concluded render execution
