@@ -518,7 +518,7 @@ if __name__ == "__main__":
         raise Exception("build routines share write space (data_dir), please select only one at a time") 
 
     # except multiple run-type flags
-    if (args["r"] + args["rl"] + args["rc"] > 1):
+    if (args["r"] + args["rl"] > 1):
         raise Exception("render routines share write space (save_dir), please select only one at a time")
     
     # construct regression data suite with or without labels
