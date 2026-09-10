@@ -4,7 +4,7 @@
 
 Documentation is hosted on [ReadTheDocs](https://cudart.readthedocs.io/en/latest/). 
 
-Developer's Note: this repository is ungoing the final checks to ensure it is ready for public use. We advise waiting until v1.0 is available under the [Releases](https://github.com/hwhitehead/cuDART/releases) tab before using.
+This code is under active development, we recommend users obtain a stable release from the [Releases](https://github.com/hwhitehead/cuDART/releases). 
 
 Gallery
 -------

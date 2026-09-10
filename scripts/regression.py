@@ -219,22 +219,16 @@ def build_labelled_regression_suite(save_dir, sim_args, verbose=True):
         # build Mesh to contain MeshBlock data
         mesh = Mesh(snapshot_save_dir)
 
-        # TEMP: save as homogenoues block to probe formatting error
-        xl = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                        # lower corner of data
-        xr = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                           # upper corner of data
-        mesh.add_meshblock(save_data, xl, xr)
+        # partitioned data needs to have spatial labels
+        mb_data_a = np.array(save_data[mask_a], order="C")                      # select lower half of data 
+        xl_a = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                      # lower corner of data_a
+        xr_a = np.array([0.5 * Lx, 0.5 * Ly, 0.0])                              # upper corner of data_a
+        mesh.add_meshblock(mb_data_a, xl_a, xr_a)                               # add MeshBlock to Mesh
 
-
-        # # partitioned data needs to have spatial labels
-        # mb_data_a = np.array(save_data[mask_a], order="C")                      # select lower half of data 
-        # xl_a = np.array([-0.5 * Lx, -0.5 * Ly, -0.5 * Lz])                      # lower corner of data_a
-        # xr_a = np.array([0.5 * Lx, 0.5 * Ly, 0.0])                              # upper corner of data_a
-        # mesh.add_meshblock(mb_data_a, xl_a, xr_a)                               # add MeshBlock to Mesh
-
-        # mb_data_b = np.array(save_data[mask_b], order="C")                      # select upper half of data
-        # xl_b = np.array([-0.5 * Lx, -0.5 * Ly, 0.0])                            # lower corner of data_b
-        # xr_b = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                         # upper corner of data_b
-        # mesh.add_meshblock(mb_data_b, xl_b, xr_b)                               # add MeshBlock to Mesh
+        mb_data_b = np.array(save_data[mask_b], order="C")                      # select upper half of data
+        xl_b = np.array([-0.5 * Lx, -0.5 * Ly, 0.0])                            # lower corner of data_b
+        xr_b = np.array([0.5 * Lx, 0.5 * Ly, 0.5 * Lz])                         # upper corner of data_b
+        mesh.add_meshblock(mb_data_b, xl_b, xr_b)                               # add MeshBlock to Mesh
 
         mesh.write_header()                                                     # save header for Mesh directory
         if (verbose): print("built labelled dataset for snapshot {0}/{1}".format(n,num_snapshots))
@@ -407,143 +401,6 @@ def render_with_lookback(load_dir, save_dir, sim_args, camera_args, verbose = Tr
 
     if (verbose): print("finished lookback test, see {0} for output".format(save_dir))
 
-def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, show_masks = False):
-
-    if (verbose): 
-        print("starting lookback render test...")
-        print("reading data from {0}".format(load_dir))
-        print("saving data at {0}".format(save_dir))
-
-    # check input, output directory existence
-    for path in [load_dir, save_dir]:
-        if not os.path.isdir(path):
-            raise Exception("{0} does not exist".format(path))
-
-    # check for ALL snapshot input files
-    for n in range(0, sim_args["num_snapshots"]):
-        # check for both labelled and unlabelled datasets
-        unlabelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5) + ".npy")
-        labelled_str = os.path.join(load_dir, "snapshot" + str(n).zfill(5))
-        if (not os.path.exists(unlabelled_str)) and (not os.path.isdir(labelled_str)):
-            raise Exception("no file found at {0}, or directory at {1}, did you forget to build dataset with -b before?".format(unlabelled_str, labelled_str))
-
-    # collect data from args
-    v_in_c = np.sqrt(1.0 - 1.0 / sim_args["Gamma"] ** 2)                                        # calculate velocity in units of c
-    theta = camera_args["template"].theta                      
-    r_blob_in_code = sim_args["r_in_kpc"] / sim_args["L_in_kpc"]
-
-    # first render at midpoint time for emitter
-    nolookback_load_str = os.path.join(load_dir, "snapshot" + str(int(0.5 * sim_args["num_snapshots"])).zfill(5) + ".npy")
-    if not os.path.exists(nolookback_load_str): # alternate, load as labelled
-        nolookback_load_str = os.path.join(load_dir, "snapshot" + str(int(0.5 * sim_args["num_snapshots"])).zfill(5))
-
-    # second render at midpoint displacement for observer
-    x_obs_mid_m = 0.25 * sim_args["L_in_kpc"] * np.sin(theta) * kpc_to_m                        # cast to astro units    
-    D_in_m = 2.0 * sim_args["L_in_kpc"] * kpc_to_m                                              # origin-camera seperation    
-    d_mid_m = x_obs_mid_m * (1 - v_in_c * np.cos(theta)) / (v_in_c * np.sin(theta)) + D_in_m
-    t_obs_in_s = d_mid_m / c_light
-    t_obs = t_obs_in_s / Myr_to_s
-
-    # identify ejecta positions
-    D_av = c_light * t_obs * Myr_to_s - D_in_m
-    x_adv_m = v_in_c * np.sin(theta) * D_av / (1 - v_in_c * np.cos(theta))
-    x_adv = x_adv_m / (sim_args["L_in_kpc"] * kpc_to_m)
-    x_rec_m = v_in_c * np.sin(theta) * D_av / (1 + v_in_c * np.cos(theta))
-    x_rec = x_rec_m / (sim_args["L_in_kpc"] * kpc_to_m)
-
-    x_adv_pos = (0.5 - x_adv) # shift to image space
-    x_rec_pos = (0.5 + x_rec)
-    x_positions = [[0.5 - 0.25 * np.sin(theta), 0.5 + 0.25 * np.sin(theta)], [x_adv_pos, x_rec_pos]]
-    
-    # generate single camera
-    camera_args["template"].set_sph_pos(r = 2.0, phi = epsilon, theta = theta, target_origin = True)
-    camera_args["template"].t_obs = t_obs # only used with the lookback render
-    cameras = [camera_args["template"]]
-
-    # build scene and call render, with and without lookback
-    labels = ["nolookback", "lookback"]
-    save_dirs = [os.path.join(save_dir, label) for label in labels]
-    for local_save_dir in save_dirs:
-        if not os.path.exists(local_save_dir):
-            os.mkdir(local_save_dir)
-    load_strs = [nolookback_load_str, load_dir]
-    lookbacks = [False, True]
-    for i, label in enumerate(labels):
-        scene = Scene(load_str = load_strs[i], save_dir = save_dirs[i], cameras = cameras, camera_file_name = camera_args["camera_file_name"])
-        scene.render(verbose = verbose, relativistic = camera_args["relativistic"], lookback = lookbacks[i], verbose_cpp = verbose)
-    if (verbose): print("finished raw image generation")
-
-    # plot composite
-    set_plot_defaults(use_tex=False)
-    height_ratios = np.array([1])
-    width_ratios = np.array([1,1,0.05])
-    h_over_w = np.sum(height_ratios) / np.sum(width_ratios)
-    L_fig = 20.0 / 3
-    fig = plt.figure(figsize=(L_fig, L_fig * h_over_w))
-    gs = fig.add_gridspec(np.size(height_ratios), np.size(width_ratios), height_ratios=height_ratios, width_ratios=width_ratios)
-    axl = fig.add_subplot(gs[:, 0])
-    axr = fig.add_subplot(gs[:, 1])
-    cax = fig.add_subplot(gs[:, 2])
-    axes = [axl, axr]
-
-    X = np.linspace(0,camera_args["template"].length_X,camera_args["template"].num_pixels_X)
-    Y = np.linspace(0,camera_args["template"].length_Y,camera_args["template"].num_pixels_Y)
-    XX, YY = np.meshgrid(X, Y, indexing="ij")
-    dA = (X[1] - X[0]) * (Y[1] - Y[0])
-
-    subplot_labels = ["Rendered without Lookback", "Rendered with Lookback"]
-    math_label = r"$\frac{F_\mathrm{adv}}{F_\mathrm{rec}}$"
-    png_str = os.path.join(save_dir, "penrose-terrell.png")
-    r_mask = r_blob_in_code * 1.25
-    for i, save_dir in enumerate(save_dirs):
-        raw_str = os.path.join(save_dir, "raw00001.npy")
-        img = np.load(raw_str)
-        
-
-        # build masks
-        r_adv_sqr = (XX - x_positions[i][0]) ** 2 + (YY - 0.5) ** 2
-        r_rec_sqr = (XX - x_positions[i][1]) ** 2 + (YY - 0.5) ** 2
-        
-        in_adv = (r_adv_sqr < r_mask ** 2)
-        in_rec = (r_rec_sqr < r_mask ** 2)
-
-        if show_masks:
-            r_adv_sqr_offset = (XX - x_positions[i][0]) ** 2 + (YY - 0.25) ** 2
-            r_rec_sqr_offset = (XX - x_positions[i][1]) ** 2 + (YY - 0.25) ** 2
-            in_adv_offset = (r_adv_sqr_offset < r_mask ** 2)
-            in_rec_offset = (r_rec_sqr_offset < r_mask ** 2)
-            CC = np.zeros_like(XX)
-            CC[:] = np.nan
-            CC[in_adv_offset] = 0.8
-            CC[in_rec_offset] = 0.5
-            pc = axes[i].pcolormesh(XX, YY, CC, vmin = 0, vmax = 1, cmap = "afmhot", zorder=10)
-
-        L_adv = np.sum(img[in_adv]) * dA
-        L_rec = np.sum(img[in_rec]) * dA
-        L_ratio = L_adv / L_rec
-
-        pc = axes[i].pcolormesh(XX, YY, np.log10(img), vmin = -6, vmax = 0, cmap = "afmhot", zorder=-5)
-        axes[i].set_xlim([0,1])
-        axes[i].set_ylim([0,1])
-        axes[i].xaxis.set_visible(False)
-        axes[i].yaxis.set_visible(False)
-        axes[i].text(0.5,0.95,s=subplot_labels[i], color='w', va="top", ha="center")
-        axes[i].text(0.5,0.05,s=math_label + " = {0:.3f}".format(L_ratio), color='w', va="bottom", ha="center")
-        axes[i].set_facecolor("k")
-
-    true_ratio = np.power((1 + v_in_c * np.cos(theta)) / (1 - v_in_c * np.cos(theta)), 3.0 + 0.6)
-    fig.suptitle(r"$\theta = \frac{\pi}{4}$, $\Gamma = 2$ -> $\frac{F_\mathrm{adv}}{F_\mathrm{rec}} = \left(\frac{1+\beta \cos(\theta)}{1-\beta \cos(\theta)}\right)^{3-\alpha}$" + " = {0:.3f}".format(true_ratio))
-
-    sm = plt.cm.ScalarMappable(cmap="afmhot", norm=plt.Normalize(vmin=-6, vmax=0))
-    fig.colorbar(sm, cax=cax, orientation="vertical")
-    cax.set_ylabel(r"$\log_{10}(I_\nu / I_{\nu,0})$")
-
-    plt.subplots_adjust(hspace = 0, wspace= 0)
-    fig.savefig(png_str, dpi=300, bbox_inches="tight")
-    plt.close("all")
-
-    if (verbose): print("finished penrose-terrell test, see {0} for output".format(png_str))
-
 def report_profiling(save_dir, verbose = True):
 
     profiler = Profiler(save_dir)
@@ -567,8 +424,8 @@ if __name__ == "__main__":
     sim_args = {"Gamma": 2.0,
                 "L_in_kpc": 120.0,
                 "r_in_kpc": 2.5,
-                "domain_dims": [128,128,256],
-                "num_snapshots": 100,
+                "domain_dims": [256,256,512],
+                "num_snapshots": 200,
                 "target_theta": None,
                 "build_mode": "sphere_rest"}
 
@@ -622,10 +479,6 @@ if __name__ == "__main__":
                         action="store_true",
                         default=False,
                         help="run in lookback mode")
-    parser.add_argument("-rc", "-render_comp",
-                        action="store_true",
-                        default=False,
-                        help="run penrose-terrell test")
     parser.add_argument("-v", "-verbose",
                         action="store_true",
                         default=False,
@@ -665,7 +518,7 @@ if __name__ == "__main__":
         raise Exception("build routines share write space (data_dir), please select only one at a time") 
 
     # except multiple run-type flags
-    if (args["r"] + args["rl"] + args["rc"] > 1):
+    if (args["r"] + args["rl"] > 1):
         raise Exception("render routines share write space (save_dir), please select only one at a time")
     
     # construct regression data suite with or without labels
@@ -700,16 +553,6 @@ if __name__ == "__main__":
                             camera_args = camera_args, 
                             verbose = args["v"],
                             save_profile = args["p"])
-    elif (args["rc"]):
-        if (args["save_dir"] is None):
-            raise Exception("unable to run penrose-terrell test without save location (use --save_dir)")
-        if (args["data_dir"] is None):
-            raise Exception("unable to run penrose-terrell test without load location (use --data_dir)")
-        compare_lookback(load_dir = args["data_dir"], 
-                                save_dir = args["save_dir"], 
-                                sim_args = sim_args, 
-                                camera_args = camera_args, 
-                                verbose = args["v"])
 
     # report profiling for earlier run
     if (args["p"]):
