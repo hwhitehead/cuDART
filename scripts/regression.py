@@ -496,7 +496,7 @@ def compare_lookback(load_dir, save_dir, sim_args, camera_args, verbose = True, 
     png_str = os.path.join(save_dir, "penrose-terrell.png")
     r_mask = r_blob_in_code * 1.25
     for i, save_dir in enumerate(save_dirs):
-        raw_str = os.path.join(save_dir, "raw00001.npy")
+        raw_str = os.path.join(save_dir, "raw00000.npy")
         img = np.load(raw_str)
         
 
