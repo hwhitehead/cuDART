@@ -164,11 +164,11 @@ __host__ std::vector<MeshBlockInfo> load_labelled_meshblocks(std::string input_s
         if (!file_exists) {
             std::stringstream err_msg;
             err_msg << "### FATAL ERROR in meshblock.hpp ###\n";
-            err_msg << "Unable to locate input file at " << input_str << std::endl;
+            err_msg << "Unable to locate input file at " << npy_str << std::endl;
             CUDART_ERROR(err_msg);
         }
 
-        std::vector<unsigned long int> data_shape = npy_to_host(input_str, h_all_data, h_bytes, verbose, false);
+        std::vector<unsigned long int> data_shape = npy_to_host(npy_str, h_all_data, h_bytes, verbose, false);
         bool beta_in_data = (data_shape.size() > 3);
         all_mb_info[n].beta_in_data = beta_in_data;
         all_mb_info[n].mem_start = mem_offset;
